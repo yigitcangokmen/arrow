@@ -9,7 +9,7 @@ export interface RelayValidateConfig {
 }
 
 export type Validated =
-  | { ok: true; signerId: string; op: "list" | "eval" | "buy" }
+  | { ok: true; signerId: string; op: "list" | "eval" | "buy"; amount: bigint; listingId: number | null }
   | { ok: false; status: 400 | 403; code: "BAD_REQUEST" | "NOT_ARROW_INTENT"; error: string };
 
 const MAX_DEADLINE_MS = 60 * 60_000;
@@ -42,6 +42,8 @@ export function validateArrowMultipayload(mp: MultiPayload, cfg: RelayValidateCo
   const tokens = intent.tokens;
   const keys = typeof tokens === "object" && tokens !== null ? Object.keys(tokens) : [];
   if (keys.length !== 1 || keys[0] !== cfg.usdcToken) return refused("tokens must be exactly the USDC token");
+  const rawAmount = tokens[cfg.usdcToken];
+  if (typeof rawAmount !== "string" || !/^[0-9]{1,38}$/.test(rawAmount)) return refused("the USDC amount must be a decimal string");
   if (intent.min_gas === undefined || intent.min_gas === null) return refused("min_gas is required");
 
   if (typeof intent.msg !== "string") return refused("msg is required");
@@ -54,5 +56,6 @@ export function validateArrowMultipayload(mp: MultiPayload, cfg: RelayValidateCo
   const parsed = ArrowMsg.safeParse(msg);
   if (!parsed.success) return refused("msg is not an Arrow list, eval or buy message");
 
-  return { ok: true, signerId: p.signer_id, op: parsed.data.op };
+  const m = parsed.data;
+  return { ok: true, signerId: p.signer_id, op: m.op, amount: BigInt(rawAmount), listingId: m.op === "list" ? null : m.listing_id };
 }

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { handleRelay, type RelayDeps } from "../lib/server/relayHandler.ts";
+import { RelayRuns } from "../lib/server/relayRuns.ts";
 import { tokenBucket } from "../lib/ratelimit.ts";
-import { NOW, USDC, makeMp, post } from "./helpers.ts";
+import { NOW, USDC, listingFixture, makeMp, post } from "./helpers.ts";
 
 const event = (name: string, data: object) => `EVENT_JSON:${JSON.stringify({ standard: "arrow", version: "1.0.0", event: name, data: [data] })}`;
 const outcomeWith = (logs: string[]) => ({
@@ -15,6 +16,10 @@ function setup(path: "notify" | "escrow", logs: string[], escrow: boolean) {
   const reqCalls: any[] = [];
   const d: RelayDeps = {
     limiter: tokenBucket({ capacity: 10, refillEveryMs: 6_000 }),
+    signerLimiter: tokenBucket({ capacity: 10, refillEveryMs: 6_000 }),
+    store: new RelayRuns(),
+    chain: { listing: async () => listingFixture(), listingBond: async () => 100_000n },
+    waitMs: 1_000,
     cfg: { contract: "arrow-market.near", usdcToken: USDC, now: NOW },
     relayer: () => ({
       accountId: "arrow-relayer.arrowhq.near",

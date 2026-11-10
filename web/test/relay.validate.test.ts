@@ -6,7 +6,7 @@ const cfg = { contract: "arrow-market.near", usdcToken: USDC, now: NOW };
 
 describe("validateArrowMultipayload", () => {
   it.each(["list", "eval", "buy"] as const)("accepts a valid %s", (op) => {
-    expect(validateArrowMultipayload(makeMp(op), cfg)).toEqual({ ok: true, signerId: SIGNER, op });
+    expect(validateArrowMultipayload(makeMp(op), cfg)).toEqual({ ok: true, signerId: SIGNER, op, amount: 2_000_000n, listingId: op === "list" ? null : 7 });
   });
 
   it.each([
