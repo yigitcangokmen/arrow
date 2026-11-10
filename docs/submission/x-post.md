@@ -7,7 +7,7 @@ Standard account (no X Premium): one post with the 2:15 cut attached natively, a
 ```
 Data is hard to sell: to judge it you must see it. Then why pay?
 
-Arrow: your AI reads sealed data in a TEE before you pay. Only a capped verdict comes back. Pay from Base, withdraw to Solana.
+Arrow: your AI reads sealed data in a TEE before you pay. A capped verdict comes back. Pay from Base, withdraw to Solana.
 
 Built at NEAR HACKATHON @NEARProtocol #NEARHackathon
 https://github.com/yigitcangokmen/arrow
