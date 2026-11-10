@@ -21,6 +21,7 @@ A split-screen demo.
 On PASS the buyer gets a refund.
 It is x402-compatible.
 Only a capped verdict leaves the enclave.
+Only BUY/PASS (and optionally fit/novelty) comes out.
 The seller receives on their own chain.
 It uses a zero-knowledge proof.
 A stray receipt tree sentence.

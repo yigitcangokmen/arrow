@@ -26,11 +26,18 @@ while [ $# -gt 0 ]; do
 done
 
 collect() {
+  local d
   for f in README.md JUDGES.md sdk/src/x402.ts scripts/src/verify.ts; do [ -f "$f" ] && echo "$f"; done
-  find docs/submission docs/video -type f \( -name '*.md' -o -name '*.txt' -o -name '*.srt' \) 2>/dev/null
+  # A missing directory must not abort the scan (set -e): each find only runs on directories that exist.
+  for d in docs/submission docs/video; do
+    [ -d "$d" ] || continue
+    find "$d" -type f \( -name '*.md' -o -name '*.txt' -o -name '*.srt' \) || true
+  done
   for f in invite followup seller-guide targets; do [ -f "docs/outreach/$f.md" ] && echo "docs/outreach/$f.md"; done
-  find web/app web/components agent/src -type f \( -name '*.ts' -o -name '*.tsx' \) \
-    ! -name '*.test.*' ! -path '*/node_modules/*' ! -path '*/.next/*' 2>/dev/null
+  for d in web/app web/components web/lib agent/src; do
+    [ -d "$d" ] || continue
+    find "$d" -type f \( -name '*.ts' -o -name '*.tsx' \) ! -name '*.test.*' ! -path '*/node_modules/*' ! -path '*/.next/*' || true
+  done
   return 0
 }
 
@@ -64,9 +71,12 @@ tee-escrow-headline ::: tee escrow
 split-screen ::: split[- ]screen|twin (buyer|outcome)
 pass-refund ::: pass[^.]{0,30}refund|refund[^.]{0,30}on pass
 x402-compatible ::: x402[- ]compatible
-verdict-leaves ::: only a (capped )?verdict leaves
+verdict-leaves ::: only a (capped )?verdict leaves|only buy/pass[^.]{0,80}(comes? out|leaves)
 own-chain-payout ::: (receives|paid|gets paid) on (their|its) own chain|seller (is )?paid on solana
 zk ::: zero[- ]knowledge|zk[- ]proof'
+
+# All substring rules as one alternation, used only to skip files that match none of them.
+ANY_RULE="$(printf '%s\n' "$RULES" | sed -e 's/^[^:]* ::: //' -e 's/^/(/' -e 's/$/)/' | paste -s -d '|' -)"
 
 # Only with --final, and only for prose files (md, txt, srt): code legitimately contains <T> and generics.
 FINAL_RULES='final-placeholder ::: [{][{][A-Z0-9_]+[}][}]
@@ -120,6 +130,9 @@ for f in "${FILES[@]}"; do
     while IFS=$'\t' read -r n t; do echo "$f:$n: [$rule] $t" >> "$OUT"; done
   }
 
+  # One pass over the body first: most files hit no substring rule, and 25 greps per file are slow over the whole tree.
+  grep -q -i -E -- "$ANY_RULE" "$TMP/body" && any_rule=1 || any_rule=0
+
   apply() { # newline-separated "rule ::: regex" table
     local line rule re
     while IFS= read -r line; do
@@ -131,7 +144,7 @@ $1
 EOF
   }
 
-  apply "$RULES"
+  [ "$any_rule" -eq 1 ] && apply "$RULES"
 
   # llm-cannot-buy: the sentence must carry its qualifier on the same line.
   { grep -i -E -- 'llm cannot produce buy' "$TMP/body" | grep -i -v -E -- 'unless the structural gates pass' || true; } | emit llm-cannot-buy

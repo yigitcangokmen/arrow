@@ -1,6 +1,7 @@
 // Acceptance tests for scripts/check-claims.sh (WS7-T04a).
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -73,10 +74,42 @@ describe("check-claims.sh", () => {
     expect(code).not.toContain("mapfile");
   });
 
+  it("scans_code_dirs_when_docs_dirs_are_missing", () => {
+    // F2: find on a missing docs/submission or docs/video used to abort collect() under set -e, so nothing after it was scanned
+    const root = mkdtempSync(resolve(tmpdir(), "claims-tree-"));
+    try {
+      mkdirSync(resolve(root, "scripts"));
+      copyFileSync(SCRIPT, resolve(root, "scripts/check-claims.sh"));
+      for (const [path, text] of [
+        ["web/app/page.tsx", "const a = 'a trustless market';\n"],
+        ["web/components/Hero.tsx", "const b = 'nothing leaks';\n"],
+        ["web/lib/trust.ts", "const c = 'impossible on EVM';\n"],
+        ["agent/src/cli.ts", "const d = 'no bridge';\n"],
+        ["docs/outreach/invite.md", "we are trustless\n"],
+      ] as const) {
+        mkdirSync(dirname(resolve(root, path)), { recursive: true });
+        writeFileSync(resolve(root, path), text);
+      }
+      let out = "";
+      let code = 0;
+      try {
+        execFileSync("bash", [resolve(root, "scripts/check-claims.sh")], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+      } catch (e) {
+        const err = e as { status?: number; stdout?: string };
+        code = err.status ?? -1;
+        out = err.stdout ?? "";
+      }
+      expect(code).toBe(1);
+      for (const f of ["web/app/page.tsx", "web/components/Hero.tsx", "web/lib/trust.ts", "agent/src/cli.ts", "docs/outreach/invite.md"]) expect(out, f).toContain(`${f}:1:`);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it("current_surfaces_are_clean_outside_the_readme_skeleton", () => {
     // the judge-facing code and docs on this branch must not trip any rule
     const r = run([]);
     const bad = r.out.split("\n").filter((l) => l && !l.startsWith("README.md:"));
     expect(bad).toEqual([]);
-  });
+  }, 60_000); // scans the whole judge-facing tree since F2; it took 10 s before the single-pass prefilter
 });
