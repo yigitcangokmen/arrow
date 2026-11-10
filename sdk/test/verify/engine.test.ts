@@ -223,6 +223,7 @@ describe("failures", () => {
     /** One real eval: the archived tx and the attestation OutLayer served for it, nothing else in the world. */
     const realWorld = (att: unknown = fixture("attestation-15850.json")) => {
       const w = buildWorld("testnet");
+      w.contract = w.evidence.contract = "arrow.arrowhq.testnet"; // the market these records came from, whatever the default is
       w.evidence.runs = w.evidence.runs.filter((x) => x.id === "e1").map((x) => ({ ...x, tx: REAL_TX }));
       w.txs = { [REAL_TX]: fixture("tx-eval-15850.json") };
       w.attestations = { 15850: att };
