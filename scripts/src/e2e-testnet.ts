@@ -386,7 +386,7 @@ async function publishDemo(
 
 // ---------------------------------------------------------------------- real dependencies
 
-function fileKeys(path: string): E2eDeps["keys"] {
+export function fileKeys(path: string): E2eDeps["keys"] {
   return (plaintextSha, source) => {
     const store: Record<string, { k_hex: string; nonce_hex: string; source: string; created_utc: string }> = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : {};
     let e = store[plaintextSha];
@@ -402,7 +402,7 @@ function fileKeys(path: string): E2eDeps["keys"] {
   };
 }
 
-async function serves(url: string, sha: string): Promise<boolean> {
+export async function serves(url: string, sha: string): Promise<boolean> {
   try {
     await fetchAndCheckBlob(url, sha);
     return true;
@@ -412,7 +412,7 @@ async function serves(url: string, sha: string): Promise<boolean> {
 }
 
 /** testnet FastFS (repo is private, DEC K-03): `outlayer upload` signed by the seller; the CLI login is global, so it logs in first. */
-function fastfsHost(sellerId: string, workDir: string): E2eDeps["host"] {
+export function fastfsHost(sellerId: string, workDir: string): E2eDeps["host"] {
   return async (blob, sha) => {
     const guess = `https://test.fastfs.io/${sellerId}/outlayer.testnet/${sha}.bin`;
     if (await serves(guess, sha)) return guess;
