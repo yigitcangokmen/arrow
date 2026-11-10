@@ -35,6 +35,35 @@ describe("viewing key", () => {
     expect(a.buyerPk).toMatch(/^04[0-9a-f]{128}$/);
   });
 
+  it("CRY-3: v as 0/1 or 27/28 and the high-s twin of one signature give one key; keys from viem are unchanged", async () => {
+    const sig = await account.signMessage({ message: viewingKeyMessage("arrow-market.vercel.app") });
+    const bytes = hexToBytes(sig.slice(2));
+    const hex = (b: Uint8Array) => `0x${bytesToHex(b)}` as `0x${string}`;
+    const parity = bytes[64] - 27;
+    const v01 = Uint8Array.from(bytes);
+    v01[64] = parity;
+    const s = BigInt("0x" + bytesToHex(bytes.subarray(32, 64)));
+    const twin = Uint8Array.from(bytes);
+    twin.set(be32(SECP256K1_N - s), 32);
+    twin[64] = 27 + (parity ^ 1);
+    expect(await recoverAddress({ hash: hashMessage(viewingKeyMessage("arrow-market.vercel.app")), signature: hex(twin) })).toBe(account.address); // the twin is valid
+    const key = viewingKeyFromSignature(sig);
+    expect(viewingKeyFromSignature(hex(v01))).toEqual(key);
+    expect(viewingKeyFromSignature(hex(twin))).toEqual(key);
+    expect(key.scalarHex).toBe(bytesToHex(reduceToScalar(keccak_256(bytes)))); // viem's canonical form: no key changes
+  });
+
+  it("X12-7: twice:true refuses a signer whose signatures differ", async () => {
+    let n = 0;
+    const flaky = { signMessage: async (a: { message: string }) => {
+      const sig = hexToBytes((await account.signMessage(a)).slice(2));
+      if (n++ % 2) sig[0] ^= 1; // a different valid-looking r on the second call
+      return `0x${bytesToHex(sig)}` as `0x${string}`;
+    } };
+    await expect(deriveViewingKeyEoa(flaky, "arrow-market.vercel.app", { twice: true })).rejects.toThrow(/different signature each time/);
+    await expect(deriveViewingKeyEoa(account, "arrow-market.vercel.app", { twice: true })).resolves.toEqual(await deriveViewingKeyEoa(account, "arrow-market.vercel.app"));
+  });
+
   it("different_domain_different_key", async () => {
     const a = await deriveViewingKeyEoa(account, "arrow-market.vercel.app");
     const b = await deriveViewingKeyEoa(account, "arrow-market-near.vercel.app");

@@ -31,18 +31,49 @@ function fromScalar(scalar: Uint8Array): ViewingKey {
   return { scalarHex, buyerPk: publicKeyHex(scalarHex) };
 }
 
-/** keccak256 over the 65 signature bytes (not over the hex string), reduced mod n. */
-export function viewingKeyFromSignature(sigHex: `0x${string}`): ViewingKey {
-  const sig = hexToBytes(sigHex.slice(2));
+/**
+ * CRY-3: one ECDSA signature has several byte encodings (v as 0/1 or 27/28, s or n-s), and wallets differ. The canonical
+ * form is low s with v = 27 + parity, which is what viem and most wallets already return, so keys derived before stay equal.
+ */
+export function canonicalSignature(sig: Uint8Array): Uint8Array {
   if (sig.length !== 65) throw new Error("EOA signature required (EIP-1271 not supported)");
-  return fromScalar(reduceToScalar(keccak_256(sig)));
+  const v = sig[64];
+  let parity: number;
+  if (v === 0 || v === 1) parity = v;
+  else if (v === 27 || v === 28) parity = v - 27;
+  else throw new Error(`unsupported signature v byte ${v}`);
+  let s = BigInt("0x" + bytesToHex(sig.subarray(32, 64)));
+  if (s > SECP256K1_N >> 1n) {
+    s = SECP256K1_N - s;
+    parity ^= 1;
+  }
+  const out = new Uint8Array(65);
+  out.set(sig.subarray(0, 32), 0);
+  out.set(hexToBytes(s.toString(16).padStart(64, "0")), 32);
+  out[64] = 27 + parity;
+  return out;
 }
 
+/** keccak256 over the 65 canonical signature bytes (not over the hex string), reduced mod n. */
+export function viewingKeyFromSignature(sigHex: `0x${string}`): ViewingKey {
+  return fromScalar(reduceToScalar(keccak_256(canonicalSignature(hexToBytes(sigHex.slice(2))))));
+}
+
+/**
+ * `twice`: ask for the signature a second time and refuse when the two differ (X12-7: a threshold/MPC signer gives a new
+ * valid signature each time, so a key derived from it could never be derived again to open a purchase).
+ */
 export async function deriveViewingKeyEoa(
   account: { signMessage(a: { message: string }): Promise<`0x${string}`> },
   domain: string,
+  o: { twice?: boolean } = {},
 ): Promise<ViewingKey> {
-  return viewingKeyFromSignature(await account.signMessage({ message: viewingKeyMessage(domain) }));
+  const message = viewingKeyMessage(domain);
+  const key = viewingKeyFromSignature(await account.signMessage({ message }));
+  if (o.twice && viewingKeyFromSignature(await account.signMessage({ message })).scalarHex !== key.scalarHex) {
+    throw new Error("this wallet gives a different signature each time, so its viewing key cannot be derived again later: use a standard EOA wallet");
+  }
+  return key;
 }
 
 /** The deliberately public demo buyer key (DEC J-06): it holds no funds and only decrypts demo purchases. */
