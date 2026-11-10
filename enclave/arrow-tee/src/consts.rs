@@ -32,6 +32,8 @@ pub const GLM: LlmProfile = LlmProfile {
 /// The S1-a gate picks one of QWEN / QWEN_SOFT / GLM here (and sets the response model it
 /// observed). S1-a is still pending (H-01a), so this is the card default.
 pub const LLM: LlmProfile = QWEN;
+/// Fixed NEAR AI endpoint (DEC I-05); only the dev-endpoints build can override it.
+pub const NEARAI_URL: &str = "https://cloud-api.near.ai/v1/chat/completions";
 
 pub const T_PAD: Duration = Duration::from_secs(45);
 /// 80 / 50 if the S1-b clock skew were > 10 s; S1-b measured max 5.6 s (spikes/GATES.md).
