@@ -55,6 +55,7 @@ Every panic reads `Arrow: Exx <text>`. A panic inside a transfer notification re
 | E16 | `escrow path disabled` |
 | E17 | `wrong state` |
 | E18 | `not stale yet` |
+| E19 | `blob listed by another seller` (a `blob_sha256` belongs to the first account that listed it) |
 | E20 | `intents disabled on this build` |
 
 ### Events

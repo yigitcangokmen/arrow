@@ -245,6 +245,32 @@ async fn max_evals() -> R<()> {
 
 // ---------------------------------------------------------------- entry checks
 
+/// ENC-1 (defence in depth; the enclave also refuses a sealed_k bound to another seller): a second
+/// account that copies blob_url, blob_sha256 and sealed_k from `get_listing` cannot list them.
+#[tokio::test]
+async fn clone_relist_rejected() -> R<()> {
+    for net in [Net::Mainnet, Net::Testnet] {
+        let e = setup(net, Path::Notify).await?;
+        let id = e.list("scored", None, 10).await?;
+        let listing: Value = e.view("get_listing", json!({"listing_id": id})).await?;
+        let mut clone = list_msg("scored", None, 10);
+        for f in ["blob_url", "blob_sha256", "sealed_k"] {
+            clone[f] = listing[f].clone();
+        }
+        clone["price"] = json!("100000");
+        let attacker = e.id(Who::Buyer2);
+        let before = e.usdc_of(&attacker).await?;
+        let out = e.pay(Who::Buyer2, BOND, &clone).transact().await?;
+        assert_panicked(&out, "E19 blob listed by another seller");
+        assert_eq!(e.usdc_of(&attacker).await?, before, "{net:?}: the clone's bond was kept");
+        let none: Option<Value> = e.view("get_listing", json!({"listing_id": id + 1})).await?;
+        assert!(none.is_none(), "{net:?}: the clone was listed");
+        // the first seller may list the same blob again (a relist after a program change)
+        assert_eq!(e.list("scored", None, 10).await?, id + 1, "{net:?}");
+    }
+    Ok(())
+}
+
 #[tokio::test]
 async fn wrong_token_or_predecessor_refunds() -> R<()> {
     // Mainnet rail: only intents may notify, with exactly one USDC token.
@@ -430,6 +456,7 @@ async fn outlayer_request_args() -> R<()> {
         let input: Value = serde_json::from_str(r["input_data"].as_str().expect("input_data")).expect("input json");
         assert_eq!((input["v"].as_u64(), input["action"].as_str()), (Some(1), Some(action)));
         assert_eq!(input["listing"]["blob_sha256"], json!(blob_sha()));
+        assert_eq!(input["listing"]["seller"], json!(e.id(Who::Seller)), "the enclave checks it against sealed_k");
     };
     assert!(e.eval(Who::Buyer, id, EVAL_FEE).await?.receipt_failures().is_empty());
     let r: Value = e.mock.view("last_request").await?.json()?;

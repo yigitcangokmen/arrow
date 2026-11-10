@@ -198,8 +198,9 @@ mod tests {
         assert_eq!(ok(&m), Err("max_evals"));
 
         let crit = |b64: String| EvalMsg { listing_id: 1, sealed_criteria: b64, buyer_pk: pk("04") };
-        let max = STANDARD.encode(vec![7u8; 3072]);
-        assert_eq!(max.len(), 4096);
+        // ECIES 97 + criteria bind 32 + criteria JSON 2975 = 3104 bytes (ENC-2)
+        let max = STANDARD.encode(vec![7u8; 3104]);
+        assert_eq!(max.len(), 4140);
         assert_eq!(validate_eval(&crit(max.clone())), Ok(()));
         assert_eq!(validate_eval(&crit(format!("{max}A"))), Err("sealed_criteria"));
         assert_eq!(validate_eval(&crit(String::new())), Err("sealed_criteria"));

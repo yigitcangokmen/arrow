@@ -7,10 +7,10 @@ pub const BITS_SCORED_MILLI: u32 = 5673; // ceil(1000*log2(51))  [DEC A.1 G1]
 pub const BITS_VERDICT_MILLI: u32 = 1585; // ceil(1000*log2(3))
 pub const SEALED_RESULT_LEN: usize = 98; // ECIES overhead 97 + 1 byte index  [DEC I-09]
 pub const SEALED_K_LEN: usize = 129; // 97 + 32 (release output k)
-pub const SEALED_K_LIST_LEN: usize = 161; // 97 + 64 (seller's sealed K || blob_sha256) [DEC J-04]
+pub const SEALED_K_LIST_LEN: usize = 193; // 97 + 96 (seller's sealed K || blob_sha256 || sha256(seller)) [DEC J-04, ENC-1]
 pub const MAX_OUTPUT_BYTES: usize = 1024; // promise_result_checked bound
 pub const OUTPUT_LIMIT_BYTES: usize = 900; // OutLayer blockchain-mode output limit [DEC I-07]
-pub const MAX_SEALED_CRITERIA_B64: usize = 4096;
+pub const MAX_SEALED_CRITERIA_B64: usize = 4140; // 97 + 32 (buyer/listing bind, ENC-2) + 2975 criteria = 3104 bytes
 pub const INPUT_EVENT_THRESHOLD: usize = 10_000; // OutLayer puts larger input in state, keep below
 pub const ESCROW_STALE_NS: u64 = 15 * 60 * 1_000_000_000;
 pub const DAY_NS: u64 = 86_400 * 1_000_000_000;

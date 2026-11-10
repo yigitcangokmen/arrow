@@ -82,6 +82,8 @@ pub fn request(cfg: &Config, input: String, deposit: u128, l: &Limits) -> Promis
 #[serde(crate = "near_sdk::serde")]
 struct InputListing<'a> {
     id: u64,
+    /// The enclave checks it against the seller bound inside sealed_k (ENC-1).
+    seller: &'a str,
     blob_url: &'a str,
     blob_sha256: &'a str,
     sealed_k: &'a str,
@@ -93,6 +95,7 @@ impl<'a> From<&'a Listing> for InputListing<'a> {
     fn from(l: &'a Listing) -> Self {
         Self {
             id: l.id,
+            seller: l.seller.as_str(),
             blob_url: &l.blob_url,
             blob_sha256: &l.blob_sha256,
             sealed_k: &l.sealed_k,

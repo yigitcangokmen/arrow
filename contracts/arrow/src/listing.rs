@@ -16,6 +16,10 @@ impl Contract {
         if let Err(field) = validate_list(&m, &self.cfg) {
             env::panic_str(&format!("Arrow: E04 bad msg: {field}"));
         }
+        // ENC-1: sealed_k is bound to the seller inside the enclave; this refuses a clone at list time.
+        if self.blob_sellers.get(&m.blob_sha256).is_some_and(|owner| *owner != sender) {
+            env::panic_str("Arrow: E19 blob listed by another seller");
+        }
         let bond = self.cfg.listing_bond.0;
         if amount < bond {
             env::panic_str("Arrow: E08 amount below required");
@@ -61,6 +65,9 @@ impl Contract {
             program_wasm_hash: listing.program_hash_at_list.clone(),
         }
         .emit();
+        if !self.blob_sellers.contains_key(&listing.blob_sha256) {
+            self.blob_sellers.insert(listing.blob_sha256.clone(), listing.seller.clone());
+        }
         self.listings.insert(id, listing);
         amount - bond
     }
@@ -170,6 +177,27 @@ mod tests {
         setup(intents(), NEAR / 100);
         let mut c = contract();
         let _ = mt_call(&mut c, seller(), 150_000, list_json());
+    }
+
+    /// ENC-1 defence in depth: a second account listing a blob_sha256 that is already listed
+    /// (a clone of blob_url, blob_sha256 and sealed_k) is refused before any state change.
+    #[test]
+    #[should_panic(expected = "Arrow: E19 blob listed by another seller")]
+    fn list_clone_by_other_seller_rejected() {
+        setup(intents(), 10 * NEAR);
+        let mut c = contract();
+        let _ = mt_call(&mut c, seller(), 100_000, list_json());
+        assert_eq!(c.blob_sellers.get(&list_msg().blob_sha256), Some(&seller()));
+        let _ = mt_call(&mut c, acc("0x1111111111111111111111111111111111111111"), 100_000, list_json());
+    }
+
+    #[test]
+    fn same_seller_may_relist_same_blob() {
+        setup(intents(), 10 * NEAR);
+        let mut c = contract();
+        let _ = mt_call(&mut c, seller(), 100_000, list_json());
+        let _ = mt_call(&mut c, seller(), 100_000, list_json());
+        assert_eq!((c.next_listing_id, c.listings.get(&2).map(|l| l.seller.clone())), (3, Some(seller())));
     }
 
     #[test]

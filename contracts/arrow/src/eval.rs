@@ -501,7 +501,7 @@ mod tests {
         let mut c = contract();
         let _ = mt_call(&mut c, seller(), 100_000, msg_json(Msg::List(listing_msg)));
         let listing = c.listings.get(&1).unwrap().clone();
-        let crit = STANDARD.encode(vec![7u8; 3072]);
+        let crit = STANDARD.encode(vec![7u8; 3104]);
         let eval = Eval {
             id: u64::MAX,
             listing_id: u64::MAX,

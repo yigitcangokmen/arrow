@@ -37,6 +37,7 @@ enum StorageKey {
     Purchases,
     EvalsByListing,
     CapByAccount,
+    BlobSellers,
 }
 
 #[near(contract_state)]
@@ -56,6 +57,8 @@ pub struct Contract {
     cap_day: u64,
     cap_global_used: u32,
     cap_by_account: LookupMap<AccountId, (u64, u32)>,
+    /// blob_sha256 → the first account that listed it; another account listing it gets E19 (ENC-1).
+    blob_sellers: LookupMap<String, AccountId>,
 }
 
 #[near]
@@ -82,6 +85,7 @@ impl Contract {
             cap_day: 0,
             cap_global_used: 0,
             cap_by_account: LookupMap::new(StorageKey::CapByAccount),
+            blob_sellers: LookupMap::new(StorageKey::BlobSellers),
         }
     }
 

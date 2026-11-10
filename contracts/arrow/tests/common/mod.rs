@@ -116,7 +116,7 @@ pub fn list_msg(mode: &str, mock: Option<&str>, max_evals: u32) -> Value {
         "rows_claimed": 1000,
         "blob_url": format!("https://b.test/{}.bin{q}", blob_sha()),
         "blob_sha256": blob_sha(),
-        "sealed_k": STANDARD.encode([7u8; 161]),
+        "sealed_k": STANDARD.encode([7u8; 193]),
         "price": PRICE.to_string(),
         "eval_fee": EVAL_FEE.to_string(),
         "max_evals": max_evals,
