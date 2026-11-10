@@ -41,7 +41,8 @@ describe("public text", () => {
   const superseded = (t: string) => /SUPERSEDED|KU-11|cannot be topped up/.test(t);
 
   it("no_topup_mainnet_key_text_in_tracked_files (X12-OPS-4)", () => {
-    const hits = lines(tracked.filter((f) => !LEDGERS.has(f))).filter(
+    // HANDOFFS.md is a ledger but carries the H-01b steps, each now marked superseded
+    const hits = lines(tracked.filter((f) => !LEDGERS.has(f) || f === "HANDOFFS.md")).filter(
       (l) => STALE_KEY_TEXT.test(l.text) && !superseded(l.text),
     );
     expect(hits.map((l) => `${l.f}:${l.n}`)).toEqual([]);
