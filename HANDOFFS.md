@@ -9,20 +9,20 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | Due GMT+7 [UTC] | H | Owner (card) | Blocks what | Status |
 |---|---|---|---|---|
 | 10 Kas 16:49 [09:49Z] (was 08:00) | H-01a | WS-1 T02 | WS1-T06 (S1-a), S1-b NEAR AI call, bench | OPEN |
-| 10 Kas 17:49 [10:49Z] (was 09:00; latest 20:49 [13:49Z]) | H-02 | WS-1 T09 | H-07, all mainnet gates | OPEN (K-06 money not approved) |
-| 10 Kas 17:49 [10:49Z] (was 09:00) | H-03 | WS-4 T08 | H-08a (S4-a) | OPEN (K-06 money not approved) |
-| 10 Kas 18:49 [11:49Z] (was 10:00) | H-05 | WS-1 T04 | raw GitHub WasmUrl (S-02 primary); push part done by agent (K-02) | OPEN (public step only; not approved, K-03) |
-| 10 Kas 20:49 [13:49Z] (was 12:00) | H-04 | WS-4 T05 | S4-a Solana dry quote | OPEN (K-06 money not approved) |
+| 10 Kas 17:49 [10:49Z] (was 09:00; latest 20:49 [13:49Z]) | H-02 | WS-1 T09 | H-07, all mainnet gates | OPEN (money approved by the user 2026-11-10, DEC §K KU-06) |
+| 10 Kas 17:49 [10:49Z] (was 09:00) | H-03 | WS-4 T08 | H-08a (S4-a) | OPEN (money approved by the user 2026-11-10, DEC §K KU-06) |
+| 10 Kas 18:49 [11:49Z] (was 10:00) | H-05 | WS-1 T04 | raw GitHub WasmUrl (S-02 primary); push DONE by agent 15:08 (origin/main 6c7b4d37, K-02) | OPEN (public step only; not approved, K-03) |
+| 10 Kas 20:49 [13:49Z] (was 12:00) | H-04 | WS-4 T05 | S4-a Solana dry quote | OPEN (money approved by the user 2026-11-10, DEC §K KU-06) |
 | 10 Kas 20:49 [13:49Z] (was 12:00) | H-06 | WS-5 T10 | WS5-T10 hosted deploy | OPEN |
-| 10 Kas 21:19 [14:19Z] (was 12:30) | H-07 | WS-1 T09 + WS-4 T09 (relayer key part) | H-08, H-12 | OPEN (K-06 money not approved) |
-| 10 Kas 21:49 [14:49Z] (was 13:00) | H-08a | WS-1 T09 + WS-4 T05 | H-08b, S4-a | OPEN (block written by T09) |
-| 10 Kas 22:19 [15:19Z] (was 13:30) | H-08b | WS-1 T09 + WS-4 T04 | H-08c, S3a(ii) | OPEN (block written by T09) |
-| 10 Kas 22:49 [15:49Z] (was 14:00) | H-08c | WS-1 T09 | H-08d, S3b | OPEN (block written by T09) |
-| 11 Kas 00:19 [10 Kas 17:19Z] (was 10 Kas 15:30) | H-08d | WS-1 T09 | H-08e, S3c + B5 | OPEN (block written by T09) |
+| 10 Kas 21:19 [14:19Z] (was 12:30) | H-07 | WS-1 T09 + WS-4 T09 (relayer key part) | H-08, H-12 | OPEN (money approved by the user 2026-11-10, DEC §K KU-06) |
+| 10 Kas 21:49 [14:49Z] (was 13:00) | H-08a | WS-1 T09 + WS-4 T05 | H-08b, S4-a | OPEN (block below; RUNBOOK spikes/s3/RUNBOOK.md) |
+| 10 Kas 22:19 [15:19Z] (was 13:30) | H-08b | WS-1 T09 + WS-4 T04 | H-08c, S3a(ii) | OPEN (block below; RUNBOOK spikes/s3/RUNBOOK.md) |
+| 10 Kas 22:49 [15:49Z] (was 14:00) | H-08c | WS-1 T09 | H-08d, S3b | OPEN (block below; RUNBOOK spikes/s3/RUNBOOK.md) |
+| 11 Kas 00:19 [10 Kas 17:19Z] (was 10 Kas 15:30) | H-08d | WS-1 T09 | H-08e, S3c + B5 | OPEN (block below; RUNBOOK spikes/s3/RUNBOOK.md) |
 | 11 Kas 02:49 [10 Kas 19:49Z] (was 10 Kas 18:00) | H-09 | WS-7 T03 | seller outreach | OPEN |
-| 11 Kas 04:19 [10 Kas 21:19Z] (was 10 Kas 19:30) | H-08e | WS-1 T09 | spike account cleanup | OPEN (block written by T09) |
+| 11 Kas 04:19 [10 Kas 21:19Z] (was 10 Kas 19:30) | H-08e | WS-1 T09 | spike account cleanup | OPEN (block below; RUNBOOK spikes/s3/RUNBOOK.md) |
 | 11 Kas 05:49 [10 Kas 22:49Z] (was 10 Kas 21:00; = K0) | H-24 | WS-1 T11 | K0 (only if triggered) | N/A unless triggered |
-| when triggered | H-25 | WS-1 T05 | WS1-T05 testnet faucet fallback | N/A unless triggered |
+| when triggered | H-25 | WS-1 T05 | WS1-T05 testnet faucet fallback | N/A (faucet worked 15:10, block below) |
 | 11 Kas 12:00 [05:00Z] | H-07b | WS-1 T11 | H-12 (only if K0 picks Escrow) | N/A unless Escrow |
 | 11 Kas 12:00 [05:00Z] | H-W6e | WS-6 T02 | WS6-T02 (default A if no answer) | OPEN |
 | 11 Kas 15:00 [08:00Z] | H-21 | WS-6 T04 | WS6-T05 | OPEN |
@@ -30,7 +30,7 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | when it appears | H-WS2-b | WS-2 | macOS Keychain prompt | N/A unless triggered |
 | daily 13:00 and 21:00 [06:00Z / 14:00Z] | H-10 | WS-1 T14 | push | N/A as human step: agent pushes (K-02) |
 | 12 Kas 10:00 [03:00Z] (latest 21:00 [14:00Z]) | H-13a | WS-5 T04 | `/sell` blob upload | OPEN |
-| 12 Kas 12:00 [05:00Z] | H-01b | WS-1 T02 | H-12 mainnet secret | OPEN (K-06 money not approved) |
+| 12 Kas 12:00 [05:00Z] | H-01b | WS-1 T02 | H-12 mainnet secret | OPEN (money approved by the user 2026-11-10, DEC §K KU-06) |
 | 12 Kas 18:10 [11:10Z] | H-11 | WS-1 T16 | freeze push; agent pushes (K-02) | N/A as human step: agent pushes (K-02) |
 | 12 Kas 18:30-20:30 [11:30-13:30Z] | H-12 | WS-1 T17 | mainnet deploy, H-14 | OPEN |
 | 12 Kas 19:30 [12:30Z] | H-W6a | WS-6 T05 | bench blob push (only if triggered) | N/A unless triggered |
@@ -112,6 +112,7 @@ Run exactly:
 Expected: `npx tsx scripts/src/balances.ts` → buyer Base USDC ≥ 15.000000, ETH ≥ 0.0008; MetaMask shows both "Arrow Buyer" and "Arrow Seller" with the addresses the agent printed
 Write result to: paste the balances output to the agent (no keys).
 If it fails: Arbitrum USDC is the fallback origin (DEC E-02); tell the agent, it switches the S4-a origin asset.
+Agent result (15:14 GMT+7 [08:14Z], WS4-T08): buyer address 0xB5ef360E42056049F584fd03BF0fb9b208E28387 (send the Base USDC + ETH here); seller address 0xa54Bc40188a338CAEd807CCA494bB651cF644B73 (no funds needed). Keys are in .env only.
 Result (human fills):
 
 ## H-04 · Phantom Solana address + USDC ATA · due 10 Kas 20:49 GMT+7 [13:49Z] · status: OPEN
@@ -155,4 +156,130 @@ Run exactly:
 Expected: 4 hesap view-account-summary'de görünür. Ajan RPC ile relayer key'ini doğrular: FunctionCall, receiver intents.near, method execute_intents, allowance null.
 Write result to: Result satırı (tx hash'leri).
 If it fails: arrow-market.near alınmışsa → DEC D-02/D-07: arrow-market-v2.near ana kontrat olur, yedek `arrow-market-v3.near`; ajan allowlist'i (I-03) freeze'den önce günceller ve STATUS'a duyurur.
+Result (human fills):
+
+## H-05 · İlk push + repo public · due 10 Kas 18:49 GMT+7 [11:49Z] · status: OPEN (public step only; NOT approved, DEC K-03)
+Purpose: S1-b ve freeze için public raw GitHub URL (DEC S-01, S-02); commit geçmişi süreç izi. DEC §K: push kısmı ajan işi (K-02) ve yapıldı; repoyu public yapmak insan işi ve kullanıcı henüz onaylamadı (K-03). Ajan beklemiyor: S1-b FastFS URL'siyle koşar, final wasm S-02 yedeğiyle (Vercel static, o da olmazsa FastFS) sabitlenir.
+Preconditions (ajan çıktısı, 2026-11-10 15:07-15:08 GMT+7):
+    - `bash scripts/secret-scan.sh` → `SECRET_SCAN: PASS` (raw S-04 grep 17 eşleşme, hepsi boş env adı ya da doküman satırı; strict kalıp yok; gitleaks "no leaks found", 3 commit).
+    - Plan belgeleri takipte değil: `git ls-files | grep -E "KICKOFF|DECISIONS|PLAN|OPEN-QUESTIONS|^tasks/"` → boş (DEC S-01, W-17). Yerel notlar gitignored.
+    - Push DONE (ajan, K-02): `git push -u origin main` → `origin/main = 6c7b4d37` (42595fc bootstrap, aa012ce scaffold + fixtures v1, 6c7b4d3 ledger sync). `gh repo view yigitcangokmen/arrow --json visibility` → `PRIVATE`.
+    - Not: `STATUS.md` henüz commit edilmedi (Workstreams tablosu oturum model adlarını içeriyor, DEC K-04); public'ten önce entegratör bu satırları temizleyip commit eder ya da defteri yerel tutar.
+Run exactly (ONLY if the user approves making the repo public):
+    cd ~/Desktop/hackathon/near-builds/arrow
+    bash scripts/secret-scan.sh | tail -1
+    git log --oneline origin/main
+    gh repo edit yigitcangokmen/arrow --visibility public --accept-visibility-change-consequences
+    gh repo view yigitcangokmen/arrow --json visibility
+Expected: `SECRET_SCAN: PASS`; `{"visibility":"PUBLIC"}`
+Write result to: Result satırı (saat + `git rev-parse --short origin/main`).
+If it fails / not approved: repo private kalır. Ajan S1-b'yi testnet FastFS URL'siyle koşar (H-05 "If it fails" yolu, DEC K-03) ve freeze'de Vercel static URL'sine geçer (`.vercelignore`'daki `release/*.wasm` satırı o zaman kaldırılır, `web/public/release/` kullanılır). Kullanıcı public derse S-02 birincil yol (raw GitHub) geri gelir; freeze'den (K3) sonra URL değişmez.
+Result (human fills):
+
+## H-W6e · Team-made dataset source decision (Agent Market ToS)  · due 11 Kas 12:00 GMT+7 [05:00Z] · status: OPEN
+Purpose: Agent Market ToS v2026-10-15 §9.2(h),(j) forbids scraping / collecting content "at scale". Confirm the narrowed dataset or pick fallback B. (Block written by S-epsilon, WS6-T02, 2026-11-10 15:16 GMT+7.)
+Preconditions: `fixtures/team-made/SOURCE.md` exists (agent wrote it; it quotes the clauses). Collected 2026-11-10 08:13:58Z to 08:14:34Z, 16 GET, 775 rows, on branch ws/6-data (commit 611b754, not yet merged).
+Run exactly:
+    open ~/Desktop/hackathon/near-builds/arrow-ws-6/fixtures/team-made/SOURCE.md          # read section "Terms of Service" (≈1 min)
+Expected: reply "A" (keep narrowed Agent Market snapshot, 16 published index files, no builder text) or "B" (switch to NEAR chain stats from public RPC; the agent then writes scripts/src/collect-chain-stats.ts).
+Write result to: paste "A" or "B" to the WS-6 session; it records it in STATUS.md and SOURCE.md.
+If it fails / no answer by 13 Kas 10:00: default "A" stands (it is used in H-15 that evening).
+Result (human fills):
+
+## H-09 · Seller invites · due 11 Kas 02:49 GMT+7 [10 Kas 19:49Z] (PLAN 10 Kas 18:00 + Δ 8:49) · status: OPEN
+Purpose: send the seller invites (G4). Human-only: messages go out under the lead's X account. Nothing has been sent; every message is a draft. (Block written by S-epsilon, WS7-T02, 2026-11-10.)
+Preconditions:
+  - docs/outreach/targets.md has 1..15 rows, each with a "ready message" (branch ws/6-data)
+    check: npx vitest run scripts/test/outreach.test.ts  → all green
+  - repo visibility decides the variant (repo is PRIVATE now, DEC K-03):
+    gh repo view yigitcangokmen/arrow --json visibility  → "PUBLIC" = variant A, else B
+Run exactly (per row, top to bottom):
+  1. Open the row's source link, then https://x.com/<handle>
+  2. If a Message (envelope) button exists: click it, paste the row's ready message, Send.
+     If not: open the row's hackathon post (source link) → Reply → paste the R variant → Reply.
+     If the row's channel is "email (public)": send from the lead's mail client, subject "Arrow: list <their data> on NEAR (inspect before pay)".
+  3. Right after sending, fill the row in docs/outreach/log.md: sent_utc (date -u +%FT%RZ), channel, variant, status=sent.
+Expected: every target row has status=sent or failed (with a one-word reason: dm-closed, reply-limited, …).
+Write result to: docs/outreach/log.md (or paste "T01 sent 11:05Z DM A, T02 …" to the agent).
+If it fails: X rate-limits DMs to non-followers → switch that row to the R variant. Do not use GitHub issues.
+Result (human fills): <number sent> / <number of rows>, <UTC time of last send>
+
+## H-08a · S4-a $2 inbound (1Click) · due 10 Kas 21:49 GMT+7 [14:49Z] (was 13:00) · status: OPEN (money approved by the user 2026-11-10, DEC §K KU-06)
+Purpose: Base → NEAR Intents 0x hesabı gerçek akışı (S4-a). Script WS4-T05'in. Adımların tamamı `spikes/s3/RUNBOOK.md`'de (WS1-T09, main f8c4c94).
+Preconditions: H-03 DONE (Arrow Buyer EOA Base'de ≥15 USDC + ≥0,0008 ETH). `npx tsx spikes/s4/s4a-inbound.ts --dry` → quote 200 (script WS4-T05 ile gelir; 2026-11-10 15:30'da main'de yok). Para kararı (DEC K-06) kullanıcı tarafından onaylandı.
+Run exactly:
+    cd ~/Desktop/hackathon/near-builds/arrow && source ~/.nvm/nvm.sh && nvm use 24.15.0
+    npx tsx spikes/s4/s4a-inbound.ts --amount 2
+Expected: /v0/status SUCCESS < 120 sn; mt_balance_of(0x…, NEAR USDC) ≈ 1,99
+Write result to: script evidence/mainnet.json'a yazar; Result satırına deposit adresi + SUCCESS süresi
+If it fails: Arbitrum USDC origin (DEC G-06 yedeği); rate limit → JWT (DEC E-08)
+Result (human fills):
+
+## H-08b · S3a(ii) fonlu simulate · due 10 Kas 22:19 GMT+7 [15:19Z] (was 13:30) · status: OPEN
+Purpose: Fonlu alıcı EOA ile imza + bakiye hatası olmadığını görmek.
+Preconditions: H-08a DONE. `spikes/s3/s3a-simulate.ts` main'de (WS-4 ws/4-sdk 045f81b'de yazdı, fonsuz sonuç: yalnızca "insufficient balance"; entegrasyon turunda main'e girer).
+Run exactly:
+    cd ~/Desktop/hackathon/near-builds/arrow
+    npx tsx spikes/s3/s3a-simulate.ts --funded
+Expected: class: OK (imza ve bakiye hatası yok)
+Write result to: çıktının son 5 satırı → ajana
+If it fails: ajan K-03 yedeğine geçer; H-08c bekler
+Result (human fills):
+
+## H-08c · Spike deploy + S3b notification/iade · due 10 Kas 22:49 GMT+7 [15:49Z] (was 14:00) · status: OPEN (money approved by the user 2026-11-10, DEC §K KU-06)
+Purpose: mt_on_transfer → [amounts]/[0] → mt_resolve_transfer davranışını mainnet'te görmek (S3b).
+Preconditions: H-07 DONE (arrow-spike.arrowhq.near ≥1,4 NEAR), H-08b PASS, `spikes/s3/spike-contract/target/near/spike.wasm` var (ajan ana checkout'ta build etti 2026-11-10 15:29, sha256 e8d455c905b91c24ac0561782ce6d31a73e3c14ee4e44401bc014940cc78f265; aynı wasm + `init-mainnet.json` testnet ikizinde deploy + view + yetkisiz çağrı reddi ile denendi). `spikes/s3/s3b-notify.ts` main'de (WS1-T09'un kalan parçası; WS4-T04 intent builder'ı main'e girince yazılır).
+Run exactly:
+    cd ~/Desktop/hackathon/near-builds/arrow
+    near contract deploy arrow-spike.arrowhq.near use-file spikes/s3/spike-contract/target/near/spike.wasm with-init-call new json-args "$(cat spikes/s3/init-mainnet.json)" prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' network-config mainnet sign-with-keychain send
+    near contract call-function as-read-only arrow-spike.arrowhq.near last json-args '{}' network-config mainnet now
+    npx tsx spikes/s3/s3b-notify.ts --mode refund_all
+    npx tsx spikes/s3/s3b-notify.ts --mode keep
+Expected: `last` → `""`. refund_all: log'da sender=0x… ve msg birebir, alıcı bakiyesi değişmedi. keep: alıcı −0,01, spike +0,01 (Intents içinde)
+Write result to: script'ler evidence/mainnet.json'a yazar; Result satırına iki tx hash'i
+If it fails: ajan PAYMENT_PATH=Escrow önerir (K0); H-08d yine koşulur (OutLayer bileşimi escrow'da da gerekli)
+Result (human fills):
+
+## H-08d · S3c OutLayer bileşimi + B5 negatif testi · due 11 Kas 00:19 GMT+7 [10 Kas 17:19Z] (was 10 Kas 15:30) · status: OPEN (money approved by the user 2026-11-10, DEC §K KU-06)
+Purpose: Tek receipt ağacında Intents → spike → OutLayer → karar < 90 sn; başka hesap aynı secrets_ref ile secret alamıyor (B5). Testnet'te (S1-b) aynı erişim biçimi kabul edildi ve doğrudan çağrı "Access denied by access condition" ile reddedildi (spikes/GATES.md S1-b).
+Preconditions: H-08c DONE. Alıcı Intents bakiyesi ≥0,05 USDC. `NEARAI_API_KEY` (H-01a) `.env`'de. `spikes/s3/s3c-outlayer.ts` main'de (WS4-T04 sonrası yazılır); `spikes/s3/s3c-b5-negative.ts` main'de (var).
+Run exactly:
+    cd ~/Desktop/hackathon/near-builds/arrow
+    near account export-account arrow-spike.arrowhq.near using-private-key network-config mainnet    # private key ekrana gelir, kimseyle paylaşma
+    outlayer login                        # "Account ID:" → arrow-spike.arrowhq.near · "Private key (ed25519:...):" → yukarıdaki private key
+    outlayer whoami                       # arrow-spike.arrowhq.near (mainnet)
+    set -a; source .env; set +a
+    outlayer secrets set "$(jq -cn --arg k "$NEARAI_API_KEY" '{NEARAI_API_KEY:$k}')" --profile arrow --wasm-hash $(cat spikes/s1/release/sha256.txt) --generate PROTECTED_MASTER:hex32 --access allow-all --via arrow-spike.arrowhq.near --build $(cat spikes/s1/release/sha256.txt)
+    npx tsx spikes/s3/s3c-outlayer.ts --mode outlayer
+    npx tsx spikes/s3/s3c-outlayer.ts --mode outlayer_refund
+    npx tsx spikes/s3/s3c-b5-negative.ts --prepare        # bastığı komutu aynen koş (arrowhq.near imzalı, 0,02 NEAR depozito, çoğu iade)
+    npx tsx spikes/s3/s3c-b5-negative.ts --read <tx_hash>
+    outlayer secrets delete --profile arrow --wasm-hash $(cat spikes/s1/release/sha256.txt)
+    outlayer logout
+Expected: (1) outlayer: keep, outlayer_refund: iade; ikisi de < 90 sn. (2) B5: PASS (pm null ya da null). (3) attestation 200 (api.outlayer.ai)
+Write result to: script'ler evidence/mainnet.json'a yazar; Result satırına tx'ler
+If it fails: (1) gas/süre → escrow (DEC H-15) + min_gas 400 / execute_intents 900 Tgas denemesi (DEC H-11). (2) B5 düşer → WASM allowlist birincil, trust table satırı. (3) arayüz hatası (deserialize) → ajan kaynak koddaki 7 parametreli imzayla karşılaştırır (DEC V-11). Mainnet OutLayer testnet FastFS URL'sini reddederse: login'liyken `outlayer upload spikes/s1/release/spike-tee.wasm` (mainnet FastFS), sonra `set_wasm` (komut RUNBOOK H-08d'de) ve iki s3c satırı tekrar.
+Result (human fills):
+
+## H-08e · Spike temizliği · due 11 Kas 04:19 GMT+7 [10 Kas 21:19Z] (was 10 Kas 19:30) · status: OPEN
+Purpose: ~1,4 NEAR'ı geri almak (DEC D-06).
+Preconditions: H-08c/d sonuçları ajan tarafından okundu (WS1-T10 DONE).
+Run exactly:
+    near contract call-function as-transaction intents.near mt_transfer json-args '{"receiver_id":"arrowhq.near","token_id":"nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1","amount":"<spike bakiyesi, ajan söyler>"}' prepaid-gas '30.0 Tgas' attached-deposit '1 yoctoNEAR' sign-as arrow-spike.arrowhq.near network-config mainnet sign-with-keychain send
+    near account delete-account arrow-spike.arrowhq.near beneficiary arrowhq.near network-config mainnet sign-with-keychain send
+    near account view-account-summary arrow-spike.arrowhq.near network-config mainnet now
+Expected: son komut "does not exist" (UNKNOWN_ACCOUNT); arrowhq.near ~+1,4 NEAR
+Write result to: Result satırı (iki tx)
+If it fails: DeleteAccountWithLargeState görülmez (state küçük); başka hata → ajana yapıştır
+Result (human fills):
+
+## H-25 · Testnet faucet yedeği (yalnızca tetiklenirse) · due ihtiyaç anında · status: N/A (faucet çalıştı 2026-11-10 15:10-15:14: arrowhq.testnet F = 10 tNEAR + 3 süpürme)
+Purpose: faucet script'ten çalışmazsa testnet NEAR.
+Preconditions: ajan `arrowhq.testnet`'i oluşturamadı ya da sponsor hedefi tutmuyor (STATUS'ta hata satırı).
+Run exactly:
+    https://near-faucet.io → "NEAR" → alıcı: arrowhq.testnet (ya da ajanın yazdığı hesap) → Request (istek başına 2 tNEAR, rate limited)
+    Hesap hiç yoksa: https://testnet.mynearwallet.com → Create account → cüzdanın kendi key'iyle; sonra ajana yalnızca hesap adını söyle
+Expected: `near account view-account-summary arrowhq.testnet network-config testnet now` bakiyesi arttı
+Write result to: Result satırı
+If it fails: NEAR DevHub Telegram (https://t.me/neardev) faucet kanalı; ajan bu arada sandbox testleriyle devam eder
 Result (human fills):

@@ -1,3 +1,24 @@
-{"near": ["arrowhq.near","arrow-market.near","arrow-market-v2.near","arrow-relayer.arrowhq.near","arrow-spike.arrowhq.near","arrowhq.testnet"],
- "evm": [], "solana": [],
- "note": "Team-controlled accounts. Any seller not listed here counts as external (DECISIONS H-07). EVM/Solana addresses only, never keys."}
+{
+  "near": [
+    "arrowhq.near",
+    "arrow-market.near",
+    "arrow-market-v2.near",
+    "arrow-relayer.arrowhq.near",
+    "arrow-spike.arrowhq.near",
+    "arrowhq.testnet"
+  ],
+  "evm": [
+    {
+      "role": "buyer",
+      "address": "0xb5ef360e42056049f584fd03bf0fb9b208e28387",
+      "created_utc": "2026-11-10T08:13:06.198Z"
+    },
+    {
+      "role": "seller",
+      "address": "0xa54bc40188a338caed807cca494bb651cf644b73",
+      "created_utc": "2026-11-10T08:13:06.833Z"
+    }
+  ],
+  "solana": [],
+  "note": "Team-controlled accounts. Any seller not listed here counts as external (DECISIONS H-07). EVM/Solana addresses only, never keys."
+}
