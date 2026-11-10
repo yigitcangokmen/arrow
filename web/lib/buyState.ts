@@ -67,7 +67,7 @@ export function announceText(s: { waiting: "inspect" | "buy" | null; slow: boole
   if (s.error) return `That step did not finish: ${s.error}`;
   if (s.saved) return "The file is decrypted and ready to save.";
   if (s.purchaseRefund) return "The purchase failed on chain and was refunded to your NEAR Intents balance.";
-  if (s.waiting) return s.slow ? "Still waiting for the enclave." : s.waiting === "inspect" ? "Your AI is reading the data inside the enclave. This takes 45 to 120 seconds." : "Waiting for the purchase key.";
+  if (s.waiting) return s.slow ? "Still waiting for the enclave." : s.waiting === "inspect" ? "The enclave and NEAR AI are evaluating the listing. This takes 45 to 120 seconds." : "Waiting for the purchase key.";
   if (s.outcome?.kind === "verdict") return `Result: ${s.outcome.line}`;
   if (s.outcome?.kind === "refunded") return "The inspection failed on chain and was refunded to your NEAR Intents balance.";
   return "";
