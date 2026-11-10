@@ -30,9 +30,9 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | when it appears | H-WS2-b | WS-2 | macOS Keychain prompt | N/A unless triggered |
 | daily 13:00 and 21:00 [06:00Z / 14:00Z] | H-10 | WS-1 T14 | push | N/A as human step: agent pushes (K-02) |
 | 12 Kas 10:00 [03:00Z] (latest 21:00 [14:00Z]) | H-13a | WS-5 T04 | `/sell` blob upload | OPEN |
-| 12 Kas 12:00 [05:00Z] | H-01b | WS-1 T02 | H-12 mainnet secret | OPEN (money approved by the user 2026-11-10, DEC §K KU-06) |
+| 12 Kas 12:00 [05:00Z] | H-01b | WS-1 T02 | H-12 mainnet secret | DONE by decision (DEC §K KU-11): no paid key; NEARAI_API_KEY_MAINNET = the NEAR Builders key |
 | 12 Kas 18:10 [11:10Z] | H-11 | WS-1 T16 | freeze push; agent pushes (K-02) | N/A as human step: agent pushes (K-02) |
-| 12 Kas 18:30-20:30 [11:30-13:30Z] | H-12 | WS-1 T17 | mainnet deploy, H-14 | OPEN |
+| 12 Kas 18:30-20:30 [11:30-13:30Z] | H-12 | WS-1 T17 | mainnet deploy, H-14 | BLOCKED until K3 freeze + H-01b (lines ready and twin-rehearsed 22:50, block below; runbook scripts/deploy/mainnet.md on main 5081eca) |
 | 12 Kas 19:30 [12:30Z] | H-W6a | WS-6 T05 | bench blob push (only if triggered) | N/A unless triggered |
 | 12 Kas 21:00 [14:00Z] | H-13b | WS-5 T10 | hosted relay/sponsor routes | OPEN |
 | 12 Kas 21:00-23:00 [14:00-16:00Z] | H-14 | WS-1 T18 + WS-4 T15 | K4 | OPEN |
@@ -294,6 +294,42 @@ Write result to: Result line (both tx hashes).
 If it fails: DeleteAccountWithLargeState is not expected (small state); any other error → paste it to the agent. The delete-account form was run on testnet at 21:49 (arrow-h07-twin-2148.testnet).
 Result (human fills): DONE 22:15 GMT+7. mt_transfer 20000 → arrowhq.near 7pQZRaHXD9HYMR1uCwFHnttyPr4KgJM6pUmao7giGfQ1 · delete-account 6DBnU8naQHNNdb9XV28boP8RiZcSt3z9mHfnkxAfkMRd. Read-only 22:16: arrow-spike.arrowhq.near UNKNOWN_ACCOUNT, arrowhq.near 9.0611 NEAR and Intents USDC 20000.
 
+## H-12 · Mainnet deploy + secret + init_program_key · due 12 Kas 18:30-20:30 GMT+7 [11:30-13:30Z] · status: BLOCKED until K3 freeze (12 Kas 18:00) + H-01b
+Purpose: deploy the market to arrow-market.near, not locked (DEC B-06); arrow-market-v2.near stays a reserve with no deploy (DEC D-07). Rewritten 22:50 by S-α (WS1-T17) as single lines in run order; full runbook with expected output and each step's testnet twin: `scripts/deploy/mainnet.md` (ws/1-gates 5081eca, on main after the next merge).
+Preconditions: K3 PASS (release/sha256.txt written; `.env` PROGRAM_WASM_URL / PROGRAM_WASM_SHA256 = frozen values); H-01b DONE (`.env` NEARAI_API_KEY_MAINNET filled); step 0 prints PASS on every row. Agent read-only 22:45: arrow-market.near exists, 0.1 NEAR, no code; arrowhq.near 9.0611 NEAR (needs ≥ 3.4 + 0.5 + gas); outlayer not logged in on mainnet; contract wasm sha 24fe374a…6d4def = SHA256SUMS; storage-estimate → deposit 3.4 NEAR. Today step 0 FAILs exactly on `program_frozen` and `nearai_key_mainnet`. Each `sign-with-keychain` may show a macOS Keychain prompt: allow it.
+Twin: every signing line ran 22:30-22:44 on testnet against mainnet-dryrun.arrowhq.testnet with the same wasm, the same init JSON and the same `sign-with-keychain` form (create Eb6sXMQM…, storage EVTKMY4N…, deploy+init 29RhuCrm…, tank C5vnSJfF…, secret set + logout/restore OK, init_program_key DD4Q6MX8… → "derive failed: null" because outlayer.near does not exist on testnet, self-only check frrHwP7u… → E14, account deleted 2wU5urgX…). Finding: `new` only accepts the mainnet init JSON on arrow-market.near (secrets_ref must be the contract itself; first twin try FM8kHR3y… → E15 secrets_ref), so the twin rendered its own name there.
+Run exactly (one line per step, in this order):
+    0. preflight (read-only):
+       cd ~/Desktop/hackathon/near-builds/arrow && bash scripts/deploy/mainnet-check.sh pre
+       → every row PASS, last lines "deposit for step 1: 3.4 NEAR" and "PASS outlayer_logged_out on mainnet". Stop on any FAIL.
+    1. storage money:
+       near tokens arrowhq.near send-near arrow-market.near '3.4 NEAR' network-config mainnet sign-with-keychain send
+       → "<arrowhq.near> has transferred 3.4 NEAR to <arrow-market.near> successfully."
+    2. deploy + init:
+       cd ~/Desktop/hackathon/near-builds/arrow && shasum -a 256 release/contracts/arrow-mainnet.wasm && I=$(bash scripts/deploy/render-init.sh mainnet) && near contract deploy arrow-market.near use-file release/contracts/arrow-mainnet.wasm with-init-call new json-args "$I" prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' network-config mainnet sign-with-keychain send
+       → sha 24fe374ac7b4410a6324bfd924bdcfa9a1dab50829dba21aaeea8c10876d4def, then "Contract code has been successfully deployed."
+    3. gas tank:
+       near contract call-function as-transaction arrow-market.near fund_tank json-args '{}' prepaid-gas '30.0 Tgas' attached-deposit '0.5 NEAR' sign-as arrowhq.near network-config mainnet sign-with-keychain send
+       → log "arrow: tank funded 500000000000000000000000"
+    4. OutLayer secret (stops before login if NEARAI_API_KEY_MAINNET is empty; the key goes from the keychain into outlayer, never on screen):
+       cd ~/Desktop/hackathon/near-builds/arrow && ( set -a && . ./.env && set +a && : "${NEARAI_API_KEY_MAINNET:?is empty in .env (H-01b)}" && printf '%s\n%s\n' arrow-market.near "$(near account export-account arrow-market.near using-private-key network-config mainnet 2>/dev/null | grep -oE 'ed25519:[1-9A-HJ-NP-Za-km-z]{80,}')" | outlayer login mainnet >/dev/null && OUTLAYER_NETWORK=mainnet outlayer secrets set "$(jq -cn --arg k "$NEARAI_API_KEY_MAINNET" '{NEARAI_API_KEY:$k}')" --profile arrow --wasm-hash "$PROGRAM_WASM_SHA256" --generate PROTECTED_MASTER:hex32 --access allow-all --via arrow-market.near --build "$PROGRAM_WASM_SHA256" 2>&1 | tail -4 )
+       → "Logged in as arrow-market.near (mainnet)", "Calls admitted only from: arrow-market.near", "Secrets stored (profile: arrow, keys: NEARAI_API_KEY; protected (TEE): PROTECTED_MASTER)"
+       check: near contract call-function as-read-only outlayer.near list_user_secrets json-args '{"account_id":"arrow-market.near"}' network-config mainnet now    → one row, profile arrow, WasmHash = frozen sha, access And[WasmHash, Predecessor Whitelist [arrow-market.near]]
+    5. log out of mainnet OutLayer, restore the testnet login (run it even if step 4 failed after the login):
+       cd ~/Desktop/hackathon/near-builds/arrow && OUTLAYER_NETWORK=mainnet outlayer logout && printf '%s\n%s\n' arrow.arrowhq.testnet "$(jq -r .private_key ~/.near-credentials/testnet/arrow.arrowhq.testnet.json)" | outlayer login testnet >/dev/null && ls ~/.outlayer/mainnet && outlayer whoami
+       → "Logged out from mainnet", empty mainnet folder, "Account: arrow.arrowhq.testnet", "Network: testnet"
+    6. program key (self-signed):
+       near contract call-function as-transaction arrow-market.near init_program_key json-args '{}' prepaid-gas '300.0 Tgas' attached-deposit '0.05 NEAR' sign-as arrow-market.near network-config mainnet sign-with-keychain send
+       → tx succeeds; "arrow: program key set" arrives on the callback within about a minute
+    7. post check (read-only, waits up to 120 s for the key):
+       cd ~/Desktop/hackathon/near-builds/arrow && bash scripts/deploy/mainnet-check.sh post
+       → PASS config_matches_init, build mainnet / payment notify / result chain / not paused, code_hash, tank_available, secret_row, program_pubkey_130hex 04…
+    8. arrow-market-v2.near: nothing (reserve only).
+Expected: steps 1, 2, 3, 6 succeed; step 7 all PASS.
+Write result to: paste the tx hashes of steps 1, 2, 3, 6 to the agent; the agent records them with evidence-add (ids h12-deploy-storage, h12-deploy-init, h12-deploy-tank, h12-deploy-pubkey) and sets contract / contract_wasm_sha256 / program_wasm_* in evidence/mainnet.json.
+If it fails: step 1 or 3 → nothing deployed or lost, paste the error. Step 2 → deploy and init are one receipt, a failed init leaves no code; paste the error and stop. program_pubkey null after step 7 → paste the step 6 tx; the agent reads list_user_secrets and the callback log (a wrong secret can be replaced with `outlayer secrets update` before the lock, never after). If arrow-market-v2.near must be used: the agent rewrites these lines with v2 and renders the init with secrets_ref = arrow-market-v2.near.
+Result (human fills):
+
 ## H-25 · Testnet faucet yedeği (yalnızca tetiklenirse) · due ihtiyaç anında · status: N/A (faucet çalıştı 2026-11-10 15:10-15:14: arrowhq.testnet F = 10 tNEAR + 3 süpürme)
 Purpose: faucet script'ten çalışmazsa testnet NEAR.
 Preconditions: ajan `arrowhq.testnet`'i oluşturamadı ya da sponsor hedefi tutmuyor (STATUS'ta hata satırı).
@@ -303,6 +339,35 @@ Run exactly:
 Expected: `near account view-account-summary arrowhq.testnet network-config testnet now` bakiyesi arttı
 Write result to: Result satırı
 If it fails: NEAR DevHub Telegram (https://t.me/neardev) faucet kanalı; ajan bu arada sandbox testleriyle devam eder
+Result (human fills):
+
+## H-14 · e2e-mainnet run · due 12 Kas 21:00-23:00 GMT+7 [14:00-16:00Z] · status: OPEN (block written 11 Kas 01:10 by S-δ, WS4-T15; script on main 11f2d58, merged round 7)
+Purpose: one real mainnet pass of the full flow; produces K4 evidence (evidence/mainnet.json). Spends about $5 plus gas; the spend plan is printed first and nothing moves until you type y.
+Preconditions:
+    - H-12 done and K3 freeze pushed: `npx tsx scripts/src/e2e-mainnet.ts --network mainnet --dry-plan` prints preflight all OK (today it FAILs on `CodeDoesNotExist arrow-market.near`, as expected before H-12)
+    - Buyer Base USDC ≥ 5.5 and ETH ≥ 0.0005 (`npx tsx scripts/src/balances.ts`); `SOLANA_PAYOUT_ADDRESS` set in .env (H-04); `RELAYER_PRIVATE_KEY` and `RELAYER_ACCOUNT_ID=arrow-relayer.arrowhq.near` in .env (H-07)
+    - The two e2e ciphertexts must be served over public HTTPS: the first run (or `--dry-plan`) writes them to `fixtures/blobs/e2e/<sha>.bin` and stops. The repo is private (K-03), so raw.githubusercontent.com will not serve them until it is public: use any public HTTPS prefix that serves `<prefix>/<sha>.bin` (Vercel static after H-06, or an `outlayer upload` URL per file) and pass it as `--blob-base`. Preflight checks each URL returns 200 with the right sha256.
+Run exactly:
+    export PATH="$HOME/.nvm/versions/node/v24.15.0/bin:$PATH"
+    cd ~/Desktop/hackathon/near-builds/arrow
+    npx tsx scripts/src/e2e-mainnet.ts --network mainnet --relay direct --blob-base <https prefix that serves the .bin files>
+    # read the spend plan (it ends with what H-15 still needs), type "y"
+Expected: last line `E2E mainnet: 11/11 green` (step 5 may say WARN: BUY scene not reproduced); each step prints a nearblocks/basescan/solscan link; then run the suggested `npm run verify -- --network mainnet --only e2e --pre-lock`.
+Write result to: evidence/mainnet.json (the script writes it); paste the last 30 lines to the agent.
+If it fails: do not re-run from scratch; paste the output. The agent names the exact `--from-step N` command (earlier listing and eval ids are read back from evidence, so money is not spent twice).
+Result (human fills):
+
+## H-20 · Submission · due 14 Kas 21:00-22:00 GMT+7 [14:00-15:00Z] (absolute 15 Kas 06:00) · status: OPEN (block written 11 Kas 01:10 by S-δ, WS4-T17; script on main b0e39b5, merged round 7)
+Purpose: one submission for Arrow, sent by the human only. The script never sends; it validates and prints the curl command.
+Preconditions: repo public (H-05/H-17), X post live (H-19x) so `demoUrl` is known, Q-015 check done (H-19), `docs/submission/idea.txt` final (WS7-T07). `~/.config/arrow/submission-inputs.json` exists with placeholders in `<...>`: replace each one yourself (leadName, email, size, nearAddress, and set q015Approved true after H-19). Add `"demoUrl": "<x post url>"` after H-19x or pass `--demo-url`. Keep the file outside the repo; never paste its contents into chat or git.
+Run exactly:
+    curl -s https://nearhackathon.com/HACKATHON.md | wc -c        # expect 22529; if different, show the agent first
+    npx tsx scripts/src/submission-preview.ts --consent        # reads ~/.config/arrow/submission-inputs.json; any flag overrides a field
+    # read the printed payload and the consent sentence; if all correct:
+    curl -sS -X POST https://nearhackathon.com/api/applications -H 'Content-Type: application/json' -d @$HOME/.config/arrow/submission.json
+Expected: preview ends `payload valid (11 fields, no website) · written ~/.config/arrow/submission.json · NOT SENT`, exit 0; the POST answers HTTP 201.
+Write result to: tell the agent "201" (no personal data in git).
+If it fails: preview exit 2 lists the missing or invalid fields; exit 3 means HACKATHON.md changed (read it first); POST 400 → fix the fields listed, same requestId; 503 → wait 1 min, same command; 403/409 → stop, tell the agent; never resubmit after 201 (use https://nearhackathon.com/request-changes).
 Result (human fills):
 
 ## H-21 (WS-3 part) · G5 pattern review · due 11 Kas 15:00 GMT+7 [08:00Z] · status: OPEN
