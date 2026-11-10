@@ -105,11 +105,16 @@ impl Contract {
         if listing.evals_used >= listing.max_evals {
             env::panic_str("Arrow: E09 leak budget exhausted");
         }
+        let in_flight = self.evals_in_flight.get(&listing.id).copied().unwrap_or(0);
+        if in_flight >= MAX_EVALS_IN_FLIGHT {
+            env::panic_str("Arrow: E21 too many evals in flight");
+        }
         self.assert_tank(self.cfg.outlayer_deposit_eval.0);
         self.charge_eval_cap(&sender);
 
         // Mutations start here. The budget counts the eval now and is never given back.
         listing.evals_used += 1;
+        self.evals_in_flight.insert(listing.id, in_flight + 1);
         let id = self.next_eval_id;
         self.next_eval_id += 1;
         let mut eval = Eval {
@@ -158,6 +163,18 @@ impl Contract {
         PromiseOrValue::Promise(self.eval_promise(id, input))
     }
 
+    /// The eval left the in-flight set (settled in on_eval, or refunded stale before request_eval).
+    pub(crate) fn release_eval_slot(&mut self, listing_id: u64) {
+        match self.evals_in_flight.get(&listing_id).copied().unwrap_or(0) {
+            0 | 1 => {
+                self.evals_in_flight.remove(&listing_id);
+            }
+            n => {
+                self.evals_in_flight.insert(listing_id, n - 1);
+            }
+        }
+    }
+
     /// OutLayer eval request chained to `on_eval` (Notify: from the notification; Escrow: from request_eval).
     pub(crate) fn eval_promise(&self, eval_id: u64, input: String) -> Promise {
         let call = request(&self.cfg, input, self.cfg.outlayer_deposit_eval.0, &self.cfg.limits_eval);
@@ -174,6 +191,8 @@ impl Contract {
     /// OutLayer callback. Notify: returns the unused amount in the rail's resolver shape.
     /// Escrow: the overpay was returned at accept time, so a refund is a payout of the fee
     /// back to the buyer and the return value is `null`.
+    /// A failed eval is not free (ARW-C2): the tank has paid OutLayer, so the treasury keeps its
+    /// `fee_bps_eval` share of the fee and only the rest goes back.
     #[private]
     pub fn on_eval(&mut self, eval_id: u64) -> Value {
         let mut eval = match self.evals.get(&eval_id) {
@@ -184,6 +203,7 @@ impl Contract {
             Some(l) => l.clone(),
             None => env::panic_str("Arrow: E07 unknown listing"),
         };
+        self.release_eval_slot(listing.id);
         let escrow = payment_path() == PaymentPath::Escrow;
         let result = classify(env::promise_result_checked(0, MAX_OUTPUT_BYTES), &listing.blob_sha256, Action::Eval);
         eval.settled_at_ns = Some(env::block_timestamp());
@@ -211,21 +231,23 @@ impl Contract {
                 eval.paid.0 - fee
             }
             Err(reason) => {
-                let amount = if escrow { eval.fee } else { eval.paid };
+                let (_, kept) = split(eval.fee.0, self.cfg.fee_bps_eval);
+                let back = if escrow { eval.fee.0 - kept } else { eval.paid.0 - kept };
                 if escrow {
-                    pay_out(&self.cfg, eval.rail, eval.buyer.clone(), amount.0, format!("arrow:refund:eval:{eval_id}"));
+                    pay_out(&self.cfg, eval.rail, eval.buyer.clone(), back, format!("arrow:refund:eval:{eval_id}"));
                 }
+                pay_out(&self.cfg, eval.rail, self.cfg.treasury.clone(), kept, format!("arrow:eval-fail-fee:{eval_id}"));
                 ArrowEvent::ArrowRefund {
                     kind: "eval".into(),
                     listing_id: listing.id,
                     id: eval_id,
                     reason: reason.into(),
-                    amount,
+                    amount: U128(back),
                 }
                 .emit();
                 eval.status = Status::Refunded;
                 eval.refund_reason = Some(reason.into());
-                eval.paid.0
+                back
             }
         };
         let rail = eval.rail;
@@ -394,14 +416,56 @@ mod tests {
             let _ = eval(&mut c, 70_000);
             callback_env(result);
             let v = c.on_eval(1);
-            assert_eq!(v, json!(["70000"]), "{reason}");
+            // ARW-C2: the treasury keeps its 10 % of the 50000 fee; the seller's share and the overpay go back.
+            assert_eq!(v, json!(["65000"]), "{reason}");
             let e = c.evals.get(&1).unwrap();
             assert_eq!((e.status, e.refund_reason.as_deref()), (Status::Refunded, Some(reason)));
             assert_eq!(c.listings.get(&1).unwrap().evals_used, 1, "{reason}: budget changed");
-            assert!(calls().iter().all(|(_, m, _, _)| m != "mt_transfer"), "{reason}: paid out");
+            let paid: Vec<(String, String, String)> = calls()
+                .into_iter()
+                .filter(|(_, m, _, _)| m == "mt_transfer")
+                .map(|(_, _, a, _)| (a["receiver_id"].as_str().unwrap().to_string(), a["amount"].as_str().unwrap().to_string(), a["memo"].as_str().unwrap().to_string()))
+                .collect();
+            assert_eq!(paid, vec![("treasury.test.near".into(), "5000".into(), "arrow:eval-fail-fee:1".into())], "{reason}");
             let logs = get_logs();
-            assert!(logs.iter().any(|l| l.contains(r#""event":"arrow_refund""#) && l.contains(&format!(r#""reason":"{reason}""#)) && l.contains(r#""amount":"70000""#)), "{reason}: {logs:?}");
+            assert!(logs.iter().any(|l| l.contains(r#""event":"arrow_refund""#) && l.contains(&format!(r#""reason":"{reason}""#)) && l.contains(r#""amount":"65000""#)), "{reason}: {logs:?}");
         }
+    }
+
+    /// ARW-C2: a failed eval costs the buyer the treasury share; with fee_bps_eval 0 it is a full refund.
+    #[test]
+    fn failed_eval_keeps_treasury_share() {
+        crate::paths::TEST_PAYMENT_PATH.with(|p| p.set(Some(PaymentPath::Notify)));
+        let mut c = listed(20);
+        let _ = eval(&mut c, 50_000);
+        callback_env(PromiseResult::Successful(br#"{"v":1,"ok":false}"#.to_vec()));
+        assert_eq!(c.on_eval(1), json!(["45000"]));
+        let mut c = listed(20);
+        c.cfg.fee_bps_eval = 0;
+        let _ = eval(&mut c, 50_000);
+        callback_env(PromiseResult::Failed);
+        assert_eq!(c.on_eval(1), json!(["50000"]));
+        assert!(calls().iter().all(|(_, m, _, _)| m != "mt_transfer"));
+    }
+
+    /// ARW-C2: at most MAX_EVALS_IN_FLIGHT unsettled evals per listing; a settled one frees its slot.
+    #[test]
+    fn eval_in_flight_cap_then_e21() {
+        crate::paths::TEST_PAYMENT_PATH.with(|p| p.set(Some(PaymentPath::Notify)));
+        let mut c = listed(20);
+        for _ in 0..MAX_EVALS_IN_FLIGHT {
+            setup(intents(), 10 * NEAR);
+            assert!(matches!(eval(&mut c, 50_000), PromiseOrValue::Promise(_)));
+        }
+        setup(intents(), 10 * NEAR);
+        let err = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| eval(&mut c, 50_000))).err().unwrap();
+        let text = err.downcast_ref::<String>().cloned().unwrap_or_default();
+        assert!(text.contains("Arrow: E21 too many evals in flight"), "{text}");
+        assert_eq!(c.listings.get(&1).unwrap().evals_used, MAX_EVALS_IN_FLIGHT, "a refused eval used budget");
+        callback_env(PromiseResult::Failed);
+        c.on_eval(1);
+        setup(intents(), 10 * NEAR);
+        assert!(matches!(eval(&mut c, 50_000), PromiseOrValue::Promise(_)));
     }
 
     #[test]
@@ -535,7 +599,8 @@ mod tests {
             c
         }
 
-        /// Fresh context per call: each eval schedules 210 TGas of promises.
+        /// Fresh context per call: each eval schedules 210 TGas of promises. An accepted eval is
+        /// settled at once so the in-flight cap (E21) stays out of the way of the daily caps.
         fn eval_at(c: &mut crate::Contract, who: &str, ts: u64) -> std::thread::Result<PromiseOrValue<Value>> {
             let mut b = near_sdk::test_utils::VMContextBuilder::new();
             b.current_account_id(self_id())
@@ -544,7 +609,12 @@ mod tests {
                 .block_timestamp(ts);
             near_sdk::testing_env!(b.build());
             let who = acc(who);
-            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| mt_call(c, who, 50_000, msg_json(Msg::Eval(eval_msg(1))))))
+            let res = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| mt_call(c, who, 50_000, msg_json(Msg::Eval(eval_msg(1))))));
+            if res.is_ok() {
+                callback_env(PromiseResult::Failed);
+                c.on_eval(c.next_eval_id - 1);
+            }
+            res
         }
 
         fn eval_as(c: &mut crate::Contract, who: &str) -> std::thread::Result<PromiseOrValue<Value>> {

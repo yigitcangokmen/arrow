@@ -91,6 +91,7 @@ impl Contract {
                 e.settled_at_ns = Some(now);
                 self.evals.insert(id, e);
             }
+            self.release_eval_slot(listing_id);
         } else if let Some(mut p) = self.purchases.get(&id).cloned() {
             p.status = Status::Refunded;
             p.refund_reason = Some("stale".into());
@@ -225,10 +226,37 @@ mod tests {
         assert_eq!(c.on_eval(1), Value::Null);
         let e = c.evals.get(&1).unwrap();
         assert_eq!((e.status, e.refund_reason.as_deref()), (Status::Refunded, Some("null")));
-        // only the held fee goes back: the 30000 overpay was returned at accept time
-        assert_eq!(mt_transfers(), vec![(buyer().to_string(), "50000".into())]);
-        assert!(get_logs().iter().any(|l| l.contains(r#""event":"arrow_refund""#) && l.contains(r#""amount":"50000""#)));
+        // only the held fee goes back (the 30000 overpay was returned at accept time), less the
+        // treasury's 10 % that a failed eval keeps (ARW-C2)
+        assert_eq!(mt_transfers(), vec![(buyer().to_string(), "45000".into()), ("treasury.test.near".into(), "5000".into())]);
+        assert!(get_logs().iter().any(|l| l.contains(r#""event":"arrow_refund""#) && l.contains(r#""amount":"45000""#)));
         assert_eq!(c.listings.get(&1).unwrap().evals_used, 1);
+    }
+
+    /// ARW-C2: an escrowed eval holds an in-flight slot until it settles or refund_stale frees it.
+    #[test]
+    fn escrow_in_flight_slots_freed_by_settle_and_stale() {
+        let mut c = listed();
+        for _ in 0..MAX_EVALS_IN_FLIGHT {
+            setup(intents(), 10 * NEAR);
+            let _ = eval(&mut c, 50_000);
+        }
+        setup(intents(), 10 * NEAR);
+        let err = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| eval(&mut c, 50_000))).map_err(panic_text).unwrap_err();
+        assert!(err.contains("Arrow: E21 too many evals in flight"), "{err}");
+        relayer_at(ESCROW_STALE_NS);
+        c.refund_stale("eval".into(), 1);
+        relayer_at(0);
+        let _ = c.request_eval(2);
+        callback_env(PromiseResult::Failed);
+        c.on_eval(2);
+        for _ in 0..2 {
+            setup(intents(), 10 * NEAR);
+            assert_eq!(eval(&mut c, 50_000), json!(["0"]));
+        }
+        setup(intents(), 10 * NEAR);
+        let err = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| eval(&mut c, 50_000))).map_err(panic_text).unwrap_err();
+        assert!(err.contains("E21"), "{err}");
     }
 
     #[test]

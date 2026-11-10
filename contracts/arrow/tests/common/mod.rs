@@ -30,6 +30,10 @@ pub const USDC_MAINNET: &str = "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac
 pub const BOND: u128 = 100_000;
 pub const EVAL_FEE: u128 = 50_000;
 pub const PRICE: u128 = 2_000_000;
+/// What a failed eval costs the buyer: the treasury's `fee_bps_eval` (init template: 1000) share of the fee (ARW-C2).
+pub const EVAL_FAIL_KEEP: u128 = EVAL_FEE * 1000 / 10_000;
+/// What a failed eval of `EVAL_FEE` gives back.
+pub const EVAL_REFUND: u128 = EVAL_FEE - EVAL_FAIL_KEEP;
 pub const MINT: u128 = 10_000_000; // arrow-usd per-call cap
 pub const BITS_SCORED: u64 = 5673;
 pub const BITS_VERDICT: u64 = 1585;

@@ -95,15 +95,18 @@ async fn assert_buy_refunded(e: &Env, out: &near_workspaces::result::ExecutionFi
 async fn refund_on_null(net: Net) -> R<()> {
     let e = setup(net, Path::Notify).await?;
     let id = e.list("scored", Some("null"), 10).await?;
-    let (seller, buyer) = (e.id(Who::Seller), e.id(Who::Buyer));
-    let (s0, b0) = (e.usdc_of(&seller).await?, e.usdc_of(&buyer).await?);
+    let (seller, buyer, treasury) = (e.id(Who::Seller), e.id(Who::Buyer), e.treasury_id());
+    let (s0, b0, t0) = (e.usdc_of(&seller).await?, e.usdc_of(&buyer).await?, e.usdc_of(&treasury).await?);
     let out = e.eval(Who::Buyer, id, EVAL_FEE).await?;
-    assert_eval_refunded(&e, &out, 1, "null", EVAL_FEE).await?;
+    assert_eval_refunded(&e, &out, 1, "null", EVAL_REFUND).await?;
     if net == Net::Mainnet {
-        assert_eq!(out.json::<Vec<String>>()?, vec![EVAL_FEE.to_string()], "intents resolver refunds this");
+        assert_eq!(out.json::<Vec<String>>()?, vec![EVAL_REFUND.to_string()], "intents resolver refunds this");
     }
     assert_eq!(e.leak(id).await?["evals_used"].as_u64(), Some(1), "budget is never given back");
-    assert_eq!((e.usdc_of(&seller).await?, e.usdc_of(&buyer).await?), (s0, b0), "no payout, buyer whole");
+    // ARW-C2: no seller payout; the treasury keeps its share, the buyer gets the rest back.
+    assert_eq!(e.usdc_of(&treasury).await? - t0, EVAL_FAIL_KEEP, "treasury share of a failed eval");
+    let b1 = if net == Net::Testnet { b0 - EVAL_FAIL_KEEP } else { b0 };
+    assert_eq!((e.usdc_of(&seller).await?, e.usdc_of(&buyer).await?), (s0, b1), "no payout, buyer short only the treasury share");
     Ok(())
 }
 
@@ -123,8 +126,8 @@ async fn refund_on_yield_timeout() -> R<()> {
     let id = e.list("scored", Some("never"), 10).await?;
     let status = e.pay(Who::Buyer, EVAL_FEE, &eval_msg(id)).transact_async().await?;
     let out = e.time_out(status).await?;
-    assert_eval_refunded(&e, &out, 1, "null", EVAL_FEE).await?;
-    assert_eq!(out.json::<Vec<String>>()?, vec![EVAL_FEE.to_string()]);
+    assert_eval_refunded(&e, &out, 1, "null", EVAL_REFUND).await?;
+    assert_eq!(out.json::<Vec<String>>()?, vec![EVAL_REFUND.to_string()]);
     assert_eq!(e.pending().await?, 0, "yield callback did not run");
     Ok(())
 }
@@ -134,7 +137,7 @@ async fn refund_on_late_guard() -> R<()> {
     let e = setup(Net::Mainnet, Path::Notify).await?;
     let id = e.list("scored", Some("late"), 10).await?;
     let out = e.eval(Who::Buyer, id, EVAL_FEE).await?;
-    assert_eval_refunded(&e, &out, 1, "not_ok", EVAL_FEE).await?;
+    assert_eval_refunded(&e, &out, 1, "not_ok", EVAL_REFUND).await?;
     let out = e.buy(Who::Buyer, id, PRICE).await?;
     assert_buy_refunded(&e, &out, 1, "not_ok", PRICE).await?;
     Ok(())
@@ -148,9 +151,10 @@ async fn hash_mismatch_refunds() -> R<()> {
         let (seller, buyer) = (e.id(Who::Seller), e.id(Who::Buyer));
         let (s0, b0) = (e.usdc_of(&seller).await?, e.usdc_of(&buyer).await?);
         let out = e.eval(Who::Buyer, id, EVAL_FEE).await?;
-        assert_eval_refunded(&e, &out, 1, "hash_mismatch", EVAL_FEE).await?;
+        assert_eval_refunded(&e, &out, 1, "hash_mismatch", EVAL_REFUND).await?;
         assert!(e.get_eval(1).await?["sealed_result"].is_null());
-        assert_eq!((e.usdc_of(&seller).await?, e.usdc_of(&buyer).await?), (s0, b0), "{net:?}: seller paid or buyer short");
+        let b1 = if net == Net::Testnet { b0 - EVAL_FAIL_KEEP } else { b0 };
+        assert_eq!((e.usdc_of(&seller).await?, e.usdc_of(&buyer).await?), (s0, b1), "{net:?}: seller paid or buyer short");
     }
     Ok(())
 }
@@ -175,7 +179,7 @@ async fn bad_output_refunds() -> R<()> {
     for (i, mode) in ["garbage", "wrongv", "shortr"].into_iter().enumerate() {
         let id = e.list("scored", Some(mode), 10).await?;
         let out = e.eval(Who::Buyer, id, EVAL_FEE).await?;
-        assert_eval_refunded(&e, &out, i as u64 + 1, "bad_output", EVAL_FEE).await?;
+        assert_eval_refunded(&e, &out, i as u64 + 1, "bad_output", EVAL_REFUND).await?;
     }
     Ok(())
 }
@@ -187,7 +191,7 @@ async fn refund_on_outlayer_call_failure() -> R<()> {
     let requests: u64 = e.mock.view("requests_count").await?.json()?;
     let t0 = e.tank().await?;
     let out = e.eval(Who::Buyer, id, EVAL_FEE).await?;
-    assert_eval_refunded(&e, &out, 1, "null", EVAL_FEE).await?;
+    assert_eval_refunded(&e, &out, 1, "null", EVAL_REFUND).await?;
     let t1 = e.tank().await?;
     // The 0.02 NEAR deposit comes back with the failed receipt; only the eval record's storage is spent.
     assert!(t0.saturating_sub(t1) < NEAR / 100, "tank dropped by {}", t0.saturating_sub(t1));
@@ -208,11 +212,39 @@ async fn budget_counts_in_flight() -> R<()> {
     assert_panicked(&second, "E09");
     assert_eq!(e.leak(id).await?["evals_used"].as_u64(), Some(1));
     let out = e.time_out(first).await?;
-    assert_eval_refunded(&e, &out, 1, "null", EVAL_FEE).await?;
+    assert_eval_refunded(&e, &out, 1, "null", EVAL_REFUND).await?;
     let lb = e.leak(id).await?;
     assert_eq!((lb["evals_used"].as_u64(), lb["left_milli"].as_u64()), (Some(1), Some(0)), "refund gave budget back");
     let third = e.eval(Who::Buyer, id, EVAL_FEE).await?;
     assert_panicked(&third, "E09");
+    Ok(())
+}
+
+/// ARW-C2: a listing holds at most 5 unsettled evals; the 6th panics with E21 before it counts
+/// against the budget or reaches OutLayer, and a settled eval frees its slot.
+#[tokio::test]
+async fn eval_in_flight_cap() -> R<()> {
+    let e = setup(Net::Mainnet, Path::Notify).await?;
+    let id = e.list("scored", Some("never"), 20).await?;
+    let mut held = Vec::new();
+    for n in 1..=5 {
+        held.push(e.pay(Who::Buyer, EVAL_FEE, &eval_msg(id)).transact_async().await?);
+        e.wait_pending(n).await?;
+    }
+    let requests: u64 = e.mock.view("requests_count").await?.json()?;
+    let out = e.eval(Who::Buyer2, id, EVAL_FEE).await?;
+    assert_panicked(&out, "E21 too many evals in flight");
+    assert_eq!(e.leak(id).await?["evals_used"].as_u64(), Some(5), "a refused eval used budget");
+    assert_eq!(e.mock.view("requests_count").await?.json::<u64>()?, requests, "a refused eval reached OutLayer");
+    e.worker.fast_forward(210).await?;
+    for status in held {
+        let out = tokio::time::timeout(std::time::Duration::from_secs(60), std::future::IntoFuture::into_future(status)).await??;
+        assert_eq!(refund_reason(&out).as_deref(), Some("null"));
+    }
+    let next = e.pay(Who::Buyer2, EVAL_FEE, &eval_msg(id)).transact_async().await?;
+    e.wait_pending(1).await?;
+    assert_eq!(e.leak(id).await?["evals_used"].as_u64(), Some(6), "slots were not freed");
+    drop(next);
     Ok(())
 }
 
@@ -383,7 +415,7 @@ async fn paused_settles_in_flight() -> R<()> {
     e.wait_pending(1).await?;
     assert!(e.self_call("set_paused", json!({"paused": true})).await?.is_success());
     let out = e.time_out(status).await?;
-    assert_eval_refunded(&e, &out, 1, "null", EVAL_FEE).await?;
+    assert_eval_refunded(&e, &out, 1, "null", EVAL_REFUND).await?;
     let cfg: Value = e.view("get_config", json!({})).await?;
     assert_eq!(cfg["paused"].as_bool(), Some(true));
     Ok(())
@@ -598,8 +630,8 @@ async fn escrow_refund_on_null_transfers_back() -> R<()> {
         assert_eq!(arrow_return(&out, &e.arrow), Some(Value::Null));
         assert_eq!(e.get_eval(1).await?["status"].as_str(), Some("refunded"));
         match net {
-            Net::Mainnet => assert_eq!(e.usdc_of(&buyer).await? - b0, EVAL_FEE, "mt_transfer back to the buyer"),
-            Net::Testnet => assert_eq!(e.usdc_of(&buyer).await?, b0, "ft_transfer back to the buyer"),
+            Net::Mainnet => assert_eq!(e.usdc_of(&buyer).await? - b0, EVAL_REFUND, "mt_transfer back to the buyer"),
+            Net::Testnet => assert_eq!(e.usdc_of(&buyer).await?, b0 - EVAL_FAIL_KEEP, "ft_transfer back to the buyer"),
         }
     }
     Ok(())

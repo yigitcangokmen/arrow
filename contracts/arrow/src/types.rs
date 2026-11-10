@@ -22,6 +22,8 @@ pub const COLUMN_MAX_CHARS: usize = 40;
 pub const BLOB_URL_MAX_BYTES: usize = 200;
 pub const ROWS_CLAIMED_MAX: u64 = 200_000;
 pub const MAX_EVALS_HARD_CAP: u32 = 500;
+/// Unsettled evals per listing (pending, or escrowed before request_eval); one more gets E21 (ARW-C2).
+pub const MAX_EVALS_IN_FLIGHT: u32 = 5;
 
 #[near(serializers = [borsh, json])]
 #[derive(Clone, Debug, PartialEq)]

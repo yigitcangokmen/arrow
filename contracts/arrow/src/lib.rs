@@ -38,6 +38,7 @@ enum StorageKey {
     EvalsByListing,
     CapByAccount,
     BlobSellers,
+    EvalsInFlight,
 }
 
 #[near(contract_state)]
@@ -59,6 +60,8 @@ pub struct Contract {
     cap_by_account: LookupMap<AccountId, (u64, u32)>,
     /// blob_sha256 → the first account that listed it; another account listing it gets E19 (ENC-1).
     blob_sellers: LookupMap<String, AccountId>,
+    /// listing_id → unsettled evals; at MAX_EVALS_IN_FLIGHT a new eval gets E21 (ARW-C2).
+    evals_in_flight: LookupMap<u64, u32>,
 }
 
 #[near]
@@ -86,6 +89,7 @@ impl Contract {
             cap_global_used: 0,
             cap_by_account: LookupMap::new(StorageKey::CapByAccount),
             blob_sellers: LookupMap::new(StorageKey::BlobSellers),
+            evals_in_flight: LookupMap::new(StorageKey::EvalsInFlight),
         }
     }
 
