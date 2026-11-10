@@ -60,13 +60,18 @@ impl Contract {
             Self::ext(env::current_account_id())
                 .with_static_gas(ON_PROGRAM_KEY_GAS)
                 .with_unused_gas_weight(1)
-                .on_program_key(),
+                .on_program_key(self.cfg.program_wasm_hash.clone()),
         )
     }
 
-    /// Never panics: a bad answer leaves the key unchanged and is logged.
+    /// Never panics: a bad answer leaves the key unchanged and is logged. `program_wasm_hash` is
+    /// the program the derive ran; if set_program replaced it meanwhile, the key is not stored (ARW-C4).
     #[private]
-    pub fn on_program_key(&mut self) {
+    pub fn on_program_key(&mut self, program_wasm_hash: String) {
+        if program_wasm_hash != self.cfg.program_wasm_hash {
+            log!("arrow: program key derive failed: stale_program");
+            return;
+        }
         match classify_pk(env::promise_result_checked(0, MAX_OUTPUT_BYTES)) {
             Ok(pk) => {
                 self.program_pubkey = Some(pk);
@@ -225,7 +230,7 @@ mod tests {
         assert_eq!((to.as_str(), *dep), ("outlayer.test.near", NEAR / 20));
         assert_eq!(args["input_data"], json!(r#"{"v":1,"action":"derive"}"#));
         assert_eq!(args["resource_limits"], json!({"max_instructions":2_000_000_000u64,"max_memory_mb":128,"max_execution_seconds":30}));
-        assert!(all.iter().any(|(to, m, _, _)| to == "arrow.test.near" && m == "on_program_key"));
+        assert!(all.iter().any(|(to, m, a, _)| to == "arrow.test.near" && m == "on_program_key" && a["program_wasm_hash"] == json!("ab".repeat(32))));
     }
 
     #[test]
@@ -244,7 +249,7 @@ mod tests {
         c.program_pubkey = None;
         let pk = format!("04{}", "ab".repeat(64));
         callback_env(PromiseResult::Successful(json!({"v":1,"ok":true,"pk":pk}).to_string().into_bytes()));
-        c.on_program_key();
+        c.on_program_key("ab".repeat(32));
         assert_eq!(c.program_pubkey, Some(pk));
         assert!(get_logs().contains(&"arrow: program key set".to_string()));
     }
@@ -264,10 +269,27 @@ mod tests {
             let mut c = contract();
             let before = c.program_pubkey.clone();
             callback_env(result);
-            c.on_program_key();
+            c.on_program_key("ab".repeat(32));
             assert_eq!(c.program_pubkey, before, "{reason}");
             assert!(get_logs().contains(&format!("arrow: program key derive failed: {reason}")), "{reason}");
         }
+    }
+
+    /// ARW-C4: a derive requested for the old wasm that answers after set_program must not
+    /// become the new program's key.
+    #[test]
+    fn on_program_key_ignores_key_for_replaced_program() {
+        setup(self_id(), 10 * NEAR);
+        let mut c = contract();
+        let old_hash = c.cfg.program_wasm_hash.clone();
+        c.set_program("https://example.test/v2.wasm".into(), "ef".repeat(32));
+        let pk = format!("04{}", "ab".repeat(64));
+        callback_env(PromiseResult::Successful(json!({"v":1,"ok":true,"pk":pk}).to_string().into_bytes()));
+        c.on_program_key(old_hash);
+        assert_eq!(c.program_pubkey, None);
+        assert!(get_logs().contains(&"arrow: program key derive failed: stale_program".to_string()));
+        c.on_program_key("ef".repeat(32));
+        assert_eq!(c.program_pubkey, Some(pk));
     }
 
     #[test]
