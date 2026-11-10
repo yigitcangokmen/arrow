@@ -1,0 +1,20 @@
+/* Shared by the form pages (/sell, /buy, /seller, /try, TopUp). */
+.panel { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--surface); margin: 0 0 16px; min-width: 0; }
+.panel > h2, .panel > h3 { margin-top: 0; }
+.band { border: 1px solid var(--notproven); border-left-width: 4px; border-radius: var(--radius); padding: 10px 14px; background: var(--surface); margin: 0 0 16px; overflow-wrap: anywhere; }
+.field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 12px; min-width: 0; }
+.field > label, .legend { font-weight: 600; font-size: 0.9rem; }
+.field input, .field select, .field textarea {
+  font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 8px 10px; min-height: 40px; width: 100%; min-width: 0;
+}
+.field textarea { min-height: 88px; resize: vertical; }
+.hint { color: var(--muted); font-size: 0.85rem; margin: 0; overflow-wrap: anywhere; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0 16px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 8px 0 0; }
+.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+.error { color: var(--danger); margin: 8px 0 0; overflow-wrap: anywhere; }
+.ok { color: var(--proven); font-weight: 600; margin: 8px 0 0; }
+.result { font-size: clamp(1.4rem, 5vw, 2rem); font-weight: 700; margin: 8px 0; overflow-wrap: anywhere; }
+.checks { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.pre { font-family: var(--font-mono); font-size: 0.8rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; overflow-x: auto; max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; }

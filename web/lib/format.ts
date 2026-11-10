@@ -10,8 +10,8 @@ export function formatBits(milli: number): string {
   return sdkFormatBits(milli).replace(/\.?0+$/, "");
 }
 
-/** Base units (a decimal string) to USDC text without floats: "250000" -> "0.25". */
-export function formatUsdc(base: string): string {
+/** Base units (a decimal string or a bigint) to USDC text without floats: "250000" -> "0.25". */
+export function formatUsdc(base: string | bigint): string {
   return sdkFormatUsdc(BigInt(base));
 }
 
