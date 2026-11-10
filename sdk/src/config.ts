@@ -14,7 +14,8 @@ export interface NetworkConfig {
 
 export const NETWORKS: Record<Network, NetworkConfig> = {
   mainnet: {
-    rpc: ["https://rpc.mainnet.near.org", "https://rpc.mainnet.fastnear.com"],
+    // fastnear first (STATE-12, X12-OPS-5): rpc.*.near.org is deprecated, answers -429 or takes 3-4 s, so it is only the fallback.
+    rpc: ["https://rpc.mainnet.fastnear.com", "https://rpc.mainnet.near.org"],
     archivalRpc: "https://archival-rpc.mainnet.fastnear.com",
     contract: "arrow-market.near",
     usdcToken: "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
@@ -24,7 +25,7 @@ export const NETWORKS: Record<Network, NetworkConfig> = {
     explorerTx: "https://nearblocks.io/txns/",
   },
   testnet: {
-    rpc: ["https://rpc.testnet.near.org", "https://rpc.testnet.fastnear.com"],
+    rpc: ["https://rpc.testnet.fastnear.com", "https://rpc.testnet.near.org"],
     archivalRpc: "https://archival-rpc.testnet.fastnear.com",
     contract: "arrow.arrowhq.testnet",
     usdcToken: "arrow-usd.arrowhq.testnet",

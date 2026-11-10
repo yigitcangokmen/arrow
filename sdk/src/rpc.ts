@@ -37,11 +37,13 @@ export async function rpc<T>(network: Network, method: string, params: unknown, 
           body: JSON.stringify({ jsonrpc: "2.0", id: "arrow", method, params }),
           signal: AbortSignal.timeout(o.timeoutMs ?? 20_000),
         });
-        if (res.status === 429 || res.status >= 500) throw new RpcError(`${url}: HTTP ${res.status}`, true);
+        // WEB-12: the origin only; a keyed RPC URL's path or query must never reach an error message shown to callers.
+        if (res.status === 429 || res.status >= 500) throw new RpcError(`${new URL(url).origin}: HTTP ${res.status}`, true);
         const body: any = await res.json();
         if (body.error) {
           const msg = String(body.error.data ?? body.error.message ?? "rpc error");
-          throw new RpcError(msg, body.error.cause?.name === "TIMEOUT_ERROR", body.error);
+          // STATE-12: a rate limit sent as a JSON-RPC error (code -429) is the endpoint's problem, not the call's: try the next URL.
+          throw new RpcError(msg, body.error.cause?.name === "TIMEOUT_ERROR" || body.error.code === -429, body.error);
         }
         if (body.result?.error) throw new RpcError(String(body.result.error), false, body.result);
         return body.result as T;

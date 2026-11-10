@@ -80,6 +80,36 @@ describe("rpc", () => {
   });
 });
 
+describe("endpoints (STATE-12, X12-OPS-5, WEB-12)", () => {
+  it("the deprecated near.org RPC is never tried first", () => {
+    for (const n of Object.values(NETWORKS)) expect(new URL(n.rpc[0]).hostname).not.toMatch(/near\.org$/);
+  });
+
+  it("a -429 JSON-RPC error moves on to the next URL", async () => {
+    fetchMock
+      .mockResolvedValueOnce(new Response(JSON.stringify({ jsonrpc: "2.0", id: "arrow", error: { code: -429, message: "WARNING! THIS ENDPOINT IS DEPRECATED!" } })))
+      .mockResolvedValueOnce(ok(7));
+    await expect(rpc("mainnet", "status", [])).resolves.toBe(7);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("an HTTP error names the RPC origin only, never its path or query", async () => {
+    vi.useFakeTimers();
+    const urls = [...NETWORKS.mainnet.rpc];
+    NETWORKS.mainnet.rpc.splice(0, urls.length, "https://x.example/v1/SECRET?apiKey=K");
+    try {
+      fetchMock.mockResolvedValue(fail(503));
+      const p = rpc("mainnet", "status", []).catch((e) => e);
+      await vi.advanceTimersByTimeAsync(5000);
+      const err = (await p) as Error;
+      expect(err.message).toContain("https://x.example");
+      expect(err.message).not.toMatch(/SECRET|apiKey|K$/);
+    } finally {
+      NETWORKS.mainnet.rpc.splice(0, 1, ...urls);
+    }
+  });
+});
+
 describe("isNonceUsed (RELAY-3)", () => {
   it("asks intents.near is_nonce_used with the signer and the base64 nonce", async () => {
     fetchMock.mockResolvedValueOnce(ok({ result: bytes(true) })).mockResolvedValueOnce(ok({ result: bytes(false) }));
