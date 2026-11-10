@@ -13,7 +13,7 @@ const manifest = JSON.parse(read("bench/injection-room/attacks.json"));
 const criteria = JSON.parse(read("bench/injection-room/criteria.json")) as Criteria;
 const allDatasets: string[] = [...manifest.attacks.map((a: any) => a.dataset), ...manifest.controls.map((c: any) => c.dataset)];
 
-// TS copy of the KICKOFF 2.6 instruction patterns. Used ONLY by the negative test on the clean control.
+// TS copy of the scanner instruction patterns (spec section 2.6). Used ONLY by the negative test on the clean control.
 const PATTERNS = [
   /ignore\s+(all|previous|the above)[^.\n]{0,40}instructions/i,
   /^\s*system\s*:/i,
