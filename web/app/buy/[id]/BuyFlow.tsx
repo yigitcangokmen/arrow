@@ -72,7 +72,7 @@ export function BuyFlow({ network, listing, programPk, readOnly }: { network: Ne
 
   useEffect(() => {
     setHost(window.location.host);
-    const ac = abort.current;
+    const ac = (abort.current = new AbortController()); // a fresh one per mount: strict mode runs effects twice in dev
     return () => {
       ac.abort();
       keyRef.current?.fill(0);
