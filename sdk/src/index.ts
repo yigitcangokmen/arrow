@@ -12,3 +12,4 @@ export * from "./relay.ts";
 export * from "./contract.ts";
 export * from "./flows.ts";
 export * from "./x402.ts";
+export * as oneclick from "./oneclick.ts";
