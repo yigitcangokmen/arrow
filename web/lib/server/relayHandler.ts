@@ -122,7 +122,7 @@ const respond = (s: Snap) => new Response(s.body, { status: s.status, headers: s
 const unclear = async (detail?: string): Promise<Snap> =>
   snap(
     json(502, {
-      error: "Your payment may or may not have gone through: the relayer could not confirm it. Do not pay again yet. Check your NEAR Intents balance and your Arrow activity first.",
+      error: "Your payment may or may not have gone through: the relayer could not confirm it. Do not pay again yet: use Check payment on the page, or look at your NEAR Intents balance.",
       code: "RELAY_UNCLEAR",
       unclear: true,
       ...(detail ? { detail } : {}),
@@ -212,7 +212,7 @@ async function relay(mp: Parameters<typeof relayDirect>[1], v: Extract<ReturnTyp
     const msg = String((e as Error).message ?? e).slice(0, 300);
     if (e instanceof RpcError && e.retryable) return before(apiError(502, "RPC_ERROR", "NEAR RPC is unavailable. Try again.", { detail: msg }));
     if (NONCE_USED.test(msg)) {
-      return before(apiError(409, "ALREADY_RELAYED", "This exact signed payment was already submitted to NEAR Intents. Do not pay again: check your NEAR Intents balance and your Arrow activity.", { detail: msg }));
+      return before(apiError(409, "ALREADY_RELAYED", "This exact signed payment was already submitted to NEAR Intents. Do not pay again: use Check payment on the page, or look at your NEAR Intents balance.", { detail: msg }));
     }
     return before(apiError(422, "SIMULATE_FAILED", "intents.near rejected the signed intent in simulation.", { detail: msg }));
   }

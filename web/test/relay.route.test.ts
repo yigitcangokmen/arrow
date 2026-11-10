@@ -178,6 +178,8 @@ describe("RELAY-3: the same signed payload gets the same answer and is executed 
     expect(b.unclear).toBe(true);
     expect(b.error).toMatch(/may or may not have gone through/);
     expect(b.error).toMatch(/Do not pay again/);
+    expect(b.error).toMatch(/Check payment/); // the page has that button; there is no "Arrow activity" page (X12-tabs-1)
+    expect(b.error).not.toMatch(/Arrow activity/);
     expect(b.error.length).toBeLessThan(240); // the web UI shows the first 240 characters of a relay rejection
     expect(b.detail).toContain("socket hang up");
     const second = await send(d);
@@ -233,6 +235,7 @@ describe("RELAY-3: the same signed payload gets the same answer and is executed 
     expect(b.code).toBe("ALREADY_RELAYED");
     expect(b.error).toMatch(/already submitted/);
     expect(b.error).toMatch(/Do not pay again/);
+    expect(b.error).not.toMatch(/Arrow activity/);
     expect(r.calls).toHaveLength(0);
   });
 });

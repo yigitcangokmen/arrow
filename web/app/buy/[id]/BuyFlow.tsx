@@ -126,8 +126,8 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
     if (outcome) resultHeading.current?.focus();
   }, [outcome]);
   useEffect(() => {
-    if (delivery?.saveUrl) deliveryHeading.current?.focus();
-  }, [delivery?.saveUrl]);
+    if (delivery?.saveUrl || buyTx) deliveryHeading.current?.focus(); // the Buy button that had focus is gone
+  }, [delivery?.saveUrl, buyTx]);
   useEffect(() => {
     if (confirmBuy) cancelButton.current?.focus();
   }, [confirmBuy]);
