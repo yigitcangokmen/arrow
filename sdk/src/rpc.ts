@@ -12,6 +12,8 @@ export class RpcError extends Error {
 export interface RpcOptions {
   archival?: boolean;
   timeoutMs?: number;
+  /** Replaces the global fetch (tests, verify). */
+  fetchImpl?: typeof fetch;
 }
 
 const BACKOFF_MS = [500, 1000, 2000];
@@ -29,7 +31,7 @@ export async function rpc<T>(network: Network, method: string, params: unknown, 
   for (let round = 0; round < BACKOFF_MS.length; round++) {
     for (const url of urls) {
       try {
-        const res = await fetch(url, {
+        const res = await (o.fetchImpl ?? fetch)(url, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ jsonrpc: "2.0", id: "arrow", method, params }),
