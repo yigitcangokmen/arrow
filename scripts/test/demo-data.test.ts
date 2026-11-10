@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
-import { b64, bytesToHex, Criteria, publicKeyHex, scalarFromLabel, signature, unseal } from "@arrow/sdk";
+import { b64, bytesToHex, Criteria, publicKeyHex, scalarFromLabel, sha256Hex, signature, unseal } from "@arrow/sdk";
 import { parseCsv } from "../../bench/src/gen/csv.ts";
 import { build } from "../src/gen-demo-data.ts";
 import { buildCriteria, sealedLength } from "../src/make-demo-criteria.ts";
@@ -159,7 +159,7 @@ describe("demo blobs", () => {
   it("no_plain_K_persisted", async () => {
     const key = Uint8Array.from({ length: 32 }, (_, i) => (i * 7 + 3) & 0xff);
     const keyCopy = Uint8Array.from(key);
-    const d = await prepareDemoListing({ dataset: "unlock", network: "testnet", programPubkey: programPub, root: tmp, key });
+    const d = await prepareDemoListing({ dataset: "unlock", network: "testnet", seller: "team.arrowhq.testnet", programPubkey: programPub, root: tmp, key });
     expect(key.every((b) => b === 0)).toBe(true); // wiped in memory
     const needles = [bytesToHex(keyCopy), b64.enc(keyCopy), Buffer.from(keyCopy).toString("base64url")];
     const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]));
@@ -170,13 +170,15 @@ describe("demo blobs", () => {
       }
       expect(body.includes(Buffer.from(keyCopy)), `${f} holds K as raw bytes`).toBe(false);
     }
-    // sealed_k opens with the program key and holds K || blob_sha256
+    // sealed_k opens with the program key and holds K || blob_sha256 || sha256(seller)
     const opened = unseal(programScalar, b64.dec(d.sealed_k));
     expect(Buffer.from(opened.subarray(0, 32)).equals(Buffer.from(keyCopy))).toBe(true);
-    expect(bytesToHex(opened.subarray(32))).toBe(d.blob_sha256);
+    expect(bytesToHex(opened.subarray(32, 64))).toBe(d.blob_sha256);
+    expect(bytesToHex(opened.subarray(64))).toBe(sha256Hex(new TextEncoder().encode("team.arrowhq.testnet")));
+    expect(d.seller).toBe("team.arrowhq.testnet");
   });
   it("blob_files_match_sha_and_web_copy_and_list_msg_is_valid", async () => {
-    const d = await prepareDemoListing({ dataset: "team-made", network: "testnet", programPubkey: programPub, root: tmp });
+    const d = await prepareDemoListing({ dataset: "team-made", network: "testnet", seller: "team.arrowhq.testnet", programPubkey: programPub, root: tmp });
     expect(checkBlobs(tmp)).toEqual({ total: 2, problems: [] });
     const base = "https://raw.githubusercontent.com/yigitcangokmen/arrow/0123456789abcdef0123456789abcdef01234567/fixtures/blobs";
     const msg = listMsg(d, base);
@@ -185,7 +187,7 @@ describe("demo blobs", () => {
   });
   it("synthetic_listing_titles_start_with_synthetic", async () => {
     for (const ds of ["unlock", "labels"] as const) {
-      const d = await prepareDemoListing({ dataset: ds, network: "mainnet", programPubkey: programPub, root: tmp });
+      const d = await prepareDemoListing({ dataset: ds, network: "mainnet", seller: "0x66a0dfed229e920feb17aa3186f87bd00e30844f", programPubkey: programPub, root: tmp });
       expect(d.title.startsWith("[synthetic] ")).toBe(true);
       expect(d.title.length).toBeLessThanOrEqual(80);
       expect(d.public_desc.length).toBeLessThanOrEqual(280);

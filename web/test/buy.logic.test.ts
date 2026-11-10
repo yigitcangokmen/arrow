@@ -55,16 +55,16 @@ describe("criteriaFromForm", () => {
 });
 
 describe("sealed criteria length", () => {
-  it("a minimal request with a MinHash stays under 4096 base64 characters", () => {
+  it("a minimal request with a MinHash stays under 4140 base64 characters", () => {
     const sig = signatureHex(signature(Array.from({ length: 50 }, (_, i) => `0xkey${i}`)));
     const criteria = criteriaFromForm(form({ keyColumn: "token_contract", minhash: sig, text: "t".repeat(300) }), COLUMNS);
     const msg = EvalMsg.parse(JSON.parse(buildEvalMsg({ listingId: 3, criteria, buyerPk, programPk })));
-    expect(msg.sealed_criteria.length).toBeLessThanOrEqual(4096);
+    expect(msg.sealed_criteria.length).toBeLessThanOrEqual(4140);
     expect(msg).toMatchObject({ op: "eval", listing_id: 3, buyer_pk: buyerPk });
   });
   it("turns an oversize request into advice", () => {
     const criteria = { v: 1 as const, text: "é".repeat(600), minhash: "a".repeat(2048) };
-    expect(() => buildEvalMsg({ listingId: 1, criteria, buyerPk, programPk })).toThrow(/too large to seal|4096/);
+    expect(() => buildEvalMsg({ listingId: 1, criteria, buyerPk, programPk })).toThrow(/too large to seal|4140/);
   });
 });
 

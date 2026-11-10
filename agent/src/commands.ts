@@ -269,13 +269,15 @@ export async function listCommand(
   const plainSha = sha256Hex(plaintext);
   const key = new Uint8Array(32);
   key.set(derive("k", plainSha, 32));
+  // sealed_k is bound to the account that pays the bond (the contract's sender_id), so resolve it first.
+  const seller = ctx.actor("seller", { account: a.account });
   let prepared;
   try {
     prepared = prepareList({
       plaintext, title: a.title, publicDesc: a.desc, columns: table.columns, rowsClaimed: table.rows,
       blobUrl: a.blobUrl ?? `https://example.invalid/${"0".repeat(64)}.bin`,
       price: parseUsdc(a.price).toString(), evalFee: parseUsdc(a.evalFee).toString(), maxEvals: a.maxEvals, mode: a.mode ?? "scored", programPk,
-      key, nonce: derive("nonce", plainSha, 24),
+      seller: seller.id, key, nonce: derive("nonce", plainSha, 24),
     });
   } catch (e) {
     throw new CliError(`cannot build the listing: ${(e as Error).message}`, EXIT.usage);
@@ -298,7 +300,6 @@ export async function listCommand(
   }
   const cfg = await ctx.views.config();
   const bond = BigInt(String((cfg.config as { listing_bond?: string }).listing_bond ?? "100000"));
-  const seller = ctx.actor("seller", { account: a.account });
   await ctx.confirm([`list "${a.title}" from ${seller.id}`, `pay the ${formatUsdc(bond)} USDC listing bond`, `network: ${ctx.network}`]);
 
   const tx = await ctx.transport.pay({ actor: seller, amount: bond, msg: prepared.msg });

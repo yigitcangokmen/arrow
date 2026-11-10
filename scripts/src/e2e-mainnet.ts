@@ -470,12 +470,13 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
     const { key, nonce } = deps.keys(sha256Hex(plain), spec.file);
     const probe = encryptFile(plain, copy(key), nonce);
     const blobUrl = broken ? BROKEN_HOST(probe.blobSha256) : await deps.host(probe.blob, probe.blobSha256);
+    const seller = ctx.actor("seller");
     const prepared = prepareList({
       plaintext: plain, title: spec.title, publicDesc: spec.desc, columns: table.columns, rowsClaimed: table.rows, blobUrl,
-      price: PRICE, evalFee: EVAL_FEE, maxEvals: MAX_EVALS, mode: "scored", programPk: S.programPk, key: copy(key), nonce,
+      price: PRICE, evalFee: EVAL_FEE, maxEvals: MAX_EVALS, mode: "scored", programPk: S.programPk, seller: seller.id, key: copy(key), nonce,
     });
     if (prepared.blobSha256 !== probe.blobSha256) throw new Error("ciphertext is not reproducible (key/nonce store changed?)");
-    const tx = await ctx.transport.pay({ actor: ctx.actor("seller"), amount: S.bond, msg: prepared.msg });
+    const tx = await ctx.transport.pay({ actor: seller, amount: S.bond, msg: prepared.msg });
     const { id, rejection } = await findEventId(waitDeps(), tx, "arrow_listed", "listing_id");
     if (id === undefined) throw new Error(`the market refused the ${slot} listing: ${rejection}`);
     // the event comes from the optimistic tx status, the view reads the final block a few seconds later

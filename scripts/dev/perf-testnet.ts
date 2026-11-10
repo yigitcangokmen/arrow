@@ -108,7 +108,7 @@ async function openListing(ds: Dataset, programPk: string, bond: string): Promis
   const spec = SPECS[ds];
   const plain = readFileSync(resolve(root, spec.file));
   const enc = encryptFile(new Uint8Array(plain));
-  const sealedK = b64.enc(seal(programPk, sealedKPayload(enc.key, enc.blobSha256)));
+  const sealedK = b64.enc(seal(programPk, sealedKPayload(enc.key, enc.blobSha256, SELLER)));
   enc.key.fill(0);
   const dir = mkdtempSync(join(tmpdir(), "arrow-blob-"));
   const file = join(dir, `${enc.blobSha256}.bin`);

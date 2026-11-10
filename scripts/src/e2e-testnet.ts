@@ -170,14 +170,15 @@ export async function runE2e(deps: E2eDeps, opts: E2eOpts): Promise<E2eReport> {
     const { key, nonce } = deps.keys(sha256Hex(plain), spec.file);
     const probe = encryptFile(plain, copy(key), nonce);
     const blobUrl = broken ? BROKEN_HOST(probe.blobSha256) : await deps.host(probe.blob, probe.blobSha256);
+    const seller = ctx.actor("seller");
     const prepared = prepareList({
       plaintext: plain, title: spec.title, publicDesc: spec.desc, columns: table.columns, rowsClaimed: table.rows, blobUrl,
-      price: spec.price, evalFee: spec.evalFee, maxEvals: MAX_EVALS, mode: "scored", programPk: S.programPk, key: copy(key), nonce,
+      price: spec.price, evalFee: spec.evalFee, maxEvals: MAX_EVALS, mode: "scored", programPk: S.programPk, seller: seller.id, key: copy(key), nonce,
     });
     if (prepared.blobSha256 !== probe.blobSha256) throw new Error("ciphertext is not reproducible (key/nonce store changed?)");
     const cfg = await ctx.views.config();
     const bond = BigInt(String((cfg.config as { listing_bond?: string }).listing_bond ?? "100000"));
-    const tx = await ctx.transport.pay({ actor: ctx.actor("seller"), amount: bond, msg: prepared.msg });
+    const tx = await ctx.transport.pay({ actor: seller, amount: bond, msg: prepared.msg });
     const { id, rejection } = await findEventId(waitDeps(), tx, "arrow_listed", "listing_id");
     if (id === undefined) throw new Error(`the market refused the ${slot} listing: ${rejection}`);
     // the event comes from the optimistic tx status, the view reads the final block a few seconds later
@@ -369,10 +370,11 @@ async function publishDemo(
     const { key, nonce } = deps.keys(sha256Hex(plain), spec.file);
     const probe = encryptFile(plain, copy(key), nonce);
     const blobUrl = await deps.host(probe.blob, probe.blobSha256);
-    const prepared = prepareList({ plaintext: plain, title: spec.title, publicDesc: spec.public_desc, columns: table.columns, rowsClaimed: table.rows, blobUrl, price: spec.price, evalFee: spec.eval_fee, maxEvals: MAX_EVALS, mode: "scored", programPk: S.programPk, key: copy(key), nonce });
+    const seller = deps.ctx.actor("seller");
+    const prepared = prepareList({ plaintext: plain, title: spec.title, publicDesc: spec.public_desc, columns: table.columns, rowsClaimed: table.rows, blobUrl, price: spec.price, evalFee: spec.eval_fee, maxEvals: MAX_EVALS, mode: "scored", programPk: S.programPk, seller: seller.id, key: copy(key), nonce });
     const cfg = await deps.ctx.views.config();
     const bond = BigInt(String((cfg.config as { listing_bond?: string }).listing_bond ?? "100000"));
-    const tx = await deps.ctx.transport.pay({ actor: deps.ctx.actor("seller"), amount: bond, msg: prepared.msg });
+    const tx = await deps.ctx.transport.pay({ actor: seller, amount: bond, msg: prepared.msg });
     const { id, rejection } = await findEventId({ network: "testnet", views: deps.ctx.views, ...deps.ctx.wait }, tx, "arrow_listed", "listing_id");
     if (id === undefined) throw new Error(`the market refused ${slot}: ${rejection}`);
     record(`publish-${slot}-${id}`, { kind: "list", tx: tx.txHash, chain: "near", block_height: null, listing_id: id, eval_id: null, purchase_id: null, oneclick_deposit: null, expect: "demo listing created", observed: `listed #${id} (${slot})` });

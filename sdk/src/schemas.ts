@@ -20,9 +20,11 @@ const Payout = z.string().refine(
   (s) => /^0x[0-9a-f]{40}$/.test(s) || (s.length >= 2 && s.length <= 64 && NEAR_ACCOUNT.test(s)),
   { message: "Intents 0x address or NEAR account id" },
 );
+/** The contract's `sender_id` form: a lowercase Intents 0x address or a NEAR account id. */
+export const isAccountId = (s: string): boolean => Payout.safeParse(s).success;
 
 export const MAX_OUTPUT_BYTES = 900; // OutLayer blockchain-mode limit (DEC I-07)
-export const MAX_CRITERIA_BYTES = 2975; // sealed_criteria <= 4096 b64 chars = 3072 bytes minus 97 ECIES overhead
+export const MAX_CRITERIA_BYTES = 2975; // sealed_criteria <= 4140 b64 chars = 3104 bytes minus 97 ECIES overhead and the 32-byte bind
 export const ModeSchema = z.enum(["verdict", "scored"]);
 
 // ---------- msg (ft_on_transfer / mt_on_transfer) ----------
@@ -37,7 +39,7 @@ export const ListMsg = z.strictObject({
     .max(200)
     .regex(/^https:\/\/[^\s\u0000-\u001f\u007f]+$/, "https URL without whitespace or control characters"),
   blob_sha256: hexLower(64),
-  sealed_k: b64Len(216),
+  sealed_k: b64Len(260),
   price: U128,
   eval_fee: U128,
   max_evals: z.number().int().min(1).max(500),
@@ -47,7 +49,7 @@ export const ListMsg = z.strictObject({
 export const EvalMsg = z.strictObject({
   op: z.literal("eval"),
   listing_id: U64_MAX_SAFE,
-  sealed_criteria: b64.refine((s) => s.length >= 1 && s.length <= 4096, { message: "1..4096 base64 characters" }),
+  sealed_criteria: b64.refine((s) => s.length >= 1 && s.length <= 4140, { message: "1..4140 base64 characters" }),
   buyer_pk: hexLower(130).refine((s) => s.startsWith("04"), { message: "uncompressed secp256k1 key (04...)" }),
 });
 export const BuyMsg = z.strictObject({

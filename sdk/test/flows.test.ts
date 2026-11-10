@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  ArrowMsg, ArrowViews, b64, BlobHashMismatch, bytesToHex, Criteria, CriteriaTooLarge, decodeEvalResult, decryptFile,
+  ArrowMsg, ArrowViews, b64, BlobHashMismatch, bytesToHex, Criteria, criteriaBind, CriteriaTooLarge, decodeEvalResult, decryptFile,
   fetchAndCheckBlob, MAX_BLOB_BYTES, openRelease, prepareBuy, prepareEval, prepareList, publicKeyHex, scalarFromLabel,
   seal, sealCriteria, sha256Hex, unseal,
 } from "../src/index.ts";
@@ -15,6 +15,7 @@ const programPk = publicKeyHex(programScalar);
 const buyerScalar = scalarFromLabel("arrow:test:buyer:v1");
 const buyerPk = publicKeyHex(buyerScalar);
 const plaintext = new TextEncoder().encode("id,label\n1,a\n2,b\n");
+const seller = "0x66a0dfed229e920feb17aa3186f87bd00e30844f";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -22,7 +23,7 @@ describe("prepareList", () => {
   const list = () =>
     prepareList({
       plaintext, title: "Retail sales (synthetic)", publicDesc: "Daily units per SKU.", columns: ["id", "label"], rowsClaimed: 2,
-      blobUrl: "https://blobs.example/x.bin", price: "250000", evalFee: "100000", mode: "scored", programPk,
+      blobUrl: "https://blobs.example/x.bin", price: "250000", evalFee: "100000", mode: "scored", programPk, seller,
     });
 
   it("prepare_list_zeroizes_key", () => {
@@ -34,12 +35,13 @@ describe("prepareList", () => {
     expect(msg.blob_sha256).toBe(out.blobSha256);
     expect(sha256Hex(out.blob)).toBe(out.blobSha256);
     const payload = unseal(programScalar, b64.dec(msg.sealed_k));
-    expect(payload.length).toBe(64);
-    expect(bytesToHex(payload.subarray(32))).toBe(out.blobSha256);
+    expect(payload.length).toBe(96);
+    expect(bytesToHex(payload.subarray(32, 64))).toBe(out.blobSha256);
+    expect(bytesToHex(payload.subarray(64))).toBe(sha256Hex(new TextEncoder().encode(seller)));
     // the K inside sealed_k opens the blob, and K is not in the returned object
     expect(decryptFile(out.blob, payload.subarray(0, 32))).toEqual(plaintext);
     expect(JSON.stringify(out.msg)).not.toContain(bytesToHex(payload.subarray(0, 32)));
-    expect(b64.dec(msg.sealed_k).length).toBe(161);
+    expect(b64.dec(msg.sealed_k).length).toBe(193);
   });
 
   it("each listing gets a fresh key", () => {
@@ -47,22 +49,24 @@ describe("prepareList", () => {
   });
 
   it("rejects an invalid field instead of building a bad msg", () => {
-    expect(() => prepareList({ plaintext, title: "", publicDesc: "d", columns: ["a"], rowsClaimed: 1, blobUrl: "https://x", price: "1", evalFee: "1", mode: "scored", programPk })).toThrow();
-    expect(() => prepareList({ plaintext, title: "t", publicDesc: "d", columns: ["a"], rowsClaimed: 1, blobUrl: "https://x", price: "1", evalFee: "1", mode: "scored", programPk: "04ab" })).toThrow();
+    expect(() => prepareList({ plaintext, title: "", publicDesc: "d", columns: ["a"], rowsClaimed: 1, blobUrl: "https://x", price: "1", evalFee: "1", mode: "scored", programPk, seller })).toThrow();
+    expect(() => prepareList({ plaintext, title: "t", publicDesc: "d", columns: ["a"], rowsClaimed: 1, blobUrl: "https://x", price: "1", evalFee: "1", mode: "scored", programPk: "04ab", seller })).toThrow();
+    expect(() => prepareList({ plaintext, title: "t", publicDesc: "d", columns: ["a"], rowsClaimed: 1, blobUrl: "https://x", price: "1", evalFee: "1", mode: "scored", programPk, seller: "0xABC" })).toThrow();
   });
 });
 
 describe("criteria and messages", () => {
   const criteria: Criteria = { v: 1, text: "Daily retail units by SKU and region.", min_fit: 4 };
 
-  it("sealCriteria seals the minified JSON to the program key", () => {
-    const plain = unseal(programScalar, b64.dec(sealCriteria(programPk, criteria)));
-    expect(new TextDecoder().decode(plain)).toBe(JSON.stringify(criteria));
+  it("sealCriteria seals bind(buyer_pk, listing_id) || minified JSON to the program key", () => {
+    const plain = unseal(programScalar, b64.dec(sealCriteria(programPk, criteria, { buyerPk, listingId: 7 })));
+    expect(plain.subarray(0, 32)).toEqual(criteriaBind(buyerPk, 7));
+    expect(new TextDecoder().decode(plain.subarray(32))).toBe(JSON.stringify(criteria));
   });
 
   it("criteria_too_large_error", () => {
     const big = { v: 1, text: "x".repeat(600), required_columns: Array.from({ length: 64 }, (_, i) => `column_${i}_${"y".repeat(30)}`) } as Criteria;
-    const err = (() => { try { sealCriteria(programPk, big); } catch (e) { return e as CriteriaTooLarge; } })();
+    const err = (() => { try { sealCriteria(programPk, big, { buyerPk, listingId: 7 }); } catch (e) { return e as CriteriaTooLarge; } })();
     expect(err).toBeInstanceOf(CriteriaTooLarge);
     expect(err!.bytes).toBeGreaterThan(2975);
     expect(err!.message).toContain("criteria too large: shorten text");
@@ -72,6 +76,8 @@ describe("criteria and messages", () => {
   it("prepareEval and prepareBuy produce msgs the schema accepts", () => {
     const e = ArrowMsg.parse(JSON.parse(prepareEval({ listingId: 7, criteria, buyerPk, programPk })));
     expect(e).toMatchObject({ op: "eval", listing_id: 7, buyer_pk: buyerPk });
+    if (e.op !== "eval") throw new Error("not an eval msg");
+    expect(unseal(programScalar, b64.dec(e.sealed_criteria)).subarray(0, 32)).toEqual(criteriaBind(buyerPk, 7));
     expect(JSON.parse(prepareBuy({ listingId: 7, buyerPk }))).toEqual({ op: "buy", listing_id: 7, buyer_pk: buyerPk });
     expect(() => prepareBuy({ listingId: 7, buyerPk: "02ab" })).toThrow();
   });
@@ -166,7 +172,7 @@ describe("prepareList with a given key and nonce", () => {
   it("prepare_list_reproducible_blob", () => {
     const args = () => ({
       plaintext, title: "t", publicDesc: "d", columns: ["id"], rowsClaimed: 2, blobUrl: "https://blobs.example/x.bin",
-      price: "250000", evalFee: "100000", mode: "scored" as const, programPk,
+      price: "250000", evalFee: "100000", mode: "scored" as const, programPk, seller,
       key: new Uint8Array(32).fill(7), nonce: new Uint8Array(24).fill(9),
     });
     const a = prepareList(args());

@@ -92,7 +92,7 @@ export function makeChain(accountId: string, network: "testnet" = "testnet") {
     async createListing(p: { plaintext: Uint8Array; title: string; publicDesc: string; columns: string[]; rowsClaimed: number; blobUrl: string; maxEvals: number; mode: "scored" | "verdict"; bond: string }) {
       const pk = await views.programPubkey();
       if (!pk) throw new Error("contract has no program key");
-      const { msg, blobSha256 } = prepareList({ plaintext: p.plaintext, title: p.title, publicDesc: p.publicDesc, columns: p.columns, rowsClaimed: p.rowsClaimed, blobUrl: p.blobUrl, price: "100000", evalFee: "50000", maxEvals: p.maxEvals, mode: p.mode, programPk: pk });
+      const { msg, blobSha256 } = prepareList({ plaintext: p.plaintext, title: p.title, publicDesc: p.publicDesc, columns: p.columns, rowsClaimed: p.rowsClaimed, blobUrl: p.blobUrl, price: "100000", evalFee: "50000", maxEvals: p.maxEvals, mode: p.mode, programPk: pk, seller: accountId });
       const tx = await ftTransferCall(p.bond, msg);
       return { tx, blobSha256, outcome: parseOutcomeLogs(tx as TxLike) };
     },
@@ -101,7 +101,7 @@ export function makeChain(accountId: string, network: "testnet" = "testnet") {
       const pk = await views.programPubkey();
       if (!pk) throw new Error("contract has no program key");
       const buyerPk = raw?.buyer_pk_hex ?? benchBuyerKey().pubHex;
-      const sealed = raw?.sealed_criteria_b64 ?? sealCriteria(pk, criteria!);
+      const sealed = raw?.sealed_criteria_b64 ?? sealCriteria(pk, criteria!, { buyerPk, listingId });
       const msg = JSON.stringify({ op: "eval", listing_id: listingId, sealed_criteria: sealed, buyer_pk: buyerPk });
       const tx = await ftTransferCall(fee, msg);
       return String((tx as { transaction?: { hash?: string } }).transaction?.hash ?? "");

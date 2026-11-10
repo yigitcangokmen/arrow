@@ -7,6 +7,7 @@ import { sha256 } from "@noble/hashes/sha2.js";
 import { keccak_256 } from "@noble/hashes/sha3.js";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils.js";
 import { decrypt, encrypt, PrivateKey } from "eciesjs";
+import { isAccountId } from "./schemas.ts";
 
 export { bytesToHex, hexToBytes };
 
@@ -41,15 +42,31 @@ export function unseal(scalarHex: string, data: Uint8Array): Uint8Array {
   return new Uint8Array(decrypt(scalarHex, data));
 }
 
-/** K || sha256(blob), 64 bytes: the payload sealed as sealed_k (the enclave checks the blob against the hash). */
-export function sealedKPayload(key32: Uint8Array, blobSha256Hex: string): Uint8Array {
+/**
+ * K || sha256(blob) || sha256(seller), 96 bytes: the payload sealed as sealed_k. The enclave checks the blob against
+ * the hash and the listing's `seller` against the last 32 bytes, so a copied sealed_k does not open in another
+ * account's listing. `seller` is the account the contract will see as `sender_id` (lowercase 0x on Intents).
+ */
+export function sealedKPayload(key32: Uint8Array, blobSha256Hex: string, seller: string): Uint8Array {
   if (key32.length !== 32) throw new Error("K must be 32 bytes");
   const sha = hexToBytes(blobSha256Hex);
   if (sha.length !== 32) throw new Error("blob_sha256 must be 32 bytes");
-  const out = new Uint8Array(64);
+  if (!isAccountId(seller)) throw new Error("seller must be the exact account id (lowercase 0x address or NEAR account)");
+  const out = new Uint8Array(96);
   out.set(key32, 0);
   out.set(sha, 32);
+  out.set(sha256(new TextEncoder().encode(seller)), 64);
   return out;
+}
+
+/** sha256(buyer_pk 65 bytes || listing_id u64 big-endian): the first 32 bytes of the sealed criteria plaintext. */
+export function criteriaBind(buyerPkHex130: string, listingId: number): Uint8Array {
+  if (!/^04[0-9a-f]{128}$/.test(buyerPkHex130)) throw new Error("buyer_pk must be 130 lowercase hex starting with 04");
+  if (!Number.isSafeInteger(listingId) || listingId < 0) throw new Error("listing_id must be a non-negative integer");
+  const pre = new Uint8Array(73);
+  pre.set(hexToBytes(buyerPkHex130), 0);
+  new DataView(pre.buffer).setBigUint64(65, BigInt(listingId), false);
+  return sha256(pre);
 }
 
 /** Standard alphabet with padding (RFC 4648 section 4), the same as Rust base64::STANDARD. */

@@ -32,7 +32,7 @@ function world(o: { faucet?: number; sponsor?: { status: number; body: object };
     // the recorded demo listing already sits on the fake chain
     const seed = prepareList({
       plaintext: new Uint8Array(fixture("demo/wallet-labels-1000.csv")), title: "[synthetic] seeded", publicDesc: "", columns: ["account_id"], rowsClaimed: 1000,
-      blobUrl: "https://blob.test/b.bin", price: "250000", evalFee: "100000", mode: "scored", programPk: config.programPk,
+      blobUrl: "https://blob.test/b.bin", price: "250000", evalFee: "100000", mode: "scored", programPk: config.programPk, seller: "arrow-team.arrowhq.testnet",
     });
     listMsg = ListMsg.parse(JSON.parse(seed.msg));
     blob = seed.blob;

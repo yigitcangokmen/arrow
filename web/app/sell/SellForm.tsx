@@ -205,7 +205,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
     let at = 2;
     try {
       mark(2, "doing");
-      const built = buildListMsg({ fields, plaintext: s.plain, key: s.key, nonce: s.blob.slice(0, 24), blobUrl, programPk });
+      const built = buildListMsg({ fields, plaintext: s.plain, key: s.key, nonce: s.blob.slice(0, 24), blobUrl, programPk, seller: eoa.intentsId });
       if (built.blobSha256 !== s.sha) throw new Error("internal check failed: the rebuilt ciphertext differs");
       mark(2, "done");
 

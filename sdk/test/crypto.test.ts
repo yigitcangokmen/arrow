@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
-  b64, bytesToHex, decryptFile, ECIES_OVERHEAD, encryptFile, hexToBytes, publicKeyHex, scalarFromLabel, seal,
+  b64, bytesToHex, criteriaBind, decryptFile, ECIES_OVERHEAD, encryptFile, hexToBytes, publicKeyHex, scalarFromLabel, seal,
   sealedKPayload, sha256Hex, unseal,
 } from "../src/index.ts";
 
@@ -27,7 +27,7 @@ describe("ecies", () => {
 
   it("ecies_vectors_unseal", () => {
     const v = load("ecies-vectors.json");
-    expect(v.cases).toHaveLength(7);
+    expect(v.cases).toHaveLength(8);
     for (const c of v.cases) {
       expect(publicKeyHex(c.scalar_hex), c.id).toBe(c.pub_hex);
       expect(bytesToHex(unseal(c.scalar_hex, hexToBytes(c.ciphertext_hex))), c.id).toBe(c.plaintext_hex);
@@ -52,21 +52,39 @@ describe("ecies", () => {
     expect(scalarFromLabel("a")).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it("sealed_k_payload_64", () => {
+  it("sealed_k_payload_96_binds_the_seller", () => {
     const k = bytes(32);
     const sha = sha256Hex(bytes(100));
-    const p = sealedKPayload(k, sha);
-    expect(p.length).toBe(64);
+    const p = sealedKPayload(k, sha, "seller.arrowhq.testnet");
+    expect(p.length).toBe(96);
     expect(p.subarray(0, 32)).toEqual(k);
-    expect(bytesToHex(p.subarray(32))).toBe(sha);
-    expect(seal(pub, p).length).toBe(161); // fixtures/README: sealed_k = 161 bytes
-    expect(() => sealedKPayload(bytes(31), sha)).toThrow();
-    expect(() => sealedKPayload(k, "ab")).toThrow();
+    expect(bytesToHex(p.subarray(32, 64))).toBe(sha);
+    expect(bytesToHex(p.subarray(64))).toBe(sha256Hex(new TextEncoder().encode("seller.arrowhq.testnet")));
+    expect(sealedKPayload(k, sha, "other.testnet").subarray(64)).not.toEqual(p.subarray(64));
+    expect(seal(pub, p).length).toBe(193); // fixtures/README: sealed_k = 193 bytes
+    expect(() => sealedKPayload(bytes(31), sha, "s.testnet")).toThrow();
+    expect(() => sealedKPayload(k, "ab", "s.testnet")).toThrow();
+    expect(() => sealedKPayload(k, sha, "0x66A0DFED229E920FEB17AA3186F87BD00E30844F")).toThrow(); // must be the exact account id
+    expect(() => sealedKPayload(k, sha, "")).toThrow();
+  });
+
+  it("criteria_bind_is_sha256_of_buyer_pk_and_listing_id_be", () => {
+    const b = criteriaBind(pub, 7);
+    const pre = new Uint8Array(73);
+    pre.set(hexToBytes(pub), 0);
+    pre.set([0, 0, 0, 0, 0, 0, 0, 7], 65);
+    expect(bytesToHex(b)).toBe(sha256Hex(pre));
+    expect(criteriaBind(pub, 8)).not.toEqual(b);
+    expect(criteriaBind(publicKeyHex(scalarFromLabel("arrow:test:other:v1")), 7)).not.toEqual(b);
+    expect(bytesToHex(criteriaBind(pub, 2 ** 40)).length).toBe(64);
+    expect(() => criteriaBind(pub, -1)).toThrow();
+    expect(() => criteriaBind(pub, 1.5)).toThrow();
   });
 
   it("max_criteria_fits", () => {
-    expect(b64.enc(seal(pub, bytes(2975))).length).toBeLessThanOrEqual(4096);
-    expect(b64.enc(seal(pub, bytes(2976))).length).toBeGreaterThan(4096);
+    // ECIES 97 + bind 32 + criteria 2975 = 3104 bytes = 4140 base64 characters (contract MAX_SEALED_CRITERIA_B64)
+    expect(b64.enc(seal(pub, bytes(32 + 2975))).length).toBe(4140);
+    expect(b64.enc(seal(pub, bytes(32 + 2977))).length).toBeGreaterThan(4140); // base64 groups 3 bytes: 3105 still fits
   });
 });
 

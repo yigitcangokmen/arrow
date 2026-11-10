@@ -206,7 +206,7 @@ export async function runTry(opts: {
         prefix: "[synthetic]", title: dataset.title, publicDesc: "Synthetic demo data made by the Arrow team (free testnet run).", columns: uploaded.columns,
         rowsClaimed: uploaded.rows, price: "0.25", evalFee: "0.10", maxEvals: 10, mode: "scored",
       };
-      const built = buildListMsg({ fields, plaintext: uploaded.plain, key: uploaded.key, nonce: uploaded.nonce, blobUrl: uploaded.url, programPk: config.programPk });
+      const built = buildListMsg({ fields, plaintext: uploaded.plain, key: uploaded.key, nonce: uploaded.nonce, blobUrl: uploaded.url, programPk: config.programPk, seller: accountId });
       const paid = await pay(config.bond, built.msg);
       const ev = await deps.findEvent("testnet", paid, "arrow_listed", { idField: "listing_id", ...poll });
       listingId = Number(ev.listing_id);

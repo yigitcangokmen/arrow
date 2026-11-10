@@ -90,12 +90,13 @@ describe("budgetPreview", () => {
 });
 
 describe("buildListMsg", () => {
+  const SELLER = "0x" + "5".repeat(40); // the wallet's Intents id (lowercase), the list payment's sender_id
   const plaintext = new TextEncoder().encode("account_id,label\na.near,x\nb.near,y\n");
   const make = (f = fields()) => {
     const enc = encryptFile(plaintext);
     const nonce = enc.blob.slice(0, 24);
     const keyCopy = enc.key.slice();
-    const out = buildListMsg({ fields: f, plaintext, key: enc.key, nonce, blobUrl: "https://s.public.blob.vercel-storage.com/blobs/x.bin", programPk });
+    const out = buildListMsg({ fields: f, plaintext, key: enc.key, nonce, blobUrl: "https://s.public.blob.vercel-storage.com/blobs/x.bin", programPk, seller: SELLER });
     return { enc, out, keyCopy };
   };
 
@@ -115,6 +116,8 @@ describe("buildListMsg", () => {
     expect(msg.blob_sha256).toBe(enc.blobSha256);
     const payload = unseal(programScalar, b64.dec(msg.sealed_k));
     expect(Array.from(payload.subarray(0, 32))).toEqual(Array.from(keyCopy));
+    expect(Buffer.from(payload.subarray(32, 64)).toString("hex")).toBe(enc.blobSha256);
+    expect(Buffer.from(payload.subarray(64)).toString("hex")).toBe(sha256Hex(new TextEncoder().encode(SELLER)));
     expect(new TextDecoder().decode(decryptFile(out.blob, payload.subarray(0, 32)))).toBe(new TextDecoder().decode(plaintext));
     expect(JSON.stringify(msg)).not.toContain(Buffer.from(keyCopy).toString("hex"));
   });
@@ -128,7 +131,7 @@ describe("buildListMsg", () => {
     expect(JSON.parse(make().out.msg)).not.toHaveProperty("payout");
     expect(JSON.parse(make(fields({ payout: "0x" + "ab".repeat(20) })).out.msg).payout).toBe("0x" + "ab".repeat(20));
     const enc = encryptFile(plaintext);
-    expect(() => buildListMsg({ fields: fields(), plaintext, key: enc.key, nonce: enc.blob.slice(0, 24), blobUrl: "https://x/" + "a".repeat(200), programPk })).toThrow();
+    expect(() => buildListMsg({ fields: fields(), plaintext, key: enc.key, nonce: enc.blob.slice(0, 24), blobUrl: "https://x/" + "a".repeat(200), programPk, seller: SELLER })).toThrow();
   });
 });
 

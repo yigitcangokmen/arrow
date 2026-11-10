@@ -1,10 +1,11 @@
 // WS6-T01: encrypts a demo dataset for one network, at listing time. The plain K is NOT stored anywhere: it is
 // sealed to the program key (sealed_k) and dropped from memory (PLAN WS6-T01, card section 0.4).
-//   npx tsx scripts/src/make-demo-blobs.ts --dataset unlock|labels|team-made --network testnet|mainnet [--program-pubkey <130 hex>]
+//   npx tsx scripts/src/make-demo-blobs.ts --dataset unlock|labels|team-made --network testnet|mainnet --seller <account> [--program-pubkey <130 hex>]
 //   npx tsx scripts/src/make-demo-blobs.ts --emit-msg --draft <draft.json> --blob-base <https prefix>
 //   npx tsx scripts/src/make-demo-blobs.ts --check
 // A blob is encrypted with a fresh K every run, so a new run makes a new blob; sealed_k only opens with the
 // program key of that network, which changes after the freeze re-init (old testnet listings then refund).
+// sealed_k is also bound to --seller: only that account (the list payment's sender_id) can list the draft.
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -46,6 +47,8 @@ export interface DemoDraft {
   dataset: DemoDataset;
   network: Network;
   program_pubkey: string;
+  /** The only account whose listing opens sealed_k (the enclave checks it). */
+  seller: string;
   title: string;
   public_desc: string;
   columns: string[];
@@ -63,6 +66,8 @@ export interface DemoDraft {
 export interface PrepareOpts {
   dataset: DemoDataset;
   network: Network;
+  /** The account that will send the list payment (lowercase 0x Intents id or NEAR account). */
+  seller: string;
   /** 130 lowercase hex starting with 04. Read from the contract when absent. */
   programPubkey?: string;
   /** Repository root; tests point it at a temp dir. */
@@ -85,12 +90,13 @@ export async function prepareDemoListing(o: PrepareOpts): Promise<DemoDraft> {
   if (pk === null) throw new Error(`${o.network}: the contract has no program key yet (init not done)`);
 
   const enc = encryptFile(new Uint8Array(plain), o.key);
-  const sealedK = b64.enc(seal(pk, sealedKPayload(enc.key, enc.blobSha256)));
+  const sealedK = b64.enc(seal(pk, sealedKPayload(enc.key, enc.blobSha256, o.seller)));
   const draft: DemoDraft = {
     v: 1,
     dataset: o.dataset,
     network: o.network,
     program_pubkey: pk,
+    seller: o.seller,
     title: spec.title,
     public_desc: spec.public_desc,
     columns: header,
@@ -166,10 +172,11 @@ async function main() {
   }
   const dataset = val("--dataset") as DemoDataset | undefined;
   const network = val("--network") as Network | undefined;
-  if (!dataset || !(dataset in SPECS) || (network !== "testnet" && network !== "mainnet")) {
-    throw new Error("usage: --dataset unlock|labels|team-made --network testnet|mainnet");
+  const seller = val("--seller");
+  if (!dataset || !(dataset in SPECS) || (network !== "testnet" && network !== "mainnet") || !seller) {
+    throw new Error("usage: --dataset unlock|labels|team-made --network testnet|mainnet --seller <account>");
   }
-  const d = await prepareDemoListing({ dataset, network, programPubkey: val("--program-pubkey") });
+  const d = await prepareDemoListing({ dataset, network, seller, programPubkey: val("--program-pubkey") });
   console.log(`program_pubkey ${d.program_pubkey.slice(0, 6)}... (${d.program_pubkey.length} hex)`);
   console.log(`wrote fixtures/blobs/${d.blob_sha256}.bin + web/public/blobs/${d.blob_sha256}.bin (${d.blob_bytes} bytes)`);
   console.log(`draft fixtures/demo/listings/${network}/${dataset}-${d.blob_sha256.slice(0, 8)}.json`);

@@ -87,7 +87,7 @@ export function buildEvalMsg(p: { listingId: number; criteria: Criteria; buyerPk
     return prepareEval(p);
   } catch (e) {
     if (e instanceof CriteriaTooLarge) throw new BuyInputError("The request is too large to seal. Shorten the description or drop your own list.");
-    if (e instanceof Error && /4096|sealed_criteria/.test(e.message)) throw new BuyInputError("The sealed request is over 4096 characters. Shorten the description or drop your own list.");
+    if (e instanceof Error && /4140|sealed_criteria/.test(e.message)) throw new BuyInputError("The sealed request is over 4140 characters. Shorten the description or drop your own list.");
     throw e;
   }
 }

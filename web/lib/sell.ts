@@ -145,7 +145,8 @@ export function budgetPreview(maxEvals: number, mode: Mode): string {
 
 /**
  * The `list` msg for a ciphertext that is already uploaded. `key` and `nonce` are the ones the blob was encrypted
- * with, so prepareList reproduces the same ciphertext and seals K || sha256 to the program key. It wipes `key`.
+ * with, so prepareList reproduces the same ciphertext and seals K || sha256 || sha256(seller) to the program key.
+ * `seller` is the account that pays the bond (the contract's sender_id). It wipes `key`.
  */
 export function buildListMsg(p: {
   fields: SellFields;
@@ -154,6 +155,7 @@ export function buildListMsg(p: {
   nonce: Uint8Array;
   blobUrl: string;
   programPk: string;
+  seller: string;
 }): { msg: string; blob: Uint8Array; blobSha256: string } {
   const f = p.fields;
   return prepareList({
@@ -170,6 +172,7 @@ export function buildListMsg(p: {
     maxEvals: f.maxEvals,
     mode: f.mode,
     programPk: p.programPk,
+    seller: p.seller,
     ...(f.payout ? { payout: f.payout } : {}),
   });
 }

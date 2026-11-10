@@ -1,5 +1,5 @@
 // The list / eval / buy message flows shared by CLI, MCP, web, e2e and bench.
-import { b64, encryptFile, seal, sealedKPayload, sha256Hex, unseal } from "./crypto.ts";
+import { b64, criteriaBind, encryptFile, seal, sealedKPayload, sha256Hex, unseal } from "./crypto.ts";
 import { type Mode, decodeState, type State } from "./state.ts";
 import { BuyMsg, Criteria, criteriaBytes, EvalMsg, ListMsg, MAX_CRITERIA_BYTES } from "./schemas.ts";
 
@@ -18,7 +18,10 @@ export class BlobHashMismatch extends Error {
   }
 }
 
-/** Encrypts the file and builds the `list` msg. K is sealed to the program key and wiped; it is never returned. */
+/**
+ * Encrypts the file and builds the `list` msg. K is sealed to the program key together with the seller's account id
+ * and wiped; it is never returned. `seller` must be the account that sends the list payment (the contract's `sender_id`).
+ */
 export function prepareList(p: {
   plaintext: Uint8Array;
   title: string;
@@ -31,14 +34,19 @@ export function prepareList(p: {
   maxEvals?: number;
   mode: Mode;
   programPk: string;
+  seller: string;
   payout?: string;
   /** Only for a reproducible ciphertext (the CLI derives both from a local secret so the blob can be uploaded before listing). */
   key?: Uint8Array;
   nonce?: Uint8Array;
 }): { msg: string; blob: Uint8Array; blobSha256: string } {
   const { key, blob, blobSha256 } = encryptFile(p.plaintext, p.key, p.nonce);
-  const sealedK = b64.enc(seal(p.programPk, sealedKPayload(key, blobSha256)));
-  key.fill(0);
+  let sealedK: string;
+  try {
+    sealedK = b64.enc(seal(p.programPk, sealedKPayload(key, blobSha256, p.seller)));
+  } finally {
+    key.fill(0);
+  }
   const msg = ListMsg.parse({
     op: "list",
     title: p.title,
@@ -57,18 +65,24 @@ export function prepareList(p: {
   return { msg: JSON.stringify(msg), blob, blobSha256 };
 }
 
-/** ECIES(program key) over the minified criteria JSON, base64. */
-export function sealCriteria(programPk: string, criteria: Criteria): string {
+/**
+ * ECIES(program key) over criteriaBind(buyer_pk, listing_id) || minified criteria JSON, base64. The bind stops a
+ * sealed criteria blob copied from the chain from being replayed under another buyer key or on another listing.
+ */
+export function sealCriteria(programPk: string, criteria: Criteria, bind: { buyerPk: string; listingId: number }): string {
   const bytes = criteriaBytes(criteria);
   if (bytes > MAX_CRITERIA_BYTES) throw new CriteriaTooLarge(bytes);
   const parsed = Criteria.parse(criteria);
-  return b64.enc(seal(programPk, new TextEncoder().encode(JSON.stringify(parsed))));
+  const json = new TextEncoder().encode(JSON.stringify(parsed));
+  const plain = new Uint8Array(32 + json.length);
+  plain.set(criteriaBind(bind.buyerPk, bind.listingId), 0);
+  plain.set(json, 32);
+  return b64.enc(seal(programPk, plain));
 }
 
 export function prepareEval(p: { listingId: number; criteria: Criteria; buyerPk: string; programPk: string }): string {
-  return JSON.stringify(
-    EvalMsg.parse({ op: "eval", listing_id: p.listingId, sealed_criteria: sealCriteria(p.programPk, p.criteria), buyer_pk: p.buyerPk }),
-  );
+  const sealed = sealCriteria(p.programPk, p.criteria, { buyerPk: p.buyerPk, listingId: p.listingId });
+  return JSON.stringify(EvalMsg.parse({ op: "eval", listing_id: p.listingId, sealed_criteria: sealed, buyer_pk: p.buyerPk }));
 }
 
 export function prepareBuy(p: { listingId: number; buyerPk: string }): string {

@@ -17,13 +17,13 @@ const fields: SellFields = {
 };
 const plain = new TextEncoder().encode("a,b\n1,2\n");
 
-function listMsg(): string {
+function listMsg(seller: string): string {
   const enc = encryptFile(plain);
-  return buildListMsg({ fields, plaintext: plain, key: enc.key, nonce: enc.blob.slice(0, 24), blobUrl: "https://example.com/blobs/probe.bin", programPk }).msg;
+  return buildListMsg({ fields, plaintext: plain, key: enc.key, nonce: enc.blob.slice(0, 24), blobUrl: "https://example.com/blobs/probe.bin", programPk, seller }).msg;
 }
 
 describe.skipIf(!process.env.ARROW_E2E)("web msgs through simulate_intents (mainnet, unfunded signer)", () => {
-  const cases: [string, () => string, string][] = [
+  const cases: [string, (signer: string) => string, string][] = [
     ["list", listMsg, "100000"],
     ["eval", () => prepareEval({ listingId: 1, criteria: { v: 1, text: "probe" }, buyerPk, programPk }), "100000"],
     ["buy", () => prepareBuy({ listingId: 1, buyerPk }), "250000"],
@@ -31,7 +31,7 @@ describe.skipIf(!process.env.ARROW_E2E)("web msgs through simulate_intents (main
   for (const [name, msg, amount] of cases) {
     it(`${name}_msg_signature_ok_balance_error_only`, async () => {
       const fresh = privateKeyToAccount(generatePrivateKey());
-      const intent = arrowTransferIntent({ receiverId: NETWORKS.mainnet.contract, tokenId: NETWORKS.mainnet.usdcToken, amount, msg: msg() });
+      const intent = arrowTransferIntent({ receiverId: NETWORKS.mainnet.contract, tokenId: NETWORKS.mainnet.usdcToken, amount, msg: msg(fresh.address.toLowerCase()) });
       const { multipayload } = await buildAndSignTransfer({ signer: fresh, intents: [intent] });
       const err = await simulateIntents([multipayload]).then(() => "", (e: Error) => e.message);
       expect(err).toMatch(/insufficient balance or overflow|account '0x[0-9a-f]{40}' not found/);

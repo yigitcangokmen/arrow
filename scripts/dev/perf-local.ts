@@ -41,13 +41,14 @@ const programSk = bytesToHex(new Uint8Array(hkdfSync("sha256", Buffer.from(maste
 const programPk = publicKeyHex(programSk);
 const buyerSk = scalarFromLabel("arrow:perf:buyer:v1");
 const buyerPk = publicKeyHex(buyerSk);
+const SELLER = "perf.arrowhq.testnet";
 
 interface Case { name: string; blobUrl: string; blobSha: string; sealedK: string; columns: string[]; crit: Criteria; mode: string }
 
 function makeCase(name: string, plain: Uint8Array, crit: Criteria, fakeMode: string): Case {
   const enc = encryptFile(plain);
   writeFileSync(resolve(blobDir!, `${name}.bin`), enc.blob);
-  const sealedK = b64.enc(seal(programPk, sealedKPayload(enc.key, enc.blobSha256)));
+  const sealedK = b64.enc(seal(programPk, sealedKPayload(enc.key, enc.blobSha256, SELLER)));
   enc.key.fill(0);
   const header = new TextDecoder().decode(plain.subarray(0, plain.indexOf(10))).split(",");
   return { name, blobUrl: `${fake}/blob/${name}`, blobSha: enc.blobSha256, sealedK, columns: header, crit, mode: fakeMode };
@@ -56,8 +57,8 @@ function makeCase(name: string, plain: Uint8Array, crit: Criteria, fakeMode: str
 function input(c: Case): Buffer {
   return Buffer.from(JSON.stringify({
     v: 1, action: "eval",
-    listing: { id: 1, blob_url: c.blobUrl, blob_sha256: c.blobSha, sealed_k: c.sealedK, mode: "scored", columns: c.columns },
-    eval: { id: 1, sealed_criteria: sealCriteria(programPk, c.crit), buyer_pk: buyerPk, seed: randomBytes(32).toString("hex") },
+    listing: { id: 1, seller: SELLER, blob_url: c.blobUrl, blob_sha256: c.blobSha, sealed_k: c.sealedK, mode: "scored", columns: c.columns },
+    eval: { id: 1, sealed_criteria: sealCriteria(programPk, c.crit, { buyerPk, listingId: 1 }), buyer_pk: buyerPk, seed: randomBytes(32).toString("hex") },
   }));
 }
 
