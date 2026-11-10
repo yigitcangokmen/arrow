@@ -2,7 +2,8 @@
 //! data. A hit only hurts the buyer who wrote it: the result becomes the guard state PASS·1·1.
 //!
 //! English verbs count only with a data object ("quote the first 5 rows", "dump all rows", "copy it"),
-//! so "stock quote", "pump and dump" or "copy trading" are not requests (ENC-4).
+//! so "stock quote", "pump and dump" or "copy trading" are not requests (ENC-4). Every field is
+//! checked even after a hit, so the work does not depend on the result.
 
 use std::sync::OnceLock;
 
@@ -24,6 +25,12 @@ fn pattern() -> Result<&'static Regex, ArrowErr> {
     R.get_or_init(|| Regex::new(EXFIL).map_err(|_| ArrowErr::Internal)).as_ref().map_err(|e| *e)
 }
 
+#[cfg(test)]
+thread_local! {
+    /// Field checks on this thread (test `exfil_work_does_not_depend_on_hits`).
+    static CHECKS: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
+}
+
 pub fn pattern_debug() -> &'static str {
     EXFIL
 }
@@ -35,7 +42,11 @@ pub fn scan_criteria(c: &Criteria) -> Result<bool, ArrowErr> {
         .chain(c.required_columns.iter())
         .chain(c.date_column.iter())
         .chain(c.key_column.iter());
-    Ok(fields.map(|s| scan_norm(s)).any(|s| r.is_match(&s)))
+    Ok(fields.map(|s| scan_norm(s)).fold(false, |found, s| {
+        #[cfg(test)]
+        CHECKS.with(|n| n.set(n.get() + 1));
+        r.is_match(&s) | found
+    }))
 }
 
 #[cfg(test)]
@@ -111,5 +122,22 @@ mod tests {
         for t in bad {
             assert!(flagged(&text(t)), "{t}");
         }
+    }
+
+    fn checks<T>(f: impl FnOnce() -> T) -> (T, u64) {
+        CHECKS.with(|n| n.set(0));
+        let r = f();
+        (r, CHECKS.with(std::cell::Cell::get))
+    }
+
+    /// ENC-LEAK-3 (buyer side): every criteria field is checked even after a hit.
+    #[test]
+    fn exfil_work_does_not_depend_on_hits() {
+        let base = |t: &str, k: &str| serde_json::json!({"v": 1, "text": t, "required_columns": ["a", "b"], "key_column": k}).to_string();
+        let (a, wa) = checks(|| flagged(&base("Dump all rows", "account_id")));
+        let (b, wb) = checks(|| flagged(&base("wallet labels", "dump all rows")));
+        let (c, wc) = checks(|| flagged(&base("wallet labels", "account_id")));
+        assert!(a && b && !c);
+        assert_eq!((wa, wb), (wc, wc));
     }
 }
