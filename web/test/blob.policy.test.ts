@@ -20,13 +20,18 @@ describe("tokenOptionsFor", () => {
   it("allows blobs/<sha256>.bin with a matching payload", () => {
     expect(tokenOptionsFor(`blobs/${H}.bin`, payload(), 1_000)).toEqual({
       allowedContentTypes: ["application/octet-stream"],
-      maximumSizeInBytes: MAX_BLOB_BYTES,
+      maximumSizeInBytes: 1000,
       addRandomSuffix: false,
       allowOverwrite: false,
       cacheControlMaxAge: 31_536_000,
       validUntil: 1_000 + TOKEN_TTL_MS,
     });
     expect(code(() => tokenOptionsFor(`blobs/${H}.bin`, payload({ size: MAX_BLOB_BYTES })))).toBe("NONE");
+  });
+
+  it("W2-5: the token allows exactly the declared size, the number the quota was checked against", () => {
+    expect(tokenOptionsFor(`blobs/${H}.bin`, payload({ size: 1 })).maximumSizeInBytes).toBe(1);
+    expect(tokenOptionsFor(`blobs/${H}.bin`, payload({ size: MAX_BLOB_BYTES })).maximumSizeInBytes).toBe(MAX_BLOB_BYTES);
   });
 
   it("WEB-7: a client token expires in five minutes, not the library default of an hour", () => {
@@ -73,7 +78,7 @@ describe("POST /api/blob", () => {
     expect(res.status).toBe(200);
     const b = await res.json();
     expect(b.clientToken).toBe("tok");
-    expect(b.opts.maximumSizeInBytes).toBe(MAX_BLOB_BYTES);
+    expect(b.opts.maximumSizeInBytes).toBe(1000); // W2-5: the declared size
     expect(upload.mock.calls[0][0].onUploadCompleted).toBeUndefined();
   });
 

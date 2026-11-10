@@ -29,7 +29,7 @@ export function tokenOptionsFor(pathname: string, clientPayload: string | null, 
   }
   return {
     allowedContentTypes: ["application/octet-stream"],
-    maximumSizeInBytes: MAX_BLOB_BYTES,
+    maximumSizeInBytes: payload.size, // W2-5: the size the quota is checked against, not the 5 MiB ceiling
     addRandomSuffix: false,
     allowOverwrite: false,
     cacheControlMaxAge: 31_536_000,
