@@ -59,7 +59,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "Liveness",
     sees: "Encrypted input",
     cannot: "Read secrets",
-    check: "If it fails, the callback gets null and the buyer is refunded in full",
+    check: "If it fails, the callback gets null and the buyer is refunded: a purchase in full, an eval less the treasury's share of the fee",
   },
   {
     part: "outlayer.near and intents.near contracts",
