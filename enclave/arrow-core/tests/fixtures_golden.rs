@@ -192,3 +192,29 @@ fn minhash_rs_vectors_golden() {
 fn minhash_matches_ts_vectors() {
     check_minhash_vectors("minhash-vectors.json");
 }
+
+/// Every valid criteria vector parses, every invalid one is rejected (the enclave's 3072-byte cap
+/// is looser than the SDK's 2975; `too_large` is 3483 bytes so both reject it).
+#[test]
+fn criteria_vectors() {
+    let f = fixture("criteria-vectors.json");
+    for c in f["valid"].as_array().unwrap() {
+        let raw = serde_json::to_vec(&c["criteria"]).unwrap();
+        let parsed = arrow_core::criteria::parse_criteria(&raw);
+        assert!(parsed.is_ok(), "valid {} rejected", c["name"]);
+        if c["name"] == "with_minhash_600_ascii_text" {
+            let p = parsed.unwrap();
+            assert!(p.minhash.is_some());
+            assert_eq!(p.text.chars().count(), 600);
+        }
+    }
+    for c in f["invalid"].as_array().unwrap() {
+        let raw = serde_json::to_vec(&c["criteria"]).unwrap();
+        assert_eq!(
+            arrow_core::criteria::parse_criteria(&raw).err(),
+            Some(arrow_core::ArrowErr::Criteria),
+            "invalid {} accepted",
+            c["name"]
+        );
+    }
+}

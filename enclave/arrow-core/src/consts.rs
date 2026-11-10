@@ -25,3 +25,7 @@ pub const MAX_ROW_BYTES: usize = 1024;
 pub const LLM_MAX_TOKENS: u32 = 64;
 /// Largest NEAR AI response body the enclave parses.
 pub const MAX_LLM_RESPONSE: usize = 64 * 1024;
+
+/// Largest sealed-criteria plaintext the enclave accepts (sealed b64 <= 4096, DEC H-06). The SDK
+/// enforces the tighter 2975-byte budget of fixtures/criteria-schema.json.
+pub const MAX_CRITERIA_BYTES: usize = 3072;

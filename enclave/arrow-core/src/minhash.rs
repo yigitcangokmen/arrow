@@ -121,11 +121,15 @@ pub fn parse_signature(hex: &str) -> Result<[u64; K], ArrowErr> {
     Ok(out)
 }
 
-/// j = #{i : minA[i] == m[i]} (Jaccard counter), c = #{i : some a has h_i(a) == m[i]} (B ∩ A counter).
+/// j = #{i : minA[i] == m[i]} (Jaccard counter), c = #{i : some a has h_i(a) == m[i]} (B ∩ A
+/// counter), n_a = |A| (exact, distinct seller keys), sum_m = Σ m[i] (the buyer signature's k-mins,
+/// which estimate |B|).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Counts {
     pub j: u8,
     pub c: u8,
+    pub n_a: u32,
+    pub sum_m: u128,
 }
 
 /// One pass over the seller's distinct base hashes against the buyer's signature (WS-3 §2.9).
@@ -146,7 +150,13 @@ pub fn counts(seller_base: &[u64], buyer: &[u64; K]) -> Result<Counts, ArrowErr>
     }
     let j = min_a.iter().zip(buyer.iter()).filter(|(a, b)| a == b).count();
     let c = hit_b.iter().filter(|h| **h).count();
-    Ok(Counts { j: u8::try_from(j).map_err(|_| ArrowErr::Internal)?, c: u8::try_from(c).map_err(|_| ArrowErr::Internal)? })
+    let sum_m = buyer.iter().fold(0u128, |s, &m| s.saturating_add(u128::from(m)));
+    Ok(Counts {
+        j: u8::try_from(j).map_err(|_| ArrowErr::Internal)?,
+        c: u8::try_from(c).map_err(|_| ArrowErr::Internal)?,
+        n_a: u32::try_from(seller_base.len()).map_err(|_| ArrowErr::Internal)?,
+        sum_m,
+    })
 }
 
 #[cfg(test)]
@@ -179,14 +189,17 @@ mod tests {
         let keys: Vec<String> = (0..500).map(|i| format!("key-{i}")).collect();
         let sig = signature(keys.iter().map(String::as_str)).unwrap();
         let base: Vec<u64> = keys.iter().filter_map(|k| key_hash(k)).collect();
-        assert_eq!(counts(&base, &sig).unwrap(), Counts { j: 128, c: 128 });
+        let got = counts(&base, &sig).unwrap();
+        assert_eq!((got.j, got.c, got.n_a), (128, 128, 500));
+        assert_eq!(got.sum_m, sig.iter().map(|&m| u128::from(m)).sum::<u128>());
     }
 
     #[test]
     fn counts_disjoint_c0() {
         let a: Vec<u64> = (0..500).map(|i| key_hash(&format!("a-{i}")).unwrap()).collect();
         let sig = signature((0..500).map(|i| format!("b-{i}")).collect::<Vec<_>>().iter().map(String::as_str)).unwrap();
-        assert_eq!(counts(&a, &sig).unwrap(), Counts { j: 0, c: 0 });
+        let got = counts(&a, &sig).unwrap();
+        assert_eq!((got.j, got.c), (0, 0));
     }
 
     #[test]

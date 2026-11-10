@@ -7,11 +7,15 @@
 ))]
 //! Pure, panic-free evaluation logic shared by `arrow-tee`. Errors are a fixed enum and carry no data.
 
+pub mod compose;
 pub mod consts;
+pub mod criteria;
 pub mod err;
+pub mod fit;
 pub mod llm;
 pub mod minhash;
 pub mod normalize;
+pub mod novelty;
 pub mod parse;
 pub mod prompt;
 pub mod sample;
