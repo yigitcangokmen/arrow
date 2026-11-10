@@ -168,7 +168,7 @@ export interface BuyResult {
   decrypt?: DecryptResult;
 }
 
-export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boolean; out?: string; account?: string; recordDemo?: boolean }): Promise<BuyResult> {
+export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boolean; out?: string; exclusive?: boolean; account?: string; recordDemo?: boolean }): Promise<BuyResult> {
   const listing = await requireListing(ctx, a.listingId);
   const programPk = await ctx.views.programPubkey();
   if (!programPk) throw new CliError("the market has no program key yet (init_program_key not run)");
@@ -189,12 +189,13 @@ export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boo
     record(ctx, { id: `cli-buy-${ctx.network}-${id}`, kind: "refund", tx: tx.txHash, chain: "near", block_height: null, listing_id: a.listingId, eval_id: null, purchase_id: id, oneclick_deposit: null, expect: "price refunded on failure", observed: `refunded (${res.refund_reason})` });
     return res;
   }
-  res.decrypt = await decryptCommand(ctx, { purchaseId: id, demoKey: a.demoKey, out: a.out, account: a.account });
+  res.decrypt = await decryptCommand(ctx, { purchaseId: id, demoKey: a.demoKey, out: a.out, exclusive: a.exclusive, account: a.account });
   record(ctx, { id: `cli-buy-${ctx.network}-${id}`, kind: "buy", tx: tx.txHash, chain: "near", block_height: null, listing_id: a.listingId, eval_id: null, purchase_id: id, oneclick_deposit: null, expect: "key released, hashes equal", observed: `${res.decrypt.ok ? "hashes equal, decrypted" : "HASH CHECK FAILED"}${demo}` });
   return res;
 }
 
-export async function decryptCommand(ctx: Ctx, a: { purchaseId: number; demoKey?: boolean; out?: string; account?: string }): Promise<DecryptResult> {
+/** `exclusive`: never overwrite (flag "wx"; also refuses a symlink at `out`). The MCP buy tool sets it; the CLI keeps overwriting what the user named. */
+export async function decryptCommand(ctx: Ctx, a: { purchaseId: number; demoKey?: boolean; out?: string; exclusive?: boolean; account?: string }): Promise<DecryptResult> {
   const p = await ctx.views.purchase(a.purchaseId);
   if (!p) throw new CliError(`purchase #${a.purchaseId} not found on ${ctx.network}`);
   if (p.status !== "done" || !p.sealed_k_buyer) throw new CliError(`purchase #${a.purchaseId} is ${p.status}${p.refund_reason ? ` (${p.refund_reason})` : ""}: nothing to decrypt`);
@@ -220,7 +221,7 @@ export async function decryptCommand(ctx: Ctx, a: { purchaseId: number; demoKey?
   const out = resolve(a.out ?? `arrow-listing-${listing.id}-purchase-${p.id}.dat`);
   if (ok) {
     mkdirSync(dirname(out), { recursive: true });
-    writeFileSync(out, plain);
+    writeFileSync(out, plain, a.exclusive ? { flag: "wx" } : undefined);
   }
   return { purchase_id: num(p.id), listing_id: num(p.listing_id), checks, ok, ...(ok && { out, bytes: plain.length }) };
 }

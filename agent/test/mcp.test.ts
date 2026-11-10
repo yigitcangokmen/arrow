@@ -91,7 +91,7 @@ describe("arrow MCP server", () => {
     const r = await call(c, "inspect_before_buy", { listing_id: "1", criteria: { v: 1, text: "x" }, network: "mainnet" });
     expect(r.isError).toBe(true);
     expect(r.text).toContain("ARROW_MCP_ALLOW_MAINNET=1 required");
-    const b = await call(c, "buy", { listing_id: "1", confirm: true, network: "mainnet" });
+    const b = await call(c, "buy", { listing_id: "1", network: "mainnet" });
     expect(b.isError).toBe(true);
     expect(b.text).toContain("ARROW_MCP_ALLOW_MAINNET=1 required");
     // reads stay open on mainnet
@@ -105,7 +105,7 @@ describe("arrow MCP server", () => {
     const e = await call(c, "inspect_before_buy", { listing_id: "1", criteria: { v: 1, text: "x" } });
     expect(e.isError).toBe(true);
     expect(e.text).toContain("eval fee 2 USDC exceeds the per-call cap 1 USDC");
-    const b = await call(c, "buy", { listing_id: "1", confirm: true });
+    const b = await call(await connect({ ARROW_MCP_ALLOW_BUY: "1" }), "buy", { listing_id: "1" });
     expect(b.text).toContain("price 5 USDC exceeds the per-call cap");
     const raised = await connect({ ARROW_MCP_MAX_USDC: "3.00" });
     const e2 = await call(raised, "inspect_before_buy", { listing_id: "1", criteria: { v: 1, text: "x" } });
@@ -113,12 +113,14 @@ describe("arrow MCP server", () => {
     expect(e2.text).toContain("payment attempted in ARROW_TEST_MOCK_RPC mode");
   }, 90_000);
 
-  it("buy_requires_confirm_true", async () => {
+  it("buy_requires_operator_opt_in", async () => {
+    // consent comes from ARROW_MCP_ALLOW_BUY in the server's environment, never from a tool argument (see mcp.guard.test.ts)
     const c = await connect();
-    const r = await call(c, "buy", { listing_id: "1", confirm: false });
-    expect(r.isError).toBe(true);
-    const missing = await call(c, "buy", { listing_id: "1" });
-    expect(missing.isError).toBe(true);
+    for (const args of [{ listing_id: "1" }, { listing_id: "1", confirm: true }]) {
+      const r = await call(c, "buy", args);
+      expect(r.isError).toBe(true);
+      expect(r.text).toContain("ARROW_MCP_ALLOW_BUY=1 required");
+    }
   }, 60_000);
 
   it("get_listing_mock", async () => {
