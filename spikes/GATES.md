@@ -64,7 +64,7 @@ Acceptance: `tools_versions_pinned` PASS · `outlayer_cli_present` PASS.
 - Chosen path: WasmUrl = testnet FastFS; secret condition = `--access allow-all --via <contract> --build <H>` (W1-03, unchanged); RESULT_PATH proposal: chain mode with yield callback (raw `promise_result_checked(0, 1024)`, null → refund) works on testnet.
 - Changed claim: none yet. `/verify` can state input/output hash binding (testnet observation).
 
-### S2 · Testnet token + refund · PASS · 2026-11-10 15:29-15:33 GMT+7 [08:29-08:33Z] (S-γ, ws/2-contracts f6075ab)
+### S2 · Testnet token + refund · PASS · 2026-11-10 15:29-15:32 GMT+7 [08:29-08:32Z] (S-γ, ws/2-contracts f6075ab)
 - Commands (worktree `../arrow-ws-2`): build `cargo near build non-reproducible-wasm --manifest-path contracts/arrow-usd/Cargo.toml --no-abi --locked --out-dir target/near/variants/arrow-usd` (arrow_usd.wasm 152497 B, sha256 4c7921ab…a727), same for `contracts/mock-outlayer` (199419 B) and `spikes/s2/receiver` (`--out-dir spikes/s2/receiver/target/near/s2-receiver`, 140495 B); sandbox `cargo test --manifest-path spikes/s2/receiver/Cargo.toml --test s2 -- --test-threads=2` → `test result: ok. 6 passed; 0 failed` (27 s); testnet `bash spikes/s2/run-testnet.sh` → `S2-TESTNET PASS`.
 - Evidence (testnet, accounts `arrowhq.testnet` buyer, `arrow-usd.arrowhq.testnet`, `s2.arrowhq.testnet` receiver):
   - s2-001 deploy arrow-usd + `new`: https://testnet.nearblocks.io/txns/DKcmuQZfqyXg4MprUqKqqJL9XADcL4hrCeWcTQ2LG7sL (ft_metadata symbol aUSD, decimals 6)
@@ -79,10 +79,10 @@ Acceptance: `tools_versions_pinned` PASS · `outlayer_cli_present` PASS.
 - Changed claim: none.
 - Tool versions: near-cli-rs 0.31.1, cargo-near 0.23.0, rustc 1.97.1, near-workspaces 0.24.0 (sandbox binary from near-sandbox 0.4.0 cache).
 
-### S3a · Signature simulation · PENDING · —
-- Commands: —
-- Evidence: —
-- PASS items: —
+### S3a · Signature simulation · (i) PASS (WS-4 run) · (ii) WAITING H-08b · 2026-11-10 15:26 GMT+7 [08:26Z]
+- Commands: `npx tsx spikes/s3/s3a-simulate.ts` (S-δ under WS4-T04; script and result on main since a055271). (ii): `npx tsx spikes/s3/s3a-simulate.ts --funded` after H-03 funding (H-08b).
+- Evidence: `spikes/s3/s3a-results.json` (2026-11-10T08:26:32Z): signed ERC-191 transfer intent to `arrow-spike.arrowhq.near` with `msg` and `min_gas` in the signed payload; mainnet `simulate_intents` → `insufficient balance or overflow` only (class SIGNATURE_OK_BALANCE_ERROR).
+- PASS items: (i) msg + min_gas carried, signature accepted, only balance error → PASS as recorded by WS-4; the WS1-T08 card acceptance was not re-run by the integrator. (ii) funded simulate WAITING H-08b.
 - Chosen path: —
 - Changed claim: —
 
@@ -107,11 +107,13 @@ Acceptance: `tools_versions_pinned` PASS · `outlayer_cli_present` PASS.
 - Chosen path: —
 - Changed claim: —
 
-### S4-b · ECIES/XChaCha/MinHash interop · PENDING (Rust side done; ts->rs waits WS4-T02/T03 vectors, rs->ts waits sdk/test/crypto.interop.test.ts) · 2026-11-10 15:29 GMT+7 [08:29Z]
-- Commands: `cargo run -p s4-interop --release` (branch ws/3-enclave 9248156 + c331e19; ecies 0.2.11 in Cargo.lock, eciesjs 0.4.18 in package-lock)
+### S4-b · ECIES/XChaCha/MinHash interop · PASS · 2026-11-10 15:45 GMT+7 [08:45Z] (official run on the integrated tree, S-α WS1-T14)
+- Official run 15:45 GMT+7 [08:45Z], integration worktree `../arrow-int` at int/4-sdk 9a837a5 (= main after ws/2-contracts, ws/3-enclave and ws/4-sdk merged; no S4_FIXTURES_DIR): `cargo run -p s4-interop --release` → `ecies ts->rs: 7/7 PASS` · `ecies rs->ts: 5/5 PASS` · `xchacha ts->rs: 4/4 PASS` · `xchacha rs->ts: 4/4 PASS` · `minhash ts->rs: 8/8 PASS` · `minhash rs self-check: 8/8 PASS` · `RESULT: PASS`. TS side same tree: `npx vitest run` → 16 files passed, 127 tests passed, 1 skipped (ARROW_E2E network test); `crypto.interop.test.ts` ecies_rs_to_ts_unseal + xchacha_rs_to_ts_decrypt PASS. `gen-crypto-vectors.ts --check` → OK (xchacha byte-equal, ecies 7/7 unseal); `gen-minhash-vectors.ts --check` → OK byte-equal. `cargo test -p arrow-core --test fixtures_golden -- --include-ignored` → 6 passed incl. `minhash_matches_ts_vectors` (still `#[ignore]` in the tree; WS-3 removes the attribute). The run left no diff in fixtures/.
+- Commands: `cargo run -p s4-interop --release` (branch ws/3-enclave 646d759 + c23d5ca; ecies 0.2.11 in Cargo.lock, eciesjs 0.4.18 in package-lock)
 - Evidence (official run on ws/3-enclave): `ecies ts->rs: PENDING (fixtures/ecies-vectors.json missing)` · `ecies rs->ts: 5/5 PASS (fixtures/ecies-vectors-rs.json, self-check)` · `xchacha ts->rs: PENDING` · `xchacha rs->ts: 4/4 PASS (fixtures/xchacha-vectors-rs.json)` · `minhash ts->rs: PENDING (fixtures/minhash-vectors.json missing)` · `minhash rs self-check: 8/8 PASS` · `RESULT: PENDING`
 - Dry runs (scratch, not gate evidence): eciesjs 0.4.18 unsealed 5/5 of the Rust ciphertexts; @noble/ciphers 2.4.0 opened 4/4 Rust blobs; eciesjs-sealed probe vectors (default config, 7 cases incl. 1 B and 2975 B) opened in Rust 7/7, noble XChaCha probes 4/4; an independent Node 24 implementation of the fixtures/README MinHash definition matched fixtures/minhash-vectors-rs.json 8/8.
-- PASS items: (1) ECIES ts->rs PENDING · (2) XChaCha ts->rs PENDING · (3) MinHash ts->rs PENDING · rs->ts files written. PASS = ts->rs 7/7 + 4/4 + crypto.interop.test.ts green (WS4-T02 DoD). Re-run the command above after WS4-T02/T03 land on main; "pending" is not PASS.
+- Cross-branch run 15:35 GMT+7 [08:35Z] (WS-4's committed vectors from ws/4-sdk 24f6f44 copied to scratch, `S4_FIXTURES_DIR=<copy> cargo run -p s4-interop --release`): `ecies ts->rs: 7/7 PASS` (eciesjs@0.4.18, idx0-idx6) · `xchacha ts->rs: 4/4 PASS` · `minhash ts->rs: 8/8 PASS` · `RESULT: PASS`. S-δ reports `sdk/test/crypto.interop.test.ts` green against the -rs files (STATUS WS-4 row). Both directions pass on the branches; the official PASS line is written after ws/3-enclave and ws/4-sdk are both on main and the command above runs without S4_FIXTURES_DIR.
+- PASS items: (1) ECIES ts->rs 7/7 (cross-branch) · (2) XChaCha ts->rs 4/4 (cross-branch) · (3) MinHash ts->rs 8/8 (cross-branch) · rs->ts files written (5 + 4), TS interop test green per S-δ. PASS = ts->rs 7/7 + 4/4 + crypto.interop.test.ts green (WS4-T02 DoD). Re-run the command above after WS4-T02/T03 land on main; "pending" is not PASS.
 - Chosen path: default (ecies 0.2.11 pure <-> eciesjs 0.4.x default config, XChaCha20-Poly1305 nonce24||ct||tag), no fallback needed so far.
 - Changed claim: —
 

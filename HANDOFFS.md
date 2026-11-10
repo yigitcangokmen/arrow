@@ -2,7 +2,7 @@
 
 Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W1-21). Times are GMT+7 with UTC in brackets.
 **10 Nov times are shifted by Δ = +8:49 (T0 = 2026-11-10 14:49 GMT+7 [07:49Z], DEC §K K-01).** 10 Nov work that shifts past 23:59 rolls into 11 Nov morning (PLAN §4.0(3)). Gates and dues from 11 Nov on keep their own times; hard anchors never move.
-**DEC §K changes:** K-02: pushing to the private origin is an agent step (H-10, the push step of H-11, and the push part of H-05/H-17/H-17b are not human steps). K-03: making the repo public is human-only and not approved yet. K-06: money decisions (≈$64 + NEAR AI $10) are not approved yet; every value-moving step stays here until the human says go.
+**DEC §K changes:** K-02: pushing to the private origin is an agent step (H-10, the push step of H-11, and the push part of H-05/H-17/H-17b are not human steps). K-03: making the repo public is human-only and not approved yet. K-06: money decisions (≈$64 + NEAR AI $10) were approved by the user on 2026-11-10 ~15:30 GMT+7 (DECISIONS §K KU-06; no X Premium); every value-moving step is still a human step and stays here until the human runs it.
 
 ## Timed index
 
