@@ -70,7 +70,7 @@ describe("arrow MCP server", () => {
   }, 60_000);
 
   it("stdout_is_pure_jsonrpc", async () => {
-    const child = spawn(process.execPath, ["--import", "tsx", SERVER], { cwd: ROOT, env: serverEnv(), stdio: ["pipe", "pipe", "ignore"] });
+    const child = spawn(process.execPath, ["--import", "tsx", SERVER], { cwd: ROOT, env: { NODE_ENV: "test", ...serverEnv() }, stdio: ["pipe", "pipe", "ignore"] });
     const lines: string[] = [];
     let buf = "";
     child.stdout.on("data", (d) => {
