@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { formatReport, runVerify, SUMMARY_RE, type VerifyOptions } from "../../src/verify/index.ts";
 import { base58ToHex } from "../../src/verify/links.ts";
-import { buildWorld, fakeFetch, type World } from "./world.ts";
+import { buildWorld, fakeFetch, fixture, type World } from "./world.ts";
 
 const run = (w: World, extra: Partial<VerifyOptions> = {}) =>
   runVerify({ network: w.network, evidence: w.evidence, releaseSha256: w.releaseSha256, fetchImpl: fakeFetch(w), now: new Date("2026-11-12T13:00:00Z"), ...extra });
@@ -167,6 +167,73 @@ describe("failures", () => {
     const w2 = buildWorld("testnet");
     w2.attestations[4001] = { ...w2.attestations[4001], caller_account_id: "someone.testnet" };
     expect(row(await run(w2), "R2").label).toBe("NOT PROVEN");
+  });
+
+  it("r2_caller_is_the_tx_signer_not_the_contract", async () => {
+    for (const network of ["testnet", "mainnet"] as const) {
+      const w = buildWorld(network);
+      const signer = w.txs.EVAL1.transaction.signer_id;
+      expect(signer).not.toBe(w.contract);
+      expect(w.attestations[4001].caller_account_id).toBe(signer);
+      expect(row(await run(w), "R2"), network).toMatchObject({ label: "PROVEN", required: true });
+      // the old rule (caller == contract) must not prove anything
+      const old = buildWorld(network);
+      old.attestations[4001] = { ...old.attestations[4001], caller_account_id: old.contract };
+      const r = row(await run(old), "R2");
+      expect(r.label).toBe("NOT PROVEN");
+      expect(r.detail).toContain("is not the tx signer");
+    }
+  });
+
+  it("r2_needs_the_request_to_come_through_the_contract", async () => {
+    const w = buildWorld("testnet");
+    w.txs.EVAL1.receipts[0].predecessor_id = "someone-else.testnet";
+    const r = row(await run(w), "R2");
+    expect(r.label).toBe("NOT PROVEN");
+    expect(r.detail).toContain(`no request_execution from ${w.contract}`);
+
+    const w2 = buildWorld("testnet");
+    w2.txs.EVAL1.receipts[0].receipt.Action.actions[0].FunctionCall.method_name = "other_method";
+    expect(row(await run(w2), "R2").label).toBe("NOT PROVEN");
+
+    const w3 = buildWorld("testnet");
+    w3.txs.EVAL1.receipts_outcome[0].outcome.logs = [w3.txs.EVAL1.receipts_outcome[0].outcome.logs[0].replace(w3.contract, "someone-else.testnet")];
+    expect(row(await run(w3), "R2").detail).toContain("execution_requested predecessor is someone-else.testnet");
+  });
+
+  describe("on real testnet records (request 15850, e2e eval, tx 4RzSuxeo…fS2j)", () => {
+    const REAL_TX = "4RzSuxeo1coQZangy4inXt4yhVf9ta7G8eWFJ3M7fS2j";
+    /** One real eval: the archived tx and the attestation OutLayer served for it, nothing else in the world. */
+    const realWorld = (att: unknown = fixture("attestation-15850.json")) => {
+      const w = buildWorld("testnet");
+      w.evidence.runs = w.evidence.runs.filter((x) => x.id === "e1").map((x) => ({ ...x, tx: REAL_TX }));
+      w.txs = { [REAL_TX]: fixture("tx-eval-15850.json") };
+      w.attestations = { 15850: att };
+      return w;
+    };
+
+    it("the record's caller is the buyer who signed, and R2 is PROVEN on it", async () => {
+      const w = realWorld();
+      expect(w.attestations[15850].caller_account_id).toBe("e2e-buyer.arrowhq.testnet");
+      expect(w.attestations[15850].caller_account_id).not.toBe(w.contract);
+      const r = row(await run(w, { only: ["attestation"] }), "R2");
+      expect(r, r.detail).toMatchObject({ label: "PROVEN" });
+      expect(r.detail).toContain("request 15850, signed by e2e-buyer.arrowhq.testnet");
+    });
+
+    it("the record of another request (15846) is NOT PROVEN for this tx", async () => {
+      const r = row(await run(realWorld(fixture("attestation-15846.json")), { only: ["attestation"] }), "R2");
+      expect(r.label).toBe("NOT PROVEN");
+      expect(r.detail).toContain("attestation names tx 6fSU8y8U");
+    });
+
+    it("the same tx with the contract removed from the receipts is NOT PROVEN", async () => {
+      const w = realWorld();
+      for (const rc of w.txs[REAL_TX].receipts) if (rc.predecessor_id === w.contract) rc.predecessor_id = "mallory.testnet";
+      const r = row(await run(w, { only: ["attestation"] }), "R2");
+      expect(r.label).toBe("NOT PROVEN");
+      expect(r.detail).toContain(`no request_execution from ${w.contract}`);
+    });
   });
 
   it("r3_fails_on_any_mismatch", async () => {

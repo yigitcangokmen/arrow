@@ -21,8 +21,17 @@ export interface EvalFacts {
 
 export const num = (v: number | string): number => Number(v);
 
-/** request_id inside the near-outlayer execution_requested event; request_data is a JSON string inside the event. */
-export function findRequestId(tx: any): number | null {
+export interface RequestEvent {
+  requestId: number;
+  /** request_data.predecessor_id: the account that called outlayer's request_execution (the market contract). */
+  predecessorId: string | null;
+  /** request_data.sender_id: the transaction signer. */
+  senderId: string | null;
+}
+
+/** near-outlayer execution_requested events in the tx; request_data is a JSON string inside the event. */
+export function requestEvents(tx: any): RequestEvent[] {
+  const out: RequestEvent[] = [];
   for (const ev of parseEvents(tx)) {
     if (ev.standard !== "near-outlayer" || ev.event !== "execution_requested") continue;
     const items = Array.isArray(ev.data) ? ev.data : [ev.data];
@@ -36,11 +45,16 @@ export function findRequestId(tx: any): number | null {
         }
       }
       const id = rd?.request_id;
-      if (typeof id === "number" || (typeof id === "string" && /^\d+$/.test(id))) return Number(id);
+      if (typeof id === "number" || (typeof id === "string" && /^\d+$/.test(id))) {
+        out.push({ requestId: Number(id), predecessorId: typeof rd.predecessor_id === "string" ? rd.predecessor_id : null, senderId: typeof rd.sender_id === "string" ? rd.sender_id : null });
+      }
     }
   }
-  return null;
+  return out;
 }
+
+/** request_id inside the near-outlayer execution_requested event. */
+export const findRequestId = (tx: any): number | null => requestEvents(tx)[0]?.requestId ?? null;
 
 export class VerifyCtx {
   readonly network: Network;

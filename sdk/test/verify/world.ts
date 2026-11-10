@@ -78,17 +78,19 @@ export function buildWorld(network: Network = "testnet"): World {
   ];
   const purchases = [{ id: 1, listing_id: 1, buyer, buyer_pk: demoKey.buyerPk, status: "done", sealed_k_buyer: sealedKBuyer, h: blobSha256, refund_reason: null, rail: base.rail }];
 
+  // OutLayer records the signer of the tx as the caller: the buyer on testnet, the relayer on mainnet (never the contract)
+  const signer = mainnet ? relayer : buyer;
   const inputData = (evalId: number) => JSON.stringify({ v: 1, action: "eval", listing: { id: 1, blob_sha256: blobSha256, mode: "scored" }, eval: { id: evalId } });
   const evalTx = (hash: string, requestId: number, evalId: number) => ({
-    transaction: { hash, signer_id: mainnet ? relayer : buyer, receiver_id: contract, actions: [] },
-    transaction_outcome: { id: hash, outcome: { logs: [], executor_id: mainnet ? relayer : buyer } },
-    receipts: [{ receiver_id: cfg.outlayer, receipt: { Action: { actions: [{ FunctionCall: { method_name: "request_execution", args: b64.enc(new TextEncoder().encode(JSON.stringify({ input_data: inputData(evalId) }))) } }] } } }],
-    receipts_outcome: [{ id: "r1", outcome: { executor_id: cfg.outlayer, logs: [event("near-outlayer", "execution_requested", [{ request_data: JSON.stringify({ request_id: requestId, data_id: "x" }) }])] } }],
+    transaction: { hash, signer_id: signer, receiver_id: contract, actions: [] },
+    transaction_outcome: { id: hash, outcome: { logs: [], executor_id: signer } },
+    receipts: [{ predecessor_id: contract, receiver_id: cfg.outlayer, receipt: { Action: { actions: [{ FunctionCall: { method_name: "request_execution", args: b64.enc(new TextEncoder().encode(JSON.stringify({ input_data: inputData(evalId) }))) } }] } } }],
+    receipts_outcome: [{ id: "r1", outcome: { executor_id: cfg.outlayer, logs: [event("near-outlayer", "execution_requested", [{ request_data: JSON.stringify({ request_id: requestId, sender_id: signer, predecessor_id: contract, data_id: "x" }) }])] } }],
     status: { SuccessValue: "" },
   });
   const att = (hash: string, requestId: number, evalId: number, e: any) =>
     makeAttestation({
-      request_id: requestId, transaction_hash: hash, caller_account_id: contract, wasm_hash: wasmHash, executed_wasm_sha256: wasmHash,
+      request_id: requestId, transaction_hash: hash, caller_account_id: signer, wasm_hash: wasmHash, executed_wasm_sha256: wasmHash,
       input_hash: inputHashOf(inputData(evalId)),
       output_hash: sha(JSON.stringify({ v: 1, ok: true, r: e.sealed_result, h: e.h })),
     });
