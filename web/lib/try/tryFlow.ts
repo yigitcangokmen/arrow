@@ -71,6 +71,7 @@ export interface NearApi {
   KeyPair: { fromRandom(curve: "ed25519"): { toString(): string; getPublicKey(): { toString(): string } } };
   Account: new (id: string, provider: unknown, key: string) => NearAccountLike;
   JsonRpcProvider: new (o: { url: string }) => unknown;
+  FailoverRpcProvider: new (providers: unknown[]) => unknown;
 }
 
 export interface TryDeps {
@@ -172,7 +173,8 @@ export async function runTry(opts: {
     // 1. account
     step("account", { state: "doing" });
     const near = await deps.loadNear();
-    const provider = new near.JsonRpcProvider({ url: NETWORKS.testnet.rpc[0] });
+    // rpc.testnet.near.org answers 429 under load: walk the same URL list as the sdk's fetch client.
+    const provider = new near.FailoverRpcProvider(NETWORKS.testnet.rpc.map((url) => new near.JsonRpcProvider({ url })));
     const { account, accountId } = await openAccount(near, provider, deps);
     step("account", { state: "done", detail: accountId });
 

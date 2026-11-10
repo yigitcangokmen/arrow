@@ -1,5 +1,5 @@
 // near-api-js 7.4.0 factories. Server routes only (DEC L-06): never import this from a client component.
-import { Account, JsonRpcProvider, actions, nearToYocto, type KeyPairString } from "near-api-js";
+import { Account, FailoverRpcError, FailoverRpcProvider, JsonRpcProvider, actions, nearToYocto, type KeyPairString, type Provider } from "near-api-js";
 import { resolveNetwork } from "@arrow/sdk/config";
 import type { NearCaller } from "@arrow/sdk/relay";
 import type { Network } from "../config.ts";
@@ -7,8 +7,19 @@ import type { Network } from "../config.ts";
 export { nearToYocto };
 export type WaitUntil = "INCLUDED_FINAL" | "FINAL";
 
-export function provider(net: Network): JsonRpcProvider {
-  return new JsonRpcProvider({ url: resolveNetwork(net, process.env).rpc[0] });
+/**
+ * One JsonRpcProvider per URL of the network (the same list the sdk's fetch client walks), wrapped in a
+ * FailoverRpcProvider: a 429 or 5xx from rpc.<net>.near.org moves the call on to the next URL.
+ */
+export function provider(net: Network): Provider {
+  const urls = resolveNetwork(net, process.env).rpc;
+  return urls.length === 1 ? new JsonRpcProvider({ url: urls[0] }) : new FailoverRpcProvider(urls.map((url) => new JsonRpcProvider({ url })));
+}
+
+/** Message of a thrown near-api-js error; for a failover error it is the per-URL causes, not "Exceeded N providers". */
+export function nearErrorMessage(e: unknown): string {
+  if (e instanceof FailoverRpcError) return e.errors.map((x) => String((x as Error)?.message ?? x)).join(" | ");
+  return String((e as Error)?.message ?? e);
 }
 
 function accountFromEnv(idVar: string, keyVar: string, net: Network): Account | null {

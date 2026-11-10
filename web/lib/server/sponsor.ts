@@ -3,7 +3,7 @@ import { SponsorRequest } from "@arrow/sdk/schemas";
 import { clientIp } from "../ip.ts";
 import { type Limiter, limits } from "../ratelimit.ts";
 import { apiError, json, rateLimited } from "./http.ts";
-import { availableBalance, nearToYocto, sponsorAccount } from "./near.ts";
+import { availableBalance, nearErrorMessage, nearToYocto, sponsorAccount } from "./near.ts";
 
 const MIN_SPONSOR_BALANCE = nearToYocto("2");
 const FAUCET_FALLBACK = "use the NEAR testnet faucet: near account create-account sponsor-by-faucet-service <name>.testnet autogenerate-new-keypair save-to-keychain network-config testnet create";
@@ -76,6 +76,6 @@ export async function handleSponsor(req: Request, d: SponsorDeps = realSponsorDe
     const { txHash } = await sponsor.createSubAccount(prefix, body.data.publicKey, nearToYocto(d.nearPerAccount as `${number}`));
     return json(200, { accountId: `${prefix}.${sponsor.accountId}`, txHash, nearAmount: d.nearPerAccount });
   } catch (e) {
-    return apiError(503, "SPONSOR_UNAVAILABLE", "Creating the testnet account failed.", { fallback: FAUCET_FALLBACK, detail: String((e as Error).message ?? e).slice(0, 300) });
+    return apiError(503, "SPONSOR_UNAVAILABLE", "Creating the testnet account failed.", { fallback: FAUCET_FALLBACK, detail: nearErrorMessage(e).slice(0, 300) });
   }
 }

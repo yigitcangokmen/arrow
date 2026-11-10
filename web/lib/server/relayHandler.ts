@@ -7,7 +7,7 @@ import { CONTRACTS } from "../config.ts";
 import { clientIp } from "../ip.ts";
 import { type Limiter, limits } from "../ratelimit.ts";
 import { apiError, json, rateLimited } from "./http.ts";
-import { availableBalance, callerFor, escrowAccount, nearToYocto, relayerAccount, type WaitUntil } from "./near.ts";
+import { availableBalance, callerFor, escrowAccount, nearErrorMessage, nearToYocto, relayerAccount, type WaitUntil } from "./near.ts";
 import { type RelayValidateConfig, validateArrowMultipayload } from "./relayValidate.ts";
 import { NETWORKS } from "@arrow/sdk/config";
 
@@ -76,7 +76,7 @@ export async function handleRelay(req: Request, d: RelayDeps = realRelayDeps): P
   try {
     if ((await relayer.balance()) < MIN_RELAYER_BALANCE) return unavailable("The relayer is out of gas funds.");
   } catch (e) {
-    return apiError(502, "RPC_ERROR", "Could not read the relayer balance.", { detail: String((e as Error).message).slice(0, 300) });
+    return apiError(502, "RPC_ERROR", "Could not read the relayer balance.", { detail: nearErrorMessage(e).slice(0, 300) });
   }
 
   try {
@@ -99,6 +99,6 @@ export async function handleRelay(req: Request, d: RelayDeps = realRelayDeps): P
     );
     return json(200, r);
   } catch (e) {
-    return apiError(502, "RPC_ERROR", "The relayer transaction failed.", { detail: String((e as Error).message ?? e).slice(0, 300) });
+    return apiError(502, "RPC_ERROR", "The relayer transaction failed.", { detail: nearErrorMessage(e).slice(0, 300) });
   }
 }

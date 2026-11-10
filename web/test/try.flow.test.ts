@@ -41,6 +41,7 @@ function world(o: { faucet?: number; sponsor?: { status: number; body: object };
   const near: NearApi = {
     KeyPair: { fromRandom: () => ({ toString: () => "ed25519:SECRET", getPublicKey: () => ({ toString: () => "ed25519:PUBLIC" }) }) },
     JsonRpcProvider: class { constructor(public o: { url: string }) {} },
+    FailoverRpcProvider: class { constructor(public providers: unknown[]) {} },
     Account: class {
       constructor(public id: string) {}
       async getState() { return {}; }
