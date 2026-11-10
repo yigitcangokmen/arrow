@@ -397,12 +397,17 @@ mod tests {
         let v: Value = serde_json::from_str(VECTORS_OUT).unwrap();
         let mut checked = 0;
         for case in v["cases"].as_array().unwrap() {
+            let raw = case["raw"].as_str().unwrap().as_bytes().to_vec();
             let action = match case["context"]["action"].as_str().unwrap() {
                 "eval" => Action::Eval,
                 "release" => Action::Release,
-                _ => continue, // derive: program key (WS2-T08)
+                _ => {
+                    let got = if crate::admin::classify_pk(Ok(raw)).is_ok() { "accept_derive" } else { "reject_derive" };
+                    assert_eq!(got, case["contract_decision"].as_str().unwrap(), "case {}", case["name"]);
+                    checked += 1;
+                    continue;
+                }
             };
-            let raw = case["raw"].as_str().unwrap().as_bytes().to_vec();
             let expected_h = case["context"]["listing_blob_sha256"].as_str().unwrap();
             let got = match classify(Ok(raw), expected_h, action) {
                 Ok(_) if action == Action::Eval => "accept_eval".to_string(),
@@ -412,7 +417,7 @@ mod tests {
             assert_eq!(got, case["contract_decision"].as_str().unwrap(), "case {}", case["name"]);
             checked += 1;
         }
-        assert!(checked >= 12, "only {checked} eval/release cases");
+        assert!(checked >= 15, "only {checked} cases");
         assert_eq!(classify(Err(PromiseError::Failed), "x", Action::Eval), Err("null"));
         assert_eq!(classify(Err(PromiseError::TooLong(1025)), "x", Action::Eval), Err("bad_output"));
     }

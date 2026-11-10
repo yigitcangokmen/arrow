@@ -161,3 +161,7 @@ pub fn release_input(listing: &Listing, purchase: &Purchase) -> String {
         Err(_) => env::panic_str("Arrow: input serialization failed"),
     }
 }
+
+pub fn derive_input() -> String {
+    r#"{"v":1,"action":"derive"}"#.to_string()
+}

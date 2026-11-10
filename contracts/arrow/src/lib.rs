@@ -2,6 +2,7 @@
 //! Panic messages are `Arrow: Exx <text>` (tasks card §2.5); checks always run before any state change,
 //! because a panic in a transfer-notification refunds the whole amount and rolls state back.
 
+pub mod admin;
 pub mod buy;
 pub mod caps;
 pub mod eval;
