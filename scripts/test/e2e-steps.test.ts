@@ -166,3 +166,20 @@ describe("e2e-testnet steps", () => {
     expect(r.results.find((x) => x.n === 2)).toMatchObject({ status: "PASS" });
   });
 });
+
+describe("e2e key store", () => {
+  it("X12-1/CRY-2: the same demo file gets unrelated keys per network and contract, and the same key on a rerun", async () => {
+    const { fileKeys } = await import("../src/e2e-testnet.ts");
+    const path = join(work, "e2e-keys.json");
+    const sha = "ab".repeat(32);
+    const testnet = fileKeys(path, "testnet:arrow-v2.arrowhq.testnet")(sha, "a.csv");
+    const mainnet = fileKeys(path, "mainnet:arrow-market.near")(sha, "a.csv");
+    const other = fileKeys(path, "testnet:arrow.arrowhq.testnet")(sha, "a.csv");
+    expect(Buffer.from(mainnet.key).toString("hex")).not.toBe(Buffer.from(testnet.key).toString("hex"));
+    expect(Buffer.from(other.key).toString("hex")).not.toBe(Buffer.from(testnet.key).toString("hex"));
+    expect(Buffer.from(mainnet.nonce).toString("hex")).not.toBe(Buffer.from(testnet.nonce).toString("hex"));
+    const again = fileKeys(path, "testnet:arrow-v2.arrowhq.testnet")(sha, "a.csv");
+    expect(Buffer.from(again.key).toString("hex")).toBe(Buffer.from(testnet.key).toString("hex"));
+    expect(Buffer.from(again.nonce).toString("hex")).toBe(Buffer.from(testnet.nonce).toString("hex"));
+  });
+});

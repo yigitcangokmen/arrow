@@ -8,6 +8,7 @@
 //   --dry        testnet rehearsal: steps 1, 2 and 9 are mainnet-only and skipped, the other 8 run against the testnet deploy.
 // Refunds land in the buyer's NEAR Intents balance, not in the Base wallet (DEC K-05).
 // Exit: 0 all green (WARN allowed), 1 a step failed, 3 steps were skipped, 5 spend not confirmed.
+import "./lib/require-node.ts";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -74,7 +75,8 @@ const copy = (b: Uint8Array) => new Uint8Array(b);
 const big = (v: unknown) => BigInt(String(v));
 const items = (e: NearEvent): any[] => (Array.isArray(e.data) ? e.data : [e.data]);
 const isRefundMemo = (m: unknown) => m === "refund" || (typeof m === "string" && m.startsWith("arrow:refund:"));
-const sellerShare = (amount: bigint, treasuryBps: number) => (amount * BigInt(10_000 - treasuryBps)) / 10_000n;
+/** the contract rounds the treasury share down and gives the seller the rest (rail.rs split) */
+export const sellerShare = (amount: bigint, treasuryBps: number) => amount - (amount * BigInt(treasuryBps)) / 10_000n;
 /** a failed eval keeps the treasury's share of the fee; the rest is refunded */
 const failRefund = (fee: bigint, treasuryBps: number) => sellerShare(fee, treasuryBps);
 
@@ -212,9 +214,12 @@ export interface Resume {
   /** listings that already have a completed (not refunded) eval in that run */
   evalDone: Partial<Record<"L1" | "L2", boolean>>;
   purchaseId?: number;
+  /** the broken-host eval already refunded with not_ok (step 8), and the outbound already reported SUCCESS (step 9) */
+  refundDone?: true;
+  outboundDone?: true;
 }
 
-type EvidenceRow = Pick<EvidenceRun, "id" | "kind" | "listing_id" | "eval_id" | "purchase_id">;
+type EvidenceRow = Pick<EvidenceRun, "id" | "kind" | "listing_id" | "eval_id" | "purchase_id"> & Partial<Pick<EvidenceRun, "observed">>;
 
 /** The listing, eval and purchase ids of the newest earlier run that listed all three listings, so a retry never pays twice. */
 export function resumeFrom(runs: EvidenceRow[]): Resume | null {
@@ -231,7 +236,9 @@ export function resumeFrom(runs: EvidenceRow[]): Resume | null {
     const evalDone: Resume["evalDone"] = {};
     for (const slot of ["L1", "L2"] as const) evalDone[slot] = rows.some((x) => x.kind === "eval" && Number(x.listing_id) === ids[slot]);
     const buy = rows.find((x) => x.kind === "buy" && Number(x.listing_id) === ids.L2 && x.purchase_id !== null);
-    return { stamp, ids, evalDone, purchaseId: buy ? Number(buy.purchase_id) : undefined };
+    const refund = rows.some((x) => x.kind === "refund" && Number(x.listing_id) === ids.L3 && x.observed === "refunded (not_ok)");
+    const outbound = rows.some((x) => x.kind === "outbound" && x.observed?.startsWith("status SUCCESS"));
+    return { stamp, ids, evalDone, purchaseId: buy ? Number(buy.purchase_id) : undefined, ...(refund && { refundDone: true as const }), ...(outbound && { outboundDone: true as const }) };
   }
   return null;
 }
@@ -354,6 +361,8 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
     purchaseId: undefined as number | undefined,
     plan: undefined as Plan | undefined,
   };
+  /** steps a resumed run already paid for: they are not paid again unless the human names them with --only */
+  const paid = new Map<number, string>();
 
   // ------------------------------------------------------------------ steps
   async function preflight(): Promise<StepResult> {
@@ -420,7 +429,7 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
       if (!problems.some((p) => p.startsWith("blob:"))) notes.push("e2e blob URLs serve the expected sha256");
     }
 
-    S.plan = spendPlan({ steps: selected, bond: S.bond, inboundOut, feeBpsEval: c.fee_bps_eval ?? 1000, feeBpsSale: c.fee_bps_sale ?? 200, buyerNow, sellerNow });
+    S.plan = spendPlan({ steps: new Set([...selected].filter((n) => !paid.has(n))), bond: S.bond, inboundOut, feeBpsEval: c.fee_bps_eval ?? 1000, feeBpsSale: c.fee_bps_sale ?? 200, buyerNow, sellerNow });
     if (!deps.dry) problems.push(...S.plan.shortfalls);
     for (const l of [...notes.map((n) => `  preflight · ${n}`), ...warnings.map((w) => `  preflight · WARN ${w}`)]) deps.say(l);
     if (problems.length) return { n: 0, status: "FAIL", summary: problems.join("; ") };
@@ -650,6 +659,14 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
     if (r) {
       Object.assign(S.ids, r.ids);
       S.purchaseId = r.purchaseId;
+      if (opts.only === undefined) {
+        const was = `already paid in the run ${r.stamp} (its result is recorded, not re-checked here); --only N pays for it again`;
+        if (r.evalDone.L1) paid.set(4, was);
+        if (r.evalDone.L2) paid.set(5, was);
+        if (r.purchaseId !== undefined) paid.set(6, was);
+        if (r.refundDone) paid.set(8, was);
+        if (r.outboundDone) paid.set(9, was);
+      }
       deps.say(`resuming the ids of the run ${r.stamp}: L1=#${r.ids.L1} L2=#${r.ids.L2} L3=#${r.ids.L3}${r.purchaseId !== undefined ? ` · purchase #${r.purchaseId}` : ""}`);
     }
   }
@@ -660,6 +677,10 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
     if (n !== 0 && (!selected.has(n) || opts.dryPlan)) continue;
     if (n !== 0 && deps.dry && MAINNET_ONLY.has(n)) {
       emit({ n, status: "SKIP", summary: "mainnet-only: skipped in dry", na: true });
+      continue;
+    }
+    if (paid.has(n)) {
+      emit({ n, status: "SKIP", summary: paid.get(n)!, na: true });
       continue;
     }
     if ((n === 1 && opts.skipInbound) || (n === 9 && opts.skipOutbound)) {
@@ -819,7 +840,7 @@ export async function main(argv: string[]): Promise<number> {
       : mainnet
         ? async () => { throw new Error("--blob-base is required on mainnet (raw URL prefix of the freeze commit's fixtures/blobs/e2e)"); }
         : fastfsHost(seller.id, workDir),
-    keys: fileKeys(resolve(configDir(), "e2e-keys.json")),
+    keys: fileKeys(resolve(configDir(), "e2e-keys.json"), `${network}:${cfg.contract}`),
     txEvents: async (hash) => parseEvents(await txStatus(network, hash, signers.get(hash) ?? (mainnet ? relayerAccountId : buyer.id), "NONE")),
     evidenceRuns: () => readEvidence(network).runs.filter((r) => r.script === SCRIPT),
     confirm: (plan) => confirmSpend(plan, !!v.yes),

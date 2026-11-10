@@ -392,14 +392,17 @@ async function publishDemo(
 
 // ---------------------------------------------------------------------- real dependencies
 
-export function fileKeys(path: string): E2eDeps["keys"] {
+/** Random K and nonce, stored per `scope` (network and contract) and plaintext: the same demo file listed on testnet and on mainnet gets two
+ * unrelated keys, so a free testnet purchase never reveals the key of a mainnet listing. */
+export function fileKeys(path: string, scope: string): E2eDeps["keys"] {
   return (plaintextSha, source) => {
     const store: Record<string, { k_hex: string; nonce_hex: string; source: string; created_utc: string }> = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : {};
-    let e = store[plaintextSha];
+    const slot = `${scope}|${plaintextSha}`;
+    let e = store[slot];
     if (!e) {
       const c = globalThis.crypto;
       e = { k_hex: bytesToHex(c.getRandomValues(new Uint8Array(32))), nonce_hex: bytesToHex(c.getRandomValues(new Uint8Array(24))), source, created_utc: new Date().toISOString() };
-      store[plaintextSha] = e;
+      store[slot] = e;
       mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
       writeFileSync(path, JSON.stringify(store, null, 2) + "\n", { mode: 0o600 });
       chmodSync(path, 0o600);
@@ -509,7 +512,7 @@ export async function main(argv: string[]): Promise<number> {
     },
     host: f["blob-base"] ? baseHost(f["blob-base"], workDir) : fastfsHost(sellerId, workDir),
     txEvents: async (hash, signer) => parseEvents(await txStatus("testnet", hash, signer, "NONE")),
-    keys: fileKeys(resolve(configDir(), "e2e-keys.json")),
+    keys: fileKeys(resolve(configDir(), "e2e-keys.json"), `testnet:${cfg.contract}`),
     repo: repoRoot(),
     workDir,
     sleep: (ms) => new Promise((r) => setTimeout(r, ms)),

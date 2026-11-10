@@ -18,9 +18,9 @@ import { makeViews } from "../../agent/src/views.ts";
 import { loadEnv, repoRoot } from "./lib/env.ts";
 import { appendRun } from "./lib/evidence.ts";
 import { log, mask } from "./lib/log.ts";
+import { nodeProblem } from "./lib/node-version.ts";
 
 export const JUDGE_FILE = "judge-testnet.json";
-export const MIN_NODE = [22, 22, 2] as const;
 const MINT_AMOUNT = 10_000_000n;
 const NEED_BALANCE = 3_000_000n; // two evals + one purchase of the demo listings cost 2.50 aUSD
 const CAP_MESSAGE = "Testnet cap reached (10 evals/account/day, 400/day). See recorded results: npm run bench:offline";
@@ -68,11 +68,6 @@ export class TryStop extends Error {
   }
 }
 
-const atLeast = (v: string, min: readonly number[]) => {
-  const a = v.split(".").map(Number);
-  for (let i = 0; i < min.length; i++) if ((a[i] ?? 0) !== min[i]) return (a[i] ?? 0) > min[i];
-  return true;
-};
 const sec = (ms: number) => `${Math.floor(ms / 60000)}m${Math.round((ms % 60000) / 1000)}s`;
 
 interface Profile {
@@ -130,7 +125,12 @@ export interface TryReport {
 
 export async function runTry(d: TryDeps, o: TryOpts): Promise<TryReport> {
   const t0 = d.now();
-  if (!atLeast(d.nodeVersion, MIN_NODE)) throw new TryStop(`Node ${MIN_NODE.join(".")} or newer is needed (found ${d.nodeVersion}). Run: nvm use`);
+  const old = nodeProblem(d.nodeVersion);
+  if (old) throw new TryStop(old);
+  // Before the rate-limited faucet, the mint and the judge file: a missing or stale demo listings file stops the run for free.
+  const demo = d.listings();
+  const live = await d.programHash();
+  if (demo.program_wasm_sha256 !== live) throw new TryStop("testnet demo listings are stale; re-run e2e-testnet --publish-demo (team step)");
   const acct = await ensureAccount(d, o.reset === true);
   d.say(`account ${acct.id} ${acct.how}`);
   const parts: string[] = [`account ${acct.id} (${acct.how})`];
@@ -145,9 +145,6 @@ export async function runTry(d: TryDeps, o: TryOpts): Promise<TryReport> {
     d.say(`balance ${formatUsdc(bal)} aUSD, no mint needed`);
   }
 
-  const demo = d.listings();
-  const live = await d.programHash();
-  if (demo.program_wasm_sha256 !== live) throw new TryStop("testnet demo listings are stale; re-run e2e-testnet --publish-demo (team step)");
   // The two evals wait on the enclave at the same time (60-118 s each), but they are signed by one key, so the payments go out
   // one after the other: two transactions with the same nonce would make one of them fail.
   let paying: Promise<unknown> = Promise.resolve();

@@ -9,6 +9,7 @@
 //       [--lock <tx_hash> --sender <account>]
 //
 // A NEAR run with a tx and no block_height needs --sender: block_height and timestamp_utc come from the archival RPC.
+import "./lib/require-node.ts";
 import { readFileSync } from "node:fs";
 import { basename, extname } from "node:path";
 import { parseArgs } from "node:util";

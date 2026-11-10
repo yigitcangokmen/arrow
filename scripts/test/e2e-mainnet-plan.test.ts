@@ -8,7 +8,7 @@ import { hexToBytes, NETWORKS, parseEvents } from "@arrow/sdk";
 import type { Ctx } from "../../agent/src/commands.ts";
 import { confirmSpend, EXIT_NEEDS_CONFIRM } from "../src/lib/confirm.ts";
 import { repoRoot } from "../src/lib/env.ts";
-import { AMOUNTS, configProblems, findRefundEvents, type MainnetDeps, type MainnetOpts, resumeFrom, runE2eMainnet, spendPlan } from "../src/e2e-mainnet.ts";
+import { AMOUNTS, configProblems, findRefundEvents, type MainnetDeps, type MainnetOpts, resumeFrom, runE2eMainnet, sellerShare, spendPlan } from "../src/e2e-mainnet.ts";
 import { BUYER, SELLER, world } from "./helpers/fakeChain.ts";
 import { fixture } from "../../agent/test/helpers.ts";
 
@@ -36,6 +36,12 @@ describe("spend plan", () => {
     expect(text).toContain("seller will hold ≈1.61 USDC; H-15 needs ≥ 3.5");
     expect(text).toContain("total leaving Base: 5 USDC + gas");
     expect(text).toContain("3 x 0.1 USDC listing bond");
+  });
+
+  it("NUM-7: the seller gets what the contract leaves after rounding the treasury share down", () => {
+    expect(sellerShare(50_001n, 1000)).toBe(45_001n);
+    expect(sellerShare(2_000_000n, 200)).toBe(1_960_000n);
+    expect(sellerShare(250_000n, 1000)).toBe(225_000n);
   });
 
   it("H-15 inbound never drops below 3 USDC", () => {
@@ -299,6 +305,29 @@ describe("e2e-mainnet step machine", () => {
     expect(first.w.listings.size).toBe(3);
     // 2 evals + buy + broken-host eval = 4 payments after the 3 bonds
     expect(first.calls.pay - listPays).toBe(4);
+  });
+
+  it("STATE-9: --from-step 4 after a complete run pays for nothing again, --only N still can", async () => {
+    const t = setup({ mainnet: true });
+    expect((await t.run()).exit).toBe(0);
+    const paidBefore = t.calls.pay;
+    expect(paidBefore).toBe(7); // 3 bonds, 2 evals, the buy, the broken-host eval
+    expect(t.calls.outbound).toBe(1);
+
+    const r = await t.run({ from: 4 });
+    expect(r.exit).toBe(0);
+    expect(t.calls.pay).toBe(paidBefore);
+    expect(t.calls.outbound).toBe(1);
+    const skipped = r.results.filter((x) => x.status === "SKIP");
+    expect(skipped.map((x) => x.n)).toEqual([4, 5, 6, 8, 9]);
+    expect(skipped.every((x) => x.na && x.summary.includes("already paid in the run 20261112T140000Z"))).toBe(true);
+    expect(r.results.filter((x) => x.status === "PASS").map((x) => x.n)).toEqual([7, 10]);
+    // the spend plan approved for the rerun lists none of the paid steps
+    expect(r.plan?.lines.join("\n")).not.toMatch(/step (4|5|6|8|9) /);
+    expect(r.plan?.spendsValue).toBe(false);
+
+    await t.run({ from: 4, only: 4 });
+    expect(t.calls.pay).toBe(paidBefore + 1);
   });
 
   it("--from-step 6 --only 7 decrypts the purchase an earlier run made without paying again", async () => {

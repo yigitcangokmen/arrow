@@ -244,6 +244,18 @@ describe("try-testnet", () => {
     expect(a.sentEvals).toHaveLength(0);
   });
 
+  it("CI-8: a missing or stale demo listings file stops the run before the faucet, the sponsor, the mint and the judge file", async () => {
+    const missing = await setup({}, { listings: () => { throw new TryStop("fixtures/testnet-listings.json is missing"); } });
+    await expect(runTry(missing.deps, {})).rejects.toThrow(/is missing/);
+    expect(missing.calls).toEqual({ faucet: 0, sponsor: 0, mint: 0, newKey: 0 });
+    expect(existsSync(join(dir, JUDGE_FILE))).toBe(false);
+
+    const stale = await setup({}, { programHash: async () => "cd".repeat(32) });
+    await expect(runTry(stale.deps, {})).rejects.toThrow(/stale; re-run e2e-testnet --publish-demo/);
+    expect(stale.calls).toEqual({ faucet: 0, sponsor: 0, mint: 0, newKey: 0 });
+    expect(existsSync(join(dir, JUDGE_FILE))).toBe(false);
+  });
+
   it("old Node versions are told to nvm use", async () => {
     seedJudge();
     const a = await setup({}, { nodeVersion: "18.20.0" });
