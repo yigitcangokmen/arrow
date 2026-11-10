@@ -106,10 +106,10 @@ Acceptance: `tools_versions_pinned` PASS · `outlayer_cli_present` PASS.
 - Chosen path: —
 - Changed claim: —
 
-### S4-a · 1Click inbound + Solana dry · DEFERRED → 11 Kas 12:00 GMT+7 [05:00Z] (K0-mainnet, PLAN §4.0(4)/§4.3; waiting human funding) (H-08a needs H-03 Base USDC; H-04 Solana) · —
-- Commands: human H-08a (RUNBOOK spikes/s3/RUNBOOK.md).
-- Evidence: none yet.
-- PASS items: NOT MEASURED.
+### S4-a · 1Click inbound + Solana dry · DEFERRED → 11 Kas 12:00 GMT+7 [05:00Z] (K0-mainnet, PLAN §4.0(4)/§4.3) · Solana dry PASS 2026-11-10 21:45 GMT+7 [14:45Z]; inbound waits H-08a (READY 21:55: H-03 funded) · —
+- Commands: agent `npx tsx spikes/s4/s4a-solana-dry.ts` (free, dry:true, seller Intents USDC → "Arrow Sol" Solana USDC); human H-08a `npx tsx spikes/s4/s4a-inbound.ts --amount 2` (HANDOFFS.md H-08a line).
+- Evidence: Solana dry 21:45 → `dry quote 200 · amountIn 3 · amountOut 2.989698 (2989698) · withdrawFee 9951 · timeEstimate 7 s` · `no ATA error`, exit 0, `spikes/s4/s4a-solana-dry.json` (no addresses stored). Read-only Solana RPC `getTokenAccountsByOwner` (USDC mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v) for the H-04 address → one token account holding 3.3 USDC, so the ATA exists. Inbound dry 21:47 with the funded buyer → `Base USDC 15.1 · ETH 0.0016 · dry quote 200 · amountOut 1.999596 · timeEstimate 35 s`. Paid inbound: none yet.
+- PASS items: (Solana dry) quote 200 + no ATA error PASS · (inbound) SUCCESS < 120 s and buyer Intents +≈1.99: NOT MEASURED (H-08a).
 - Chosen path: —
 - Changed claim: —
 

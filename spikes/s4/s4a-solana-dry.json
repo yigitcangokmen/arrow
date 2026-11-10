@@ -1,0 +1,10 @@
+{
+  "timestamp_utc": "2026-11-10T14:45:40.337Z",
+  "amount_in": "3000000",
+  "amount_out": "2989698",
+  "amount_out_formatted": "2.989698",
+  "withdraw_fee": "9951",
+  "time_estimate_s": 7,
+  "ata_warning": false,
+  "note": "dry:true quote; destination and seller addresses are not stored"
+}
