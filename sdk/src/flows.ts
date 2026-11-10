@@ -32,8 +32,11 @@ export function prepareList(p: {
   mode: Mode;
   programPk: string;
   payout?: string;
+  /** Only for a reproducible ciphertext (the CLI derives both from a local secret so the blob can be uploaded before listing). */
+  key?: Uint8Array;
+  nonce?: Uint8Array;
 }): { msg: string; blob: Uint8Array; blobSha256: string } {
-  const { key, blob, blobSha256 } = encryptFile(p.plaintext);
+  const { key, blob, blobSha256 } = encryptFile(p.plaintext, p.key, p.nonce);
   const sealedK = b64.enc(seal(p.programPk, sealedKPayload(key, blobSha256)));
   key.fill(0);
   const msg = ListMsg.parse({

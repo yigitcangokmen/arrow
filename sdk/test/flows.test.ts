@@ -161,3 +161,17 @@ describe("ArrowViews", () => {
     expect(JSON.parse(f.mock.calls[0][1].body).params.account_id).toBe("arrow-market.near");
   });
 });
+
+describe("prepareList with a given key and nonce", () => {
+  it("prepare_list_reproducible_blob", () => {
+    const args = () => ({
+      plaintext, title: "t", publicDesc: "d", columns: ["id"], rowsClaimed: 2, blobUrl: "https://blobs.example/x.bin",
+      price: "250000", evalFee: "100000", mode: "scored" as const, programPk,
+      key: new Uint8Array(32).fill(7), nonce: new Uint8Array(24).fill(9),
+    });
+    const a = prepareList(args());
+    const b = prepareList(args());
+    expect(a.blobSha256).toBe(b.blobSha256);
+    expect(a.blob).toEqual(b.blob);
+  });
+});
