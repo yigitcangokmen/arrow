@@ -24,7 +24,7 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | 11 Kas 05:49 [10 Kas 22:49Z] (was 10 Kas 21:00; = K0) | H-24 | WS-1 T11 | K0 (only if triggered) | N/A unless triggered |
 | when triggered | H-25 | WS-1 T05 | WS1-T05 testnet faucet fallback | N/A (faucet worked 15:10, block below) |
 | 11 Kas 12:00 [05:00Z] | H-07b | WS-1 T11 | H-12 (only if K0 picks Escrow) | N/A unless Escrow |
-| 11 Kas 12:00 [05:00Z] | H-W6e | WS-6 T02 | WS6-T02 (default A if no answer) | OPEN |
+| 11 Kas 12:00 [05:00Z] | H-W6e | WS-6 T02 | WS6-T02 | DONE: B (KU-10) |
 | 11 Kas 15:00 [08:00Z] | H-21 | WS-6 T04 | WS6-T05 | OPEN |
 | 11 Kas 23:00 [16:00Z] | H-WS2-a | WS-2 T12b | reproducible build (only if Docker is down) | N/A unless triggered |
 | when it appears | H-WS2-b | WS-2 | macOS Keychain prompt | N/A unless triggered |
@@ -162,7 +162,7 @@ Result (human fills):
 Purpose: S1-b ve freeze için public raw GitHub URL (DEC S-01, S-02); commit geçmişi süreç izi. DEC §K: push kısmı ajan işi (K-02) ve yapıldı; repoyu public yapmak insan işi ve kullanıcı henüz onaylamadı (K-03). Ajan beklemiyor: S1-b FastFS URL'siyle koşar, final wasm S-02 yedeğiyle (Vercel static, o da olmazsa FastFS) sabitlenir.
 Preconditions (ajan çıktısı, 2026-11-10 15:07-15:08 GMT+7):
     - `bash scripts/secret-scan.sh` → `SECRET_SCAN: PASS` (raw S-04 grep 17 eşleşme, hepsi boş env adı ya da doküman satırı; strict kalıp yok; gitleaks "no leaks found", 3 commit).
-    - Plan belgeleri takipte değil: `git ls-files | grep -E "KICKOFF|DECISIONS|PLAN|OPEN-QUESTIONS|^tasks/"` → boş (DEC S-01, W-17). Yerel notlar gitignored.
+    - Plan belgeleri takipte değil: `git ls-files | grep -E "KICKOFF|DECISIONS|PLAN|OPEN-QUESTIONS|^tasks/"` → boş (DEC S-01, W-17). The local maintainer notes file is gitignored.
     - Push DONE (ajan, K-02): `git push -u origin main` → `origin/main = 6c7b4d37` (42595fc bootstrap, aa012ce scaffold + fixtures v1, 6c7b4d3 ledger sync). `gh repo view yigitcangokmen/arrow --json visibility` → `PRIVATE`.
     - Not: `STATUS.md` henüz commit edilmedi (Workstreams tablosu oturum model adlarını içeriyor, DEC K-04); public'ten önce entegratör bu satırları temizleyip commit eder ya da defteri yerel tutar.
 Run exactly (ONLY if the user approves making the repo public):
@@ -176,7 +176,7 @@ Write result to: Result satırı (saat + `git rev-parse --short origin/main`).
 If it fails / not approved: repo private kalır. Ajan S1-b'yi testnet FastFS URL'siyle koşar (H-05 "If it fails" yolu, DEC K-03) ve freeze'de Vercel static URL'sine geçer (`.vercelignore`'daki `release/*.wasm` satırı o zaman kaldırılır, `web/public/release/` kullanılır). Kullanıcı public derse S-02 birincil yol (raw GitHub) geri gelir; freeze'den (K3) sonra URL değişmez.
 Result (human fills):
 
-## H-W6e · Team-made dataset source decision (Agent Market ToS)  · due 11 Kas 12:00 GMT+7 [05:00Z] · status: OPEN
+## H-W6e · Team-made dataset source decision (Agent Market ToS)  · due 11 Kas 12:00 GMT+7 [05:00Z] · status: DONE (B)
 Purpose: Agent Market ToS v2026-10-15 §9.2(h),(j) forbids scraping / collecting content "at scale". Confirm the narrowed dataset or pick fallback B. (Block written by S-epsilon, WS6-T02, 2026-11-10 15:16 GMT+7.)
 Preconditions: `fixtures/team-made/SOURCE.md` exists (agent wrote it; it quotes the clauses). Collected 2026-11-10 08:13:58Z to 08:14:34Z, 16 GET, 775 rows, on branch ws/6-data (commit 611b754, not yet merged).
 Run exactly:
@@ -185,6 +185,7 @@ Expected: reply "A" (keep narrowed Agent Market snapshot, 16 published index fil
 Write result to: paste "A" or "B" to the WS-6 session; it records it in STATUS.md and SOURCE.md.
 If it fails / no answer by 13 Kas 10:00: default "A" stands (it is used in H-15 that evening).
 Result (human fills):
+B (user delegated the decision to the orchestrator, 2026-11-10 ~16:00 GMT+7; DEC §K KU-10). The Agent Market snapshot commit was dropped from ws/6-data and local main before any push.
 
 ## H-09 · Seller invites · due 11 Kas 02:49 GMT+7 [10 Kas 19:49Z] (PLAN 10 Kas 18:00 + Δ 8:49) · status: OPEN
 Purpose: send the seller invites (G4). Human-only: messages go out under the lead's X account. Nothing has been sent; every message is a draft. (Block written by S-epsilon, WS7-T02, 2026-11-10.)
