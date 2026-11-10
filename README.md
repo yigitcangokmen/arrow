@@ -1,72 +1,141 @@
-# Arrow: inspect-before-pay for datasets, on NEAR
+# Arrow: inspect before you pay, on NEAR
 
-> Built at NEAR HACKATHON (2026-11). Skeleton README: every `<…>` is filled with real values before submission. The repo contains no claim without a command or transaction behind it.
+Inspect before you pay: the buyer's AI reads the sealed data inside a TEE, and only a capped verdict (at most 5.67 bits per eval) comes back to the buyer. The seller encrypts a dataset in the browser, the buyer pays from any chain through NEAR Intents, and after a purchase the data key is released to the buyer's key. If the enclave fails or times out, `intents.near`'s own `mt_resolve_transfer` refunds the buyer's NEAR Intents balance.
 
-Arrow lets a buyer's AI read an encrypted dataset inside a TEE before paying. Only a capped verdict leaves the enclave: `BUY` / `PASS`, optionally `fit 1-5 · novelty 1-5`. The buyer pays from any chain through NEAR Intents, and the data key is then released to the buyer's key on chain. If the enclave fails or times out, `intents.near`'s own `mt_resolve_transfer` refunds the buyer in the same receipt tree. <If gate S3 fell back to escrow: "the Arrow contract refunds the buyer".>
+> **Draft status.** Everything below is backed by a command or a transaction in this repository today. Items that need the mainnet deployment, the final run or the lock are marked `TODO(...)` or `{{UPPER_SNAKE}}`; they are filled from recorded evidence, never by hand, and `bash scripts/check-claims.sh --final` fails until none are left.
 
 ## Problem
 
-You cannot sell information: to judge its value the buyer must see it, and once they have seen it they have no reason to pay. This is Arrow's information paradox (1962). Data licensing (for example Reddit and Google, about $60M per year) and on-chain research bounties pay this cost today. Arrow lets the buyer's own AI read the data where nobody else can see it, and lets out only a few bits.
+You cannot sell information: to judge its value the buyer must see it, and once they have seen it they have no reason to pay. Kenneth Arrow described this paradox in 1962 ([NBER](https://www.nber.org/books-and-chapters/rate-and-direction-inventive-activity-economic-and-social-factors/economic-welfare-and-allocation-resources-invention)). Data sellers work around it today with NDAs, samples and trust. Arrow lets the buyer's own AI read the data where nobody can look, and lets out a few bits.
 
-## Status: what is live, what is not
+## Status (as of {{STATUS_UTC}})
 
-- Mainnet contract: `arrow-market.near`, locked (all access keys deleted) in tx `<LOCK_TX>`. Program wasm sha256: `<WASM_SHA256>`.
-- Testnet contract: `arrow.arrowhq.testnet`, same wasm sha256 `<WASM_SHA256>`.
-- Mainnet records: `<N>` listings (1 team-made real dataset, `<M>` external, rest demo, all labelled), `<K>` evals, `<J>` purchases. Listings before the lock are labelled "pre-lock" by `verify`.
-- Not live / not claimed: E2EE to NEAR AI (TLS only), on-chain TDX quote verification, resale prevention, eval-time NEAR AI attestation.
-
-## Try it (do X - see Y)
-
-Main path needs Node 22.x (≥22.22.2) or 24.x and no Rust, keys or funds.
-
-1. `git clone <REPO_URL> && cd arrow && npm ci`. See: install finishes without errors.
-2. `npm run verify`. See: `verify: <N>/<N> PASS`, with an explorer link per line (mainnet, read-only, archival RPC). For each eval and purchase it checks:
-   - OutLayer attestation `wasm_hash` == contract `program_wasm_hash` == `sha256(release/arrow-tee.wasm)`,
-   - attestation `transaction_hash` == the eval tx,
-   - `<input/output hash check, only if gate S1-b(5) established what input_hash/output_hash cover>`,
-   - 1Click inbound and outbound status `SUCCESS`.
-3. `npm run verify -- --decrypt-demo`. See: demo purchase #1 decrypted with the public demo viewing key, then `sha256(decrypted) == listing.blob_sha256 ✔`.
-4. `npm run bench:offline`. See: re-scored recorded runs.
-   - leak-bench (55 attacks incl. 5 error-path): Arrow vs free-text preview, verbatim leaks `<X>` vs `<Y>`, timing-channel estimate `<T>` bits.
-   - quality-bench (40 evals): BUY rate on injected listings, Arrow `<a>/10` vs LLM-only `<b>/10`, false flags on clean BUY/SELL data `<c>`.
-5. `npm run replay`. See: NEAR AI response signatures for the bench's direct NEAR AI calls, `<captured>/<total>` captured and verified. Signature lookups are best-effort per NEAR AI docs, so some are missing.
-6. `npm run try:testnet` (free; creates a testnet account through the NEAR faucet or our hosted sponsor endpoint and mints test tokens from `arrow-usd.arrowhq.testnet`). See: list → eval → buy → decrypt, prints `PASS · fit 4 · novelty 1`, then `sha256 match ✔`. Takes ~2-3 min. If our NEAR AI credit or the daily testnet eval cap is exhausted, it says so and points to step 4.
-7. Run step 6 with `--criteria fixtures/criteria/print-row-1.json`. See: `PASS · fit 1 · novelty 1`, no text.
-8. Open `<HOSTED_URL>/verify` and paste eval id `<EVAL_ID>`. See: the same checks as step 2 in the browser, plus TDX quote verification via `@phala/dcap-qvl-web`.
-9. Agent path: `npm run arrow -- eval <LISTING_ID> --criteria fixtures/criteria/demo.json --network testnet`. See: the same verdict as step 6. MCP: `<MCP_CONFIG_SNIPPET>` exposes MCP server `arrow`, tool `inspect_before_buy`.
-10. Optional, needs Rust ≥1.95: `cargo test -p arrow-core`. See: passes, including `output_space_is_at_most_51_states` and `no_stderr_on_any_error`.
+- Mainnet contract: `TODO(mainnet)` `arrow-market.near`, locked (all access keys deleted) in tx `{{LOCK_TX}}`. Program wasm sha256 `{{WASM_SHA256}}`, contract wasm sha256 `{{CONTRACT_WASM_SHA256}}`.
+- Testnet: contract `arrow.arrowhq.testnet` and the testnet token `arrow-usd.arrowhq.testnet`. `TODO(testnet-deploy)` the market contract is not deployed there yet; the token and the gate spikes below are.
+- Demand: `{{DEMAND_LINE}}`
+- Gates run so far (testnet and free mainnet views): S2, S1-b (echo), S3a (dry), S4-b. See [Gates and evidence](#gates-and-evidence).
+- Not live / not claimed: `TODO(S1-a)` NEAR AI calls from inside the enclave (the S1-a gate waits for an API key), the paid cross-chain inbound (S4-a), mainnet purchases, E2EE to NEAR AI (TLS only), on-chain TDX quote verification, resale prevention, eval-time NEAR AI attestation.
+- The testnet contract is not locked, so daily caps can be adjusted.
 
 ## Trust table
 
-| Part | Who you trust | Can see | Cannot | How to check |
-|---|---|---|---|---|
-| Seller data at rest | Nobody (ciphertext; host untrusted) | — | Decrypt | `blob_sha256` on chain; enclave checks it |
-| Program key / `PROTECTED_MASTER` | OutLayer keystore (TDX) + shared OutLayer master | Inside TEE | Release to an unpinned wasm or a non-Arrow caller | `WasmHash` + `Predecessor` condition; in-wasm network allowlist; negative tests `<S1-b tx>`, `<S3c tx>` |
-| OutLayer keystore DAO | Can export keys on "cessation" | Potentially everything | — | **Open risk** |
-| Evaluation | Intel TDX (OutLayer worker) | Plaintext inside TEE | Emit anything outside the schema | Open source; attestation `wasm_hash` |
-| LLM | NEAR AI gateway (TDX) + model TEE (TDX + NVIDIA CC) | 40 sampled rows + criteria | Retain data (NEAR AI zero-data-retention claim: a trust assumption) | `/v1/attestation/report` shows the endpoint's **current** attestation, not eval-time; the wasm does not verify quotes itself |
-| Wasm ↔ NEAR AI | TLS (not E2EE) | — | — | Endpoint and model ID fixed in source |
-| OutLayer coordinator (closed source) | Liveness | Encrypted input | Read secrets | If it fails, the callback gets `null` and the buyer is refunded in full |
-| `outlayer.near`, `intents.near` contracts | Their owners (upgradable); Arrow depends on them | — | — | **Open risk**; `verify` reads historical txs |
-| Arrow operator | Relayer liveness, gas tank | Encrypted blobs | Read data, take funds, change contract or wasm hash after the lock | No access keys (`<LOCK_TX>`); contract owns itself |
-| NEAR AI API key (inside OutLayer secret) | Billing | Usage volume | See content | — |
-| 1Click / PoA bridge (Intents Technology) | Short custody during swaps; Base/Solana USDC arrive as `omft.near` bridged tokens | Swap txs | — | 1Click `/v0/status`. Users see no bridge UI, but assets do come through a bridge |
-| Output channel | Schema + rule composition | ≤5.67 bits/eval (scored), ≤1.58 (verdict) | Free text | `cargo test`, leak-bench |
-| Error channel | One fixed error state, empty stderr | 1 state (counted in the bound) | Carry data | `no_stderr_on_any_error`, leak-bench error-path |
-| Side channels | **Not closed** | `time_ms`, `instructions` on chain | — | leak-bench timing measurement: `<T>` bits |
-| Decision correctness | Structural gates + LLM | — | The LLM cannot produce BUY unless the structural gates pass | quality-bench. Semantic injection on structurally valid data is an open risk: `<a>/10` |
-| Buyer viewing key | The buyer's EOA signature over a domain-bound message | — | — | Any site that obtains the same signature can derive it; EOA required (EIP-1271 wallets are not deterministic) |
-| After purchase | Buyer | All data | — | Out of scope (resale is not prevented) |
+Labels: **PROVEN** = a command or tx in this repo shows it. **RISKY** = true, and a weakness. **NOT PROVEN** = we do not claim it. **TODO** = proof is planned and not yet run.
 
-## Leak bound
+| Part | Who you trust | Can see | Cannot | How to check | Label |
+|---|---|---|---|---|---|
+| Seller data at rest | Nobody (ciphertext; the blob host is untrusted) | Ciphertext | Decrypt | `blob_sha256` is on chain and the enclave checks it before reading; `cargo test -p arrow-core` | TODO (mainnet run) |
+| Program key / `PROTECTED_MASTER` | OutLayer keystore (TDX) and the shared OutLayer master | Inside the TEE | Release to an unpinned wasm or a non-Arrow caller | `WasmHash` + `Predecessor` access condition. Negative test: an attacker account calling OutLayer directly gets `Access denied by access condition`, tx [`smm9T86m…`](https://testnet.nearblocks.io/txns/smm9T86m4RU8grrrbHgAsSd3TeD5zkCuT4FH4tbugH6) | PROVEN (testnet, echo program) |
+| OutLayer keystore DAO | Can export keys on "cessation" | Potentially everything | n/a | Open risk | RISKY |
+| Evaluation | Intel TDX (OutLayer worker) | Plaintext inside the TEE | Emit anything outside the schema | Open source; attestation `wasm_hash` and `transaction_hash` match the run (S1-b item 5) | PROVEN (testnet, echo program) |
+| LLM | NEAR AI gateway (TDX) and model TEE (TDX + NVIDIA CC) | 40 sampled rows + criteria | Retain data (NEAR AI's zero-data-retention claim is a trust assumption) | `/v1/attestation/report` shows the endpoint's **current** attestation, not eval-time; the wasm does not verify quotes itself | NOT PROVEN |
+| Wasm to NEAR AI | TLS (not E2EE) | n/a | n/a | Endpoint and model ID are fixed in source | RISKY |
+| Time guard | The TDX clock, which the host provides | n/a | n/a | The wasm compares the block timestamp with the TDX clock, which the host provides. A host that lies about time can make a late result look on time. Measured skew max 5.6 s on testnet | RISKY |
+| OutLayer coordinator (closed source) | Liveness | Encrypted input | Read secrets | If it fails, the callback gets `null` and the buyer is refunded in full (sandbox, S2) | PROVEN (sandbox) |
+| `outlayer.near`, `intents.near` contracts | Their owners (both are upgradable); Arrow depends on them | n/a | n/a | `outlayer.near` code hash changed between 2026-11-09 (`5waW…`) and 2026-11-10 (`8rRYys…`) | RISKY |
+| Program bytes | Whoever serves the wasm URL | The wasm | Change it unnoticed (hash-pinned) | Availability depends on the host (FastFS on testnet; the repo is private) | RISKY |
+| Arrow operator | Relayer liveness, gas tank | Encrypted blobs | Read data, take funds, change contract or wasm hash after the lock | `TODO(lock)` no access keys (`{{LOCK_TX}}`); the contract owns itself | TODO |
+| NEAR AI API key (inside the OutLayer secret) | Billing | Usage volume | See content | The mainnet inference key can be topped up, not rotated | RISKY |
+| 1Click and the PoA bridge (Intents Technology) | Short custody during swaps | Swap txs | n/a | Base and Solana USDC arrive as bridged tokens (`omft.near`); 1Click `/v0/status`. `TODO(S4-a)` paid inbound not run yet | NOT PROVEN |
+| Refund destination | `intents.near` | n/a | n/a | Refunds go to the buyer's NEAR Intents balance (`0x…` account in `intents.near`). Moving them back to Base is a separate 1Click withdrawal | TODO (mainnet refund tx) |
+| Output channel | Schema and rule composition | At most 5.67 bits per eval (scored), 1.58 (verdict) | Free text | `cargo test -p arrow-core` (`output_space_is_at_most_51_states`, `output_le_900_bytes`) | PROVEN |
+| Error channel | One fixed error state, empty stderr | 1 state (counted in the bound) | Carry data | `bash scripts/dev/stderr-harness.sh` | PROVEN (native harness) |
+| Leak budget | The contract counter | n/a | n/a | A buyer can burn a listing's budget by forcing failed evals (pays gas, learns at most the error state). `evals_used` never decreases | RISKY |
+| Side channels | Not closed | `time_ms`, `instructions` on chain | n/a | `TODO(bench)` leak-bench timing measurement | RISKY |
+| Decision correctness | Structural gates and the LLM | n/a | The LLM cannot produce BUY unless the structural gates pass | `cargo test -p arrow-core` (`llm_cannot_buy_without_structural_gates`); `TODO(bench)` quality-bench. Semantic injection on structurally valid data is an open risk | PROVEN (gates), RISKY (semantics) |
+| HTTP 402 wrapper | n/a | n/a | n/a | The 402 response describes how to inspect and pay; it carries no payment and no x402 facilitator is involved. `TODO(web)` live `curl -i` | TODO |
+| Buyer viewing key | The buyer's EOA signature over a domain-bound message | n/a | n/a | Any site that obtains the same signature can derive it; an EOA is required (EIP-1271 wallets are not deterministic) | RISKY |
+| After purchase | The buyer | All data | n/a | Out of scope: resale is not prevented | NOT PROVEN |
 
-- scored: `log2(2·5·5 + 1) = 5.67` bits/eval.
-- verdict-only: `log2(3) = 1.58` bits/eval.
-- Lifetime: ≤ `max_evals × bits`. The counter is on the listing, so the bound holds against sybil buyers.
-- Measured side channel (time/instructions): `<T>` bits.
+## Try it (do X, see Y)
+
+What runs today with Node 22.22.2 or later (tested on 24.15.0) and, for steps 4-6, Rust 1.95 or later. No keys, no funds. Steps that need the deployed contract come later and are listed under `TODO`.
+
+1. `npm ci`. See: the install finishes without errors. (`TODO({{REPO_URL}})` clone line once the repository is public.)
+2. `bash scripts/check-claims.sh`. See: no output, exit 0. This is the scanner for the phrases we promise not to write (below).
+3. `npm run bench:offline`. See: a results table that re-scores recorded runs; rows with no recorded run say `not run`; the injection room line reads `19/24 (79.2%)` stopped by the deterministic layer alone. Every dataset in the bench is synthetic and labelled so.
+4. `cargo test -p arrow-core`. See: `test result: ok. 77 passed`, including `output_space_is_at_most_51_states`, `output_le_900_bytes` and `regex_no_false_positive_on_buy_sell_column`.
+5. `cargo run -p s4-interop --release`. See: `S4-b RESULT: PASS`, with `ecies ts->rs: 7/7`, `xchacha ts->rs: 4/4`, `minhash ts->rs: 8/8`. TypeScript and Rust seal, open and fingerprint identically.
+6. `npx tsx spikes/s3/s3a-simulate.ts`. See: `payload carries msg: yes · min_gas: yes`, then `class: SIGNATURE_OK_BALANCE_ERROR`. A signed transfer intent with a `msg` is accepted by `intents.near` (mainnet `simulate_intents`, a free view, throwaway key); only the empty balance fails. Nothing is sent.
+7. `npm run arrow -- --help`. See: the commands `list`, `eval`, `buy`, `status`, `decrypt`.
+
+`TODO(testnet-deploy)` after the market contract is on testnet: `npm run try:testnet` (list, eval, buy, decrypt), `npm run arrow -- status --network testnet`, `npm run arrow -- list … --dry-run`. `TODO(mainnet)` `npm run verify`, `npm run verify -- --decrypt-demo`, `npm run replay`, the hosted `/verify/{{EVAL_ID_DEMO}}` page and `curl -i {{HOSTED_URL}}/api/x402/{{LISTING_ID_DEMO}}`. If one of these fails for a reason outside our control, steps 3 to 6 above still run offline.
+
+## Gates and evidence
+
+Each gate is a spike run before the real build. Transaction links point at the testnet explorer; raw notes are in `spikes/GATES.md` (integration ledger).
+
+| Gate | Result | Evidence |
+|---|---|---|
+| **S2** testnet token and refund | PASS. Public capped mint works; a receiver that returns the whole amount leaves both balances unchanged; one that keeps exactly 100000 moves exactly 100000. Sandbox: a mock OutLayer returning `null`, or never resuming, produces a full refund on both rails (`arrow_refund` event). | Deploy [`DKcmuQZf…`](https://testnet.nearblocks.io/txns/DKcmuQZfqyXg4MprUqKqqJL9XADcL4hrCeWcTQ2LG7sL), mint [`FigU6Yju…`](https://testnet.nearblocks.io/txns/FigU6Yju4aSxCmJtjnmUECcTCLbHiZUebpT1AGMSytwH), over-cap mint rejected [`9VEBgna2…`](https://testnet.nearblocks.io/txns/9VEBgna2bjfFLFa2efZjPamL7H6tYsu9kzDkxjpcSd1K), refund_all [`5toQSSae…`](https://testnet.nearblocks.io/txns/5toQSSaeNKNYyE1WAmEeZtMFwCvyLptKgraS1DT5srrV), keep [`Ajx43mbG…`](https://testnet.nearblocks.io/txns/Ajx43mbGw8pv6fWTPW5FCAww9bvwhux2DzhWh3uuKtzH). Sandbox suite: `cargo test --manifest-path spikes/s2/receiver/Cargo.toml --test s2` after building the contracts (6 passed when recorded) |
+| **S1-b** OutLayer chain mode, testnet | PARTIAL. Echo program (not the Arrow program, sha256 `195508a1…1151e`) on `spike.arrowhq.testnet`: 3 of 3 runs return valid JSON; caller and network are visible to the wasm; block-to-callback 6.9 to 8.9 s; an attacker account calling OutLayer directly is refused; attestation `wasm_hash`, `transaction_hash`, `input_hash` and `output_hash` match the run; measured clock skew at most 5.6 s, so the time guards stay at 90 s (eval) and 60 s (release). `TODO(S1-a)` the same runs with a NEAR AI call wait for an API key. | Runs [`ED5VCvV6…`](https://testnet.nearblocks.io/txns/ED5VCvV6vyzosFm9bHA1BSA4dDkk3RxdLrC2jGuCqaRi), [`4Q5eNqa3…`](https://testnet.nearblocks.io/txns/4Q5eNqa3YbGuApELvMso2oZN9aeNd3GCjjJc3wTiEF5S), [`8aPNegaf…`](https://testnet.nearblocks.io/txns/8aPNegafPsKGkUPsKQe2Qf1qaYHhjyiY7ZwGVFVoBJah); negative [`smm9T86m…`](https://testnet.nearblocks.io/txns/smm9T86m4RU8grrrbHgAsSd3TeD5zkCuT4FH4tbugH6) |
+| **S3a** signature simulation (dry) | (i) PASS. A signed ERC-191 transfer intent carrying `msg` and `min_gas` is accepted; the only error is `insufficient balance or overflow`. (ii) `TODO` the funded simulate needs a funded buyer. | `npx tsx spikes/s3/s3a-simulate.ts`; result file `spikes/s3/s3a-results.json` |
+| **S4-b** ECIES, XChaCha, MinHash interop | PASS in both directions: ECIES 7/7 and 5/5, XChaCha 4/4 and 4/4, MinHash 8/8, plus the TypeScript interop test. | `cargo run -p s4-interop --release`; `npx vitest run sdk/test/crypto.interop.test.ts` |
+| S3b, S3c (mainnet), S4-a (paid inbound) | `TODO` not run. Dry runs only (`SIGNATURE_OK_BALANCE_ERROR`); the real runs move value and are done by a human. | n/a |
+
+## Leak bound and leak budget
+
+- Scored mode: `log2(2·5·5 + 1) = 5.67` bits per eval (`bits_per_eval_milli` 5673). Verdict-only mode: `log2(3) = 1.58` bits (1585).
+- Lifetime bound per listing: `max_evals × bits`. For 50 evals in scored mode that is 283.65 bits (`budget_milli` 283650). The counter lives on the listing, so the bound holds against many buyers.
+- `evals_used` increments inside `mt_on_transfer` and is never decremented, not even on refund. When it reaches `max_evals`, a further `op=eval` is refused with a full refund; `op=buy` keeps working. Read it with the `leak_budget(listing_id)` view: `bits_per_eval_milli`, `max_evals`, `evals_used`, `budget_milli`, `spent_milli`, `left_milli`.
+- The budget can be burned by forcing errors (RISKY, see the trust table).
+- Output is also capped at 900 bytes, the OutLayer blockchain-mode limit; Arrow targets 400.
+- Measured side channel (time, instructions): `TODO(bench)`.
+
+## How it works · NEAR technology used
+
+```
+seller browser                         buyer (any chain)
+  encrypt dataset (XChaCha)              pays 1Click -> NEAR Intents balance (0x... account)
+  seal key to enclave pubkey (ECIES)     signs a transfer intent with a msg
+        |                                        |
+        v                                        v
+   blob host (untrusted)            intents.near --mt_on_transfer--> Arrow contract
+                                                                     |  request_execution (yield)
+                                                                     v
+                                                  OutLayer worker: Intel TDX
+                                                  arrow-tee wasm (WASI P2), PROTECTED_ secret
+                                                  1. checks caller and network
+                                                  2. downloads blob, checks sha256
+                                                  3. samples rows, calls NEAR AI (TEE model)
+                                                  4. composes a fixed-schema verdict
+                                                  5. time guard, then writes <= 900 bytes
+                                                                     |  resume
+                                                                     v
+                                  Arrow contract: verdict to buyer, or null/ok:false -> refund
+```
+
+- **NEAR AI Cloud** private inference. Planned model `Qwen/Qwen3.8-27B`; `TODO(S1-a)` the model is final only after the S1-a gate has run with a key. Fixed endpoint, `json_schema`, `temperature 0`, `max_tokens 64`, reasoning off, 40 sampled rows.
+- **OutLayer** TDX: a WASI P2 program, a `PROTECTED_` secret, a `WasmHash` + `Predecessor` access condition, and the `request_execution` yield and resume callback.
+- **NEAR Intents**: transfer intent with a `msg` that triggers `mt_on_transfer`, `mt_resolve_transfer` refund, ERC-191 signer, and **1Click** for cross-chain inbound and outbound.
+- NEP-245, NEP-141 (testnet token), NEP-297 events, NEP-330 reproducible build, `0x…` implicit accounts: buyer and seller need no NEAR account.
+- The decision is not the LLM's alone: `novelty` is deterministic, `fit = min(fit_llm, fit_rule)`, and BUY needs every structural gate. A guard trip maps to `PASS · 1 · 1`, never to a new output state.
+- Every eval and release output carries `h`, the sha256 of the ciphertext the enclave downloaded; the contract refunds with `arrow_refund{reason:"hash_mismatch"}` when it differs from the listing's `blob_sha256`.
+- Security-track pieces: TEE attestation (`TODO(web)` `/verify`), a bit-capped output and an injection-refusal room (24 attacks), and a relayer key limited to `intents.near` function calls (`TODO(mainnet)`).
+
+## For agents: CLI and MCP
+
+- CLI: `npm run arrow -- <list|eval|buy|status|decrypt>` (always through `npm run`; the bare npx package name belongs to an unrelated project). Exit codes: 0 ok, 1 error, 2 usage, 3 pending, 4 refunded, 5 needs a terminal or `--yes`, 6 leak budget exhausted.
+- MCP: `npx -y tsx agent/src/mcp.ts` serves a server named `arrow` with the tools `inspect_before_buy`, `buy`, `get_listing`, `list_listings`. `TODO(mcp-snippet)` client configuration snippet and a per-call spend cap.
+- HTTP: `TODO(web)` `/api/x402/<listing_id>` returns an x402-shaped 402 response whose `accepts` is empty on purpose. x402 tells you how to pay. Arrow tells you whether it's worth paying. Payment itself goes through NEAR Intents (`mt_on_transfer`), not an x402 facilitator.
+
+## Differences from prior work
+
+| Project | Source | What it does | What Arrow adds |
+|---|---|---|---|
+| TrustKit / NDAI | github.com/discordwell/ndai-hackathon · arXiv 2502.07924 | Two agents negotiate inside an enclave; README: "egress whitelist of the LLM API hosts"; output fields "outcome, price, reason"; escrow on Base/Ethereum Sepolia | The reader model itself runs in a TEE (NEAR AI Cloud); output is a fixed schema bounded in bits; mainnet; refunds by `intents.near` |
+| Information Bazaar | arXiv 2403.14443 · github.com/tn-learn/info-bazaar | Open-source simulated market; LLM agents inspect and then forget | Forgetting is enforced by an enclave and a contract, with real payments |
+| DeadDrop | github.com/Hothit1/deaddrop | Encrypted file sale, escrowed key delivery by a keeper, testnet | DeadDrop guarantees delivery; Arrow lets the buyer judge value before paying |
+| Ocean Compute-to-Data | github.com/oceanprotocol/docs (compute-to-data) | Provider checks datatokens before the job; "results and logs" are returned to the consumer; the consumer writes the algorithm | Inspection before payment, bounded output, natural-language criteria, TEE |
+| Sealed Exploit · AgentEscrow · SealedBounty | x.com/edycutjong/status/2117725204403364028 · x.com/dele_dave/status/2117911300516823327 · x.com/0xJoydeeeep/status/2119815388657774668 | A TEE verdict releases escrow | The condition is the buyer's private criterion over the seller's private data, and a buyer who does not buy learns at most 5.67 bits |
+| x402 / Penstock | github.com/coinbase/x402 (spec v2) · github.com/ace-coderr/penstock | Pay-first paywalls for HTTP and MCP | Complementary: x402 tells you how to pay, Arrow tells you whether it's worth paying |
+| Spend firewalls (uprali, Warden, Clear to Pay) | github.com/aly-coding/uprali-mvp · x.com/saxxyweb3/status/2119774924499800353 · x.com/joezzyweb3/status/2119220897345122339 | Control whom and how much an agent pays | Arrow checks what is being bought |
+| Charter · cipherwork | github.com/Spagero763/charter · github.com/wadadawadada/cipherwork | Same stack family (NEAR AI, OutLayer, Intents), privacy for one party | Privacy for both parties against each other. The stack itself is not presented as new |
+
+A mainnet implementation of the inspect-before-pay idea (Arrow 1962; NDAI 2025; Information Bazaar 2024) where the reader model is itself in a TEE, the output is bounded in bits, and refunds are intents.near's own code. Limits: see trust table.
 
 ## What we do not claim
 
+<!-- claims:quoted:start -->
 - No on-chain TDX quote verification.
 - Not zero-knowledge.
 - No NEAR MPC CKD.
@@ -76,56 +145,52 @@ Main path needs Node 22.x (≥22.22.2) or 24.x and no Rust, keys or funds.
 - Not "no bridge".
 - Not "first NDAI" (TrustKit/NDAI is prior work).
 - The keyless contract plus OutLayer pattern also appears in other hackathon entries. We do not present it as novel.
-
-## How it works · NEAR technology used
-
-`<diagram>`
-
-- **NEAR AI Cloud** private inference: `Qwen/Qwen3.8-27B` (owned_by `nearai`), `/v1/attestation/report`.
-- **OutLayer** TDX: WASI P2 program, `PROTECTED_` secret, `WasmHash` + `Predecessor` access condition, `request_execution` yield/resume callback.
-- **NEAR Intents**: transfer intent with `NotifyOnTransfer` → `mt_on_transfer`, `mt_resolve_transfer` refund, ERC-191 signer, **1Click** (Base in, Solana out).
-- NEP-245, NEP-141 (testnet token), NEP-297 events, NEP-330 reproducible build.
-- `0x…` implicit accounts: buyer and seller need no NEAR account.
-
-## Differences from prior work
-
-| Project | Difference |
-|---|---|
-| TrustKit / NDAI | LLM outside the enclave, testnet |
-| DeadDrop | Sells encrypted files with key delivery, no inspection before purchase |
-| Ocean Compute-to-Data | Buyer writes the algorithm, unbounded output, no LLM reader. `<verify against Ocean docs>` |
+<!-- claims:quoted:end -->
 
 ## Demand (honest numbers)
 
-- `<15>` invites sent, `<M>` external listings, `<K>` external evals, `<J>` purchases.
-- Team-made dataset: `<name>`, labelled "team-made".
+- `{{DEMAND_LINE}}`
+- Team-made dataset: NEAR public-RPC chain statistics, built by `scripts/src/collect-chain-stats.ts`, labelled "team-made" (see `fixtures/team-made/SOURCE.md`). Demo data is labelled synthetic.
+- Invites log: `TODO(outreach)` `docs/outreach/log.md`. Nothing has been sent yet.
+
+## Benchmarks
+
+- Injection room: 24 attacks; the deterministic layer alone stops 19 of 24 (`npm run bench:offline`). `TODO(bench)` live room, leak-bench (50 attacks + 5 error-path), quality-bench (40 evals), timing bits, replay captured/total.
+- Criteria were written by an agent and are waiting for a human review (`bench/REVIEW.md`).
+
+## Video
+
+`TODO(video)` {{YOUTUBE_URL}}
 
 ## Repo layout
 
-`contracts/` (arrow, arrow-usd, mock-outlayer) · `enclave/` (arrow-core, arrow-tee) · `sdk/` · `web/` · `agent/` · `scripts/` · `bench/` · `fixtures/` · `release/`
+`contracts/` (arrow, arrow-usd, mock-outlayer) · `enclave/` (arrow-core, arrow-tee) · `sdk/` · `web/` · `agent/` · `scripts/` · `bench/` · `fixtures/` · `spikes/` · `release/`
 
 ## Build from source
 
-- Contracts: `cargo near build reproducible-wasm` (Docker), compare with the on-chain code hash.
-- Enclave: `cargo build -p arrow-tee --target wasm32-wasip2 --release`, compare `sha256` with `release/sha256.txt` and the contract's `program_wasm_hash`.
+- Contracts: `cargo near build reproducible-wasm` (Docker) for the final build; compare with the on-chain code hash. `TODO(mainnet)`
+- Enclave: `cargo build -p arrow-tee --target wasm32-wasip2 --release`; compare its sha256 with `release/sha256.txt` and the contract's `program_wasm_hash`. `TODO(freeze)` `release/` is filled at the wasm freeze.
 
 ## Keys in this repository
 
-None. Testnet accounts for judges are created at run time (faucet or hosted sponsor endpoint). `<If kept: the demo buyer viewing key is derived from the public label "arrow:demo-buyer:public:v1"; it is intentionally public, holds no funds and only decrypts demo purchases.>`
+None, with one deliberate exception: the demo buyer's viewing key is derived in code from the public label `arrow:demo-buyer:public:v1`. It is intentionally public, holds no funds, and only decrypts demo purchases. Testnet accounts for judges are created at run time.
 
 ## Libraries, templates, AI usage
 
-- Templates: `out-layer/private-dao-example`, `out-layer/ai-example` (MIT/Apache-2.0).
+- Templates: `out-layer/private-dao-example`, `out-layer/ai-example`.
 - Libraries: see `package.json` and `Cargo.toml`.
-- AI: Parts of the code were written with AI coding assistants and reviewed by the team.
+- Parts of the code were written with AI coding assistants and reviewed by the team.
+- Claims are in this README and the trust table above.
 
 ## Pre-hackathon code
 
-None. All code in this repository was written during the NEAR HACKATHON window (first commit `<DATE>`, after 2026-11-01).
+None. First commit 2026-11-10, inside the window that opened with the announcement on 2026-10-19.
 
 ## Other projects by the same people (Q-015)
 
-yigitcangokmen also builds Tender: https://github.com/yigitcangokmen/tender — independent code, contracts and accounts; core mechanic MPC CKD sealed bids.
+<!-- claims:quoted:start -->
+yigitcangokmen also builds Tender: https://github.com/yigitcangokmen/tender. Independent code, contracts and accounts; core mechanic MPC CKD sealed bids. The two projects share no code, packages, contracts, accounts, wallets or deployments. Arrow's core is TEE inspection with NEAR Intents refunds.
+<!-- claims:quoted:end -->
 
 ## License
 
