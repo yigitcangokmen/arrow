@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { b64, demoViewingKey, encodeState, publicKeyHex, scalarFromLabel, seal, type State } from "@arrow/sdk";
+import { b64, demoViewingKey, encodeState, publicKeyHex, scalarFromLabel, seal, sha256Hex, type State } from "@arrow/sdk";
 import type { Ctx } from "../src/commands.ts";
 import type { Transport } from "../src/transport.ts";
 import type { ViewsLike } from "../src/views.ts";
@@ -34,7 +34,9 @@ export interface Fake {
 
 export function fakeCtx(o: { network?: "testnet" | "mainnet"; listing?: object; budget?: object; fetchImpl?: typeof fetch; verdict?: State; refund?: string; accepted?: { event: string; data: object } } = {}): Fake {
   const network = o.network ?? "testnet";
-  const listing = { ...fixture("listing"), ...o.listing };
+  // buy downloads the file before paying (X12-T01): without a test's own fetchImpl, serve bytes that hash to the listing's sha
+  const served = new TextEncoder().encode("ciphertext served by the fake host");
+  const listing = { ...fixture("listing"), ...(o.fetchImpl ? {} : { blob_sha256: sha256Hex(served) }), ...o.listing };
   const budget = { ...fixture("leak_budget"), ...o.budget };
   const records: Record<string, any> = {};
   const payCalls: Fake["payCalls"] = [];
@@ -79,7 +81,7 @@ export function fakeCtx(o: { network?: "testnet" | "mainnet"; listing?: object; 
     actor: (role) => ({ network, id: network === "mainnet" ? (role === "buyer" ? "0x" + "b".repeat(40) : "0x" + "5".repeat(40)) : `e2e-${role}.arrowhq.testnet`, viewingKey: async () => DEMO }),
     confirm: async () => {},
     evidence: (run) => void evidence.push(run),
-    fetchImpl: o.fetchImpl,
+    fetchImpl: o.fetchImpl ?? ((async () => new Response(served)) as unknown as typeof fetch),
     progress: (l) => void progress.push(l),
     wait: {
       sleep: async () => {},

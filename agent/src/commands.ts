@@ -253,6 +253,13 @@ export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boo
   if (!programPk) throw new CliError("the market has no program key yet (init_program_key not run)");
   const buyer = ctx.actor("buyer", { demoKey: a.demoKey, account: a.account });
   const viewing = await buyer.viewingKey();
+  // X12-T01: download and hash the file before paying; a seller who serves it once (to the enclave) cannot take the price.
+  let blob: Uint8Array;
+  try {
+    blob = await fetchAndCheckBlob(listing.blob_url, listing.blob_sha256, ctx.fetchImpl);
+  } catch (e) {
+    throw new CliError(`the listing's file cannot be read right now, so nothing was paid: ${(e as Error).message}`);
+  }
   const price = BigInt(listing.price);
   await ctx.confirm([`pay ${formatUsdc(price)} USDC for listing #${a.listingId} from ${buyer.id}`, `network: ${ctx.network}`]);
 
@@ -269,7 +276,7 @@ export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boo
     return res;
   }
   try {
-    res.decrypt = await decryptCommand(ctx, { purchaseId: id, demoKey: a.demoKey, out: a.out, outDir: a.outDir, exclusive: a.exclusive, account: a.account });
+    res.decrypt = await decryptCommand(ctx, { purchaseId: id, demoKey: a.demoKey, out: a.out, outDir: a.outDir, exclusive: a.exclusive, account: a.account, blob });
   } catch (e) {
     throw new PaidButUnfinished((e as Error).message, tx.url, id);
   }
@@ -278,7 +285,7 @@ export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boo
 }
 
 /** `exclusive`: never overwrite (flag "wx"; also refuses a symlink at `out`). The MCP buy tool sets it; the CLI keeps overwriting what the user named. */
-export async function decryptCommand(ctx: Ctx, a: { purchaseId: number; demoKey?: boolean; out?: string; outDir?: string; exclusive?: boolean; account?: string }): Promise<DecryptResult> {
+export async function decryptCommand(ctx: Ctx, a: { purchaseId: number; demoKey?: boolean; out?: string; outDir?: string; exclusive?: boolean; account?: string; blob?: Uint8Array }): Promise<DecryptResult> {
   const p = await ctx.views.purchase(a.purchaseId);
   if (!p) throw new CliError(`purchase #${a.purchaseId} not found on ${ctx.network}`);
   if (p.status !== "done" || !p.sealed_k_buyer) throw new CliError(`purchase #${a.purchaseId} is ${p.status}${p.refund_reason ? ` (${p.refund_reason})` : ""}: nothing to decrypt`);
@@ -287,7 +294,7 @@ export async function decryptCommand(ctx: Ctx, a: { purchaseId: number; demoKey?
   if (p.buyer_pk !== viewing.buyerPk) throw new CliError("this purchase was made with a different viewing key (try --demo-key, or the account that bought it)");
 
   const k = openRelease(p.sealed_k_buyer, viewing.scalarHex);
-  const blob = await fetchAndCheckBlob(listing.blob_url, listing.blob_sha256, ctx.fetchImpl);
+  const blob = a.blob && sha256Hex(a.blob) === listing.blob_sha256 ? a.blob : await fetchAndCheckBlob(listing.blob_url, listing.blob_sha256, ctx.fetchImpl);
   const plain = decryptFile(blob, k);
   k.fill(0);
 
@@ -382,7 +389,7 @@ export async function listCommand(
   const base = { blob_sha256: prepared.blobSha256, blob_path: blobPath, msg_masked: masked };
   if (a.dryRun) return { dry_run: true, ...base };
 
-  // The hosted copy must be byte-identical to what we sealed K for; otherwise every eval would refund with hash_mismatch.
+  // The hosted copy must be byte-identical to what we sealed K for; otherwise every eval would stop with not_ok (X12F-3).
   try {
     await fetchAndCheckBlob(a.blobUrl!, prepared.blobSha256, ctx.fetchImpl);
   } catch (e) {

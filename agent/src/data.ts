@@ -45,7 +45,14 @@ export function readTable(path: string): Table {
   if (/\.jsonl?$/i.test(path)) {
     const objs = text.split(/\r?\n/).filter((l) => l.trim() !== "").map((l) => JSON.parse(l) as Record<string, unknown>);
     const columns = objs.length ? Object.keys(objs[0]) : [];
-    return { columns, rows: objs.length, column: (name) => objs.map((o) => String(o[name] ?? "")) };
+    // X12-U6: the enclave hashes a JSONL key cell's own JSON text (1.0, 100.0, -0.0, 12345678901234567890), which
+    // String(Number) cannot reproduce, so a non-string key cell would silently break the MinHash comparison.
+    const cell = (v: unknown, name: string): string => {
+      if (v === undefined || v === null) return "";
+      if (typeof v !== "string") throw new Error(`column "${name}" holds a ${typeof v} in the JSONL file; key cells must be JSON strings (quote them)`);
+      return v;
+    };
+    return { columns, rows: objs.length, column: (name) => objs.map((o) => cell(o[name], name)) };
   }
   const [header = [], ...body] = parseCsv(text);
   return {

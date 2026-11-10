@@ -217,11 +217,10 @@ describe("X12-5 / QA-07: a paid buy is never answered with an error that invites
     expect([a, b].filter((r) => r.isError).map((r) => r.text)).toEqual([expect.stringContaining("already running")]);
   });
 
-  it("a download failure after payment returns the purchase id and tx instead of an error", async () => {
-    const { fake, call, blob } = await setup(ALLOW);
-    fake.ctx.fetchImpl = (async () => {
-      throw new Error("blob host down");
-    }) as any;
+  it("a failure after payment returns the purchase id and tx instead of an error", async () => {
+    const { fake, call } = await setup(ALLOW);
+    const good = fake.state.records["purchase:4"];
+    fake.state.records["purchase:4"] = { ...good, buyer_pk: "04" + "1".repeat(128) }; // decrypt fails after the money went out
     const r = await call("buy", buy);
     expect(r.isError).toBe(false);
     const j = JSON.parse(r.text);
@@ -229,11 +228,26 @@ describe("X12-5 / QA-07: a paid buy is never answered with an error that invites
     expect(j.tx_url).toMatch(/^https:/);
     expect(j.next).toContain("decrypt_purchase");
     // and decrypt_purchase finishes it later without paying
-    fake.ctx.fetchImpl = (async () => new Response(blob)) as any;
+    fake.state.records["purchase:4"] = good;
     const d = await call("decrypt_purchase", { purchase_id: "4" });
     expect(d.isError, d.text).toBe(false);
     expect(JSON.parse(d.text).hashes_ok).toBe(true);
     expect(fake.payCalls).toHaveLength(1);
+  });
+
+  it("X12-T01: buy downloads and checks the file before paying, and decrypts that copy", async () => {
+    const { fake, call, blob } = await setup(ALLOW);
+    let reads = 0;
+    fake.ctx.fetchImpl = (async () => (reads++ === 0 ? new Response(blob) : new Response("gone", { status: 404 }))) as any; // served once
+    const r = await call("buy", buy);
+    expect(r.isError, r.text).toBe(false);
+    expect(JSON.parse(r.text).hashes_ok).toBe(true);
+    const down = await setup(ALLOW);
+    down.fake.ctx.fetchImpl = (async () => new Response("gone", { status: 404 })) as any;
+    const refused = await down.call("buy", buy);
+    expect(refused.isError).toBe(true);
+    expect(refused.text).toContain("nothing was paid");
+    expect(down.fake.payCalls).toHaveLength(0);
   });
 
   it("a settle timeout after payment names the recovery tools", async () => {

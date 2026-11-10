@@ -81,6 +81,18 @@ describe("eval", () => {
     expect(fake.evidence).toEqual([expect.objectContaining({ kind: "eval", eval_id: 9, listing_id: 1 })]);
   });
 
+  it("X12-U6: a JSONL key list with number cells is refused before paying", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const list = join(tmp, "mine.jsonl");
+    writeFileSync(list, '{"id":1.0}\n{"id":"b"}\n');
+    const fake = fakeCtx();
+    const r = await run(["eval", "1", "--criteria", criteriaFile, "--my-list", list, "--key-column", "id"], fake);
+    expect(r.code).not.toBe(0);
+    expect(fake.payCalls).toHaveLength(0);
+    writeFileSync(list, '{"id":"a"}\n{"id":"b"}\n{"other":1}\n');
+    expect((await run(["eval", "1", "--criteria", criteriaFile, "--my-list", list, "--key-column", "id"], fakeCtx())).code).toBe(0);
+  });
+
   it("verdict mode prints BUY or PASS with the verdict bits and no fit", async () => {
     const fake = fakeCtx({ listing: { mode: "verdict", bits_per_eval_milli: 1585 }, verdict: { verdict: "BUY" } });
     const { out } = await run(["eval", "1", "--criteria", criteriaFile], fake);
