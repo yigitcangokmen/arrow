@@ -2,7 +2,7 @@
 const MASKS: RegExp[] = [
   /ed25519:[1-9A-HJ-NP-Za-km-z]{40,}/g,
   /secp256k1:[1-9A-HJ-NP-Za-km-z]{40,}/g,
-  /0x[0-9a-fA-F]{64}/g,
+  /(?<!\/tx\/)0x[0-9a-fA-F]{64}/g, // a key; not the hash in an explorer /tx/ link (Base tx hashes have the same shape)
   /sk-[A-Za-z0-9_-]{8,}/g,
 ];
 

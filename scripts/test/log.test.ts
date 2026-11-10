@@ -11,6 +11,17 @@ describe("mask", () => {
     for (const s of samples) expect(mask(`k=${s}.`)).toBe("k=****.");
   });
 
+  it("keeps_base_tx_hash_in_explorer_link", () => {
+    // F9: an EVM tx hash is 0x + 64 hex like a private key; in a /tx/ link it is public evidence and must stay readable
+    const link = explorerTx("mainnet", "base", "0x" + "ab".repeat(32));
+    expect(mask(`R4 evidence ${link}`)).toBe(`R4 evidence ${link}`);
+    expect(mask(JSON.stringify({ links: [link] }))).toBe(JSON.stringify({ links: [link] }));
+    // a bare 0x + 64 hex (a key) is still masked, also right after other URL parts
+    const bare = "0x" + "cd".repeat(32);
+    expect(mask(`key ${bare}`)).toBe("key ****");
+    expect(mask(`https://example.test/key/${bare}`)).toBe("https://example.test/key/****");
+  });
+
   it("leaves addresses, short hex and tx hashes alone", () => {
     const addr = "0x" + "ab".repeat(20);
     expect(mask(addr)).toBe(addr);
