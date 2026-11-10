@@ -10,7 +10,7 @@ Modules:
 - `fit_rule`.
 - `regex`: injection patterns (instruction-only; never a bare `BUY`) and exfil patterns.
 - `compose`: `fit = min(fit_llm, fit_rule)`, the BUY gates, guard → `PASS·1·1`.
-- `schema`: output enum, ≤1024 bytes.
+- `schema`: output enum, ≤900 bytes (target ≤400).
 
 Rules:
 - `#![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::indexing_slicing)]`.

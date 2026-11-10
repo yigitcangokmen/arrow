@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yigitcangokmen/arrow/fixtures/criteria-schema.json",
+  "title": "Arrow buyer criteria v1",
+  "$comment": "Size budget (W1-10, DECISIONS I-14 + H-06): sealed_criteria is at most 4096 base64 chars = 3072 bytes, ECIES adds 97, so the minified UTF-8 criteria JSON must be at most 2975 bytes. minhash is ONE 2048-char lowercase hex string (128 values x 16 hex, in order, zero-padded), not an array; with it about 600 ASCII bytes remain for text. The SDK checks the byte size before sealing and says 'criteria too large: shorten text'.",
+  "x-arrow-max-bytes": 2975,
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "text"],
+  "properties": {
+    "v": { "const": 1 },
+    "required_columns": { "type": "array", "maxItems": 64, "items": { "type": "string", "minLength": 1, "maxLength": 40 } },
+    "min_rows": { "type": "integer", "minimum": 0, "maximum": 200000 },
+    "date_column": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "date_from": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "date_to": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "max_null_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "key_column": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "text": { "type": "string", "maxLength": 600 },
+    "min_fit": { "type": "integer", "minimum": 1, "maximum": 5, "default": 4 },
+    "min_novelty": { "type": "integer", "minimum": 1, "maximum": 5, "default": 3 },
+    "minhash": { "type": "string", "pattern": "^[0-9a-f]{2048}$" }
+  }
+}

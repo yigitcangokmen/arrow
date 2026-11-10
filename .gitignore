@@ -38,3 +38,6 @@ submission*.json
 
 # Local agent instructions (never committed)
 /*.local.md
+evidence/.lock
+spikes/**/out/
+spikes/**/target/

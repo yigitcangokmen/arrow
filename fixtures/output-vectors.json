@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "max_bytes": 900,
+  "target_bytes": 400,
+  "note": "raw = the exact bytes the callback reads (utf8). Field order is fixed and there is no trailing newline. Only accept_* cases are valid ArrowOut.",
+  "cases": [
+    {
+      "name": "eval_ok",
+      "raw": "{\"v\":1,\"ok\":true,\"r\":\"QpBa+zPZcKZjCPLM9RJh84zlPV6wppP9BvSXRaa5nEo5D7edpV3nFGyoj1Z7CJ4WoBvRYYSuIKLGD4gf1PEbZ1cHsFxbLQk+5eA9CJgGpHP9x9klny/vY7zStOYsJJKQPww=\",\"h\":\"95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2\"}",
+      "context": {
+        "action": "eval",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "accept_eval"
+    },
+    {
+      "name": "release_ok",
+      "raw": "{\"v\":1,\"ok\":true,\"k\":\"iqUJGYBpaAWnbDMApHZsW8RkXzOmMH47kdi97f7RRCEbmMMyZLcE6eQU8NJYht6/sYVJIlak5rymf9QdXF6MD6Bsl2JbSL+kXop6d/f9+11TMrJesAVzLjiuxUvGn4UQvp9PaxSKWMsTVguT4u5fRF5rFP3f87FiuC646lffWQNO\",\"h\":\"95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2\"}",
+      "context": {
+        "action": "release",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "accept_release"
+    },
+    {
+      "name": "derive_ok",
+      "raw": "{\"v\":1,\"ok\":true,\"pk\":\"04b2902e94cd4b71c9ff6bd1abf3193985cb01456bec6f00121f39cfd3931150cd6adc43e4b0dc735b4529c789e2fb980867147c6ff376cbc96d42c8edad6935db\"}",
+      "context": {
+        "action": "derive",
+        "listing_blob_sha256": null
+      },
+      "contract_decision": "accept_derive"
+    },
+    {
+      "name": "not_ok",
+      "raw": "{\"v\":1,\"ok\":false}",
+      "context": {
+        "action": "eval",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:not_ok"
+    },
+    {
+      "name": "release_not_ok",
+      "raw": "{\"v\":1,\"ok\":false}",
+      "context": {
+        "action": "release",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:not_ok"
+    },
+    {
+      "name": "derive_not_ok",
+      "raw": "{\"v\":1,\"ok\":false}",
+      "context": {
+        "action": "derive",
+        "listing_blob_sha256": null
+      },
+      "contract_decision": "reject_derive"
+    },
+    {
+      "name": "null",
+      "raw": "null",
+      "context": {
+        "action": "eval",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:null"
+    },
+    {
+      "name": "text_string",
+      "raw": "\"hello\"",
+      "context": {
+        "action": "eval",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:bad_output"
+    },
+    {
+      "name": "eval_missing_h",
+      "raw": "{\"v\":1,\"ok\":true,\"r\":\"QpBa+zPZcKZjCPLM9RJh84zlPV6wppP9BvSXRaa5nEo5D7edpV3nFGyoj1Z7CJ4WoBvRYYSuIKLGD4gf1PEbZ1cHsFxbLQk+5eA9CJgGpHP9x9klny/vY7zStOYsJJKQPww=\"}",
+      "context": {
+        "action": "eval",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:bad_output"
+    },
+    {
+      "name": "eval_hash_mismatch",
+      "raw": "{\"v\":1,\"ok\":true,\"r\":\"QpBa+zPZcKZjCPLM9RJh84zlPV6wppP9BvSXRaa5nEo5D7edpV3nFGyoj1Z7CJ4WoBvRYYSuIKLGD4gf1PEbZ1cHsFxbLQk+5eA9CJgGpHP9x9klny/vY7zStOYsJJKQPww=\",\"h\":\"1c26528bb8c94f0cd8216f64b009e898f01fd10f10da2cc59a773742ad29fde3\"}",
+      "context": {
+        "action": "eval",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:hash_mismatch"
+    },
+    {
+      "name": "eval_r_wrong_len",
+      "raw": "{\"v\":1,\"ok\":true,\"r\":\"hiwZ7Xgl56sO7ahPK5dJ2VuMzcPCW9sDEkoSzxLZYsJ3GH9zqT5jtYsCGJ7Jn3C9Tl0Uyxfxc/v12PPW17YbGYlBQe1Zxio+2VlH5QXtuwtReGYVC+LLaTU+O0sA3uuE\",\"h\":\"95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2\"}",
+      "context": {
+        "action": "eval",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:bad_output"
+    },
+    {
+      "name": "eval_extra_field",
+      "raw": "{\"v\":1,\"ok\":true,\"r\":\"QpBa+zPZcKZjCPLM9RJh84zlPV6wppP9BvSXRaa5nEo5D7edpV3nFGyoj1Z7CJ4WoBvRYYSuIKLGD4gf1PEbZ1cHsFxbLQk+5eA9CJgGpHP9x9klny/vY7zStOYsJJKQPww=\",\"h\":\"95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2\",\"x\":1}",
+      "context": {
+        "action": "eval",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:bad_output"
+    },
+    {
+      "name": "eval_v2",
+      "raw": "{\"v\":2,\"ok\":true,\"r\":\"QpBa+zPZcKZjCPLM9RJh84zlPV6wppP9BvSXRaa5nEo5D7edpV3nFGyoj1Z7CJ4WoBvRYYSuIKLGD4gf1PEbZ1cHsFxbLQk+5eA9CJgGpHP9x9klny/vY7zStOYsJJKQPww=\",\"h\":\"95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2\"}",
+      "context": {
+        "action": "eval",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:bad_output"
+    },
+    {
+      "name": "release_k_wrong_len",
+      "raw": "{\"v\":1,\"ok\":true,\"k\":\"z54WTrKc//7/2UCKy1vE+OFIKKV1qzv0UNbMuzC8S+zDPTFzQpi+Un0KQ+KRr47gAQy3yFdk6hT8jyHmcfJOT901v19UM18bajLibOSMKwaIJmkukbpfc/xcrkdg5UVeU50Bk2yiRzGpyI6Pxc8KVyJALj2mplGeTTjPSGgE\",\"h\":\"95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2\"}",
+      "context": {
+        "action": "release",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:bad_output"
+    },
+    {
+      "name": "derive_pk_compressed",
+      "raw": "{\"v\":1,\"ok\":true,\"pk\":\"02b998e256c4c24981385630353c169a977cbd9b26e55eb2814375ad96e6c2d712\"}",
+      "context": {
+        "action": "derive",
+        "listing_blob_sha256": null
+      },
+      "contract_decision": "reject_derive"
+    },
+    {
+      "name": "over_900_bytes",
+      "raw": "{\"v\":1,\"ok\":true,\"r\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"h\":\"95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2\"}",
+      "context": {
+        "action": "eval",
+        "listing_blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "contract_decision": "refund:bad_output"
+    }
+  ]
+}

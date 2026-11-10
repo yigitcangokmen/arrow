@@ -16,14 +16,18 @@
     "bench"
   ],
   "scripts": {
+    "arrow": "tsx agent/src/cli.ts",
     "verify": "tsx scripts/src/verify.ts",
     "try:testnet": "tsx scripts/src/try-testnet.ts",
     "replay": "tsx scripts/src/replay.ts",
     "bench:offline": "tsx bench/src/offline.ts",
     "bench:live": "tsx bench/src/live.ts",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "check": "bash scripts/check-all.sh"
   },
   "devDependencies": {
+    "@types/node": "24.19.2",
     "tsx": "4.23.15",
     "typescript": "5.9.3",
     "vitest": "5.1.0"

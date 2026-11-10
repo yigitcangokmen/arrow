@@ -1,6 +1,6 @@
 # contracts/arrow
 
-Market contract (`arrow-market.near` on mainnet, `arrow.<team>.testnet` on testnet). near-sdk 5.30.1, about 500 lines.
+Market contract (`arrow-market.near` on mainnet, `arrow.arrowhq.testnet` on testnet). near-sdk 5.30.1, about 500 lines.
 Spec: KICKOFF.md §2.5, plus architect spec §3.3-3.4.
 
 What goes here:

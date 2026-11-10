@@ -1,0 +1,297 @@
+{
+  "version": 1,
+  "max_input_bytes": 32768,
+  "note": "Shape vectors. Ciphertexts are filler bytes of the right length, so an enclave run on a valid vector still ends in ok:false at decryption; round-trip crypto vectors live in ecies-vectors.json (WS-4).",
+  "valid": [
+    {
+      "name": "eval_scored",
+      "input": {
+        "v": 1,
+        "action": "eval",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "mode": "scored",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "eval": {
+          "id": 42,
+          "sealed_criteria": "feEHL8uiKFrMKlyIFY1Kl1tLYf+3Y9tYkweZHZakTtWvTzbjwvkmWTjQWIDtDJC7NDdreeTnFANm7gmTP4grU/h6FU2zzMwQWcwhKLqEeYJeqw2yxh6vL2DN42vZIFAf2mPK7kb8fWotl3oOODS1iooWO+cdyeEbHMzmjjerad46bDDW9B0gTC/PRynEAUMgShjZrtlae6g15quRUi7l8w38U9qie2ZrAoHWx9yS1n/jeBiKULay7NEn2nfzyve+lOdh4p+qJ9mLCqaILADMNYhNMPfx0l9yBnkqceXQtEfhTV2SmMAd7D/tL6cVwyopKeZhZaduHUz/KXuuwIyXreJEBcDD6j9qNfu5+jMS1nXbi+jWb+NdWuB7w/uPssPdnrLtI9RKshL+5JLs828GEppICH+Wro3cS0X9cH0uo6bfkZjr1vAXaP9u0EGKRC4f/JCfpWDLZItWA4KLG1qE5dBbeRu8oxRbPQlB+li0SL8/DpBRo6onXG/8qlm2ORxCsCpY1L601YSDyPV4Gv+5mVRGBdQ7gc6uLGiQyq5btjG2nk+QL7CECs9YZF3XopWk6GRnVeR2S62Ck12WtT2GjXwIHU58jmV0ZB1x0Eyx5+DI7SzAnldbPOV2gQLXv8LJYzhSjD8HOKi9gM715RoTQN0=",
+          "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337",
+          "seed": "dcf33ec4704b0aeb5cd570ca8ac646375ccc38f77c4ff45a8ba6fb66cdb327d3"
+        }
+      }
+    },
+    {
+      "name": "eval_verdict",
+      "input": {
+        "v": 1,
+        "action": "eval",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "mode": "verdict",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "eval": {
+          "id": 42,
+          "sealed_criteria": "feEHL8uiKFrMKlyIFY1Kl1tLYf+3Y9tYkweZHZakTtWvTzbjwvkmWTjQWIDtDJC7NDdreeTnFANm7gmTP4grU/h6FU2zzMwQWcwhKLqEeYJeqw2yxh6vL2DN42vZIFAf2mPK7kb8fWotl3oOODS1iooWO+cdyeEbHMzmjjerad46bDDW9B0gTC/PRynEAUMgShjZrtlae6g15quRUi7l8w38U9qie2ZrAoHWx9yS1n/jeBiKULay7NEn2nfzyve+lOdh4p+qJ9mLCqaILADMNYhNMPfx0l9yBnkqceXQtEfhTV2SmMAd7D/tL6cVwyopKeZhZaduHUz/KXuuwIyXreJEBcDD6j9qNfu5+jMS1nXbi+jWb+NdWuB7w/uPssPdnrLtI9RKshL+5JLs828GEppICH+Wro3cS0X9cH0uo6bfkZjr1vAXaP9u0EGKRC4f/JCfpWDLZItWA4KLG1qE5dBbeRu8oxRbPQlB+li0SL8/DpBRo6onXG/8qlm2ORxCsCpY1L601YSDyPV4Gv+5mVRGBdQ7gc6uLGiQyq5btjG2nk+QL7CECs9YZF3XopWk6GRnVeR2S62Ck12WtT2GjXwIHU58jmV0ZB1x0Eyx5+DI7SzAnldbPOV2gQLXv8LJYzhSjD8HOKi9gM715RoTQN0=",
+          "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337",
+          "seed": "dcf33ec4704b0aeb5cd570ca8ac646375ccc38f77c4ff45a8ba6fb66cdb327d3"
+        }
+      }
+    },
+    {
+      "name": "release",
+      "input": {
+        "v": 1,
+        "action": "release",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "mode": "scored",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "release": {
+          "id": 3,
+          "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
+        }
+      }
+    },
+    {
+      "name": "derive",
+      "input": {
+        "v": 1,
+        "action": "derive"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "v2",
+      "input": {
+        "v": 2,
+        "action": "eval",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "mode": "scored",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "eval": {
+          "id": 42,
+          "sealed_criteria": "feEHL8uiKFrMKlyIFY1Kl1tLYf+3Y9tYkweZHZakTtWvTzbjwvkmWTjQWIDtDJC7NDdreeTnFANm7gmTP4grU/h6FU2zzMwQWcwhKLqEeYJeqw2yxh6vL2DN42vZIFAf2mPK7kb8fWotl3oOODS1iooWO+cdyeEbHMzmjjerad46bDDW9B0gTC/PRynEAUMgShjZrtlae6g15quRUi7l8w38U9qie2ZrAoHWx9yS1n/jeBiKULay7NEn2nfzyve+lOdh4p+qJ9mLCqaILADMNYhNMPfx0l9yBnkqceXQtEfhTV2SmMAd7D/tL6cVwyopKeZhZaduHUz/KXuuwIyXreJEBcDD6j9qNfu5+jMS1nXbi+jWb+NdWuB7w/uPssPdnrLtI9RKshL+5JLs828GEppICH+Wro3cS0X9cH0uo6bfkZjr1vAXaP9u0EGKRC4f/JCfpWDLZItWA4KLG1qE5dBbeRu8oxRbPQlB+li0SL8/DpBRo6onXG/8qlm2ORxCsCpY1L601YSDyPV4Gv+5mVRGBdQ7gc6uLGiQyq5btjG2nk+QL7CECs9YZF3XopWk6GRnVeR2S62Ck12WtT2GjXwIHU58jmV0ZB1x0Eyx5+DI7SzAnldbPOV2gQLXv8LJYzhSjD8HOKi9gM715RoTQN0=",
+          "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337",
+          "seed": "dcf33ec4704b0aeb5cd570ca8ac646375ccc38f77c4ff45a8ba6fb66cdb327d3"
+        }
+      },
+      "expect": "ok_false"
+    },
+    {
+      "name": "unknown_action",
+      "input": {
+        "v": 1,
+        "action": "delete",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "mode": "scored",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "eval": {
+          "id": 42,
+          "sealed_criteria": "feEHL8uiKFrMKlyIFY1Kl1tLYf+3Y9tYkweZHZakTtWvTzbjwvkmWTjQWIDtDJC7NDdreeTnFANm7gmTP4grU/h6FU2zzMwQWcwhKLqEeYJeqw2yxh6vL2DN42vZIFAf2mPK7kb8fWotl3oOODS1iooWO+cdyeEbHMzmjjerad46bDDW9B0gTC/PRynEAUMgShjZrtlae6g15quRUi7l8w38U9qie2ZrAoHWx9yS1n/jeBiKULay7NEn2nfzyve+lOdh4p+qJ9mLCqaILADMNYhNMPfx0l9yBnkqceXQtEfhTV2SmMAd7D/tL6cVwyopKeZhZaduHUz/KXuuwIyXreJEBcDD6j9qNfu5+jMS1nXbi+jWb+NdWuB7w/uPssPdnrLtI9RKshL+5JLs828GEppICH+Wro3cS0X9cH0uo6bfkZjr1vAXaP9u0EGKRC4f/JCfpWDLZItWA4KLG1qE5dBbeRu8oxRbPQlB+li0SL8/DpBRo6onXG/8qlm2ORxCsCpY1L601YSDyPV4Gv+5mVRGBdQ7gc6uLGiQyq5btjG2nk+QL7CECs9YZF3XopWk6GRnVeR2S62Ck12WtT2GjXwIHU58jmV0ZB1x0Eyx5+DI7SzAnldbPOV2gQLXv8LJYzhSjD8HOKi9gM715RoTQN0=",
+          "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337",
+          "seed": "dcf33ec4704b0aeb5cd570ca8ac646375ccc38f77c4ff45a8ba6fb66cdb327d3"
+        }
+      },
+      "expect": "ok_false"
+    },
+    {
+      "name": "eval_missing_seed",
+      "input": {
+        "v": 1,
+        "action": "eval",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "mode": "scored",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "eval": {
+          "id": 42,
+          "sealed_criteria": "feEHL8uiKFrMKlyIFY1Kl1tLYf+3Y9tYkweZHZakTtWvTzbjwvkmWTjQWIDtDJC7NDdreeTnFANm7gmTP4grU/h6FU2zzMwQWcwhKLqEeYJeqw2yxh6vL2DN42vZIFAf2mPK7kb8fWotl3oOODS1iooWO+cdyeEbHMzmjjerad46bDDW9B0gTC/PRynEAUMgShjZrtlae6g15quRUi7l8w38U9qie2ZrAoHWx9yS1n/jeBiKULay7NEn2nfzyve+lOdh4p+qJ9mLCqaILADMNYhNMPfx0l9yBnkqceXQtEfhTV2SmMAd7D/tL6cVwyopKeZhZaduHUz/KXuuwIyXreJEBcDD6j9qNfu5+jMS1nXbi+jWb+NdWuB7w/uPssPdnrLtI9RKshL+5JLs828GEppICH+Wro3cS0X9cH0uo6bfkZjr1vAXaP9u0EGKRC4f/JCfpWDLZItWA4KLG1qE5dBbeRu8oxRbPQlB+li0SL8/DpBRo6onXG/8qlm2ORxCsCpY1L601YSDyPV4Gv+5mVRGBdQ7gc6uLGiQyq5btjG2nk+QL7CECs9YZF3XopWk6GRnVeR2S62Ck12WtT2GjXwIHU58jmV0ZB1x0Eyx5+DI7SzAnldbPOV2gQLXv8LJYzhSjD8HOKi9gM715RoTQN0=",
+          "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
+        }
+      },
+      "expect": "ok_false"
+    },
+    {
+      "name": "eval_seed_63hex",
+      "input": {
+        "v": 1,
+        "action": "eval",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "mode": "scored",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "eval": {
+          "id": 42,
+          "sealed_criteria": "feEHL8uiKFrMKlyIFY1Kl1tLYf+3Y9tYkweZHZakTtWvTzbjwvkmWTjQWIDtDJC7NDdreeTnFANm7gmTP4grU/h6FU2zzMwQWcwhKLqEeYJeqw2yxh6vL2DN42vZIFAf2mPK7kb8fWotl3oOODS1iooWO+cdyeEbHMzmjjerad46bDDW9B0gTC/PRynEAUMgShjZrtlae6g15quRUi7l8w38U9qie2ZrAoHWx9yS1n/jeBiKULay7NEn2nfzyve+lOdh4p+qJ9mLCqaILADMNYhNMPfx0l9yBnkqceXQtEfhTV2SmMAd7D/tL6cVwyopKeZhZaduHUz/KXuuwIyXreJEBcDD6j9qNfu5+jMS1nXbi+jWb+NdWuB7w/uPssPdnrLtI9RKshL+5JLs828GEppICH+Wro3cS0X9cH0uo6bfkZjr1vAXaP9u0EGKRC4f/JCfpWDLZItWA4KLG1qE5dBbeRu8oxRbPQlB+li0SL8/DpBRo6onXG/8qlm2ORxCsCpY1L601YSDyPV4Gv+5mVRGBdQ7gc6uLGiQyq5btjG2nk+QL7CECs9YZF3XopWk6GRnVeR2S62Ck12WtT2GjXwIHU58jmV0ZB1x0Eyx5+DI7SzAnldbPOV2gQLXv8LJYzhSjD8HOKi9gM715RoTQN0=",
+          "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337",
+          "seed": "dcf33ec4704b0aeb5cd570ca8ac646375ccc38f77c4ff45a8ba6fb66cdb327d"
+        }
+      },
+      "expect": "ok_false"
+    },
+    {
+      "name": "buyer_pk_compressed",
+      "input": {
+        "v": 1,
+        "action": "eval",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "mode": "scored",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "eval": {
+          "id": 42,
+          "sealed_criteria": "feEHL8uiKFrMKlyIFY1Kl1tLYf+3Y9tYkweZHZakTtWvTzbjwvkmWTjQWIDtDJC7NDdreeTnFANm7gmTP4grU/h6FU2zzMwQWcwhKLqEeYJeqw2yxh6vL2DN42vZIFAf2mPK7kb8fWotl3oOODS1iooWO+cdyeEbHMzmjjerad46bDDW9B0gTC/PRynEAUMgShjZrtlae6g15quRUi7l8w38U9qie2ZrAoHWx9yS1n/jeBiKULay7NEn2nfzyve+lOdh4p+qJ9mLCqaILADMNYhNMPfx0l9yBnkqceXQtEfhTV2SmMAd7D/tL6cVwyopKeZhZaduHUz/KXuuwIyXreJEBcDD6j9qNfu5+jMS1nXbi+jWb+NdWuB7w/uPssPdnrLtI9RKshL+5JLs828GEppICH+Wro3cS0X9cH0uo6bfkZjr1vAXaP9u0EGKRC4f/JCfpWDLZItWA4KLG1qE5dBbeRu8oxRbPQlB+li0SL8/DpBRo6onXG/8qlm2ORxCsCpY1L601YSDyPV4Gv+5mVRGBdQ7gc6uLGiQyq5btjG2nk+QL7CECs9YZF3XopWk6GRnVeR2S62Ck12WtT2GjXwIHU58jmV0ZB1x0Eyx5+DI7SzAnldbPOV2gQLXv8LJYzhSjD8HOKi9gM715RoTQN0=",
+          "buyer_pk": "02fcfdd77c0f4c1a5d9d3a79343bef1513373b709c7fe1fc3789ec0cc8b39f760e",
+          "seed": "dcf33ec4704b0aeb5cd570ca8ac646375ccc38f77c4ff45a8ba6fb66cdb327d3"
+        }
+      },
+      "expect": "ok_false"
+    },
+    {
+      "name": "blob_sha_upper",
+      "input": {
+        "v": 1,
+        "action": "eval",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95F1FF5FB1B4376AD09D0B81E36654955E583B852B3069831313C7C51BCDBEC2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "mode": "scored",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "eval": {
+          "id": 42,
+          "sealed_criteria": "feEHL8uiKFrMKlyIFY1Kl1tLYf+3Y9tYkweZHZakTtWvTzbjwvkmWTjQWIDtDJC7NDdreeTnFANm7gmTP4grU/h6FU2zzMwQWcwhKLqEeYJeqw2yxh6vL2DN42vZIFAf2mPK7kb8fWotl3oOODS1iooWO+cdyeEbHMzmjjerad46bDDW9B0gTC/PRynEAUMgShjZrtlae6g15quRUi7l8w38U9qie2ZrAoHWx9yS1n/jeBiKULay7NEn2nfzyve+lOdh4p+qJ9mLCqaILADMNYhNMPfx0l9yBnkqceXQtEfhTV2SmMAd7D/tL6cVwyopKeZhZaduHUz/KXuuwIyXreJEBcDD6j9qNfu5+jMS1nXbi+jWb+NdWuB7w/uPssPdnrLtI9RKshL+5JLs828GEppICH+Wro3cS0X9cH0uo6bfkZjr1vAXaP9u0EGKRC4f/JCfpWDLZItWA4KLG1qE5dBbeRu8oxRbPQlB+li0SL8/DpBRo6onXG/8qlm2ORxCsCpY1L601YSDyPV4Gv+5mVRGBdQ7gc6uLGiQyq5btjG2nk+QL7CECs9YZF3XopWk6GRnVeR2S62Ck12WtT2GjXwIHU58jmV0ZB1x0Eyx5+DI7SzAnldbPOV2gQLXv8LJYzhSjD8HOKi9gM715RoTQN0=",
+          "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337",
+          "seed": "dcf33ec4704b0aeb5cd570ca8ac646375ccc38f77c4ff45a8ba6fb66cdb327d3"
+        }
+      },
+      "expect": "ok_false"
+    },
+    {
+      "name": "not_json",
+      "input_raw": "{\"v\":1,\"action\":",
+      "expect": "ok_false"
+    },
+    {
+      "name": "empty_input",
+      "input_raw": "",
+      "expect": "ok_false"
+    },
+    {
+      "name": "release_missing_buyer_pk",
+      "input": {
+        "v": 1,
+        "action": "release",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "mode": "scored",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "release": {
+          "id": 3
+        }
+      },
+      "expect": "ok_false"
+    }
+  ]
+}

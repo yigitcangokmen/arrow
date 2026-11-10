@@ -1,0 +1,21 @@
+.env
+.env.*
+!.env.example
+**/*credentials*
+.near-credentials/
+submission*.json
+target/
+contracts/
+enclave/
+spikes/
+release/*.wasm
+docs/video/
+# Local-only planning and agent notes (never committed, never uploaded)
+/*.md
+KICKOFF.md
+KICKOFF-v3.md
+DECISIONS.md
+PLAN.md
+PLAN-SUMMARY.md
+OPEN-QUESTIONS.md
+tasks/

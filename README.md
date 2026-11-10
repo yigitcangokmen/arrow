@@ -11,7 +11,7 @@ You cannot sell information: to judge its value the buyer must see it, and once 
 ## Status: what is live, what is not
 
 - Mainnet contract: `arrow-market.near`, locked (all access keys deleted) in tx `<LOCK_TX>`. Program wasm sha256: `<WASM_SHA256>`.
-- Testnet contract: `arrow.<team>.testnet`, same wasm sha256 `<WASM_SHA256>`.
+- Testnet contract: `arrow.arrowhq.testnet`, same wasm sha256 `<WASM_SHA256>`.
 - Mainnet records: `<N>` listings (1 team-made real dataset, `<M>` external, rest demo, all labelled), `<K>` evals, `<J>` purchases. Listings before the lock are labelled "pre-lock" by `verify`.
 - Not live / not claimed: E2EE to NEAR AI (TLS only), on-chain TDX quote verification, resale prevention, eval-time NEAR AI attestation.
 
@@ -30,10 +30,10 @@ Main path needs Node 22.x (≥22.22.2) or 24.x and no Rust, keys or funds.
    - leak-bench (55 attacks incl. 5 error-path): Arrow vs free-text preview, verbatim leaks `<X>` vs `<Y>`, timing-channel estimate `<T>` bits.
    - quality-bench (40 evals): BUY rate on injected listings, Arrow `<a>/10` vs LLM-only `<b>/10`, false flags on clean BUY/SELL data `<c>`.
 5. `npm run replay`. See: NEAR AI response signatures for the bench's direct NEAR AI calls, `<captured>/<total>` captured and verified. Signature lookups are best-effort per NEAR AI docs, so some are missing.
-6. `npm run try:testnet` (free; creates a testnet account through the NEAR faucet or our hosted sponsor endpoint and mints test tokens from `arrow-usd.<team>.testnet`). See: list → eval → buy → decrypt, prints `PASS · fit 4 · novelty 1`, then `sha256 match ✔`. Takes ~2-3 min. If our NEAR AI credit or the daily testnet eval cap is exhausted, it says so and points to step 4.
+6. `npm run try:testnet` (free; creates a testnet account through the NEAR faucet or our hosted sponsor endpoint and mints test tokens from `arrow-usd.arrowhq.testnet`). See: list → eval → buy → decrypt, prints `PASS · fit 4 · novelty 1`, then `sha256 match ✔`. Takes ~2-3 min. If our NEAR AI credit or the daily testnet eval cap is exhausted, it says so and points to step 4.
 7. Run step 6 with `--criteria fixtures/criteria/print-row-1.json`. See: `PASS · fit 1 · novelty 1`, no text.
 8. Open `<HOSTED_URL>/verify` and paste eval id `<EVAL_ID>`. See: the same checks as step 2 in the browser, plus TDX quote verification via `@phala/dcap-qvl-web`.
-9. Agent path: `npx arrow eval <LISTING_ID> --criteria fixtures/criteria/demo.json --network testnet`. See: the same verdict as step 6. MCP: `<MCP_CONFIG_SNIPPET>` exposes `arrow.inspect_before_buy`.
+9. Agent path: `npm run arrow -- eval <LISTING_ID> --criteria fixtures/criteria/demo.json --network testnet`. See: the same verdict as step 6. MCP: `<MCP_CONFIG_SNIPPET>` exposes MCP server `arrow`, tool `inspect_before_buy`.
 10. Optional, needs Rust ≥1.95: `cargo test -p arrow-core`. See: passes, including `output_space_is_at_most_51_states` and `no_stderr_on_any_error`.
 
 ## Trust table

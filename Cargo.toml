@@ -7,6 +7,7 @@ members = [
     "enclave/arrow-core",
     "enclave/arrow-tee",
 ]
+exclude = ["spikes"]
 
 # Versions verified 2026-11-09 (crates.io + out-layer/private-dao-example Cargo.lock). See KICKOFF.md section 2.3.
 # Enclave crates stay on the RustCrypto generation that ecies 0.2.11 uses (k256 0.13, hkdf 0.12, sha2 0.10,
@@ -34,6 +35,9 @@ chacha20poly1305 = "0.10"
 rand_chacha = "0.3"
 csv = "1"
 regex = "1"
+# G5 injection scan (DECISIONS F-09)
+unicode-normalization = "0.1"
+base64 = "0.22"
 
 # One release profile for the whole workspace (member profiles are ignored by cargo).
 # Same settings as the cargo-near template; panic=abort is the only option on wasm32 anyway.

@@ -1,4 +1,4 @@
-# web/ (Next.js 16.4.5)
+# web/ (Next.js 16.4.6)
 
 Hosted on Vercel and kept up until at least 2026-11-18, ideally 2026-11-25 (HACKATHON.md Q-012).
 

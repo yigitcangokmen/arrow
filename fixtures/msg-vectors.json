@@ -1,0 +1,1083 @@
+{
+  "version": 1,
+  "source": "DECISIONS.md H-06 (+ W1 encoding rules in fixtures/README.md)",
+  "limits": {
+    "title_max_chars": 80,
+    "public_desc_max_chars": 280,
+    "columns_max": 64,
+    "column_name_max_chars": 40,
+    "blob_url_max_chars": 200,
+    "sealed_k_b64_len": 216,
+    "sealed_criteria_b64_max": 4096,
+    "buyer_pk_hex_len": 130,
+    "max_evals_min": 1,
+    "max_evals_max": 500,
+    "config_min_eval_fee": "50000",
+    "config_min_price": "100000"
+  },
+  "payout_format": {
+    "intents_evm": "^0x[0-9a-f]{40}$",
+    "near_account": "^(([a-z\\d]+[-_])*[a-z\\d]+\\.)*([a-z\\d]+[-_])*[a-z\\d]+$",
+    "near_account_len": [
+      2,
+      64
+    ],
+    "absent": "seller = sender_id"
+  },
+  "valid": [
+    {
+      "name": "list_scored_full",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored",
+        "payout": "0x66a0dfed229e920feb17aa3186f87bd00e30844f"
+      }
+    },
+    {
+      "name": "list_verdict_min",
+      "msg": {
+        "op": "list",
+        "title": "T",
+        "public_desc": "d",
+        "columns": [
+          "k"
+        ],
+        "rows_claimed": 1,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "verdict"
+      }
+    },
+    {
+      "name": "list_named_payout",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored",
+        "payout": "seller-payout.arrowhq.near"
+      }
+    },
+    {
+      "name": "list_max_lengths",
+      "msg": {
+        "op": "list",
+        "title": "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+        "public_desc": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "columns": [
+          "c0_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c1_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c2_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c3_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c4_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c5_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c6_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c7_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c8_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c9_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c10_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c11_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c12_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c13_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c14_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c15_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c16_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c17_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c18_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c19_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c20_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c21_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c22_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c23_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c24_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c25_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c26_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c27_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c28_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c29_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c30_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c31_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c32_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c33_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c34_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c35_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c36_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c37_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c38_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c39_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c40_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c41_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c42_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c43_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c44_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c45_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c46_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c47_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c48_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c49_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c50_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c51_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c52_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c53_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c54_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c55_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c56_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c57_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c58_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c59_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c60_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c61_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c62_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "c63_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      }
+    },
+    {
+      "name": "list_max_evals_1",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 1,
+        "mode": "scored"
+      }
+    },
+    {
+      "name": "list_max_evals_500",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 500,
+        "mode": "scored"
+      }
+    },
+    {
+      "name": "list_min_price_and_fee",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "100000",
+        "eval_fee": "50000",
+        "max_evals": 20,
+        "mode": "scored"
+      }
+    },
+    {
+      "name": "eval_min",
+      "msg": {
+        "op": "eval",
+        "listing_id": 7,
+        "sealed_criteria": "WTabHYSDoqjOpCtU7s2tXWT/rxw467GkmGy4q1XBoEldv7vSX1NDfPPa6Ie6I4M22LzYeEBoH3RPZifbO1EHJbgzWvXikv9cePD2V9nxuY1qmH667sGMBldqJzNE2L0XbblVCzy5328D4bnFk/dFAsm37G1iS7GLiEDZoyMDmB74M9IZX9XJKZg=",
+        "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
+      }
+    },
+    {
+      "name": "eval_criteria_4096",
+      "msg": {
+        "op": "eval",
+        "listing_id": 7,
+        "sealed_criteria": "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",
+        "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
+      }
+    },
+    {
+      "name": "buy_min",
+      "msg": {
+        "op": "buy",
+        "listing_id": 7,
+        "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "not_json",
+      "msg_raw": "{\"op\":",
+      "reason": "not_json",
+      "stage": "parse"
+    },
+    {
+      "name": "missing_op",
+      "msg": {
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "missing_op",
+      "stage": "parse"
+    },
+    {
+      "name": "unknown_op",
+      "msg": {
+        "op": "delist",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "unknown_op",
+      "stage": "parse"
+    },
+    {
+      "name": "extra_field",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored",
+        "foo": 1
+      },
+      "reason": "unknown_field",
+      "stage": "parse"
+    },
+    {
+      "name": "title_too_long",
+      "msg": {
+        "op": "list",
+        "title": "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "title_too_long",
+      "stage": "parse"
+    },
+    {
+      "name": "title_empty",
+      "msg": {
+        "op": "list",
+        "title": "",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "title_empty",
+      "stage": "parse"
+    },
+    {
+      "name": "desc_too_long",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "desc_too_long",
+      "stage": "parse"
+    },
+    {
+      "name": "columns_too_many",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "c0",
+          "c1",
+          "c2",
+          "c3",
+          "c4",
+          "c5",
+          "c6",
+          "c7",
+          "c8",
+          "c9",
+          "c10",
+          "c11",
+          "c12",
+          "c13",
+          "c14",
+          "c15",
+          "c16",
+          "c17",
+          "c18",
+          "c19",
+          "c20",
+          "c21",
+          "c22",
+          "c23",
+          "c24",
+          "c25",
+          "c26",
+          "c27",
+          "c28",
+          "c29",
+          "c30",
+          "c31",
+          "c32",
+          "c33",
+          "c34",
+          "c35",
+          "c36",
+          "c37",
+          "c38",
+          "c39",
+          "c40",
+          "c41",
+          "c42",
+          "c43",
+          "c44",
+          "c45",
+          "c46",
+          "c47",
+          "c48",
+          "c49",
+          "c50",
+          "c51",
+          "c52",
+          "c53",
+          "c54",
+          "c55",
+          "c56",
+          "c57",
+          "c58",
+          "c59",
+          "c60",
+          "c61",
+          "c62",
+          "c63",
+          "c64"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "columns_too_many",
+      "stage": "parse"
+    },
+    {
+      "name": "column_name_too_long",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "c1_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "column_name_too_long",
+      "stage": "parse"
+    },
+    {
+      "name": "columns_empty",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "columns_empty",
+      "stage": "parse"
+    },
+    {
+      "name": "blob_url_http",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "http://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "blob_url_not_https",
+      "stage": "parse"
+    },
+    {
+      "name": "blob_url_too_long",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "blob_url_too_long",
+      "stage": "parse"
+    },
+    {
+      "name": "blob_url_whitespace",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/a b.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "blob_url_whitespace",
+      "stage": "parse"
+    },
+    {
+      "name": "blob_sha_upper",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95F1FF5FB1B4376AD09D0B81E36654955E583B852B3069831313C7C51BCDBEC2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "blob_sha256_format",
+      "stage": "parse"
+    },
+    {
+      "name": "blob_sha_63",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "blob_sha256_format",
+      "stage": "parse"
+    },
+    {
+      "name": "blob_sha_0x",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "0x95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "blob_sha256_format",
+      "stage": "parse"
+    },
+    {
+      "name": "sealed_k_not_b64",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "!zDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "sealed_k_not_b64",
+      "stage": "parse"
+    },
+    {
+      "name": "sealed_k_wrong_len",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "0EkNVWPJJByMc/PrD2OnRf/ExcTJlhuM+N3ec6cle1kPY2rpOqX8fJCD/2epvqLDjohM8BLlVYkBKoPMnKdtgRF2UdmlsnOCqdyEkZU9PgFZshF57A+3PsdyAKKfIdcwh6CAfZSH2doNsmccxrHmdNERDDddDMrHueiwT/PcjnLPE4kap/h5PsSAwFlE9SN36xoJf3qtZ+xeO/9C/6gQ",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "sealed_k_wrong_len",
+      "stage": "parse"
+    },
+    {
+      "name": "price_number_not_string",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": 250000,
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "amount_not_string",
+      "stage": "parse"
+    },
+    {
+      "name": "price_non_numeric",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "12a",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "amount_not_u128",
+      "stage": "parse"
+    },
+    {
+      "name": "price_negative",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "-1",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "amount_not_u128",
+      "stage": "parse"
+    },
+    {
+      "name": "max_evals_0",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 0,
+        "mode": "scored"
+      },
+      "reason": "max_evals_range",
+      "stage": "parse"
+    },
+    {
+      "name": "max_evals_501",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 501,
+        "mode": "scored"
+      },
+      "reason": "max_evals_range",
+      "stage": "parse"
+    },
+    {
+      "name": "mode_unknown",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "full"
+      },
+      "reason": "mode_unknown",
+      "stage": "parse"
+    },
+    {
+      "name": "buyer_pk_compressed",
+      "msg": {
+        "op": "eval",
+        "listing_id": 7,
+        "sealed_criteria": "WTabHYSDoqjOpCtU7s2tXWT/rxw467GkmGy4q1XBoEldv7vSX1NDfPPa6Ie6I4M22LzYeEBoH3RPZifbO1EHJbgzWvXikv9cePD2V9nxuY1qmH667sGMBldqJzNE2L0XbblVCzy5328D4bnFk/dFAsm37G1iS7GLiEDZoyMDmB74M9IZX9XJKZg=",
+        "buyer_pk": "02fcfdd77c0f4c1a5d9d3a79343bef1513373b709c7fe1fc3789ec0cc8b39f760e"
+      },
+      "reason": "buyer_pk_format",
+      "stage": "parse"
+    },
+    {
+      "name": "buyer_pk_0x",
+      "msg": {
+        "op": "eval",
+        "listing_id": 7,
+        "sealed_criteria": "WTabHYSDoqjOpCtU7s2tXWT/rxw467GkmGy4q1XBoEldv7vSX1NDfPPa6Ie6I4M22LzYeEBoH3RPZifbO1EHJbgzWvXikv9cePD2V9nxuY1qmH667sGMBldqJzNE2L0XbblVCzy5328D4bnFk/dFAsm37G1iS7GLiEDZoyMDmB74M9IZX9XJKZg=",
+        "buyer_pk": "0x040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
+      },
+      "reason": "buyer_pk_format",
+      "stage": "parse"
+    },
+    {
+      "name": "buyer_pk_upper",
+      "msg": {
+        "op": "eval",
+        "listing_id": 7,
+        "sealed_criteria": "WTabHYSDoqjOpCtU7s2tXWT/rxw467GkmGy4q1XBoEldv7vSX1NDfPPa6Ie6I4M22LzYeEBoH3RPZifbO1EHJbgzWvXikv9cePD2V9nxuY1qmH667sGMBldqJzNE2L0XbblVCzy5328D4bnFk/dFAsm37G1iS7GLiEDZoyMDmB74M9IZX9XJKZg=",
+        "buyer_pk": "040061DD42F8D26CFD6A95E45F25E5F31AA277B30791430AE63EA19C89D368637CD0C836CEFAAFABDBCA2D43AC645DE5F2F0F1BEF88665E3A535409F9D7D857337"
+      },
+      "reason": "buyer_pk_format",
+      "stage": "parse"
+    },
+    {
+      "name": "buyer_pk_not_04",
+      "msg": {
+        "op": "eval",
+        "listing_id": 7,
+        "sealed_criteria": "WTabHYSDoqjOpCtU7s2tXWT/rxw467GkmGy4q1XBoEldv7vSX1NDfPPa6Ie6I4M22LzYeEBoH3RPZifbO1EHJbgzWvXikv9cePD2V9nxuY1qmH667sGMBldqJzNE2L0XbblVCzy5328D4bnFk/dFAsm37G1iS7GLiEDZoyMDmB74M9IZX9XJKZg=",
+        "buyer_pk": "050061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
+      },
+      "reason": "buyer_pk_format",
+      "stage": "parse"
+    },
+    {
+      "name": "sealed_criteria_4097",
+      "msg": {
+        "op": "eval",
+        "listing_id": 7,
+        "sealed_criteria": "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",
+        "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
+      },
+      "reason": "sealed_criteria_too_long",
+      "stage": "parse"
+    },
+    {
+      "name": "listing_id_negative",
+      "msg": {
+        "op": "buy",
+        "listing_id": -1,
+        "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
+      },
+      "reason": "listing_id_not_u64",
+      "stage": "parse"
+    },
+    {
+      "name": "listing_id_string",
+      "msg": {
+        "op": "buy",
+        "listing_id": "7",
+        "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
+      },
+      "reason": "listing_id_not_u64",
+      "stage": "parse"
+    },
+    {
+      "name": "payout_bad",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored",
+        "payout": "Not A Valid!"
+      },
+      "reason": "payout_format",
+      "stage": "parse"
+    },
+    {
+      "name": "rows_claimed_negative",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": -5,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "rows_claimed_not_u64",
+      "stage": "parse"
+    },
+    {
+      "name": "eval_fee_below_min",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "250000",
+        "eval_fee": "49999",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "eval_fee_below_min",
+      "stage": "config"
+    },
+    {
+      "name": "price_below_min",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+        "price": "99999",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "price_below_min",
+      "stage": "config"
+    }
+  ]
+}

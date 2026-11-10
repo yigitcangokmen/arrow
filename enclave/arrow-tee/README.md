@@ -3,7 +3,7 @@
 OutLayer WASI P2 program (`wasm32-wasip2`). Scaffold it from `out-layer/private-dao-example` (ECIES, HKDF, `PROTECTED_` secret) and `out-layer/ai-example` (wasi-http POST).
 
 Behaviour (KICKOFF.md §2.6):
-- **Guard.** `OUTLAYER_EXECUTION_TYPE == "NEAR"`, and `NEAR_PREDECESSOR_ID` is in the allowlist for `NEAR_NETWORK_ID`: `{mainnet: [arrow-market.near], testnet: [arrow.<team>.testnet]}`. The same wasm hash runs on both networks.
+- **Guard.** `OUTLAYER_EXECUTION_TYPE == "NEAR"`, and `NEAR_PREDECESSOR_ID` is in the allowlist for `NEAR_NETWORK_ID`: `{mainnet: [arrow-market.near, arrow-market-v2.near], testnet: [arrow.arrowhq.testnet, arrow-v2.arrowhq.testnet]}`. The same wasm hash runs on both networks.
 - **eval.** Steps:
   1. Unseal `K‖blob_sha256`.
   2. Download the blob and check its sha256.
@@ -14,7 +14,7 @@ Behaviour (KICKOFF.md §2.6):
   7. Compose the result.
   8. ECIES-encrypt it to `buyer_pk`.
   9. Pad to `T_PAD = 45 s`.
-  10. Write `{"v":1,"ok":true,"sealed_result":…,"program":…}` (≤1024 bytes).
+  10. Write `{"v":1,"ok":true,"r":…,"h":…}` (≤900 bytes, target ≤400).
 - **release.** Unseal, check the hash binding, return `ECIES(buyer_pk, K)`.
 - **Errors (red-team B1).**
   - `panic::set_hook(Box::new(|_| {}))`.

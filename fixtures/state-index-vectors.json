@@ -1,0 +1,332 @@
+{
+  "version": 1,
+  "formula": "idx = (verdict==BUY)*25 + (fit-1)*5 + (novelty-1)",
+  "scored": [
+    {
+      "verdict": "PASS",
+      "fit": 1,
+      "novelty": 1,
+      "idx": 0
+    },
+    {
+      "verdict": "PASS",
+      "fit": 1,
+      "novelty": 2,
+      "idx": 1
+    },
+    {
+      "verdict": "PASS",
+      "fit": 1,
+      "novelty": 3,
+      "idx": 2
+    },
+    {
+      "verdict": "PASS",
+      "fit": 1,
+      "novelty": 4,
+      "idx": 3
+    },
+    {
+      "verdict": "PASS",
+      "fit": 1,
+      "novelty": 5,
+      "idx": 4
+    },
+    {
+      "verdict": "PASS",
+      "fit": 2,
+      "novelty": 1,
+      "idx": 5
+    },
+    {
+      "verdict": "PASS",
+      "fit": 2,
+      "novelty": 2,
+      "idx": 6
+    },
+    {
+      "verdict": "PASS",
+      "fit": 2,
+      "novelty": 3,
+      "idx": 7
+    },
+    {
+      "verdict": "PASS",
+      "fit": 2,
+      "novelty": 4,
+      "idx": 8
+    },
+    {
+      "verdict": "PASS",
+      "fit": 2,
+      "novelty": 5,
+      "idx": 9
+    },
+    {
+      "verdict": "PASS",
+      "fit": 3,
+      "novelty": 1,
+      "idx": 10
+    },
+    {
+      "verdict": "PASS",
+      "fit": 3,
+      "novelty": 2,
+      "idx": 11
+    },
+    {
+      "verdict": "PASS",
+      "fit": 3,
+      "novelty": 3,
+      "idx": 12
+    },
+    {
+      "verdict": "PASS",
+      "fit": 3,
+      "novelty": 4,
+      "idx": 13
+    },
+    {
+      "verdict": "PASS",
+      "fit": 3,
+      "novelty": 5,
+      "idx": 14
+    },
+    {
+      "verdict": "PASS",
+      "fit": 4,
+      "novelty": 1,
+      "idx": 15
+    },
+    {
+      "verdict": "PASS",
+      "fit": 4,
+      "novelty": 2,
+      "idx": 16
+    },
+    {
+      "verdict": "PASS",
+      "fit": 4,
+      "novelty": 3,
+      "idx": 17
+    },
+    {
+      "verdict": "PASS",
+      "fit": 4,
+      "novelty": 4,
+      "idx": 18
+    },
+    {
+      "verdict": "PASS",
+      "fit": 4,
+      "novelty": 5,
+      "idx": 19
+    },
+    {
+      "verdict": "PASS",
+      "fit": 5,
+      "novelty": 1,
+      "idx": 20
+    },
+    {
+      "verdict": "PASS",
+      "fit": 5,
+      "novelty": 2,
+      "idx": 21
+    },
+    {
+      "verdict": "PASS",
+      "fit": 5,
+      "novelty": 3,
+      "idx": 22
+    },
+    {
+      "verdict": "PASS",
+      "fit": 5,
+      "novelty": 4,
+      "idx": 23
+    },
+    {
+      "verdict": "PASS",
+      "fit": 5,
+      "novelty": 5,
+      "idx": 24
+    },
+    {
+      "verdict": "BUY",
+      "fit": 1,
+      "novelty": 1,
+      "idx": 25
+    },
+    {
+      "verdict": "BUY",
+      "fit": 1,
+      "novelty": 2,
+      "idx": 26
+    },
+    {
+      "verdict": "BUY",
+      "fit": 1,
+      "novelty": 3,
+      "idx": 27
+    },
+    {
+      "verdict": "BUY",
+      "fit": 1,
+      "novelty": 4,
+      "idx": 28
+    },
+    {
+      "verdict": "BUY",
+      "fit": 1,
+      "novelty": 5,
+      "idx": 29
+    },
+    {
+      "verdict": "BUY",
+      "fit": 2,
+      "novelty": 1,
+      "idx": 30
+    },
+    {
+      "verdict": "BUY",
+      "fit": 2,
+      "novelty": 2,
+      "idx": 31
+    },
+    {
+      "verdict": "BUY",
+      "fit": 2,
+      "novelty": 3,
+      "idx": 32
+    },
+    {
+      "verdict": "BUY",
+      "fit": 2,
+      "novelty": 4,
+      "idx": 33
+    },
+    {
+      "verdict": "BUY",
+      "fit": 2,
+      "novelty": 5,
+      "idx": 34
+    },
+    {
+      "verdict": "BUY",
+      "fit": 3,
+      "novelty": 1,
+      "idx": 35
+    },
+    {
+      "verdict": "BUY",
+      "fit": 3,
+      "novelty": 2,
+      "idx": 36
+    },
+    {
+      "verdict": "BUY",
+      "fit": 3,
+      "novelty": 3,
+      "idx": 37
+    },
+    {
+      "verdict": "BUY",
+      "fit": 3,
+      "novelty": 4,
+      "idx": 38
+    },
+    {
+      "verdict": "BUY",
+      "fit": 3,
+      "novelty": 5,
+      "idx": 39
+    },
+    {
+      "verdict": "BUY",
+      "fit": 4,
+      "novelty": 1,
+      "idx": 40
+    },
+    {
+      "verdict": "BUY",
+      "fit": 4,
+      "novelty": 2,
+      "idx": 41
+    },
+    {
+      "verdict": "BUY",
+      "fit": 4,
+      "novelty": 3,
+      "idx": 42
+    },
+    {
+      "verdict": "BUY",
+      "fit": 4,
+      "novelty": 4,
+      "idx": 43
+    },
+    {
+      "verdict": "BUY",
+      "fit": 4,
+      "novelty": 5,
+      "idx": 44
+    },
+    {
+      "verdict": "BUY",
+      "fit": 5,
+      "novelty": 1,
+      "idx": 45
+    },
+    {
+      "verdict": "BUY",
+      "fit": 5,
+      "novelty": 2,
+      "idx": 46
+    },
+    {
+      "verdict": "BUY",
+      "fit": 5,
+      "novelty": 3,
+      "idx": 47
+    },
+    {
+      "verdict": "BUY",
+      "fit": 5,
+      "novelty": 4,
+      "idx": 48
+    },
+    {
+      "verdict": "BUY",
+      "fit": 5,
+      "novelty": 5,
+      "idx": 49
+    }
+  ],
+  "verdict_mode": [
+    {
+      "verdict": "PASS",
+      "idx": 0
+    },
+    {
+      "verdict": "BUY",
+      "idx": 1
+    }
+  ],
+  "guard_tripped": {
+    "scored_idx": 0,
+    "verdict_idx": 0
+  },
+  "novelty_without_signature": 3,
+  "error_state": "ok:false output; not an index; counted as the 51st (scored) / 3rd (verdict) state",
+  "states": {
+    "scored": 51,
+    "verdict": 3
+  },
+  "bits_per_eval_milli": {
+    "scored": 5673,
+    "verdict": 1585
+  },
+  "result_plaintext_len": 1,
+  "result_ecies_len": 98
+}

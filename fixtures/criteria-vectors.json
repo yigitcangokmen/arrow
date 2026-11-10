@@ -1,0 +1,182 @@
+{
+  "version": 1,
+  "schema": "criteria-schema.json",
+  "max_bytes": 2975,
+  "byte_count": "Buffer.byteLength(JSON.stringify(criteria)) (minified UTF-8)",
+  "valid": [
+    {
+      "name": "demo_min",
+      "criteria": {
+        "v": 1,
+        "text": "Daily retail sales with region and SKU."
+      }
+    },
+    {
+      "name": "demo_full_no_minhash",
+      "criteria": {
+        "v": 1,
+        "required_columns": [
+          "date",
+          "region",
+          "sku",
+          "units"
+        ],
+        "min_rows": 10000,
+        "date_column": "date",
+        "date_from": "2025-01-01",
+        "date_to": "2025-12-31",
+        "max_null_rate": 0.05,
+        "key_column": "sku",
+        "text": "Daily retail units by SKU and region for 2025.",
+        "min_fit": 4,
+        "min_novelty": 3
+      }
+    },
+    {
+      "name": "with_minhash_600_ascii_text",
+      "criteria": {
+        "v": 1,
+        "required_columns": [
+          "date",
+          "region",
+          "sku",
+          "units"
+        ],
+        "min_rows": 10000,
+        "date_column": "date",
+        "date_from": "2025-01-01",
+        "date_to": "2025-12-31",
+        "max_null_rate": 0.05,
+        "key_column": "sku",
+        "text": "Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units ",
+        "min_fit": 4,
+        "min_novelty": 3,
+        "minhash": "dff11c0339c9d6d05dc839028c82a97bdf1b45bb4387ef5b87f815773949f7c82b5d5afe8b2c0beb161e0cc6ed746797c2a14247d244665946e413e2b9c016e0ecddec6263c97c95235aaa7fc5453a62f5c3bd3e1754ec13445ce87cb1106c5b02ec3acf7c0d53e05e80fa8f91884d7e42a2c2afc8d86e86893950211b033106da74eaaad3004c17e9c4ce36547d3ccd52ec225f017995236f845b3ab045b96de079385afeea28ec148cda57146c1638c8dd99503c2d40847da6cc75d742ede7f7c53379313f235aa39e4c6d041b7339de12cbcc8dffe5e77cb138715b60040ae26959652b4ab8ffbc0e839921014dbd630b946a58e8721ee0ebea10c7ca11546b3ea04719d33bad8f649cd5d0722fa473088c20723967b5ea33ffbe7fe8ca241f6c059004afee37458b3a95e8fbbeba98ce4f8f3e0e103d468650ec13512da1d17165ffecd06b5ea12911f6bd27bcc77f15a43ceb0259e163662da879fb10834712ed07873b6f02c4b514dd2f39aa187dd39e3e8f8f97b2baf4cd75b10c3d6e10ef60f9fe848dc48178d8d281361db5095beab536b0fe7d96a7636b684361e59956fb9217d5049c56335b5de782c8ec2e30ed11a0ac7b85731acf03e5efb0b9c73d99a84d71b378957fcff0a48d9dea0d1e0a721af94d1470c7f30a8a878420a30e26574ee71d9750ee873cdf799bac3742bbdb9aab930635477d0046f06565f23470fa2b6e0f3140f7a6c3aa7eeb118e82196bca6bb4639892e1364b02ef24ef951edc11229d71bf578e6624e354064e02fd89b680b3aadcb0497494e28ec7b7c0c0c4ad758e7e86b706864d8fffe553cbdf2f0edc350656d7c44302f7263ec95017d15c6ca12c88249381e8eeefe627af9999d73a757b062b34d1f3e972994dea739da0f65e5a983fccefed0b4bf2e3dfa08998ab3ebd034a29c9157ebccd1645ed1b34803b98a3351548da7a2b2aa964c1097e56e27e7aae91cbbce96564ca214d87907877be99a5af8b58182ed9ad9e70a246f0a1914623fb2a27b12c34109419c73f7c0f5acf13087bcdf1328ad3a1d8a4d1b191489488c88a164bebf731567f0d3a38cd05b7b835fe782cedb72a09846b9b8b35cc54e2086851d1252d602544dc8b08fc4b614d23c8e060a2f4d3dac172519dbcac0315070d91ab90936da1386666b717ee68245ba020945462afd9a096fcb05fd7bd472b8fc88e43ff9b557f48d33efa08efea32be217036cfc4e79a95b85f6c4e057704b57d5a6cf5d8e9da59fa8ad05bdfe8f41ed2194356c423c2aab155a85351ded8510a0feb14e121fc928cd081a6d1ffcaf1f2a80589d828cf7d5dbbf2d7478c52009a2bbb769de411530b7ed5ca75ae1a519de096cdfc7addde9c1d33ecd20531acbb8c397fa7e5a8ef7312d4576522b3d52fa98bc11b7390ebfa8b61503dfbab4e892699c1"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "text_601",
+      "criteria": {
+        "v": 1,
+        "text": "Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units by SKU and region for 2025 with prices; Need daily retail units x"
+      },
+      "reason": "text_too_long"
+    },
+    {
+      "name": "minhash_2032",
+      "criteria": {
+        "v": 1,
+        "required_columns": [
+          "date",
+          "region",
+          "sku",
+          "units"
+        ],
+        "min_rows": 10000,
+        "date_column": "date",
+        "date_from": "2025-01-01",
+        "date_to": "2025-12-31",
+        "max_null_rate": 0.05,
+        "key_column": "sku",
+        "text": "Daily retail units by SKU and region for 2025.",
+        "min_fit": 4,
+        "min_novelty": 3,
+        "minhash": "dff11c0339c9d6d05dc839028c82a97bdf1b45bb4387ef5b87f815773949f7c82b5d5afe8b2c0beb161e0cc6ed746797c2a14247d244665946e413e2b9c016e0ecddec6263c97c95235aaa7fc5453a62f5c3bd3e1754ec13445ce87cb1106c5b02ec3acf7c0d53e05e80fa8f91884d7e42a2c2afc8d86e86893950211b033106da74eaaad3004c17e9c4ce36547d3ccd52ec225f017995236f845b3ab045b96de079385afeea28ec148cda57146c1638c8dd99503c2d40847da6cc75d742ede7f7c53379313f235aa39e4c6d041b7339de12cbcc8dffe5e77cb138715b60040ae26959652b4ab8ffbc0e839921014dbd630b946a58e8721ee0ebea10c7ca11546b3ea04719d33bad8f649cd5d0722fa473088c20723967b5ea33ffbe7fe8ca241f6c059004afee37458b3a95e8fbbeba98ce4f8f3e0e103d468650ec13512da1d17165ffecd06b5ea12911f6bd27bcc77f15a43ceb0259e163662da879fb10834712ed07873b6f02c4b514dd2f39aa187dd39e3e8f8f97b2baf4cd75b10c3d6e10ef60f9fe848dc48178d8d281361db5095beab536b0fe7d96a7636b684361e59956fb9217d5049c56335b5de782c8ec2e30ed11a0ac7b85731acf03e5efb0b9c73d99a84d71b378957fcff0a48d9dea0d1e0a721af94d1470c7f30a8a878420a30e26574ee71d9750ee873cdf799bac3742bbdb9aab930635477d0046f06565f23470fa2b6e0f3140f7a6c3aa7eeb118e82196bca6bb4639892e1364b02ef24ef951edc11229d71bf578e6624e354064e02fd89b680b3aadcb0497494e28ec7b7c0c0c4ad758e7e86b706864d8fffe553cbdf2f0edc350656d7c44302f7263ec95017d15c6ca12c88249381e8eeefe627af9999d73a757b062b34d1f3e972994dea739da0f65e5a983fccefed0b4bf2e3dfa08998ab3ebd034a29c9157ebccd1645ed1b34803b98a3351548da7a2b2aa964c1097e56e27e7aae91cbbce96564ca214d87907877be99a5af8b58182ed9ad9e70a246f0a1914623fb2a27b12c34109419c73f7c0f5acf13087bcdf1328ad3a1d8a4d1b191489488c88a164bebf731567f0d3a38cd05b7b835fe782cedb72a09846b9b8b35cc54e2086851d1252d602544dc8b08fc4b614d23c8e060a2f4d3dac172519dbcac0315070d91ab90936da1386666b717ee68245ba020945462afd9a096fcb05fd7bd472b8fc88e43ff9b557f48d33efa08efea32be217036cfc4e79a95b85f6c4e057704b57d5a6cf5d8e9da59fa8ad05bdfe8f41ed2194356c423c2aab155a85351ded8510a0feb14e121fc928cd081a6d1ffcaf1f2a80589d828cf7d5dbbf2d7478c52009a2bbb769de411530b7ed5ca75ae1a519de096cdfc7addde9c1d33ecd20531acbb8c397fa7e5a8ef7312d4576522b3d52fa98bc11b7390ebfa8b6150"
+      },
+      "reason": "minhash_format"
+    },
+    {
+      "name": "minhash_upper",
+      "criteria": {
+        "v": 1,
+        "required_columns": [
+          "date",
+          "region",
+          "sku",
+          "units"
+        ],
+        "min_rows": 10000,
+        "date_column": "date",
+        "date_from": "2025-01-01",
+        "date_to": "2025-12-31",
+        "max_null_rate": 0.05,
+        "key_column": "sku",
+        "text": "Daily retail units by SKU and region for 2025.",
+        "min_fit": 4,
+        "min_novelty": 3,
+        "minhash": "DFF11C0339C9D6D05DC839028C82A97BDF1B45BB4387EF5B87F815773949F7C82B5D5AFE8B2C0BEB161E0CC6ED746797C2A14247D244665946E413E2B9C016E0ECDDEC6263C97C95235AAA7FC5453A62F5C3BD3E1754EC13445CE87CB1106C5B02EC3ACF7C0D53E05E80FA8F91884D7E42A2C2AFC8D86E86893950211B033106DA74EAAAD3004C17E9C4CE36547D3CCD52EC225F017995236F845B3AB045B96DE079385AFEEA28EC148CDA57146C1638C8DD99503C2D40847DA6CC75D742EDE7F7C53379313F235AA39E4C6D041B7339DE12CBCC8DFFE5E77CB138715B60040AE26959652B4AB8FFBC0E839921014DBD630B946A58E8721EE0EBEA10C7CA11546B3EA04719D33BAD8F649CD5D0722FA473088C20723967B5EA33FFBE7FE8CA241F6C059004AFEE37458B3A95E8FBBEBA98CE4F8F3E0E103D468650EC13512DA1D17165FFECD06B5EA12911F6BD27BCC77F15A43CEB0259E163662DA879FB10834712ED07873B6F02C4B514DD2F39AA187DD39E3E8F8F97B2BAF4CD75B10C3D6E10EF60F9FE848DC48178D8D281361DB5095BEAB536B0FE7D96A7636B684361E59956FB9217D5049C56335B5DE782C8EC2E30ED11A0AC7B85731ACF03E5EFB0B9C73D99A84D71B378957FCFF0A48D9DEA0D1E0A721AF94D1470C7F30A8A878420A30E26574EE71D9750EE873CDF799BAC3742BBDB9AAB930635477D0046F06565F23470FA2B6E0F3140F7A6C3AA7EEB118E82196BCA6BB4639892E1364B02EF24EF951EDC11229D71BF578E6624E354064E02FD89B680B3AADCB0497494E28EC7B7C0C0C4AD758E7E86B706864D8FFFE553CBDF2F0EDC350656D7C44302F7263EC95017D15C6CA12C88249381E8EEEFE627AF9999D73A757B062B34D1F3E972994DEA739DA0F65E5A983FCCEFED0B4BF2E3DFA08998AB3EBD034A29C9157EBCCD1645ED1B34803B98A3351548DA7A2B2AA964C1097E56E27E7AAE91CBBCE96564CA214D87907877BE99A5AF8B58182ED9AD9E70A246F0A1914623FB2A27B12C34109419C73F7C0F5ACF13087BCDF1328AD3A1D8A4D1B191489488C88A164BEBF731567F0D3A38CD05B7B835FE782CEDB72A09846B9B8B35CC54E2086851D1252D602544DC8B08FC4B614D23C8E060A2F4D3DAC172519DBCAC0315070D91AB90936DA1386666B717EE68245BA020945462AFD9A096FCB05FD7BD472B8FC88E43FF9B557F48D33EFA08EFEA32BE217036CFC4E79A95B85F6C4E057704B57D5A6CF5D8E9DA59FA8AD05BDFE8F41ED2194356C423C2AAB155A85351DED8510A0FEB14E121FC928CD081A6D1FFCAF1F2A80589D828CF7D5DBBF2D7478C52009A2BBB769DE411530B7ED5CA75AE1A519DE096CDFC7ADDDE9C1D33ECD20531ACBB8C397FA7E5A8EF7312D4576522B3D52FA98BC11B7390EBFA8B61503DFBAB4E892699C1"
+      },
+      "reason": "minhash_format"
+    },
+    {
+      "name": "min_fit_6",
+      "criteria": {
+        "v": 1,
+        "required_columns": [
+          "date",
+          "region",
+          "sku",
+          "units"
+        ],
+        "min_rows": 10000,
+        "date_column": "date",
+        "date_from": "2025-01-01",
+        "date_to": "2025-12-31",
+        "max_null_rate": 0.05,
+        "key_column": "sku",
+        "text": "Daily retail units by SKU and region for 2025.",
+        "min_fit": 6,
+        "min_novelty": 3
+      },
+      "reason": "min_fit_range"
+    },
+    {
+      "name": "extra_field",
+      "criteria": {
+        "v": 1,
+        "required_columns": [
+          "date",
+          "region",
+          "sku",
+          "units"
+        ],
+        "min_rows": 10000,
+        "date_column": "date",
+        "date_from": "2025-01-01",
+        "date_to": "2025-12-31",
+        "max_null_rate": 0.05,
+        "key_column": "sku",
+        "text": "Daily retail units by SKU and region for 2025.",
+        "min_fit": 4,
+        "min_novelty": 3,
+        "budget": 5
+      },
+      "reason": "unknown_field"
+    },
+    {
+      "name": "too_large",
+      "criteria": {
+        "v": 1,
+        "required_columns": [
+          "date",
+          "region",
+          "sku",
+          "units"
+        ],
+        "min_rows": 10000,
+        "date_column": "date",
+        "date_from": "2025-01-01",
+        "date_to": "2025-12-31",
+        "max_null_rate": 0.05,
+        "key_column": "sku",
+        "text": "çççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççç",
+        "min_fit": 4,
+        "min_novelty": 3,
+        "minhash": "dff11c0339c9d6d05dc839028c82a97bdf1b45bb4387ef5b87f815773949f7c82b5d5afe8b2c0beb161e0cc6ed746797c2a14247d244665946e413e2b9c016e0ecddec6263c97c95235aaa7fc5453a62f5c3bd3e1754ec13445ce87cb1106c5b02ec3acf7c0d53e05e80fa8f91884d7e42a2c2afc8d86e86893950211b033106da74eaaad3004c17e9c4ce36547d3ccd52ec225f017995236f845b3ab045b96de079385afeea28ec148cda57146c1638c8dd99503c2d40847da6cc75d742ede7f7c53379313f235aa39e4c6d041b7339de12cbcc8dffe5e77cb138715b60040ae26959652b4ab8ffbc0e839921014dbd630b946a58e8721ee0ebea10c7ca11546b3ea04719d33bad8f649cd5d0722fa473088c20723967b5ea33ffbe7fe8ca241f6c059004afee37458b3a95e8fbbeba98ce4f8f3e0e103d468650ec13512da1d17165ffecd06b5ea12911f6bd27bcc77f15a43ceb0259e163662da879fb10834712ed07873b6f02c4b514dd2f39aa187dd39e3e8f8f97b2baf4cd75b10c3d6e10ef60f9fe848dc48178d8d281361db5095beab536b0fe7d96a7636b684361e59956fb9217d5049c56335b5de782c8ec2e30ed11a0ac7b85731acf03e5efb0b9c73d99a84d71b378957fcff0a48d9dea0d1e0a721af94d1470c7f30a8a878420a30e26574ee71d9750ee873cdf799bac3742bbdb9aab930635477d0046f06565f23470fa2b6e0f3140f7a6c3aa7eeb118e82196bca6bb4639892e1364b02ef24ef951edc11229d71bf578e6624e354064e02fd89b680b3aadcb0497494e28ec7b7c0c0c4ad758e7e86b706864d8fffe553cbdf2f0edc350656d7c44302f7263ec95017d15c6ca12c88249381e8eeefe627af9999d73a757b062b34d1f3e972994dea739da0f65e5a983fccefed0b4bf2e3dfa08998ab3ebd034a29c9157ebccd1645ed1b34803b98a3351548da7a2b2aa964c1097e56e27e7aae91cbbce96564ca214d87907877be99a5af8b58182ed9ad9e70a246f0a1914623fb2a27b12c34109419c73f7c0f5acf13087bcdf1328ad3a1d8a4d1b191489488c88a164bebf731567f0d3a38cd05b7b835fe782cedb72a09846b9b8b35cc54e2086851d1252d602544dc8b08fc4b614d23c8e060a2f4d3dac172519dbcac0315070d91ab90936da1386666b717ee68245ba020945462afd9a096fcb05fd7bd472b8fc88e43ff9b557f48d33efa08efea32be217036cfc4e79a95b85f6c4e057704b57d5a6cf5d8e9da59fa8ad05bdfe8f41ed2194356c423c2aab155a85351ded8510a0feb14e121fc928cd081a6d1ffcaf1f2a80589d828cf7d5dbbf2d7478c52009a2bbb769de411530b7ed5ca75ae1a519de096cdfc7addde9c1d33ecd20531acbb8c397fa7e5a8ef7312d4576522b3d52fa98bc11b7390ebfa8b61503dfbab4e892699c1"
+      },
+      "reason": "criteria_too_large"
+    }
+  ]
+}
