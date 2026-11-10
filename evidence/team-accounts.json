@@ -1,0 +1,3 @@
+{"near": ["arrowhq.near","arrow-market.near","arrow-market-v2.near","arrow-relayer.arrowhq.near","arrow-spike.arrowhq.near","arrowhq.testnet"],
+ "evm": [], "solana": [],
+ "note": "Team-controlled accounts. Any seller not listed here counts as external (DECISIONS H-07). EVM/Solana addresses only, never keys."}

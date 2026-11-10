@@ -1,0 +1,11 @@
+{
+  "network": "testnet",
+  "contract": "arrow.arrowhq.testnet",
+  "contract_wasm_sha256": null,
+  "program_wasm_sha256": null,
+  "program_wasm_url": null,
+  "lock": {"tx": null, "block_height": null, "timestamp_utc": null},
+  "accounts": {},
+  "runs": [],
+  "corrections": []
+}
