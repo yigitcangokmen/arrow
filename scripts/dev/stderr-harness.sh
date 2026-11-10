@@ -10,7 +10,7 @@ cd "$(git rev-parse --show-toplevel)"
 only=""
 if [ "${1:-}" = --only ]; then only=${2:?usage: --only <case>}; fi
 
-cargo build -q -p arrow-tee --target wasm32-wasip2 --release --target-dir target/rel-tee
+bash scripts/build-tee.sh target/rel-tee >/dev/null 2>&1
 cargo build -q -p arrow-tee --target wasm32-wasip2 --release --features dev-endpoints --target-dir target/dev-tee
 
 tmp=$(mktemp -d)
