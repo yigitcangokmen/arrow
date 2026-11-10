@@ -1,0 +1,28 @@
+/// The only error type. It carries no data and has no `Display`: nothing about a failure
+/// may reach stdout, stderr or a log. Third-party errors are dropped with `map_err(|_| ...)`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ArrowErr {
+    Input,
+    Guard,
+    Late,
+    Secret,
+    Key,
+    Unseal,
+    HashBind,
+    BuyerKey,
+    Seed,
+    Criteria,
+    BlobUrl,
+    BlobFetch,
+    BlobTooLarge,
+    BlobHash,
+    Decrypt,
+    Format,
+    Limits,
+    Empty,
+    Llm,
+    LlmSchema,
+    Seal,
+    Output,
+    Internal,
+}
