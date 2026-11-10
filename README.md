@@ -11,10 +11,10 @@ You cannot sell information: to judge its value the buyer must see it, and once 
 ## Status (as of {{STATUS_UTC}})
 
 - Mainnet contract: `TODO(mainnet)` `arrow-market.near`, locked (all access keys deleted) in tx `{{LOCK_TX}}`. Program wasm sha256 `{{WASM_SHA256}}`, contract wasm sha256 `{{CONTRACT_WASM_SHA256}}`.
-- Testnet: contract `arrow.arrowhq.testnet` and the testnet token `arrow-usd.arrowhq.testnet`. `TODO(testnet-deploy)` the market contract is not deployed there yet; the token and the gate spikes below are.
+- Testnet: contract `arrow.arrowhq.testnet` (live, release-candidate program wasm `73415b8f…` served from testnet FastFS) and the testnet token `arrow-usd.arrowhq.testnet`. The end-to-end run on it is green (9 of 9 steps) and the enclave has produced real verdicts with a NEAR AI call inside it; see [Testnet end-to-end and timings](#testnet-end-to-end-and-timings). The release candidate is not the final program: the wasm freeze is still ahead, and listings made now stop being readable when the program key changes.
 - Demand: `{{DEMAND_LINE}}`
-- Gates run so far (testnet and free mainnet views): S2, S1-b (echo), S3a (dry), S4-b. See [Gates and evidence](#gates-and-evidence).
-- Not live / not claimed: `TODO(S1-a)` NEAR AI calls from inside the enclave (the S1-a gate waits for an API key), the paid cross-chain inbound (S4-a), mainnet purchases, E2EE to NEAR AI (TLS only), on-chain TDX quote verification, resale prevention, eval-time NEAR AI attestation.
+- Gates run so far (testnet and free mainnet views): S2, S1-b (echo), S3a (dry), S4-b, and the K2 testnet end-to-end run. See [Gates and evidence](#gates-and-evidence).
+- Not live / not claimed: NEAR AI calls from inside the enclave on mainnet (`TODO(mainnet)`; on testnet they run), the paid cross-chain inbound (S4-a), mainnet purchases, E2EE to NEAR AI (TLS only), on-chain TDX quote verification, resale prevention, eval-time NEAR AI attestation.
 - The testnet contract is not locked, so daily caps can be adjusted.
 
 ## Trust table
@@ -58,7 +58,7 @@ What runs today with Node 22.22.2 or later (tested on 24.15.0) and, for steps 4-
 6. `npx tsx spikes/s3/s3a-simulate.ts`. See: `payload carries msg: yes · min_gas: yes`, then `class: SIGNATURE_OK_BALANCE_ERROR`. A signed transfer intent with a `msg` is accepted by `intents.near` (mainnet `simulate_intents`, a free view, throwaway key); only the empty balance fails. Nothing is sent.
 7. `npm run arrow -- --help`. See: the commands `list`, `eval`, `buy`, `status`, `decrypt`.
 
-`TODO(testnet-deploy)` after the market contract is on testnet: `npm run try:testnet` (list, eval, buy, decrypt), `npm run arrow -- status --network testnet`, `npm run arrow -- list … --dry-run`. `TODO(mainnet)` `npm run verify`, `npm run verify -- --decrypt-demo`, `npm run replay`, the hosted `/verify/{{EVAL_ID_DEMO}}` page and `curl -i {{HOSTED_URL}}/api/x402/{{LISTING_ID_DEMO}}`. If one of these fails for a reason outside our control, steps 3 to 6 above still run offline.
+`TODO(try-testnet)` the market contract is on testnet now; the judge path has not been run from a clean clone yet: `npm run try:testnet` (list, eval, buy, decrypt), `npm run arrow -- status --network testnet`, `npm run arrow -- list … --dry-run`. `TODO(mainnet)` `npm run verify`, `npm run verify -- --decrypt-demo`, `npm run replay`, the hosted `/verify/{{EVAL_ID_DEMO}}` page and `curl -i {{HOSTED_URL}}/api/x402/{{LISTING_ID_DEMO}}`. If one of these fails for a reason outside our control, steps 3 to 6 above still run offline.
 
 ## Gates and evidence
 
@@ -67,10 +67,23 @@ Each gate is a spike run before the real build. Transaction links point at the t
 | Gate | Result | Evidence |
 |---|---|---|
 | **S2** testnet token and refund | PASS. Public capped mint works; a receiver that returns the whole amount leaves both balances unchanged; one that keeps exactly 100000 moves exactly 100000. Sandbox: a mock OutLayer returning `null`, or never resuming, produces a full refund on both rails (`arrow_refund` event). | Deploy [`DKcmuQZf…`](https://testnet.nearblocks.io/txns/DKcmuQZfqyXg4MprUqKqqJL9XADcL4hrCeWcTQ2LG7sL), mint [`FigU6Yju…`](https://testnet.nearblocks.io/txns/FigU6Yju4aSxCmJtjnmUECcTCLbHiZUebpT1AGMSytwH), over-cap mint rejected [`9VEBgna2…`](https://testnet.nearblocks.io/txns/9VEBgna2bjfFLFa2efZjPamL7H6tYsu9kzDkxjpcSd1K), refund_all [`5toQSSae…`](https://testnet.nearblocks.io/txns/5toQSSaeNKNYyE1WAmEeZtMFwCvyLptKgraS1DT5srrV), keep [`Ajx43mbG…`](https://testnet.nearblocks.io/txns/Ajx43mbGw8pv6fWTPW5FCAww9bvwhux2DzhWh3uuKtzH). Sandbox suite: `cargo test --manifest-path spikes/s2/receiver/Cargo.toml --test s2` after building the contracts (6 passed when recorded) |
-| **S1-b** OutLayer chain mode, testnet | PARTIAL. Echo program (not the Arrow program, sha256 `195508a1…1151e`) on `spike.arrowhq.testnet`: 3 of 3 runs return valid JSON; caller and network are visible to the wasm; block-to-callback 6.9 to 8.9 s; an attacker account calling OutLayer directly is refused; attestation `wasm_hash`, `transaction_hash`, `input_hash` and `output_hash` match the run; measured clock skew at most 5.6 s, so the time guards stay at 90 s (eval) and 60 s (release). `TODO(S1-a)` the same runs with a NEAR AI call wait for an API key. | Runs [`ED5VCvV6…`](https://testnet.nearblocks.io/txns/ED5VCvV6vyzosFm9bHA1BSA4dDkk3RxdLrC2jGuCqaRi), [`4Q5eNqa3…`](https://testnet.nearblocks.io/txns/4Q5eNqa3YbGuApELvMso2oZN9aeNd3GCjjJc3wTiEF5S), [`8aPNegaf…`](https://testnet.nearblocks.io/txns/8aPNegafPsKGkUPsKQe2Qf1qaYHhjyiY7ZwGVFVoBJah); negative [`smm9T86m…`](https://testnet.nearblocks.io/txns/smm9T86m4RU8grrrbHgAsSd3TeD5zkCuT4FH4tbugH6) |
+| **S1-b** OutLayer chain mode, testnet | PARTIAL. Echo program (not the Arrow program, sha256 `195508a1…1151e`) on `spike.arrowhq.testnet`: 3 of 3 runs return valid JSON; caller and network are visible to the wasm; block-to-callback 6.9 to 8.9 s; an attacker account calling OutLayer directly is refused; attestation `wasm_hash`, `transaction_hash`, `input_hash` and `output_hash` match the run; measured clock skew at most 5.6 s, so the time guards stay at 90 s (eval) and 60 s (release). The same flow with a real NEAR AI call inside the Arrow program is in the next section. | Runs [`ED5VCvV6…`](https://testnet.nearblocks.io/txns/ED5VCvV6vyzosFm9bHA1BSA4dDkk3RxdLrC2jGuCqaRi), [`4Q5eNqa3…`](https://testnet.nearblocks.io/txns/4Q5eNqa3YbGuApELvMso2oZN9aeNd3GCjjJc3wTiEF5S), [`8aPNegaf…`](https://testnet.nearblocks.io/txns/8aPNegafPsKGkUPsKQe2Qf1qaYHhjyiY7ZwGVFVoBJah); negative [`smm9T86m…`](https://testnet.nearblocks.io/txns/smm9T86m4RU8grrrbHgAsSd3TeD5zkCuT4FH4tbugH6) |
 | **S3a** signature simulation (dry) | (i) PASS. A signed ERC-191 transfer intent carrying `msg` and `min_gas` is accepted; the only error is `insufficient balance or overflow`. (ii) `TODO` the funded simulate needs a funded buyer. | `npx tsx spikes/s3/s3a-simulate.ts`; result file `spikes/s3/s3a-results.json` |
 | **S4-b** ECIES, XChaCha, MinHash interop | PASS in both directions: ECIES 7/7 and 5/5, XChaCha 4/4 and 4/4, MinHash 8/8, plus the TypeScript interop test. | `cargo run -p s4-interop --release`; `npx vitest run sdk/test/crypto.interop.test.ts` |
+| **K2** testnet end-to-end | PASS, `E2E testnet: 9/9 steps green`. The PASS scene returns `PASS fit 2/5 novelty 1/5` and the BUY scene `BUY fit 5/5 novelty 4/5`; a purchase releases the key and the decrypted data hashes equal; an eval against a broken blob host is refunded with both events and the balance back; the leak counters move. Evidence rows: 12 listings, 16 evals, 3 purchases, 3 refunds in `evidence/testnet.json`. Run on the release-candidate wasm. | Eval PASS [`6fSU8y8U…`](https://testnet.nearblocks.io/txns/6fSU8y8UxJ3KYps91yVyfyMHo6TCFnQJZwyyz3FTTEnm), eval BUY [`4RzSuxeo…`](https://testnet.nearblocks.io/txns/4RzSuxeo1coQZangy4inXt4yhVf9ta7G8eWFJ3M7fS2j), purchase [`DwKeJ1YX…`](https://testnet.nearblocks.io/txns/DwKeJ1YXXWixQQmCNnqLXTZPKgm1CAvXxGDPyDY3ocgz), refund [`EQPftWo8…`](https://testnet.nearblocks.io/txns/EQPftWo8vA6Foyz7UzM2Mnk56mWuT6s8LDUDQPerEmmz). Needs the team's testnet accounts, so it is a recorded run, not a judge command |
 | S3b, S3c (mainnet), S4-a (paid inbound) | `TODO` not run. Dry runs only (`SIGNATURE_OK_BALANCE_ERROR`); the real runs move value and are done by a human. | n/a |
+
+## Testnet end-to-end and timings
+
+Real evals on `arrow.arrowhq.testnet`, program wasm release candidate `73415b8f…`, with the model `Qwen/Qwen3.8-27B` called from inside the enclave. All data is the synthetic demo data. Full table with every transaction: `docs/perf.md`.
+
+- Two scenes, ten evals, ten verdicts, no refund. Listing 8 (unlock, 412 rows) returned `PASS·2·1` five times and listing 9 (labels, 1 000 rows) returned `BUY·5·4` five times: the model agreed on every run. Example transactions: [`2FV7Ep9P…`](https://testnet.nearblocks.io/txns/2FV7Ep9PcfBXibqtgDc3Q7YwCtsJJmhecFUEojAi29FM) (`PASS·2·1`), [`6mke3XDR…`](https://testnet.nearblocks.io/txns/6mke3XDRrLd5kRFJU7DYyKHtgBPJoxyVcq1RtUcUm7y9) (`BUY·5·4`).
+- Time from sending the transaction until the contract shows the eval settled: p50 59.0 s, p95 71.2 s (10 runs, so p95 is the slowest run). In block time the eval took p50 53.7 s, p95 59.7 s, against the 90 s eval guard.
+- OutLayer `time_ms` is 47.0 s in every run (46.9 to 47.1 s). The enclave pads each eval to 45 s on purpose, so the real work time is not visible on chain. Locally, with the real model, the work takes p50 3.2 s.
+- `instructions` are public and follow the dataset size: 2.67e8 on the 412-row listing, 4.02e8 on the 1 000-row one, within 0.4 % between runs on one listing. This is the side channel listed in the trust table.
+- The verdict output is 227 bytes in every run (limit 900). One eval cost the contract's gas tank 0.0057 NEAR.
+- Largest accepted input (200 000 rows, 5 MB) was measured locally only, after a MinHash speed-up that is not in the testnet release candidate: 1.33e10 instructions of the 2.0e10 limit.
+- Mainnet numbers: `TODO(mainnet)` the same table from the final wasm on `arrow-market.near`, `{{MAINNET_EVAL_TIMINGS}}`.
 
 ## Leak bound and leak budget
 
@@ -104,7 +117,7 @@ seller browser                         buyer (any chain)
                                   Arrow contract: verdict to buyer, or null/ok:false -> refund
 ```
 
-- **NEAR AI Cloud** private inference. Planned model `Qwen/Qwen3.8-27B`; `TODO(S1-a)` the model is final only after the S1-a gate has run with a key. Fixed endpoint, `json_schema`, `temperature 0`, `max_tokens 64`, reasoning off, 40 sampled rows.
+- **NEAR AI Cloud** private inference. Model `Qwen/Qwen3.8-27B`, called from inside the enclave on testnet (ten real verdicts, see above); `TODO(mainnet)` the mainnet key and run. Fixed endpoint, `json_schema`, `temperature 0`, `max_tokens 64`, reasoning off, 40 sampled rows.
 - **OutLayer** TDX: a WASI P2 program, a `PROTECTED_` secret, a `WasmHash` + `Predecessor` access condition, and the `request_execution` yield and resume callback.
 - **NEAR Intents**: transfer intent with a `msg` that triggers `mt_on_transfer`, `mt_resolve_transfer` refund, ERC-191 signer, and **1Click** for cross-chain inbound and outbound.
 - NEP-245, NEP-141 (testnet token), NEP-297 events, NEP-330 reproducible build, `0x…` implicit accounts: buyer and seller need no NEAR account.
@@ -155,7 +168,7 @@ A mainnet implementation of the inspect-before-pay idea (Arrow 1962; NDAI 2025; 
 
 ## Benchmarks
 
-- Injection room: 24 attacks; the deterministic layer alone stops 19 of 24 (`npm run bench:offline`). `TODO(bench)` live room, leak-bench (50 attacks + 5 error-path), quality-bench (40 evals), timing bits, replay captured/total.
+- Injection room: 24 attacks; the deterministic layer alone stops 19 of 24 (`npm run bench:offline`). Enclave timing and instruction counts from real testnet evals are in [Testnet end-to-end and timings](#testnet-end-to-end-and-timings). `TODO(bench)` live room, leak-bench (50 attacks + 5 error-path), quality-bench (40 evals), timing bits, replay captured/total.
 - Criteria were written by an agent and are waiting for a human review (`bench/REVIEW.md`).
 
 ## Video
