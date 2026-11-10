@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# Read-only checks around the mainnet deploy (H-12, WS1-T17). Signs nothing, prints no key.
+#   bash scripts/deploy/mainnet-check.sh pre  [<market> <owner> <network>]   # before H-12 step 1
+#   bash scripts/deploy/mainnet-check.sh post [<market> <network>]           # after H-12 step 6
+# Defaults: arrow-market.near, arrowhq.near, mainnet. Testnet twin:
+#   bash scripts/deploy/mainnet-check.sh pre mainnet-dryrun.arrowhq.testnet arrowhq.testnet testnet
+# Every row prints PASS or FAIL; the exit code is 1 when any row failed.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+ENV_FILE=$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' .env) # .env is a symlink in worktrees
+envget() { grep -E "^$1=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true; }
+W=release/contracts/arrow-mainnet.wasm
+FAIL=0
+pass() { echo "PASS $*"; }
+fail() { echo "FAIL $*"; FAIL=1; }
+
+rpc_query() { # rpc_query <params json> -> result json; falls over to FastNEAR when the first RPC rate-limits (-429)
+  local u out=
+  for u in "$RPC" "$RPC2"; do
+    out=$(curl -sS --max-time 20 --retry 2 --retry-max-time 30 "$u" -H 'content-type: application/json' -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"query\",\"params\":$1}" | jq -c '.result // .error') || continue
+    [ "$(echo "$out" | jq -r '.code? // empty')" = -429 ] || break
+  done
+  echo "$out"
+}
+view() { # view <account> <method> [<args json>] -> decoded JSON result
+  local a=${3:-}; [ -n "$a" ] || a='{}'
+  rpc_query "{\"request_type\":\"call_function\",\"finality\":\"final\",\"account_id\":\"$1\",\"method_name\":\"$2\",\"args_base64\":\"$(printf '%s' "$a" | base64)\"}" | jq -r 'if .result then (.result | implode) else error(tostring) end'
+}
+account() { rpc_query "{\"request_type\":\"view_account\",\"finality\":\"final\",\"account_id\":\"$1\"}"; }
+near_ge() { python3 -c 'import sys; sys.exit(0 if int(sys.argv[1]) >= int(sys.argv[2]) else 1)' "$1" "$2"; }
+to_near() { python3 -c 'import sys; print(f"{int(sys.argv[1])/1e24:.4f}")' "$1"; }
+code_hash_of() { python3 -c 'import hashlib,sys
+A="123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"; n=int.from_bytes(hashlib.sha256(open(sys.argv[1],"rb").read()).digest(),"big"); s=""
+while n: n,r=divmod(n,58); s=A[r]+s
+print(s)' "$1"; }
+sha() { shasum -a 256 "$1" | cut -d' ' -f1; }
+secret_row() { # secret_row <market> <wasm sha>: the (profile arrow, WasmHash) row, or empty
+  view "$OUTLAYER" list_user_secrets "{\"account_id\":\"$1\"}" | jq -c --arg h "$2" '.[] | select(.profile=="arrow" and .accessor.WasmHash.hash==$h)'
+}
+set_net() {
+  case "$1" in
+    mainnet) RPC=$(envget MAINNET_RPC_URL); RPC=${RPC:-https://rpc.mainnet.near.org}; RPC2=https://rpc.mainnet.fastnear.com; OUTLAYER=outlayer.near ;;
+    testnet) RPC=$(envget TESTNET_RPC_URL); RPC=${RPC:-https://rpc.testnet.near.org}; RPC2=https://rpc.testnet.fastnear.com; OUTLAYER=outlayer.testnet ;;
+    *) echo "network must be mainnet or testnet" >&2; exit 2 ;;
+  esac
+}
+
+pre() {
+  local market=${1:-arrow-market.near} owner=${2:-arrowhq.near} net=${3:-mainnet} want sums url rc frozen dep acct ob init
+  set_net "$net"
+  want=$(sha "$W"); sums=$(awk '$2=="arrow-mainnet.wasm"{print $1}' release/contracts/SHA256SUMS)
+  [ "$want" = "$sums" ] && pass "contract_wasm_sha256 $want (= SHA256SUMS)" || fail "contract_wasm_sha256 $want != SHA256SUMS $sums"
+  url=$(envget PROGRAM_WASM_URL); rc=$(envget PROGRAM_WASM_SHA256)
+  frozen=$([ -f release/sha256.txt ] && tr -d ' \n' <release/sha256.txt || true)
+  if [ -z "$frozen" ]; then fail "program_frozen: release/sha256.txt missing (K3 freeze not done)"
+  elif [ "$frozen" = "$rc" ]; then pass "program_frozen .env PROGRAM_WASM_SHA256 = release/sha256.txt $rc"
+  else fail "program_frozen: .env PROGRAM_WASM_SHA256 $rc != release/sha256.txt $frozen"; fi
+  [ -n "$url" ] && [ "$(curl -sSL --retry 3 "$url" | shasum -a 256 | cut -d' ' -f1)" = "$rc" ] \
+    && pass "program_url_serves_sha $url" || fail "program_url_serves_sha: $url does not serve $rc"
+  [ -n "$(envget NEARAI_API_KEY_MAINNET)" ] && pass "nearai_key_mainnet set in .env (H-01b)" || fail "nearai_key_mainnet: .env NEARAI_API_KEY_MAINNET is empty (H-01b)"
+  if init=$(bash scripts/deploy/render-init.sh mainnet 2>&1); then
+    [ "$(echo "$init" | jq -r .cfg.secrets_ref.account_id)" = "arrow-market.near" ] && [ "$(echo "$init" | jq -r .cfg.program_wasm_hash)" = "$rc" ] \
+      && pass "init_json secrets_ref arrow-market.near, program_wasm_hash $rc" || fail "init_json: $(echo "$init" | jq -c '{s:.cfg.secrets_ref, h:.cfg.program_wasm_hash}')"
+  else fail "init_json: $init"; fi
+  dep=$(bash scripts/deploy/storage-estimate.sh | awk '/^deposit:/{print $2}')
+  acct=$(account "$market")
+  if [ "$(echo "$acct" | jq -r '.code_hash // empty')" = 11111111111111111111111111111111 ]; then
+    pass "market_empty $market exists, no code, $(to_near "$(echo "$acct" | jq -r .amount)") NEAR"
+  else fail "market_empty: $market $(echo "$acct" | jq -c '{code_hash, name, cause}')"; fi
+  ob=$(account "$owner" | jq -r '.amount // "0"')
+  near_ge "$ob" "$(python3 -c 'import sys; print(int((float(sys.argv[1]) + 1) * 10**24))' "$dep")" \
+    && pass "owner_balance $owner $(to_near "$ob") NEAR >= deposit $dep + 1" || fail "owner_balance $owner $(to_near "$ob") NEAR < deposit $dep + 1"
+  echo "deposit for step 1: $dep NEAR"
+  if OUTLAYER_NETWORK=$net outlayer whoami >/dev/null 2>&1; then fail "outlayer_logged_out: outlayer is logged in on $net (run the logout line first)"
+  else pass "outlayer_logged_out on $net"; fi
+  return $FAIL
+}
+
+post() {
+  local market=${1:-arrow-market.near} net=${2:-mainnet} cfg build want pk i rc row avail
+  set_net "$net"
+  cfg=$(view "$market" get_config); build=$(echo "$cfg" | jq -r .build)
+  # `new` requires secrets_ref.account_id == the contract itself, so the twin renders it with its own name
+  want=$(bash scripts/deploy/render-init.sh "$build" | jq -S --arg m "$market" '.cfg | .secrets_ref.account_id = $m')
+  [ "$(echo "$cfg" | jq -S .config)" = "$want" ] && pass "config_matches_init ($build template, secrets_ref $market)" || { fail "config_matches_init"; diff <(echo "$cfg" | jq -S .config) <(echo "$want") || true; }
+  [ "$(echo "$cfg" | jq -c '[.build, .payment_path, .result_path, .paused]')" = '["mainnet","notify","chain",false]' ] \
+    && pass "build mainnet, payment notify, result chain, not paused" || fail "build/paths: $(echo "$cfg" | jq -c '[.build, .payment_path, .result_path, .paused]')"
+  [ "$(account "$market" | jq -r .code_hash)" = "$(code_hash_of "$W")" ] && pass "code_hash = $W" || fail "code_hash differs from $W"
+  avail=$(echo "$cfg" | jq -r .tank_available)
+  near_ge "$avail" 400000000000000000000000 && pass "tank_available $(to_near "$avail") NEAR" || fail "tank_available $(to_near "$avail") NEAR < 0.4"
+  rc=$(echo "$cfg" | jq -r .config.program_wasm_hash); row=$(secret_row "$market" "$rc")
+  if [ -n "$row" ] && [ "$(echo "$row" | jq -c '[.access.Logic.operator, (.access.Logic.conditions | map(keys[0])), (.access.Logic.conditions[1].Predecessor.condition.Whitelist.accounts)]')" = "[\"And\",[\"WasmHash\",\"Predecessor\"],[\"$market\"]]" ]; then
+    pass "secret_row profile arrow, WasmHash $rc AND Predecessor $market"
+  else fail "secret_row for $rc: ${row:-missing}"; fi
+  for i in $(seq 1 12); do # the derive answer arrives through yield/resume
+    pk=$(view "$market" program_pubkey | jq -r '. // empty')
+    [ -n "$pk" ] && break
+    [ "$i" = 12 ] || sleep 10
+  done
+  [[ "$pk" =~ ^04[0-9a-f]{128}$ ]] && pass "program_pubkey_130hex ${pk:0:10}…" || fail "program_pubkey_130hex (${pk:-null} after 120 s)"
+  return $FAIL
+}
+
+case "${1:-}" in
+  pre) shift; pre "$@" ;;
+  post) shift; post "$@" ;;
+  *) sed -n '2,7p' "$0" >&2; exit 2 ;;
+esac
