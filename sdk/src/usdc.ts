@@ -15,3 +15,10 @@ export function formatUsdc(units: bigint): string {
   const frac = (units % UNIT).toString().padStart(USDC_DECIMALS, "0").replace(/0+$/, "");
   return frac ? `${units / UNIT}.${frac}` : `${units / UNIT}`;
 }
+
+/** For people (NUM-6): at least two decimals, up to six. 100000n -> "0.10", 2000000n -> "2.00", 1999596n -> "1.999596". */
+export function formatUsdcDisplay(units: bigint): string {
+  const s = formatUsdc(units);
+  const [int, frac = ""] = s.split(".");
+  return `${int}.${frac.padEnd(2, "0")}`;
+}

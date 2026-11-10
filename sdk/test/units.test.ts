@@ -1,7 +1,7 @@
 // WS4-T01 acceptance: bits_constants, usdc_exact, network config.
 import { describe, expect, it } from "vitest";
 import {
-  BITS_PER_EVAL_MILLI, budgetLine, formatBits, formatUsdc, NETWORKS, parseUsdc, resolveNetwork,
+  BITS_PER_EVAL_MILLI, budgetLine, formatBits, formatBitsBound, formatUsdc, formatUsdcDisplay, NETWORKS, parseUsdc, resolveNetwork,
 } from "../src/index.ts";
 
 describe("units", () => {
@@ -17,6 +17,16 @@ describe("units", () => {
     expect(formatBits(1585)).toBe("1.59");
     expect(formatBits(0)).toBe("0.00");
     expect(budgetLine({ bits_per_eval_milli: 5673, budget_milli: 283650 })).toBe("out: 5.67 bits / budget 283.65 bits");
+  });
+
+  it("NUM-2: an 'at most' bound rounds up, so it never understates log2 of the state count", () => {
+    expect(Number(formatBitsBound(BITS_PER_EVAL_MILLI.scored))).toBeGreaterThanOrEqual(Math.log2(51));
+    expect(Number(formatBitsBound(BITS_PER_EVAL_MILLI.verdict))).toBeGreaterThanOrEqual(Math.log2(3));
+    expect([formatBitsBound(5673), formatBitsBound(1585), formatBitsBound(5670)]).toEqual(["5.68", "1.59", "5.67"]);
+  });
+
+  it("NUM-6: amounts for people keep two decimals", () => {
+    expect([100000n, 2000000n, 2500000n, 1999596n, 250000n, 0n].map(formatUsdcDisplay)).toEqual(["0.10", "2.00", "2.50", "1.999596", "0.25", "0.00"]);
   });
 
   it("usdc_exact", () => {
