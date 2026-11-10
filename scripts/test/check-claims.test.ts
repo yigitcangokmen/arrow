@@ -25,6 +25,7 @@ const RULES = [
   "evm-impossible", "funds-never-leave", "refund-to-wallet", "llm-cannot-buy", "deterministic-llm", "npx-arrow",
   "pay-if", "tender-core", "seal-until", "tee-escrow-headline", "split-screen", "pass-refund", "x402-compatible",
   "verdict-leaves", "own-chain-payout", "zk", "receipt-tree-placement", "quoted-block-misplaced",
+  "nobody-can-look", "reader-inside-enclave", "any-chain", "failed-eval-full-refund",
 ];
 
 describe("check-claims.sh", () => {
@@ -64,6 +65,33 @@ describe("check-claims.sh", () => {
     const unclosed = run(["--files", fx("quoted-closed.md")]);
     expect(unclosed.code).toBe(1);
     expect(unclosed.out).toContain("quoted block never closed");
+  });
+
+  it("flags_solana_in_outreach_until_k4", () => {
+    // CLM-2: only a dry Solana quote ran, so no outreach text may promise a withdrawal
+    const root = mkdtempSync(resolve(tmpdir(), "claims-outreach-"));
+    try {
+      mkdirSync(resolve(root, "scripts"));
+      copyFileSync(SCRIPT, resolve(root, "scripts/check-claims.sh"));
+      mkdirSync(resolve(root, "docs/outreach"), { recursive: true });
+      writeFileSync(resolve(root, "docs/outreach/invite.md"), "You keep 90%, withdrawable to Solana.\n");
+      mkdirSync(resolve(root, "docs/submission"), { recursive: true });
+      writeFileSync(resolve(root, "docs/submission/x-post.md"), "A dry quote to Solana ran.\n");
+      let out = "";
+      let code = 0;
+      try {
+        execFileSync("bash", [resolve(root, "scripts/check-claims.sh")], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+      } catch (e) {
+        const err = e as { status?: number; stdout?: string };
+        code = err.status ?? -1;
+        out = err.stdout ?? "";
+      }
+      expect(code).toBe(1);
+      expect(out).toContain("docs/outreach/invite.md:1: [outreach-solana]");
+      expect(out).not.toContain("x-post.md");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it("runs_on_bsd_and_gnu_grep", () => {

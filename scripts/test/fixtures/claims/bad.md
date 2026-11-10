@@ -20,6 +20,10 @@ A TEE escrow headline.
 A split-screen demo.
 On PASS the buyer gets a refund.
 It is x402-compatible.
+The buyer's own AI reads the data where nobody can look.
+Your AI is reading the data inside the enclave.
+The buyer pays from any chain.
+If the key runs out, evals refund by design.
 Only a capped verdict leaves the enclave.
 Only BUY/PASS (and optionally fit/novelty) comes out.
 The seller receives on their own chain.

@@ -71,6 +71,10 @@ tee-escrow-headline ::: tee escrow
 split-screen ::: split[- ]screen|twin (buyer|outcome)
 pass-refund ::: pass[^.]{0,30}refund|refund[^.]{0,30}on pass
 x402-compatible ::: x402[- ]compatible
+nobody-can-look ::: nobody can look
+reader-inside-enclave ::: reading the data inside the enclave|reads the (sealed )?data inside (a|the) (tee|enclave)
+any-chain ::: (^|[^a-z])any chain
+failed-eval-full-refund ::: refund by design|full refund on both rails|returns the fee
 verdict-leaves ::: only a (capped )?verdict leaves|only buy/pass[^.]{0,80}(comes? out|leaves)
 own-chain-payout ::: (receives|paid|gets paid) on (their|its) own chain|seller (is )?paid on solana
 zk ::: zero[- ]knowledge|zk[- ]proof'
@@ -148,6 +152,9 @@ EOF
 
   # llm-cannot-buy: the sentence must carry its qualifier on the same line.
   { grep -i -E -- 'llm cannot produce buy' "$TMP/body" | grep -i -v -E -- 'unless the structural gates pass' || true; } | emit llm-cannot-buy
+
+  # docs/outreach promises nothing about a Solana withdrawal until K4: only a dry quote ran.
+  case "$f" in docs/outreach/*) grep -i -E -- 'solana' "$TMP/body" | emit outreach-solana || true ;; esac
 
   receipt_tree "$readme" "$f" | emit receipt-tree-placement
   quoted_problems "$readme" "$f" | emit quoted-block-misplaced

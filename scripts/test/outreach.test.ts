@@ -1,5 +1,5 @@
 // Acceptance tests for the outreach drafts (WS7-T01, WS7-T02). Nothing here sends anything.
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -134,6 +134,20 @@ describe("invite", () => {
       // the rules list in invite.md quotes the banned phrases on purpose; check only quoted message lines
       for (const line of text.split("\n").filter((l) => l.startsWith("> ") || /^\| T\d\d /.test(l))) expect(re.test(line), `${re} in ${line.slice(0, 60)}`).toBe(false);
     }
+  });
+
+  it("input_formats_are_accepted_by_sell_form", () => {
+    // CLM-2: an invite must not promise a file type that /sell rejects
+    const accept = [...read("web/app/sell/SellForm.tsx").matchAll(/accept="([^"]+)"/g)].flatMap((m) => (m[1] as string).split(",").map((x) => x.trim().toLowerCase()));
+    expect(accept.length).toBeGreaterThan(0);
+    const lists = [...invite.matchAll(/\(([^()]*?),? up to \d+ MB\)/g), ...targets.matchAll(/\(([^()]*?),? up to \d+ MB\)/g)].map((m) => m[1] as string);
+    expect(lists.length).toBeGreaterThan(rows.length);
+    for (const list of lists) for (const fmt of list.split(/,| or /).map((x) => x.trim().toLowerCase()).filter(Boolean)) expect(accept, `${fmt} in "${list}"`).toContain(`.${fmt}`);
+  });
+
+  it("outreach_names_no_missing_seller_guide", () => {
+    if (existsSync(resolve(ROOT, "docs/outreach/seller-guide.md"))) return;
+    for (const text of [targets, invite, followup]) expect(text).not.toMatch(/seller guide|seller-guide/i);
   });
 
   it("followup_le_60_words", () => {
