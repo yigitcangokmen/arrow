@@ -263,6 +263,8 @@ fn cases(fx: &Fx) -> (Vec<Case>, Vec<Case>) {
     wk["listing"]["blob_sha256"] = json!(hex::encode(sha(&wrong_k_blob)));
     wk["listing"]["sealed_k"] = json!(seal(&fx.ppk, &k_payload(&fx.k, &sha(&wrong_k_blob), SELLER)));
     add("right_hash_wrong_k", Wasm::Dev, wk.to_string().into_bytes(), dev("ok_buy"), Some(1), e.clone());
+    // ENC-A1: release never hands back a K that does not open the blob it downloaded
+    add("release_right_hash_wrong_k", Wasm::Dev, release(&wk["listing"]), dev("ok_buy"), Some(1), e.clone());
     let binary: Vec<u8> = (0..4000u32).map(|i| (i.wrapping_mul(2_654_435_761) >> 13) as u8).collect();
     add("decrypted_binary_garbage", Wasm::Dev, fx.eval_input("binary", &binary, CRIT).0.to_string().into_bytes(), dev("ok_buy"), Some(1), e.clone());
     add("csv_65_columns", Wasm::Dev, fx.eval_input("wide", &csv(59, false, "routine"), CRIT).0.to_string().into_bytes(), dev("ok_buy"), Some(1), e.clone());

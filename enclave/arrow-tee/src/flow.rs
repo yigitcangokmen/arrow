@@ -207,9 +207,16 @@ fn release(input: &[u8], env: &dyn Env, net: &dyn Net) -> Result<Vec<u8>, ArrowE
     let buyer = parse_buyer_pk(&r.buyer_pk)?;
     let (k, bound) = unseal_k(&sk, &l)?;
     // G3 on buy (ARW-C1): h is the hash of the ciphertext downloaded now, so a blob swapped after
-    // listing makes the contract refund with hash_mismatch. K leaves only for the bound ciphertext.
-    let (_, h) = fetch_blob(net, &l.blob_url)?;
-    let k_out = if h == bound { k } else { [0u8; 32] };
+    // listing makes the contract refund with hash_mismatch. K leaves only for the bound ciphertext,
+    // and only if it opens it (ENC-A1): a K' sealed next to the right hash is ok:false, not a sale.
+    let (blob, h) = fetch_blob(net, &l.blob_url)?;
+    let k_out = if h == bound {
+        xchacha_open(&k, &blob)?;
+        k
+    } else {
+        [0u8; 32]
+    };
+    drop(blob);
     let out = out_release(&seal_b64(&buyer, &k_out)?, &hex::encode(h))?;
     time_guard(env, &snap, RELEASE_DEADLINE)?;
     Ok(out)
@@ -581,6 +588,19 @@ mod tests {
         assert_eq!(run(release_input(&c).to_string().as_bytes(), &env_at(5), &Gone), ERR_JSON);
         let env = env_at(5);
         assert_eq!(run_v(&release_input(&c), &env, &net(&env, vec![0u8; MAX_BLOB + 1], vec![])), ERR_JSON);
+    }
+
+    /// ENC-A1: a sealed_k that binds the right blob hash and seller but carries a K' that does not
+    /// open that blob is ok:false (refund not_ok), never ok:true with a useless key that pays the seller.
+    #[test]
+    fn release_refuses_k_that_does_not_open_blob() {
+        let mut c = case(&csv(10, "x"), CRIT, "scored");
+        let sha: [u8; 32] = Sha256::digest(&c.blob).into();
+        c.input["listing"]["sealed_k"] = json!(sealed_k_for(&[9u8; 32], &sha, SELLER));
+        let env = env_at(5);
+        let n = net(&env, c.blob.clone(), vec![]);
+        assert_eq!(run_v(&release_input(&c), &env, &n), ERR_JSON);
+        assert_eq!(n.calls.get(), 1, "the blob was downloaded and tried");
     }
 
     /// ENC-1: a clone copies blob_url, blob_sha256 and sealed_k, but the contract writes the
