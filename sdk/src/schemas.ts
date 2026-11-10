@@ -28,24 +28,49 @@ export const MAX_CRITERIA_BYTES = 2975; // sealed_criteria <= 4140 b64 chars = 3
 export const ModeSchema = z.enum(["verdict", "scored"]);
 
 // ---------- msg (ft_on_transfer / mt_on_transfer) ----------
-export const ListMsg = z.strictObject({
-  op: z.literal("list"),
-  title: chars(1, 80),
-  public_desc: chars(0, 280),
-  columns: z.array(chars(1, 40)).min(1).max(64),
-  rows_claimed: U64_MAX_SAFE,
-  blob_url: z
-    .string()
-    .max(200)
-    .regex(/^https:\/\/[^\s\u0000-\u001f\u007f]+$/, "https URL without whitespace or control characters"),
-  blob_sha256: hexLower(64),
-  sealed_k: b64Len(260),
-  price: U128,
-  eval_fee: U128,
-  max_evals: z.number().int().min(1).max(500),
-  mode: ModeSchema,
-  payout: Payout.optional(),
-});
+// Seller text mirrors contracts/arrow validate.rs check_text (X12-U3, X12-U7): no control character (Rust char::is_control is
+// category Cc), no invisible or reordering character, no "EVENT_JSON", and a UTF-8 byte cap next to the character cap.
+// A msg the contract would refuse must be refused here, before the relayer pays gas for an E04 panic.
+const HIDDEN = /[\u061C\u200B\u200E\u200F\u202A-\u202E\u2060-\u2069\uFEFF]|\u{E0000}|[\u{E0001}-\u{E007F}]/u;
+const sellerText = (min: number, maxChars: number, maxBytes: number) =>
+  chars(min, maxChars)
+    .refine((s) => !/\p{Cc}/u.test(s), { message: "no control characters (line breaks, tabs)" })
+    .refine((s) => !HIDDEN.test(s), { message: "no invisible or text-direction characters" })
+    .refine((s) => !s.includes("EVENT_JSON"), { message: "must not contain EVENT_JSON" })
+    .refine((s) => new TextEncoder().encode(s).length <= maxBytes, { message: `at most ${maxBytes} bytes` });
+/** Bytes inside a JSON string, as validate.rs json_len counts them: `"` and `\` take two. */
+const jsonLen = (s: string) => new TextEncoder().encode(s).length + (s.match(/["\\]/g)?.length ?? 0);
+/** validate.rs is_payout_shape: 64-hex implicit, 0x/0s + 40 hex, or a named sub-account; never the intents contract. */
+const ListPayout = Payout.refine(
+  (s) => (/^[0-9a-f]{64}$/.test(s) || /^0[xs][0-9a-f]{40}$/.test(s) || s.includes(".")) && s !== "intents.near",
+  { message: "an implicit id, an 0x address or a named sub-account (not a bare top-level name)" },
+);
+
+export const ListMsg = z
+  .strictObject({
+    op: z.literal("list"),
+    title: sellerText(1, 80, 240),
+    public_desc: sellerText(0, 280, 840),
+    columns: z
+      .array(sellerText(1, 40, 160))
+      .min(1)
+      .max(64)
+      .refine((cs) => cs.reduce((n, c) => n + jsonLen(c), 0) <= 2560, { message: "column names take at most 2560 bytes together" }),
+    rows_claimed: U64_MAX_SAFE.max(200_000),
+    blob_url: z
+      .string()
+      .max(200)
+      .regex(/^https:\/\/[^\s\u0000-\u001f\u007f]+$/, "https URL without whitespace or control characters")
+      .refine((s) => !s.includes("EVENT_JSON"), { message: "must not contain EVENT_JSON" }),
+    blob_sha256: hexLower(64),
+    sealed_k: b64Len(260),
+    price: U128,
+    eval_fee: U128,
+    max_evals: z.number().int().min(1).max(500),
+    mode: ModeSchema,
+    payout: ListPayout.optional(),
+  })
+  .refine((m) => !/^\d+$/.test(String(m.eval_fee)) || !/^\d+$/.test(String(m.price)) || BigInt(m.eval_fee) <= BigInt(m.price), { message: "the eval fee must not be higher than the price", path: ["eval_fee"] });
 export const EvalMsg = z.strictObject({
   op: z.literal("eval"),
   listing_id: U64_MAX_SAFE,

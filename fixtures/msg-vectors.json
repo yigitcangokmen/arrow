@@ -1072,7 +1072,7 @@
         "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
         "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
         "price": "99999",
-        "eval_fee": "100000",
+        "eval_fee": "50000",
         "max_evals": 20,
         "mode": "scored"
       },

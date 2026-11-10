@@ -136,7 +136,7 @@ function msgVectors(): Obj {
     inv("payout_bad", withField(listBase(), "payout", "Not A Valid!"), "payout_format"),
     inv("rows_claimed_negative", withField(listBase(), "rows_claimed", -5), "rows_claimed_not_u64"),
     inv("eval_fee_below_min", withField(listBase(), "eval_fee", "49999"), "eval_fee_below_min", "config"),
-    inv("price_below_min", withField(listBase(), "price", "99999"), "price_below_min", "config"),
+    inv("price_below_min", withField(withField(listBase(), "price", "99999"), "eval_fee", "50000"), "price_below_min", "config"), // eval_fee <= price stays true
   ];
   return {
     version: 1,

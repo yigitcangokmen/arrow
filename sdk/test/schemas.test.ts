@@ -149,3 +149,30 @@ describe("views and API shapes", () => {
     }
   });
 });
+
+describe("X12-U3 / X12-U7 / X12-2 / SCAM-6: ListMsg refuses what the contract's validate_list refuses", () => {
+  const base = JSON.parse(asText(msgVectors.valid.find((x: any) => JSON.parse(asText(x)).op === "list")));
+  const smile = "\u{1F600}";
+  const bad: [string, Record<string, unknown>][] = [
+    ["LF in public_desc", { public_desc: "line one\nline two" }],
+    ["tab in a column", { columns: ["a\tb"] }],
+    ["RLO in title", { title: "invoice‮txt.exe" }],
+    ["tag character in a column", { columns: ["sku\u{E0041}"] }],
+    ["zero-width space in title", { title: "re​tail" }],
+    ["EVENT_JSON in title", { title: "EVENT_JSON:{}" }],
+    ["80 emoji title (320 bytes)", { title: smile.repeat(80) }],
+    ["64 columns of 40 emoji", { columns: Array.from({ length: 64 }, () => smile.repeat(40)) }],
+    ["bare lowercased Solana payout", { payout: "9wzdxwbbmkg8ztbnmquxvqrayrzzdsgydlvl9zytawwm" }],
+    ["payout to intents.near", { payout: "intents.near" }],
+    ["eval fee above the price", { price: "100000", eval_fee: "200000" }],
+    ["rows_claimed over 200000", { rows_claimed: 200001 }],
+  ];
+  it("refuses each case", () => {
+    for (const [name, over] of bad) expect(ArrowMsg.safeParse({ ...base, ...over }).success, name).toBe(false);
+  });
+  it("keeps ZWJ emoji, named and 0x payouts, and an eval fee equal to the price", () => {
+    for (const over of [{ title: "family \u{1F468}‍\u{1F469}‍\u{1F467} data" }, { payout: "seller.near" }, { payout: "0x" + "a".repeat(40) }, { eval_fee: base.price }]) {
+      expect(ArrowMsg.safeParse({ ...base, ...over }).success, JSON.stringify(over)).toBe(true);
+    }
+  });
+});
