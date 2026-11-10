@@ -6,6 +6,7 @@ members = [
     "contracts/mock-outlayer",
     "enclave/arrow-core",
     "enclave/arrow-tee",
+    "spikes/s4/rust-interop",
 ]
 exclude = ["spikes"]
 

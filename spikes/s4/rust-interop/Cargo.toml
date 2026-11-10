@@ -1,0 +1,19 @@
+[package]
+name = "s4-interop"
+description = "S4-b gate: ECIES, XChaCha and MinHash interop between the TS SDK and the Rust enclave crates."
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+publish = false
+
+# Root workspace member on purpose (W1-08 exception): uses the workspace deps and arrow-core.
+
+[dependencies]
+arrow-core = { path = "../../../enclave/arrow-core" }
+ecies = { workspace = true }
+k256 = { workspace = true }
+chacha20poly1305 = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
