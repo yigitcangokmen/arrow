@@ -6,8 +6,8 @@ use near_sdk::{env, AccountId};
 use crate::events::ArrowEvent;
 use crate::msg::{ListMsg, RehostMsg};
 use crate::rail::pay_out;
-use crate::types::{Listing, Rail, BLOB_URL_MAX_BYTES, LIST_TANK_RESERVE_EVALS};
-use crate::validate::{is_https_url, validate_list};
+use crate::types::{Listing, Rail, LIST_TANK_RESERVE_EVALS};
+use crate::validate::{validate_list, validate_rehost};
 use crate::Contract;
 
 impl Contract {
@@ -83,6 +83,7 @@ impl Contract {
     /// X12-3: the listing's seller moves it to a new URL for the same bytes. `blob_sha256` is kept,
     /// so the enclave still refuses any other file (G3). The whole amount is returned.
     pub(crate) fn handle_rehost(&mut self, sender: AccountId, amount: u128, m: RehostMsg) -> u128 {
+        self.assert_open();
         let mut listing = match self.listings.get(&m.listing_id) {
             Some(l) => l.clone(),
             None => env::panic_str("Arrow: E07 unknown listing"),
@@ -90,8 +91,8 @@ impl Contract {
         if listing.seller != sender {
             env::panic_str("Arrow: E23 not the listing's seller");
         }
-        if !is_https_url(&m.blob_url, BLOB_URL_MAX_BYTES) {
-            env::panic_str("Arrow: E04 bad msg: blob_url");
+        if let Err(field) = validate_rehost(&m) {
+            env::panic_str(&format!("Arrow: E04 bad msg: {field}"));
         }
         listing.blob_url = m.blob_url;
         ArrowEvent::ArrowRehosted { listing_id: listing.id, blob_url: listing.blob_url.clone() }.emit();
@@ -328,6 +329,8 @@ mod tests {
             (buyer(), 1, "https://mirror.test/b.bin", "Arrow: E23 not the listing's seller"),
             (seller(), 1, "http://mirror.test/b.bin", "Arrow: E04 bad msg: blob_url"),
             (seller(), 2, "https://mirror.test/b.bin", "Arrow: E07 unknown listing"),
+            (seller(), 1, "https://mirror.test/\u{202E}nib.exe", "Arrow: E04 bad msg: blob_url"),
+            (seller(), 1, "https://mirror.test/a\u{200B}b.bin", "Arrow: E04 bad msg: blob_url"),
         ] {
             setup(intents(), 10 * NEAR);
             let mut c = contract();
@@ -337,6 +340,19 @@ mod tests {
             assert!(text.contains(want), "{text}");
             assert_eq!(c.listings.get(&1).unwrap().blob_url, list_msg().blob_url);
         }
+    }
+
+    /// R2-4: a paused market refuses a rehost like every other op (E05).
+    #[test]
+    fn rehost_refused_while_paused() {
+        setup(intents(), 10 * NEAR);
+        let mut c = contract();
+        let _ = mt_call(&mut c, seller(), 100_000, list_json());
+        c.paused = true;
+        let err = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| rehost(&mut c, seller(), 1, "https://mirror.test/b.bin"))).err().unwrap();
+        let text = err.downcast_ref::<String>().cloned().unwrap_or_default();
+        assert!(text.contains("Arrow: E05 paused"), "{text}");
+        assert_eq!(c.listings.get(&1).unwrap().blob_url, list_msg().blob_url);
     }
 
     #[test]

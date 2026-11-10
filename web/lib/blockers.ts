@@ -34,10 +34,11 @@ export function marketStateFrom(cv: ConfigView, programPk: string | null): Marke
 }
 
 /** Why a payment for `op` would panic in mt_on_transfer. `listing` is needed for eval and buy (E13). */
-export function blockersFor(op: "list" | "eval" | "buy", m: MarketState, listing?: { program_hash_at_list?: string }): Blocker[] {
+export function blockersFor(op: "list" | "eval" | "buy" | "rehost", m: MarketState, listing?: { program_hash_at_list?: string }): Blocker[] {
   const out: Blocker[] = [];
   if (m.paused) out.push({ code: "MARKET_PAUSED", message: "The market is paused." });
   if (!m.programPkSet) out.push({ code: "PROGRAM_KEY_MISSING", message: "The enclave program key is not published." });
+  if (op === "rehost") return out; // handle_rehost checks only assert_open
   if (op !== "list" && listing && listing.program_hash_at_list !== m.programWasmHash) {
     out.push({ code: "LISTING_STALE", message: "This listing was sealed to an older enclave program and can no longer be inspected or bought." });
   }

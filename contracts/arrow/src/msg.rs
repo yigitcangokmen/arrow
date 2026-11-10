@@ -68,7 +68,7 @@ pub fn parse_msg(s: &str) -> Result<Msg, &'static str> {
 mod tests {
     use super::*;
     use crate::testkit::test_config;
-    use crate::validate::{validate_buy, validate_eval, validate_list};
+    use crate::validate::{validate_buy, validate_eval, validate_list, validate_rehost};
     use near_sdk::serde_json::{self, Value};
 
     const VECTORS: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../fixtures/msg-vectors.json"));
@@ -79,7 +79,7 @@ mod tests {
             Msg::List(m) => validate_list(&m, &cfg),
             Msg::Eval(m) => validate_eval(&m),
             Msg::Buy(m) => validate_buy(&m),
-            Msg::Rehost(_) => Ok(()),
+            Msg::Rehost(m) => validate_rehost(&m),
         }
     }
 

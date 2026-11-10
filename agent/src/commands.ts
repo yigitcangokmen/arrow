@@ -5,7 +5,7 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "n
 import { dirname, join, resolve } from "node:path";
 import {
   BlobHashMismatch, Criteria, decodeEvalResult, decryptFile, fetchAndCheckBlob, formatBits, formatUsdc,
-  type Listing, type Mode, type Network, openRelease, parseUsdc, prepareBuy, prepareEval, prepareList, resolveNetwork, sha256Hex, signature, signatureHex,
+  type Listing, type Mode, type Network, openRelease, parseUsdc, prepareBuy, prepareEval, prepareList, RehostMsg, resolveNetwork, sha256Hex, signature, signatureHex,
 } from "@arrow/sdk";
 import { isTeamAccount } from "@arrow/sdk/team";
 import { evidenceDir, type EvidenceRunInput } from "../../scripts/src/lib/evidence.ts";
@@ -405,6 +405,31 @@ export async function listCommand(
   if (id === undefined) throw new PaymentRefused("listing", rejection, ctx.network);
   record(ctx, { id: `cli-list-${ctx.network}-${id}`, kind: "list", tx: tx.txHash, chain: "near", block_height: null, listing_id: id, eval_id: null, purchase_id: null, oneclick_deposit: null, expect: "listing created", observed: `listed #${id}` });
   return { dry_run: false, ...base, listing_id: id, tx: tx.txHash, tx_url: tx.url };
+}
+
+// ---------------------------------------------------------------- rehost
+
+/**
+ * R2-4: the seller points a listing at a new copy of the same ciphertext (op=rehost, contract E23). The copy is fetched and
+ * hashed first, because a different file would make every eval and buy fail. The 1 base unit paid is returned in full.
+ */
+export async function rehostCommand(ctx: Ctx, a: { listingId: number; blobUrl: string; account?: string }): Promise<{ listing_id: number; blob_url: string; tx: string; tx_url: string }> {
+  const msg = RehostMsg.safeParse({ op: "rehost", listing_id: a.listingId, blob_url: a.blobUrl });
+  if (!msg.success) throw new CliError(`--blob-url: ${msg.error.issues[0]?.message ?? "invalid"}`, EXIT.usage);
+  const listing = await requireListing(ctx, a.listingId);
+  const seller = ctx.actor("seller", { account: a.account });
+  if (listing.seller !== seller.id) throw new CliError(`listing #${a.listingId} belongs to ${listing.seller}, not ${seller.id}: only its seller can move it`);
+  try {
+    await fetchAndCheckBlob(a.blobUrl, listing.blob_sha256, ctx.fetchImpl);
+  } catch (e) {
+    if (e instanceof BlobHashMismatch) throw new CliError(`the file at --blob-url is not this listing's ciphertext (sha256 ${e.actual}, expected ${e.expected})`);
+    throw new CliError(`cannot read --blob-url: ${(e as Error).message}`);
+  }
+  await ctx.confirm([`move listing #${a.listingId} to ${a.blobUrl}`, "pay 1 base unit of USDC, returned in full", `network: ${ctx.network}`]);
+  const tx = await ctx.transport.pay({ actor: seller, amount: 1n, msg: JSON.stringify(msg.data) });
+  const { id, rejection } = await findEventId(waitDeps(ctx), tx, "arrow_rehosted", "listing_id");
+  if (id === undefined) throw new PaymentRefused("rehost", rejection, ctx.network);
+  return { listing_id: id, blob_url: a.blobUrl, tx: tx.txHash, tx_url: tx.url };
 }
 
 // ---------------------------------------------------------------- status

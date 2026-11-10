@@ -253,6 +253,31 @@ describe("list", () => {
   });
 });
 
+describe("rehost (R2-4)", () => {
+  const SELLER = "e2e-seller.arrowhq.testnet"; // fakeCtx's seller actor on testnet
+
+  it("moves the seller's listing to a new URL after checking the copy, paying 1 base unit that comes back", async () => {
+    const fake = fakeCtx({ listing: { seller: SELLER }, accepted: { event: "arrow_rehosted", data: { listing_id: 1, blob_url: "https://mirror.example/x.bin" } } });
+    const { code, out } = await run(["rehost", "1", "--blob-url", "https://mirror.example/x.bin"], fake);
+    expect(code).toBe(0);
+    expect(out).toContain("rehosted #1");
+    expect(fake.payCalls).toHaveLength(1);
+    expect(fake.payCalls[0].amount).toBe(1n);
+    expect(JSON.parse(fake.payCalls[0].msg)).toEqual({ op: "rehost", listing_id: 1, blob_url: "https://mirror.example/x.bin" });
+  });
+
+  it("refuses before paying: someone else's listing, a copy with other bytes, a URL the contract refuses", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect((await run(["rehost", "1", "--blob-url", "https://mirror.example/x.bin"], fakeCtx({ listing: { seller: "other.testnet" } }))).code).toBe(1);
+    const wrongBytes = fakeCtx({ listing: { seller: SELLER, blob_sha256: "0".repeat(64) } });
+    expect((await run(["rehost", "1", "--blob-url", "https://mirror.example/x.bin"], wrongBytes)).code).toBe(1);
+    const bidi = fakeCtx({ listing: { seller: SELLER } });
+    expect((await run(["rehost", "1", "--blob-url", "https://mirror.example/\u202Enib.exe"], bidi)).code).toBe(2);
+    expect((await run(["rehost", "1"], bidi)).code).toBe(2);
+    for (const f of [wrongBytes, bidi]) expect(f.payCalls).toHaveLength(0);
+  });
+});
+
 describe("buy and decrypt", () => {
   const plaintext = new TextEncoder().encode("id,label\n1,a\n2,b\n");
   function purchaseFixture(tamper = false) {

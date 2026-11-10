@@ -5,7 +5,7 @@ import { clientIp } from "../lib/ip.ts";
 import { keyedDaily, tokenBucket } from "../lib/ratelimit.ts";
 import { handleRelay, type ChainPort, type RelayDeps, type RelayerPort } from "../lib/server/relayHandler.ts";
 import { RelayRuns } from "../lib/server/relayRuns.ts";
-import { NOW, USDC, healthyMarket, listingFixture, makeMp, post } from "./helpers.ts";
+import { NOW, SIGNER, USDC, healthyMarket, listingFixture, makeMp, post } from "./helpers.ts";
 
 const outcome = { transaction: { hash: "TX", signer_id: "r.near" }, transaction_outcome: { outcome: { logs: [] } }, receipts_outcome: [] };
 const NEAR = 10n ** 24n;
@@ -129,6 +129,24 @@ describe("X12-OPS-1: one execute_intents locks 0.6 NEAR until its receipts finis
     expect(first.status).toBe(503);
     expect((await first.json()).code).toBe("RELAYER_BUSY");
     expect((await send(d)).status).toBe(200);
+  });
+});
+
+describe("R2-4: a seller can rehost a listing through the hosted relay", () => {
+  it("the listing's seller gets 200; anyone else, a paused market or an unknown listing is refused before any gas", async () => {
+    const r = relayer();
+    const mine = chain(healthyMarket, listingFixture({ seller: SIGNER }));
+    const ok = await send(deps({ relayer: () => r.port, chain: mine }), makeMp("rehost"));
+    expect(ok.status).toBe(200);
+    expect(r.calls).toHaveLength(1);
+    for (const [d, code] of [
+      [deps({ relayer: () => r.port, chain: chain(healthyMarket, listingFixture({ seller: "other.near" })) }), "NOT_SELLER"],
+      [deps({ relayer: () => r.port, chain: chain(market({ paused: true }), listingFixture({ seller: SIGNER })) }), "MARKET_PAUSED"],
+      [deps({ relayer: () => r.port, chain: { ...mine, listing: async () => null } }), "LISTING_NOT_FOUND"],
+    ] as const) {
+      expect((await (await send(d, makeMp("rehost"))).json()).code).toBe(code);
+    }
+    expect(r.calls).toHaveLength(1);
   });
 });
 

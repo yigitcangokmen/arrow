@@ -268,6 +268,14 @@
         "listing_id": 7,
         "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
       }
+    },
+    {
+      "name": "rehost_min",
+      "msg": {
+        "op": "rehost",
+        "listing_id": 7,
+        "blob_url": "https://blobs.arrow.example/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
     }
   ],
   "invalid": [
@@ -1053,6 +1061,62 @@
       },
       "reason": "eval_fee_below_min",
       "stage": "config"
+    },
+    {
+      "name": "blob_url_bidi",
+      "msg": {
+        "op": "list",
+        "title": "Retail sales by SKU, 2025 (synthetic)",
+        "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+        "columns": [
+          "date",
+          "region",
+          "sku",
+          "units",
+          "price_usd"
+        ],
+        "rows_claimed": 12000,
+        "blob_url": "https://blobs.arrow.example/‮nib.exe",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+        "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
+        "price": "250000",
+        "eval_fee": "100000",
+        "max_evals": 20,
+        "mode": "scored"
+      },
+      "reason": "blob_url_hidden_char",
+      "stage": "parse"
+    },
+    {
+      "name": "rehost_http",
+      "msg": {
+        "op": "rehost",
+        "listing_id": 7,
+        "blob_url": "http://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin"
+      },
+      "reason": "blob_url_not_https",
+      "stage": "parse"
+    },
+    {
+      "name": "rehost_zero_width",
+      "msg": {
+        "op": "rehost",
+        "listing_id": 7,
+        "blob_url": "https://blobs.arrow.example/a​b.bin"
+      },
+      "reason": "blob_url_hidden_char",
+      "stage": "parse"
+    },
+    {
+      "name": "rehost_extra_field",
+      "msg": {
+        "op": "rehost",
+        "listing_id": 7,
+        "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+        "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2"
+      },
+      "reason": "unknown_field",
+      "stage": "parse"
     },
     {
       "name": "price_below_min",

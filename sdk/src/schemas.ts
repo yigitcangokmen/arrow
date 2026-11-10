@@ -46,6 +46,14 @@ const ListPayout = Payout.refine(
   { message: "an implicit id, an 0x address or a named sub-account (not a bare top-level name)" },
 );
 
+/** validate.rs is_https_url: https, at most 200 bytes, no whitespace, control or hidden character, no EVENT_JSON. */
+const BlobUrl = z
+  .string()
+  .max(200)
+  .regex(/^https:\/\/[^\s\u0000-\u001f\u007f]+$/, "https URL without whitespace or control characters")
+  .refine((s) => !/\p{Cc}/u.test(s) && !HIDDEN.test(s), { message: "no invisible or text-direction characters" })
+  .refine((s) => !s.includes("EVENT_JSON"), { message: "must not contain EVENT_JSON" });
+
 export const ListMsg = z
   .strictObject({
     op: z.literal("list"),
@@ -57,11 +65,7 @@ export const ListMsg = z
       .max(64)
       .refine((cs) => cs.reduce((n, c) => n + jsonLen(c), 0) <= 2560, { message: "column names take at most 2560 bytes together" }),
     rows_claimed: U64_MAX_SAFE.max(200_000),
-    blob_url: z
-      .string()
-      .max(200)
-      .regex(/^https:\/\/[^\s\u0000-\u001f\u007f]+$/, "https URL without whitespace or control characters")
-      .refine((s) => !s.includes("EVENT_JSON"), { message: "must not contain EVENT_JSON" }),
+    blob_url: BlobUrl,
     blob_sha256: hexLower(64),
     sealed_k: b64Len(260),
     price: U128,
@@ -82,10 +86,17 @@ export const BuyMsg = z.strictObject({
   listing_id: U64_MAX_SAFE,
   buyer_pk: hexLower(130).refine((s) => s.startsWith("04"), { message: "uncompressed secp256k1 key (04...)" }),
 });
-export const ArrowMsg = z.discriminatedUnion("op", [ListMsg, EvalMsg, BuyMsg]);
+/** Seller only (E23): a new URL for the listing's unchanged ciphertext. The whole amount is returned. */
+export const RehostMsg = z.strictObject({
+  op: z.literal("rehost"),
+  listing_id: U64_MAX_SAFE,
+  blob_url: BlobUrl,
+});
+export const ArrowMsg = z.discriminatedUnion("op", [ListMsg, EvalMsg, BuyMsg, RehostMsg]);
 export type ListMsg = z.infer<typeof ListMsg>;
 export type EvalMsg = z.infer<typeof EvalMsg>;
 export type BuyMsg = z.infer<typeof BuyMsg>;
+export type RehostMsg = z.infer<typeof RehostMsg>;
 export type ArrowMsg = z.infer<typeof ArrowMsg>;
 
 // ---------- buyer criteria (sealed to the program key) ----------

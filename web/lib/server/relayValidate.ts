@@ -1,5 +1,5 @@
 // Allowlist for /api/relay. The relayer key pays gas for execute_intents, so anything that is not a plain Arrow
-// list/eval/buy transfer to the market contract is refused: nobody gets a free gas station (WS5-T02).
+// list/eval/buy/rehost transfer to the market contract is refused: nobody gets a free gas station (WS5-T02).
 import { ArrowMsg, type MultiPayload } from "@arrow/sdk/schemas";
 
 export interface RelayValidateConfig {
@@ -9,7 +9,7 @@ export interface RelayValidateConfig {
 }
 
 export type Validated =
-  | { ok: true; signerId: string; op: "list" | "eval" | "buy"; amount: bigint; listingId: number | null }
+  | { ok: true; signerId: string; op: "list" | "eval" | "buy" | "rehost"; amount: bigint; listingId: number | null }
   | { ok: false; status: 400 | 403; code: "BAD_REQUEST" | "NOT_ARROW_INTENT"; error: string };
 
 const MAX_DEADLINE_MS = 60 * 60_000;
@@ -54,7 +54,7 @@ export function validateArrowMultipayload(mp: MultiPayload, cfg: RelayValidateCo
     return refused("msg is not JSON");
   }
   const parsed = ArrowMsg.safeParse(msg);
-  if (!parsed.success) return refused("msg is not an Arrow list, eval or buy message");
+  if (!parsed.success) return refused("msg is not an Arrow list, eval, buy or rehost message");
 
   const m = parsed.data;
   return { ok: true, signerId: p.signer_id, op: m.op, amount: BigInt(rawAmount), listingId: m.op === "list" ? null : m.listing_id };

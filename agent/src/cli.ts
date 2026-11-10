@@ -1,4 +1,4 @@
-// npm run arrow -- list | eval | buy | status | decrypt | transfer   (run through npm: the package has no bin entry)
+// npm run arrow -- list | eval | buy | status | decrypt | rehost | transfer   (run through npm: the package has no bin entry)
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { type Network, resolveNetwork } from "@arrow/sdk";
@@ -7,7 +7,7 @@ import { loadEnv } from "../../scripts/src/lib/env.ts";
 import { confirmSpend } from "../../scripts/src/lib/confirm.ts";
 import { mask } from "../../scripts/src/lib/log.ts";
 import {
-  buyCommand, CliError, type Ctx, decryptCommand, EXIT, evalCommand, formatDecrypt, formatEval, listCommand, resultCommand, statusCommand, transferCommand,
+  buyCommand, CliError, type Ctx, decryptCommand, EXIT, evalCommand, formatDecrypt, formatEval, listCommand, rehostCommand, resultCommand, statusCommand, transferCommand,
 } from "./commands.ts";
 import { resolveActor } from "./keys.ts";
 import { SettleTimeout } from "./settle.ts";
@@ -35,6 +35,7 @@ commands
         pay the eval fee; prints a capped verdict (PASS/BUY, optionally fit and novelty)
   result <eval_id> [--demo-key]                     read the verdict of an eval you already paid (after exit 3)
   buy <listing_id> [--demo-key] [--out <path>]      pay the price, receive the key, decrypt, check the hashes
+  rehost <listing_id> --blob-url <https>             seller only: point a listing at a new copy of the same file (1 base unit, returned)
   status [--listing <id> | --eval <id> | --purchase <id>] [--limit N]   listings, or one record
   decrypt <purchase_id> [--demo-key] [--out <path>] decrypt a purchase you already made (default: ~/.config/arrow/purchases, mode 0600)
   transfer --to buyer|seller --amount <usdc> [--from buyer|seller]      move USDC between the team wallets (mainnet only)
@@ -143,6 +144,11 @@ export async function main(argv: string[], deps: { ctx?: (f: Flags) => Ctx; out?
         emit(r, r.dry_run
           ? [JSON.stringify(r.msg_masked, null, 2), `ciphertext written: ${r.blob_path} (sha256 ${r.blob_sha256})`, "dry run: nothing sent"]
           : [`listed #${r.listing_id} · sha256 ${r.blob_sha256} · tx ${r.tx_url}`]);
+        return EXIT.ok;
+      }
+      case "rehost": {
+        const r = await rehostCommand(ctx, { listingId: int(arg, "listing_id"), blobUrl: need(f["blob-url"], "--blob-url") });
+        emit(r, [`rehosted #${r.listing_id} · ${r.blob_url} · tx ${r.tx_url}`]);
         return EXIT.ok;
       }
       case "status": {

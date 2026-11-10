@@ -145,6 +145,13 @@ async function checkAgainstChain(v: Extract<ReturnType<typeof validateArrowMulti
     }
     const l = await chain.listing(v.listingId!);
     if (!l) return apiError(404, "LISTING_NOT_FOUND", `Listing ${v.listingId} does not exist.`);
+    if (v.op === "rehost") {
+      // E23 / E05 / E06: the whole amount comes back, so only the seller's own listing on an open market is relayed.
+      if (l.seller !== v.signerId) return apiError(403, "NOT_SELLER", "Only the listing's seller can move its file. Nothing was sent.");
+      if (v.amount < 1n) return low("the minimum transfer", 1n);
+      const [b] = blockersFor("rehost", market);
+      return b ? blocked(b) : null;
+    }
     if (v.op === "eval") {
       if (v.amount < BigInt(l.eval_fee)) return low("the eval fee", BigInt(l.eval_fee));
       if (l.evals_used >= l.max_evals) return apiError(409, "BUDGET_EXHAUSTED", "This listing's inspection budget is used up: it is buy-only.");

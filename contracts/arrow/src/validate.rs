@@ -2,7 +2,7 @@
 
 use near_sdk::base64::{engine::general_purpose::STANDARD, Engine};
 
-use crate::msg::{BuyMsg, EvalMsg, ListMsg};
+use crate::msg::{BuyMsg, EvalMsg, ListMsg, RehostMsg};
 use crate::types::*;
 
 const OUTLAYER_MAX_INSTRUCTIONS: u64 = 500_000_000_000;
@@ -14,11 +14,11 @@ pub fn is_lower_hex(s: &str, len: usize) -> bool {
     s.len() == len && s.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
 }
 
-/// `https://`, at most `max` bytes, no whitespace or control characters, no `EVENT_JSON`.
+/// `https://`, at most `max` bytes, no whitespace, control or hidden characters, no `EVENT_JSON`.
 pub fn is_https_url(s: &str, max: usize) -> bool {
     s.starts_with("https://")
         && s.len() <= max
-        && !s.chars().any(|c| c.is_whitespace() || c.is_control())
+        && !s.chars().any(|c| c.is_whitespace() || c.is_control() || is_hidden_char(c))
         && !s.contains("EVENT_JSON")
 }
 
@@ -127,6 +127,13 @@ pub fn validate_buy(m: &BuyMsg) -> Result<(), &'static str> {
     Ok(())
 }
 
+pub fn validate_rehost(m: &RehostMsg) -> Result<(), &'static str> {
+    if !is_https_url(&m.blob_url, BLOB_URL_MAX_BYTES) {
+        return Err("blob_url");
+    }
+    Ok(())
+}
+
 pub fn validate_program(url: &str, hash: &str) -> Result<(), &'static str> {
     if !is_https_url(url, PROGRAM_URL_MAX_BYTES) {
         return Err("program_wasm_url");
@@ -210,6 +217,10 @@ mod tests {
         assert_eq!(ok(&m), Ok(()));
         m.blob_url.push('a');
         assert_eq!(ok(&m), Err("blob_url"));
+        for bad in ["https://b.test/\u{202E}nib.exe", "https://b.test/a\u{200B}b", "https://b.test/\u{E0041}"] {
+            m.blob_url = bad.into();
+            assert_eq!(ok(&m), Err("blob_url"), "{bad:?}");
+        }
 
         let mut m = base.clone();
         for (len, want) in [(63, Err("blob_sha256")), (64, Ok(())), (65, Err("blob_sha256"))] {

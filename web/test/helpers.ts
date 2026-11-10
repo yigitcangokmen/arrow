@@ -11,7 +11,7 @@ export const SIGNER = "0xb5ef360e42056049f584fd03bf0fb9b208e28387";
 const vectors = JSON.parse(readFileSync(new URL("../../fixtures/msg-vectors.json", import.meta.url), "utf8"));
 /** A valid msg object from fixtures/msg-vectors.json by name. */
 export const vectorMsg = (name: string): Record<string, unknown> => vectors.valid.find((v: any) => v.name === name).msg;
-export const MSGS = { list: "list_scored_full", eval: "eval_min", buy: "buy_min" } as const;
+export const MSGS = { list: "list_scored_full", eval: "eval_min", buy: "buy_min", rehost: "rehost_min" } as const;
 
 export interface Overrides {
   payload?: Record<string, unknown>;

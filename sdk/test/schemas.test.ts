@@ -18,7 +18,7 @@ const REASON_PATH: Record<string, string | null> = {
   missing_op: "op", unknown_op: "op", unknown_field: null,
   title_too_long: "title", title_empty: "title", desc_too_long: "public_desc",
   columns_too_many: "columns", column_name_too_long: "columns", columns_empty: "columns",
-  blob_url_not_https: "blob_url", blob_url_too_long: "blob_url", blob_url_whitespace: "blob_url",
+  blob_url_not_https: "blob_url", blob_url_too_long: "blob_url", blob_url_whitespace: "blob_url", blob_url_hidden_char: "blob_url",
   blob_sha256_format: "blob_sha256", sealed_k_not_b64: "sealed_k", sealed_k_wrong_len: "sealed_k",
   amount_not_string: "price", amount_not_u128: "price", max_evals_range: "max_evals", mode_unknown: "mode",
   buyer_pk_format: "buyer_pk", sealed_criteria_too_long: "sealed_criteria", listing_id_not_u64: "listing_id",

@@ -99,6 +99,7 @@ function msgVectors(): Obj {
     { name: "eval_min", msg: evalBase() },
     { name: "eval_criteria_4140", msg: withField(evalBase(), "sealed_criteria", b64("eval/sealed_criteria_max", SIZES.sealed_criteria_max_bytes)) },
     { name: "buy_min", msg: buyBase() },
+    { name: "rehost_min", msg: { op: "rehost", listing_id: 7, blob_url: maxUrl } },
   ];
   const inv = (name: string, msg: Obj, reason: string, stage = "parse"): Obj => ({ name, msg, reason, stage });
   const invalid: Obj[] = [
@@ -136,6 +137,10 @@ function msgVectors(): Obj {
     inv("payout_bad", withField(listBase(), "payout", "Not A Valid!"), "payout_format"),
     inv("rows_claimed_negative", withField(listBase(), "rows_claimed", -5), "rows_claimed_not_u64"),
     inv("eval_fee_below_min", withField(listBase(), "eval_fee", "49999"), "eval_fee_below_min", "config"),
+    inv("blob_url_bidi", withField(listBase(), "blob_url", "https://blobs.arrow.example/\u202Enib.exe"), "blob_url_hidden_char"),
+    inv("rehost_http", { op: "rehost", listing_id: 7, blob_url: BLOB_URL.replace("https://", "http://") }, "blob_url_not_https"),
+    inv("rehost_zero_width", { op: "rehost", listing_id: 7, blob_url: "https://blobs.arrow.example/a\u200Bb.bin" }, "blob_url_hidden_char"),
+    inv("rehost_extra_field", { op: "rehost", listing_id: 7, blob_url: BLOB_URL, blob_sha256: SHA }, "unknown_field"),
     inv("price_below_min", withField(withField(listBase(), "price", "99999"), "eval_fee", "50000"), "price_below_min", "config"), // eval_fee <= price stays true
   ];
   return {
