@@ -223,4 +223,29 @@ mod tests {
         assert_eq!(((51f64).log2() * 1000.0).ceil() as u32, BITS_SCORED_MILLI);
         assert_eq!(((3f64).log2() * 1000.0).ceil() as u32, BITS_VERDICT_MILLI);
     }
+
+    /// scripts/deploy/init-*.json are bare `Config` objects; each must pass `validate_config`
+    /// on its own build once the program placeholders are filled (render-init.sh does that).
+    #[test]
+    fn init_json_templates_deserialize() {
+        let (name, raw) = if cfg!(feature = "testnet") {
+            ("testnet", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../scripts/deploy/init-testnet.json")))
+        } else {
+            ("mainnet", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../scripts/deploy/init-mainnet.json")))
+        };
+        assert!(raw.contains("__PROGRAM_WASM_URL__") && raw.contains("__PROGRAM_WASM_SHA256__"), "{name}: placeholders missing");
+        let filled = raw
+            .replace("__PROGRAM_WASM_URL__", "https://example.test/arrow-tee.wasm")
+            .replace("__PROGRAM_WASM_SHA256__", &"ab".repeat(32));
+        let cfg: Config = near_sdk::serde_json::from_str(&filled).unwrap_or_else(|e| panic!("{name}: {e}"));
+        assert_eq!(crate::validate::validate_config(&cfg), Ok(()), "{name}");
+        assert_eq!((cfg.secrets_ref.profile.as_str(), cfg.fee_bps_eval, cfg.fee_bps_sale), ("arrow", 1000, 200));
+        if cfg!(feature = "testnet") {
+            assert_eq!((cfg.intents.is_none(), cfg.usdc_token_id.as_str(), cfg.secrets_ref.account_id.as_str()), (true, "arrow-usd.arrowhq.testnet", "arrow.arrowhq.testnet"));
+        } else {
+            assert_eq!(cfg.intents.as_ref().map(|a| a.as_str()), Some("intents.near"));
+            assert!(cfg.usdc_token_id.starts_with("nep141:17208628"));
+            assert_eq!(cfg.secrets_ref.account_id.as_str(), "arrow-market.near");
+        }
+    }
 }

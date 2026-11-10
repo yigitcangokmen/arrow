@@ -1,0 +1,21 @@
+{
+  "outlayer": "outlayer.near",
+  "intents": "intents.near",
+  "usdc_token_id": "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+  "program_wasm_url": "__PROGRAM_WASM_URL__",
+  "program_wasm_hash": "__PROGRAM_WASM_SHA256__",
+  "secrets_ref": { "profile": "arrow", "account_id": "arrow-market.near" },
+  "treasury": "arrowhq.near",
+  "fee_bps_eval": 1000,
+  "fee_bps_sale": 200,
+  "min_eval_fee": "50000",
+  "min_price": "100000",
+  "listing_bond": "100000",
+  "max_evals_cap": 500,
+  "outlayer_deposit_eval": "20000000000000000000000",
+  "outlayer_deposit_release": "10000000000000000000000",
+  "tank_min": "50000000000000000000000",
+  "limits_eval": { "max_instructions": 20000000000, "max_memory_mb": 512, "max_execution_seconds": 100 },
+  "limits_release": { "max_instructions": 2000000000, "max_memory_mb": 128, "max_execution_seconds": 30 },
+  "testnet_caps": null
+}
