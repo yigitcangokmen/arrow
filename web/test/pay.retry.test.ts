@@ -96,16 +96,24 @@ describe("resumePending", () => {
 });
 
 describe("locateLatest", () => {
-  const rows = Array.from({ length: 23 }, (_, i) => ({ id: i, pk: i === 17 ? "mine" : "other" }));
-  it("finds the newest matching record without reading every id", async () => {
+  // W2-1 / W2-10: contract ids start at 1 (next_*_id: 1), so get_*(0) is always None.
+  const chain = new Map(Array.from({ length: 23 }, (_, i) => [i + 1, { id: i + 1, pk: i + 1 === 17 ? "mine" : "other" }]));
+  const read = async (id: number) => chain.get(id) ?? null;
+  it("finds the newest matching record in a 1-based id space without reading every id", async () => {
     let reads = 0;
-    const found = await locateLatest(async (id) => (reads++, rows[id] ?? null), (r) => r.pk === "mine");
+    const found = await locateLatest(async (id) => (reads++, read(id)), (r) => r.pk === "mine");
     expect(found?.id).toBe(17);
     expect(reads).toBeLessThan(23);
   });
-  it("returns null for an empty space or no match", async () => {
+  it("finds the only record (id 1) and the newest one (id 23)", async () => {
+    expect((await locateLatest(async (id) => (id === 1 ? { pk: "mine" } : null), (r) => r.pk === "mine"))?.id).toBe(1);
+    expect((await locateLatest(read, (r) => r.id === 23))?.id).toBe(23);
+  });
+  it("returns null for an empty space or no match, and never reads id 0", async () => {
     expect(await locateLatest(async () => null, () => true)).toBeNull();
-    expect(await locateLatest(async (id) => rows[id] ?? null, (r) => r.pk === "nobody")).toBeNull();
+    const seen: number[] = [];
+    expect(await locateLatest(async (id) => (seen.push(id), read(id)), (r) => r.pk === "nobody")).toBeNull();
+    expect(seen).not.toContain(0);
   });
 });
 
