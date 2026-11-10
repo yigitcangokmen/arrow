@@ -1,0 +1,110 @@
+{
+  "final_execution_status": "FINAL",
+  "transaction": {
+    "signer_id": "arrow-relayer.arrowhq.near",
+    "receiver_id": "intents.near",
+    "actions": [
+      {
+        "FunctionCall": {
+          "method_name": "execute_intents",
+          "args": "eyJzaWduZWQiOlt7InN0YW5kYXJkIjoiZXJjMTkxIiwicGF5bG9hZCI6Int9Iiwic2lnbmF0dXJlIjoic2VjcDI1NmsxOngifV19",
+          "gas": 600000000000000,
+          "deposit": "0"
+        }
+      }
+    ],
+    "hash": "FAKEHASH1111111111111111111111111111111111"
+  },
+  "transaction_outcome": {
+    "id": "FAKEHASH1111111111111111111111111111111111",
+    "outcome": {
+      "logs": [],
+      "executor_id": "arrow-relayer.arrowhq.near",
+      "status": {
+        "SuccessReceiptId": "R1"
+      }
+    }
+  },
+  "receipts": [
+    {
+      "predecessor_id": "intents.near",
+      "receiver_id": "arrow-market.near",
+      "receipt_id": "R2",
+      "receipt": {
+        "Action": {
+          "signer_id": "arrow-relayer.arrowhq.near",
+          "actions": [
+            {
+              "FunctionCall": {
+                "method_name": "mt_on_transfer",
+                "args": "eyJzZW5kZXJfaWQiOiIweGFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWIiLCJwcmV2aW91c19vd25lcl9pZHMiOlsiMHhhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiIl0sInRva2VuX2lkcyI6WyJuZXAxNDE6MTcyMDg2MjhmODRmNWQ2YWQzM2YwZGEzYmJiZWIyN2ZmY2IzOThlYWM1MDFhMzFiZDZhZDIwMTFlMzYxMzNhMSJdLCJhbW91bnRzIjpbIjM1MDAwMCJdLCJtc2ciOiJ7XCJvcFwiOlwiYnV5XCIsXCJsaXN0aW5nX2lkXCI6MX0ifQ==",
+                "gas": 300000000000000,
+                "deposit": "0"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "predecessor_id": "arrow-market.near",
+      "receiver_id": "outlayer.near",
+      "receipt_id": "R3",
+      "receipt": {
+        "Action": {
+          "signer_id": "arrow-relayer.arrowhq.near",
+          "actions": [
+            {
+              "FunctionCall": {
+                "method_name": "request_execution",
+                "args": "eyJ4IjoxfQ==",
+                "gas": 150000000000000,
+                "deposit": "20000000000000000000000"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "receipts_outcome": [
+    {
+      "id": "R1",
+      "outcome": {
+        "logs": [
+          "not an event",
+          "EVENT_JSON:{\"standard\": \"nep245\", \"version\": \"1.0.0\", \"event\": \"mt_transfer\", \"data\": [{\"old_owner_id\": \"arrow-market.near\", \"new_owner_id\": \"0xabababababababababababababababababababab\", \"token_ids\": [\"nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1\"], \"amounts\": [\"350000\"], \"memo\": \"refund\"}]}"
+        ],
+        "executor_id": "intents.near",
+        "status": {
+          "SuccessReceiptId": "R2"
+        }
+      }
+    },
+    {
+      "id": "R2",
+      "outcome": {
+        "logs": [
+          "EVENT_JSON:{\"standard\": \"arrow\", \"version\": \"1.0.0\", \"event\": \"arrow_eval\", \"data\": {\"listing_id\": 1, \"eval_id\": 3, \"buyer\": \"0xabababababababababababababababababababab\", \"spent_milli\": 5673, \"left_milli\": 277977}}",
+          "EVENT_JSON:{broken"
+        ],
+        "executor_id": "arrow-market.near",
+        "status": {
+          "SuccessValue": ""
+        }
+      }
+    },
+    {
+      "id": "R3",
+      "outcome": {
+        "logs": [
+          "EVENT_JSON:{\"standard\": \"arrow\", \"version\": \"1.0.0\", \"event\": \"arrow_refund\", \"data\": {\"listing_id\": 1, \"eval_id\": 4, \"buyer\": \"0xabababababababababababababababababababab\", \"reason\": \"hash_mismatch\"}}"
+        ],
+        "executor_id": "arrow-market.near",
+        "status": {
+          "SuccessValue": ""
+        }
+      }
+    }
+  ]
+}
