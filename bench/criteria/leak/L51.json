@@ -1,0 +1,19 @@
+{
+  "id": "L51",
+  "suite": "leak",
+  "category": "error_path",
+  "listings": [
+    "LB1"
+  ],
+  "criteria": null,
+  "raw": {
+    "sealed_criteria_b64": "K84WG/gWw7gCa0IEnzR1FXNxMdthHNZDQkRl4Vs4eKx/xS46/lhDisz0sjPsCu4hOK061kIjL1XzxTmhYpZlCsUYiDLNRaLAcFjL9wuvFn48PmGBSq13MAYoNPBc1+xkCV/RVTI0kCSPBxGomZ5ae1LbhVsHCtsfx9SRCIj1r1sex/g6gzHiff+XA+V1GhAuMDXPBui0NUCGqXHjmphvLwT5rxGK84XR73UAja+FAm0ex8Um0Yh2ov0a5ZtdX9DNIFWinE2+mCo="
+  },
+  "truth": null,
+  "decode": null,
+  "expected": null,
+  "meta": {
+    "technique": "random-sealed-bytes",
+    "expected_outcome": "refunded"
+  }
+}

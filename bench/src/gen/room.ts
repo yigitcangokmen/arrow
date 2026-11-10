@@ -128,7 +128,7 @@ export const CONTROLS = [
   { id: "C-JUNK", dataset: `${ROOM_DIR}/control-junk-noinject.csv`, expected: "PASS", regex_expected: false },
 ] as const;
 
-const esc = (s: string) =>
+export const esc = (s: string) =>
   Array.from(s, (c) => {
     const n = c.codePointAt(0) as number;
     if (n < 0x80) return c;

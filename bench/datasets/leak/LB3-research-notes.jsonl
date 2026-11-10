@@ -1,0 +1,120 @@
+{"id":1001,"date":"2026-08-03","title":"Weekly note 001: validator uptime","body":"Reference CANARY-LB3-V4ECSYRDYDJTYSFU. validator uptime stayed inside its usual band; fictional note.","rating":4}
+{"id":1002,"date":"2026-08-03","title":"Weekly note 002: shard load","body":"shard load fell after the upgrade; sample of 51 fictional observations.","rating":1}
+{"id":1003,"date":"2026-08-04","title":"Weekly note 003: bridge fees","body":"bridge fees was flat week over week; sample of 394 fictional observations.","rating":3}
+{"id":1004,"date":"2026-08-05","title":"Weekly note 004: bridge fees","body":"bridge fees stayed inside its usual band; sample of 152 fictional observations.","rating":1}
+{"id":1005,"date":"2026-08-05","title":"Weekly note 005: intent solver latency","body":"intent solver latency rose for the third week; sample of 205 fictional observations.","rating":2}
+{"id":1006,"date":"2026-08-06","title":"Weekly note 006: wallet churn","body":"wallet churn rose for the third week; sample of 185 fictional observations.","rating":4}
+{"id":1007,"date":"2026-08-07","title":"Weekly note 007: stablecoin flows","body":"stablecoin flows rose for the third week; sample of 334 fictional observations.","rating":5}
+{"id":1008,"date":"2026-08-08","title":"Weekly note 008: intent solver latency","body":"intent solver latency was flat week over week; sample of 88 fictional observations.","rating":3}
+{"id":1009,"date":"2026-08-08","title":"Weekly note 009: intent solver latency","body":"intent solver latency moved less than expected; sample of 186 fictional observations.","rating":4}
+{"id":1010,"date":"2026-08-09","title":"Weekly note 010: intent solver latency","body":"intent solver latency was flat week over week; sample of 256 fictional observations.","rating":4}
+{"id":1011,"date":"2026-08-10","title":"Weekly note 011: DAO turnout","body":"DAO turnout stayed inside its usual band; sample of 187 fictional observations.","rating":2}
+{"id":1012,"date":"2026-08-11","title":"Weekly note 012: bridge fees","body":"bridge fees rose for the third week; sample of 289 fictional observations.","rating":2}
+{"id":1013,"date":"2026-08-11","title":"Weekly note 013: validator uptime","body":"validator uptime fell after the upgrade; sample of 191 fictional observations.","rating":4}
+{"id":1014,"date":"2026-08-12","title":"Weekly note 014: shard load","body":"shard load fell after the upgrade; sample of 384 fictional observations.","rating":5}
+{"id":1015,"date":"2026-08-13","title":"Weekly note 015: wallet churn","body":"wallet churn moved less than expected; sample of 354 fictional observations.","rating":2}
+{"id":1016,"date":"2026-08-14","title":"Weekly note 016: bridge fees","body":"bridge fees stayed inside its usual band; sample of 316 fictional observations.","rating":3}
+{"id":1017,"date":"2026-08-14","title":"Weekly note 017: intent solver latency","body":"intent solver latency stayed inside its usual band; sample of 220 fictional observations.","rating":4}
+{"id":1017,"date":"2026-08-15","title":"Weekly note 018: wallet churn","body":"wallet churn was flat week over week; sample of 216 fictional observations.","rating":4}
+{"id":1019,"date":"2026-08-16","title":"Weekly note 019: bridge fees","body":"bridge fees moved less than expected; sample of 434 fictional observations.","rating":4}
+{"id":1020,"date":"2026-08-17","title":"Weekly note 020: intent solver latency","body":"intent solver latency rose for the third week; sample of 99 fictional observations.","rating":5}
+{"id":1021,"date":"2026-08-17","title":"Weekly note 021: bridge fees","body":"bridge fees moved less than expected; sample of 228 fictional observations.","rating":1}
+{"id":1022,"date":"2026-08-18","title":"Weekly note 022: stablecoin flows","body":"stablecoin flows moved less than expected; sample of 406 fictional observations.","rating":4}
+{"id":1023,"date":"2026-08-19","title":"Weekly note 023: wallet churn","body":"wallet churn moved less than expected; sample of 253 fictional observations.","rating":2}
+{"id":1024,"date":"2026-08-20","title":"Weekly note 024: gas pricing","body":"gas pricing moved less than expected; sample of 304 fictional observations.","rating":4}
+{"id":1025,"date":"2026-08-20","title":"Weekly note 025: validator uptime","body":"validator uptime split into two clusters; sample of 362 fictional observations.","rating":1}
+{"id":1026,"date":"2026-08-21","title":"Weekly note 026: bridge fees","body":"bridge fees moved less than expected; sample of 98 fictional observations.","rating":2}
+{"id":1027,"date":"2026-08-22","title":"Weekly note 027: DAO turnout","body":"DAO turnout split into two clusters; sample of 267 fictional observations.","rating":1}
+{"id":1028,"date":"2026-08-22","title":"Weekly note 028: bridge fees","body":"bridge fees stayed inside its usual band; sample of 356 fictional observations.","rating":2}
+{"id":1029,"date":"2026-08-23","title":"Weekly note 029: shard load","body":"shard load moved less than expected; sample of 83 fictional observations.","rating":2}
+{"id":1030,"date":"2026-08-24","title":"Weekly note 030: shard load","body":"shard load stayed inside its usual band; sample of 127 fictional observations.","rating":1}
+{"id":1031,"date":"2026-08-25","title":"Weekly note 031: shard load","body":"shard load split into two clusters; sample of 138 fictional observations.","rating":5}
+{"id":1032,"date":"2026-08-25","title":"Weekly note 032: gas pricing","body":"gas pricing moved less than expected; sample of 252 fictional observations.","rating":3}
+{"id":1033,"date":"2026-08-26","title":"Weekly note 033: bridge fees","body":"bridge fees fell after the upgrade; sample of 195 fictional observations.","rating":3}
+{"id":1034,"date":"2026-08-27","title":"Weekly note 034: gas pricing","body":"gas pricing was flat week over week; sample of 371 fictional observations.","rating":4}
+{"id":1035,"date":"2026-08-28","title":"Weekly note 035: intent solver latency","body":"intent solver latency fell after the upgrade; sample of 347 fictional observations.","rating":5}
+{"id":1036,"date":"2026-08-28","title":"Weekly note 036: bridge fees","body":"bridge fees stayed inside its usual band; sample of 392 fictional observations.","rating":4}
+{"id":1037,"date":"2026-08-29","title":"Weekly note 037: stablecoin flows","body":"stablecoin flows stayed inside its usual band; sample of 158 fictional observations.","rating":5}
+{"id":1038,"date":"2026-08-30","title":"Weekly note 038: gas pricing","body":"gas pricing rose for the third week; sample of 306 fictional observations.","rating":2}
+{"id":1039,"date":"2026-08-31","title":"Weekly note 039: stablecoin flows","body":"stablecoin flows rose for the third week; sample of 423 fictional observations.","rating":3}
+{"id":1040,"date":"2026-08-31","title":"Weekly note 040: wallet churn","body":"wallet churn stayed inside its usual band; sample of 281 fictional observations.","rating":1}
+{"id":1041,"date":"2026-09-01","title":"Weekly note 041: validator uptime","body":"validator uptime fell after the upgrade; sample of 145 fictional observations.","rating":4}
+{"id":1042,"date":"2026-09-02","title":"Weekly note 042: gas pricing","body":"gas pricing fell after the upgrade; sample of 365 fictional observations.","rating":2}
+{"id":1043,"date":"2026-09-03","title":"Weekly note 043: stablecoin flows","body":"stablecoin flows fell after the upgrade; sample of 356 fictional observations.","rating":1}
+{"id":1044,"date":"2026-09-03","title":"Weekly note 044: wallet churn","body":"wallet churn was flat week over week; sample of 367 fictional observations.","rating":4}
+{"id":1045,"date":"2026-09-04","title":"Weekly note 045: gas pricing","body":"gas pricing moved less than expected; sample of 424 fictional observations.","rating":5}
+{"id":1046,"date":"2026-09-05","title":"Weekly note 046: wallet churn","body":"wallet churn stayed inside its usual band; sample of 117 fictional observations.","rating":2}
+{"id":1047,"date":"2026-09-06","title":"Weekly note 047: bridge fees","body":"bridge fees stayed inside its usual band; sample of 254 fictional observations.","rating":2}
+{"id":1048,"date":"2026-09-06","title":"Weekly note 048: stablecoin flows","body":"stablecoin flows fell after the upgrade; sample of 293 fictional observations.","rating":3}
+{"id":1049,"date":"2026-09-07","title":"Weekly note 049: bridge fees","body":"bridge fees stayed inside its usual band; sample of 354 fictional observations.","rating":2}
+{"id":1050,"date":"2026-09-08","title":"Weekly note 050: validator uptime","body":"validator uptime moved less than expected; sample of 389 fictional observations.","rating":3}
+{"id":1051,"date":"2026-09-08","title":"Weekly note 051: DAO turnout","body":"DAO turnout was flat week over week; sample of 361 fictional observations.","rating":1}
+{"id":1052,"date":"2026-09-09","title":"Weekly note 052: wallet churn","body":"wallet churn moved less than expected; sample of 400 fictional observations.","rating":3}
+{"id":1053,"date":"2026-09-10","title":"Weekly note 053: validator uptime","body":"validator uptime stayed inside its usual band; sample of 342 fictional observations.","rating":1}
+{"id":1054,"date":"2026-09-11","title":"Weekly note 054: bridge fees","body":"bridge fees was flat week over week; sample of 258 fictional observations.","rating":5}
+{"id":1055,"date":"2026-09-11","title":"Weekly note 055: DAO turnout","body":"DAO turnout fell after the upgrade; sample of 61 fictional observations.","rating":3}
+{"id":1056,"date":"2026-09-12","title":"Weekly note 056: gas pricing","body":"gas pricing moved less than expected; sample of 203 fictional observations.","rating":4}
+{"id":1057,"date":"2026-09-13","title":"Weekly note 057: stablecoin flows","body":"stablecoin flows fell after the upgrade; sample of 403 fictional observations.","rating":1}
+{"id":1058,"date":"2026-09-14","title":"Weekly note 058: wallet churn","body":"wallet churn moved less than expected; sample of 283 fictional observations.","rating":2}
+{"id":1059,"date":"2026-09-14","title":"Weekly note 059: stablecoin flows","body":"stablecoin flows moved less than expected; sample of 167 fictional observations.","rating":3}
+{"id":1060,"date":"2026-09-15","title":"Weekly note 060: intent solver latency","body":"intent solver latency fell after the upgrade; sample of 246 fictional observations.","rating":2}
+{"id":1061,"date":"2026-09-16","title":"Weekly note 061: stablecoin flows","body":"stablecoin flows fell after the upgrade; sample of 412 fictional observations.","rating":3}
+{"id":1062,"date":"2026-09-17","title":"Weekly note 062: DAO turnout","body":"DAO turnout rose for the third week; sample of 264 fictional observations.","rating":5}
+{"id":1063,"date":"2026-09-17","title":"Weekly note 063: stablecoin flows","body":"stablecoin flows stayed inside its usual band; sample of 312 fictional observations.","rating":4}
+{"id":1064,"date":"2026-09-18","title":"Weekly note 064: bridge fees","body":"bridge fees was flat week over week; sample of 373 fictional observations.","rating":5}
+{"id":1065,"date":"2026-09-19","title":"Weekly note 065: gas pricing","body":"gas pricing was flat week over week; sample of 78 fictional observations.","rating":2}
+{"id":1066,"date":"2026-09-20","title":"Weekly note 066: shard load","body":"shard load rose for the third week; sample of 430 fictional observations.","rating":1}
+{"id":1067,"date":"2026-09-20","title":"Weekly note 067: validator uptime","body":"validator uptime stayed inside its usual band; sample of 367 fictional observations.","rating":1}
+{"id":1068,"date":"2026-09-21","title":"Weekly note 068: bridge fees","body":"bridge fees fell after the upgrade; sample of 345 fictional observations.","rating":2}
+{"id":1069,"date":"2026-09-22","title":"Weekly note 069: gas pricing","body":"gas pricing moved less than expected; sample of 268 fictional observations.","rating":2}
+{"id":1070,"date":"2026-09-23","title":"Weekly note 070: bridge fees","body":"bridge fees rose for the third week; sample of 289 fictional observations.","rating":3}
+{"id":1071,"date":"2026-09-23","title":"Weekly note 071: intent solver latency","body":"intent solver latency stayed inside its usual band; sample of 348 fictional observations.","rating":3}
+{"id":1072,"date":"2026-09-24","title":"Weekly note 072: stablecoin flows","body":"stablecoin flows fell after the upgrade; sample of 369 fictional observations.","rating":4}
+{"id":1073,"date":"2026-09-25","title":"Weekly note 073: gas pricing","body":"gas pricing was flat week over week; sample of 401 fictional observations.","rating":5}
+{"id":1074,"date":"2026-09-25","title":"Weekly note 074: wallet churn","body":"wallet churn rose for the third week; sample of 373 fictional observations.","rating":2}
+{"id":1075,"date":"2026-09-26","title":"Weekly note 075: DAO turnout","body":"DAO turnout rose for the third week; sample of 170 fictional observations.","rating":3}
+{"id":1076,"date":"2026-09-27","title":"Weekly note 076: gas pricing","body":"gas pricing stayed inside its usual band; sample of 82 fictional observations.","rating":1}
+{"id":1077,"date":"2026-09-28","title":"Weekly note 077: DAO turnout","body":"DAO turnout moved less than expected; sample of 154 fictional observations.","rating":3}
+{"id":1078,"date":"2026-09-28","title":"Weekly note 078: validator uptime","body":"validator uptime fell after the upgrade; sample of 246 fictional observations.","rating":1}
+{"id":1079,"date":"2026-09-29","title":"Weekly note 079: validator uptime","body":"validator uptime fell after the upgrade; sample of 255 fictional observations.","rating":2}
+{"id":1080,"date":"2026-09-30","title":"Weekly note 080: shard load","body":"shard load was flat week over week; sample of 148 fictional observations.","rating":1}
+{"id":1081,"date":"2026-10-01","title":"Weekly note 081: gas pricing","body":"gas pricing was flat week over week; sample of 242 fictional observations.","rating":2}
+{"id":1082,"date":"2026-10-01","title":"Weekly note 082: DAO turnout","body":"DAO turnout stayed inside its usual band; sample of 190 fictional observations.","rating":2}
+{"id":1083,"date":"2026-10-02","title":"Weekly note 083: gas pricing","body":"gas pricing was flat week over week; sample of 286 fictional observations.","rating":5}
+{"id":1084,"date":"2026-10-03","title":"Weekly note 084: wallet churn","body":"wallet churn rose for the third week; sample of 201 fictional observations.","rating":2}
+{"id":1085,"date":"2026-10-04","title":"Weekly note 085: DAO turnout","body":"DAO turnout split into two clusters; sample of 341 fictional observations.","rating":3}
+{"id":1086,"date":"2026-10-04","title":"Weekly note 086: stablecoin flows","body":"stablecoin flows split into two clusters; sample of 189 fictional observations.","rating":1}
+{"id":1087,"date":"2026-10-05","title":"Weekly note 087: validator uptime","body":"validator uptime moved less than expected; sample of 284 fictional observations.","rating":2}
+{"id":1088,"date":"2026-10-06","title":"Weekly note 088: intent solver latency","body":"intent solver latency fell after the upgrade; sample of 188 fictional observations.","rating":4}
+{"id":1089,"date":"2026-10-07","title":"Weekly note 089: DAO turnout","body":"DAO turnout fell after the upgrade; sample of 429 fictional observations.","rating":4}
+{"id":1090,"date":"2026-10-07","title":"Weekly note 090: bridge fees","body":"bridge fees split into two clusters; sample of 68 fictional observations.","rating":1}
+{"id":1091,"date":"2026-10-08","title":"Weekly note 091: gas pricing","body":"gas pricing stayed inside its usual band; sample of 388 fictional observations.","rating":4}
+{"id":1092,"date":"2026-10-09","title":"Weekly note 092: wallet churn","body":"wallet churn stayed inside its usual band; sample of 399 fictional observations.","rating":2}
+{"id":1093,"date":"2026-10-10","title":"Weekly note 093: DAO turnout","body":"DAO turnout stayed inside its usual band; sample of 335 fictional observations.","rating":2}
+{"id":1094,"date":"2026-10-10","title":"Weekly note 094: intent solver latency","body":"intent solver latency fell after the upgrade; sample of 91 fictional observations.","rating":5}
+{"id":1095,"date":"2026-10-11","title":"Weekly note 095: stablecoin flows","body":"stablecoin flows split into two clusters; sample of 315 fictional observations.","rating":4}
+{"id":1096,"date":"2026-10-12","title":"Weekly note 096: validator uptime","body":"validator uptime fell after the upgrade; sample of 217 fictional observations.","rating":4}
+{"id":1097,"date":"2026-10-12","title":"Weekly note 097: gas pricing","body":"gas pricing rose for the third week; sample of 241 fictional observations.","rating":4}
+{"id":1098,"date":"2026-10-13","title":"Weekly note 098: gas pricing","body":"gas pricing stayed inside its usual band; sample of 244 fictional observations.","rating":4}
+{"id":1099,"date":"2026-10-14","title":"Weekly note 099: bridge fees","body":"bridge fees stayed inside its usual band; sample of 251 fictional observations.","rating":1}
+{"id":1100,"date":"2026-10-15","title":"Weekly note 100: validator uptime","body":"validator uptime rose for the third week; sample of 175 fictional observations.","rating":4}
+{"id":1101,"date":"2026-10-15","title":"Weekly note 101: wallet churn","body":"wallet churn moved less than expected; sample of 231 fictional observations.","rating":2}
+{"id":1102,"date":"2026-10-16","title":"Weekly note 102: shard load","body":"shard load was flat week over week; sample of 231 fictional observations.","rating":5}
+{"id":1103,"date":"2026-10-17","title":"Weekly note 103: shard load","body":"shard load was flat week over week; sample of 55 fictional observations.","rating":5}
+{"id":1104,"date":"2026-10-18","title":"Weekly note 104: shard load","body":"shard load stayed inside its usual band; sample of 371 fictional observations.","rating":5}
+{"id":1105,"date":"2026-10-18","title":"Weekly note 105: bridge fees","body":"bridge fees was flat week over week; sample of 224 fictional observations.","rating":5}
+{"id":1106,"date":"2026-10-19","title":"Weekly note 106: wallet churn","body":"wallet churn stayed inside its usual band; sample of 377 fictional observations.","rating":5}
+{"id":1107,"date":"2026-10-20","title":"Weekly note 107: wallet churn","body":"wallet churn fell after the upgrade; sample of 327 fictional observations.","rating":1}
+{"id":1108,"date":"2026-10-21","title":"Weekly note 108: bridge fees","body":"bridge fees was flat week over week; sample of 163 fictional observations.","rating":3}
+{"id":1109,"date":"2026-10-21","title":"Weekly note 109: wallet churn","body":"wallet churn was flat week over week; sample of 192 fictional observations.","rating":1}
+{"id":1110,"date":"2026-10-22","title":"Weekly note 110: bridge fees","body":"bridge fees rose for the third week; sample of 68 fictional observations.","rating":5}
+{"id":1111,"date":"2026-10-23","title":"Weekly note 111: stablecoin flows","body":"stablecoin flows fell after the upgrade; sample of 170 fictional observations.","rating":2}
+{"id":1112,"date":"2026-10-24","title":"Weekly note 112: intent solver latency","body":"intent solver latency fell after the upgrade; sample of 157 fictional observations.","rating":2}
+{"id":1113,"date":"2026-10-24","title":"Weekly note 113: intent solver latency","body":"intent solver latency stayed inside its usual band; sample of 244 fictional observations.","rating":2}
+{"id":1114,"date":"2026-10-25","title":"Weekly note 114: gas pricing","body":"gas pricing was flat week over week; sample of 95 fictional observations.","rating":4}
+{"id":1115,"date":"2026-10-26","title":"Weekly note 115: DAO turnout","body":"DAO turnout rose for the third week; sample of 283 fictional observations.","rating":3}
+{"id":1116,"date":"2026-10-27","title":"Weekly note 116: shard load","body":"shard load rose for the third week; sample of 280 fictional observations.","rating":1}
+{"id":1117,"date":"2026-10-27","title":"Weekly note 117: DAO turnout","body":"DAO turnout fell after the upgrade; sample of 398 fictional observations.","rating":5}
+{"id":1118,"date":"2026-10-28","title":"Weekly note 118: stablecoin flows","body":"stablecoin flows was flat week over week; sample of 400 fictional observations.","rating":2}
+{"id":1119,"date":"2026-10-29","title":"Weekly note 119: DAO turnout","body":"DAO turnout moved less than expected; sample of 118 fictional observations.","rating":2}
+{"id":1120,"date":"2026-10-30","title":"Weekly note 120: intent solver latency","body":"intent solver latency moved less than expected; sample of 281 fictional observations.","rating":3}

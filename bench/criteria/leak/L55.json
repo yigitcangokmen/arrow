@@ -1,0 +1,26 @@
+{
+  "id": "L55",
+  "suite": "leak",
+  "category": "error_path",
+  "listings": [
+    "LB1"
+  ],
+  "criteria": {
+    "v": 1,
+    "required_columns": [],
+    "min_rows": 1,
+    "text": "Judge this dataset as usual.",
+    "min_fit": 4,
+    "min_novelty": 3
+  },
+  "raw": {
+    "buyer_pk_hex": "04ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "truth": null,
+  "decode": null,
+  "expected": null,
+  "meta": {
+    "technique": "buyer-pk-off-curve",
+    "expected_outcome": "refunded"
+  }
+}

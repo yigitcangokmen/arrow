@@ -1,0 +1,181 @@
+record_id,date,validator_id,uptime_pct,blocks_produced,blocks_expected,stake_near,memo
+VQ02-0001,2026-10-01,v07.synthetic-demo.near,98.19,97,99,112279,key rotation
+VQ02-0002,2026-10-01,v10.synthetic-demo.near,99.13,104,105,557698,key rotation
+VQ02-0003,2026-10-01,v04.synthetic-demo.near,99.79,88,89,144296,epoch rollover
+VQ02-0004,2026-10-01,v04.synthetic-demo.near,97.09,99,102,150911,restart window
+VQ02-0005,2026-10-01,v09.synthetic-demo.near,98.10,79,81,112644,routine
+VQ02-0006,2026-10-01,v09.synthetic-demo.near,99.23,79,80,231066,routine
+VQ02-0007,2026-10-02,v09.synthetic-demo.near,97.52,97,100,176559,key rotation
+VQ02-0008,2026-10-02,v09.synthetic-demo.near,99.31,81,82,129637,key rotation
+VQ02-0009,2026-10-02,v12.synthetic-demo.near,98.83,90,92,187696,epoch rollover
+VQ02-0010,2026-10-02,v07.synthetic-demo.near,99.30,87,88,150006,epoch rollover
+VQ02-0011,2026-10-02,v01.synthetic-demo.near,97.23,109,113,116232,key rotation
+VQ02-0012,2026-10-02,v02.synthetic-demo.near,98.00,80,82,282501,epoch rollover
+VQ02-0013,2026-10-03,v07.synthetic-demo.near,99.97,91,92,114655,epoch rollover
+VQ02-0014,2026-10-03,v04.synthetic-demo.near,97.87,102,105,160098,routine
+VQ02-0015,2026-10-03,v08.synthetic-demo.near,99.44,81,82,122607,restart window
+VQ02-0016,2026-10-03,v11.synthetic-demo.near,97.70,95,98,241089,restart window
+VQ02-0017,2026-10-03,v07.synthetic-demo.near,99.69,93,94,187696,key rotation
+VQ02-0018,2026-10-03,v09.synthetic-demo.near,99.56,93,94,617897,restart window
+VQ02-0019,2026-10-04,v05.synthetic-demo.near,97.73,107,110,127569,key rotation
+VQ02-0020,2026-10-04,v03.synthetic-demo.near,99.14,80,81,137828,key rotation
+VQ02-0021,2026-10-04,v04.synthetic-demo.near,97.46,98,101,137382,restart window
+VQ02-0022,2026-10-04,v06.synthetic-demo.near,98.31,103,105,407926,key rotation
+VQ02-0023,2026-10-04,v01.synthetic-demo.near,99.13,95,96,122476,key rotation
+VQ02-0024,2026-10-04,v08.synthetic-demo.near,98.63,112,114,132754,epoch rollover
+VQ02-0025,2026-10-05,v07.synthetic-demo.near,99.84,99,100,404766,key rotation
+VQ02-0026,2026-10-05,v05.synthetic-demo.near,98.41,79,81,334116,restart window
+VQ02-0027,2026-10-05,v12.synthetic-demo.near,98.32,113,115,924367,key rotation
+VQ02-0028,2026-10-05,v06.synthetic-demo.near,98.61,114,116,492045,key rotation
+VQ02-0029,2026-10-05,v06.synthetic-demo.near,98.53,111,113,129993,routine
+VQ02-0030,2026-10-05,v12.synthetic-demo.near,98.34,109,111,841433,epoch rollover
+VQ02-0031,2026-10-06,v01.synthetic-demo.near,98.84,101,103,595318,routine
+VQ02-0032,2026-10-06,v11.synthetic-demo.near,97.04,86,89,137873,restart window
+VQ02-0033,2026-10-06,v02.synthetic-demo.near,97.70,91,94,110416,epoch rollover
+VQ02-0034,2026-10-06,v06.synthetic-demo.near,97.62,111,114,104081,routine
+VQ02-0035,2026-10-06,v06.synthetic-demo.near,98.78,87,89,352423,epoch rollover
+VQ02-0036,2026-10-06,v04.synthetic-demo.near,98.27,81,83,911780,epoch rollover
+VQ02-0037,2026-10-07,v01.synthetic-demo.near,98.29,78,80,562453,epoch rollover
+VQ02-0038,2026-10-07,v08.synthetic-demo.near,99.25,91,92,104379,key rotation
+VQ02-0039,2026-10-07,v11.synthetic-demo.near,99.07,99,100,220837,restart window
+VQ02-0040,2026-10-07,v03.synthetic-demo.near,98.94,108,110,143526,routine
+VQ02-0041,2026-10-07,v12.synthetic-demo.near,97.11,106,110,123623,restart window
+VQ02-0042,2026-10-07,v11.synthetic-demo.near,97.85,79,81,702680,restart window
+VQ02-0043,2026-10-08,v02.synthetic-demo.near,98.84,79,80,215226,key rotation
+VQ02-0044,2026-10-08,v04.synthetic-demo.near,99.97,100,101,179055,epoch rollover
+VQ02-0045,2026-10-08,v05.synthetic-demo.near,97.24,87,90,105547,key rotation
+VQ02-0046,2026-10-08,v08.synthetic-demo.near,99.02,105,107,146550,key rotation
+VQ02-0047,2026-10-08,v05.synthetic-demo.near,99.47,105,106,121655,key rotation
+VQ02-0048,2026-10-08,v07.synthetic-demo.near,98.83,99,101,649093,epoch rollover
+VQ02-0049,2026-10-09,v12.synthetic-demo.near,99.42,87,88,149410,epoch rollover
+VQ02-0050,2026-10-09,v07.synthetic-demo.near,98.45,92,94,219161,epoch rollover
+VQ02-0051,2026-10-09,v05.synthetic-demo.near,98.57,102,104,270764,restart window
+VQ02-0052,2026-10-09,v01.synthetic-demo.near,97.75,103,106,557353,key rotation
+VQ02-0053,2026-10-09,v08.synthetic-demo.near,98.06,78,80,127608,epoch rollover
+VQ02-0054,2026-10-09,v06.synthetic-demo.near,99.00,112,114,144907,routine
+VQ02-0055,2026-10-10,v03.synthetic-demo.near,99.87,115,116,670034,epoch rollover
+VQ02-0056,2026-10-10,v08.synthetic-demo.near,99.05,85,86,203709,epoch rollover
+VQ02-0057,2026-10-10,v03.synthetic-demo.near,98.76,110,112,152144,epoch rollover
+VQ02-0058,2026-10-10,v03.synthetic-demo.near,99.54,89,90,623446,key rotation
+VQ02-0059,2026-10-10,v03.synthetic-demo.near,98.12,105,108,138648,restart window
+VQ02-0060,2026-10-10,v05.synthetic-demo.near,98.42,84,86,426398,routine
+VQ02-0061,2026-10-11,v12.synthetic-demo.near,99.58,85,86,104265,epoch rollover
+VQ02-0062,2026-10-11,v11.synthetic-demo.near,97.20,116,120,106140,key rotation
+VQ02-0063,2026-10-11,v09.synthetic-demo.near,98.84,89,91,547221,routine
+VQ02-0064,2026-10-11,v10.synthetic-demo.near,98.40,88,90,114966,restart window
+VQ02-0065,2026-10-11,v04.synthetic-demo.near,99.33,82,83,122676,restart window
+VQ02-0066,2026-10-11,v12.synthetic-demo.near,98.61,106,108,166074,routine
+VQ02-0067,2026-10-12,v06.synthetic-demo.near,97.65,114,117,103034,epoch rollover
+VQ02-0068,2026-10-12,v07.synthetic-demo.near,98.46,111,113,546199,routine
+VQ02-0069,2026-10-12,v07.synthetic-demo.near,99.80,93,94,120413,routine
+VQ02-0070,2026-10-12,v05.synthetic-demo.near,98.79,117,119,107082,key rotation
+VQ02-0071,2026-10-12,v11.synthetic-demo.near,99.13,118,120,273988,routine
+VQ02-0072,2026-10-12,v06.synthetic-demo.near,98.31,106,108,249864,restart window
+VQ02-0073,2026-10-13,v07.synthetic-demo.near,99.03,92,93,178039,routine
+VQ02-0074,2026-10-13,v02.synthetic-demo.near,97.02,113,117,562928,key rotation
+VQ02-0075,2026-10-13,v06.synthetic-demo.near,98.12,109,112,102880,epoch rollover
+VQ02-0076,2026-10-13,v12.synthetic-demo.near,98.22,101,103,101111,key rotation
+VQ02-0077,2026-10-13,v09.synthetic-demo.near,99.38,105,106,596123,epoch rollover
+VQ02-0078,2026-10-13,v07.synthetic-demo.near,97.33,106,109,232416,epoch rollover
+VQ02-0079,2026-10-14,v02.synthetic-demo.near,99.73,116,117,112794,epoch rollover
+VQ02-0080,2026-10-14,v12.synthetic-demo.near,99.18,106,107,233093,restart window
+VQ02-0081,2026-10-14,v06.synthetic-demo.near,97.68,96,99,130217,routine
+VQ02-0082,2026-10-14,v06.synthetic-demo.near,99.04,85,86,832007,restart window
+VQ02-0083,2026-10-14,v06.synthetic-demo.near,98.60,117,119,160881,key rotation
+VQ02-0084,2026-10-14,v12.synthetic-demo.near,99.33,112,113,100257,restart window
+VQ02-0085,2026-10-15,v01.synthetic-demo.near,97.78,81,83,105833,routine
+VQ02-0086,2026-10-15,v04.synthetic-demo.near,97.89,113,116,217441,restart window
+VQ02-0087,2026-10-15,v02.synthetic-demo.near,99.41,117,118,100292,key rotation
+VQ02-0088,2026-10-15,v07.synthetic-demo.near,99.98,92,93,123396,key rotation
+VQ02-0089,2026-10-15,v04.synthetic-demo.near,98.95,97,99,132743,restart window
+VQ02-0090,2026-10-15,v06.synthetic-demo.near,98.52,92,94,860067,epoch rollover
+VQ02-0091,2026-10-16,v04.synthetic-demo.near,98.89,92,94,100473,key rotation
+VQ02-0092,2026-10-16,v01.synthetic-demo.near,97.57,110,113,127949,epoch rollover
+VQ02-0093,2026-10-16,v01.synthetic-demo.near,97.02,78,81,100166,restart window
+VQ02-0094,2026-10-16,v09.synthetic-demo.near,99.20,116,117,545631,key rotation
+VQ02-0095,2026-10-16,v06.synthetic-demo.near,98.70,107,109,108895,restart window
+VQ02-0096,2026-10-16,v11.synthetic-demo.near,99.15,88,89,101270,restart window
+VQ02-0097,2026-10-17,v11.synthetic-demo.near,97.26,100,103,223315,key rotation
+VQ02-0098,2026-10-17,v04.synthetic-demo.near,98.45,89,91,635677,restart window
+VQ02-0099,2026-10-17,v04.synthetic-demo.near,98.86,115,117,199732,epoch rollover
+VQ02-0100,2026-10-17,v06.synthetic-demo.near,98.25,110,112,353171,restart window
+VQ02-0101,2026-10-17,v12.synthetic-demo.near,97.81,85,87,123787,key rotation
+VQ02-0102,2026-10-17,v12.synthetic-demo.near,98.69,109,111,254339,epoch rollover
+VQ02-0103,2026-10-18,v12.synthetic-demo.near,97.61,97,100,227854,key rotation
+VQ02-0104,2026-10-18,v10.synthetic-demo.near,98.91,90,92,626380,restart window
+VQ02-0105,2026-10-18,v12.synthetic-demo.near,99.31,79,80,201532,key rotation
+VQ02-0106,2026-10-18,v07.synthetic-demo.near,98.25,112,114,101312,epoch rollover
+VQ02-0107,2026-10-18,v08.synthetic-demo.near,98.61,94,96,108378,routine
+VQ02-0108,2026-10-18,v12.synthetic-demo.near,98.68,95,97,145790,key rotation
+VQ02-0109,2026-10-19,v03.synthetic-demo.near,98.65,87,89,196983,key rotation
+VQ02-0110,2026-10-19,v12.synthetic-demo.near,97.33,109,113,305670,key rotation
+VQ02-0111,2026-10-19,v05.synthetic-demo.near,99.94,118,119,657996,epoch rollover
+VQ02-0112,2026-10-19,v10.synthetic-demo.near,99.22,82,83,131254,routine
+VQ02-0113,2026-10-19,v12.synthetic-demo.near,98.35,109,111,103526,restart window
+VQ02-0114,2026-10-19,v07.synthetic-demo.near,99.85,118,119,210625,epoch rollover
+VQ02-0115,2026-10-20,v06.synthetic-demo.near,98.84,108,110,127962,epoch rollover
+VQ02-0116,2026-10-20,v10.synthetic-demo.near,99.38,86,87,183970,epoch rollover
+VQ02-0117,2026-10-20,v08.synthetic-demo.near,99.21,113,114,155976,key rotation
+VQ02-0118,2026-10-20,v06.synthetic-demo.near,99.00,107,109,105993,epoch rollover
+VQ02-0119,2026-10-20,v05.synthetic-demo.near,97.32,114,118,309744,restart window
+VQ02-0120,2026-10-20,v03.synthetic-demo.near,99.21,105,106,397784,restart window
+VQ02-0121,2026-10-21,v11.synthetic-demo.near,97.28,95,98,115724,epoch rollover
+VQ02-0122,2026-10-21,v02.synthetic-demo.near,99.74,109,110,134574,restart window
+VQ02-0123,2026-10-21,v01.synthetic-demo.near,99.34,118,119,106147,routine
+VQ02-0124,2026-10-21,v12.synthetic-demo.near,97.24,82,85,107975,routine
+VQ02-0125,2026-10-21,v08.synthetic-demo.near,98.11,90,92,111915,routine
+VQ02-0126,2026-10-21,v04.synthetic-demo.near,98.13,95,97,129575,routine
+VQ02-0127,2026-10-22,v06.synthetic-demo.near,98.68,82,84,102074,restart window
+VQ02-0128,2026-10-22,v02.synthetic-demo.near,99.30,107,108,661166,epoch rollover
+VQ02-0129,2026-10-22,v11.synthetic-demo.near,98.85,118,120,1278361,restart window
+VQ02-0130,2026-10-22,v11.synthetic-demo.near,97.06,103,107,108057,routine
+VQ02-0131,2026-10-22,v11.synthetic-demo.near,97.51,85,88,122509,epoch rollover
+VQ02-0132,2026-10-22,v07.synthetic-demo.near,98.72,105,107,153080,restart window
+VQ02-0133,2026-10-23,v03.synthetic-demo.near,99.33,105,106,113359,restart window
+VQ02-0134,2026-10-23,v02.synthetic-demo.near,98.27,101,103,548805,routine
+VQ02-0135,2026-10-23,v05.synthetic-demo.near,97.53,113,116,151321,key rotation
+VQ02-0136,2026-10-23,v03.synthetic-demo.near,97.95,84,86,105987,restart window
+VQ02-0137,2026-10-23,v12.synthetic-demo.near,99.36,87,88,103064,epoch rollover
+VQ02-0138,2026-10-23,v10.synthetic-demo.near,98.60,97,99,1779830,restart window
+VQ02-0139,2026-10-24,v03.synthetic-demo.near,98.18,90,92,105102,routine
+VQ02-0140,2026-10-24,v08.synthetic-demo.near,98.69,80,82,160423,epoch rollover
+VQ02-0141,2026-10-24,v06.synthetic-demo.near,99.76,119,120,186566,restart window
+VQ02-0142,2026-10-24,v04.synthetic-demo.near,98.16,92,94,113950,restart window
+VQ02-0143,2026-10-24,v06.synthetic-demo.near,97.87,112,115,132016,restart window
+VQ02-0144,2026-10-24,v09.synthetic-demo.near,97.35,82,85,269511,routine
+VQ02-0145,2026-10-25,v09.synthetic-demo.near,98.34,103,105,161136,key rotation
+VQ02-0146,2026-10-25,v12.synthetic-demo.near,99.74,113,114,174585,epoch rollover
+VQ02-0147,2026-10-25,v11.synthetic-demo.near,97.18,111,115,124613,routine
+VQ02-0148,2026-10-25,v06.synthetic-demo.near,97.98,98,101,179946,restart window
+VQ02-0149,2026-10-25,v02.synthetic-demo.near,97.57,87,90,776237,key rotation
+VQ02-0150,2026-10-25,v02.synthetic-demo.near,99.31,104,105,114142,routine
+VQ02-0151,2026-10-26,v04.synthetic-demo.near,98.86,102,104,369134,routine
+VQ02-0152,2026-10-26,v05.synthetic-demo.near,98.85,92,94,168705,restart window
+VQ02-0153,2026-10-26,v03.synthetic-demo.near,99.17,117,118,247975,epoch rollover
+VQ02-0154,2026-10-26,v08.synthetic-demo.near,97.44,104,107,184901,epoch rollover
+VQ02-0155,2026-10-26,v04.synthetic-demo.near,98.93,84,85,124256,routine
+VQ02-0156,2026-10-26,v05.synthetic-demo.near,99.26,80,81,100749,epoch rollover
+VQ02-0157,2026-10-27,v06.synthetic-demo.near,98.86,113,115,101347,key rotation
+VQ02-0158,2026-10-27,v10.synthetic-demo.near,99.58,105,106,114970,key rotation
+VQ02-0159,2026-10-27,v08.synthetic-demo.near,97.22,77,80,107678,routine
+VQ02-0160,2026-10-27,v12.synthetic-demo.near,97.99,90,92,604123,epoch rollover
+VQ02-0161,2026-10-27,v02.synthetic-demo.near,98.40,112,114,163257,epoch rollover
+VQ02-0162,2026-10-27,v04.synthetic-demo.near,99.27,115,116,107749,key rotation
+VQ02-0163,2026-10-28,v07.synthetic-demo.near,98.29,115,118,129904,restart window
+VQ02-0164,2026-10-28,v12.synthetic-demo.near,98.37,108,110,864641,key rotation
+VQ02-0165,2026-10-28,v01.synthetic-demo.near,97.76,105,108,108905,restart window
+VQ02-0166,2026-10-28,v05.synthetic-demo.near,99.15,95,96,100308,restart window
+VQ02-0167,2026-10-28,v02.synthetic-demo.near,99.97,83,84,318626,key rotation
+VQ02-0168,2026-10-28,v07.synthetic-demo.near,99.86,88,89,177412,key rotation
+VQ02-0169,2026-10-29,v05.synthetic-demo.near,99.83,111,112,276015,epoch rollover
+VQ02-0170,2026-10-29,v03.synthetic-demo.near,97.89,109,112,153340,routine
+VQ02-0171,2026-10-29,v07.synthetic-demo.near,99.80,79,80,143106,key rotation
+VQ02-0172,2026-10-29,v10.synthetic-demo.near,98.48,83,85,883023,epoch rollover
+VQ02-0173,2026-10-29,v07.synthetic-demo.near,97.19,107,111,170814,routine
+VQ02-0174,2026-10-29,v07.synthetic-demo.near,97.11,104,108,259554,restart window
+VQ02-0175,2026-10-30,v05.synthetic-demo.near,97.38,83,86,133128,restart window
+VQ02-0176,2026-10-30,v01.synthetic-demo.near,98.82,118,120,286324,routine
+VQ02-0177,2026-10-30,v10.synthetic-demo.near,97.18,109,113,1326347,routine
+VQ02-0178,2026-10-30,v06.synthetic-demo.near,97.83,109,112,139266,routine
+VQ02-0179,2026-10-30,v10.synthetic-demo.near,98.11,102,104,114008,epoch rollover
+VQ02-0180,2026-10-31,v08.synthetic-demo.near,97.49,116,119,192750,epoch rollover

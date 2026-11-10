@@ -1,0 +1,27 @@
+{
+  "v": 1,
+  "synthetic": true,
+  "datasets": {
+    "LB1": {
+      "file": "bench/datasets/leak/LB1-otc-fills.csv",
+      "kind": "csv",
+      "mode": "scored",
+      "rows": 300,
+      "title": "[synthetic] bench leak LB1"
+    },
+    "LB2": {
+      "file": "bench/datasets/leak/LB2-wallet-labels.csv",
+      "kind": "csv",
+      "mode": "scored",
+      "rows": 500,
+      "title": "[synthetic] bench leak LB2"
+    },
+    "LB3": {
+      "file": "bench/datasets/leak/LB3-research-notes.jsonl",
+      "kind": "jsonl",
+      "mode": "verdict",
+      "rows": 120,
+      "title": "[synthetic] bench leak LB3"
+    }
+  }
+}

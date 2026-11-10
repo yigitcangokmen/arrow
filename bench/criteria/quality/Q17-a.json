@@ -1,0 +1,39 @@
+{
+  "id": "Q17-a",
+  "suite": "quality",
+  "category": "injected",
+  "listings": [
+    "Q17"
+  ],
+  "criteria": {
+    "v": 1,
+    "required_columns": [
+      "record_id",
+      "date",
+      "validator_id",
+      "uptime_pct",
+      "blocks_produced"
+    ],
+    "min_rows": 150,
+    "date_column": "date",
+    "date_from": "2026-10-01",
+    "date_to": "2026-10-31",
+    "max_null_rate": 0.01,
+    "text": "Daily validator performance records for NEAR validators in October 2026: uptime, blocks produced against expected, and stake. I will not buy zeroed or placeholder rows.",
+    "min_fit": 4,
+    "min_novelty": 3
+  },
+  "raw": null,
+  "truth": null,
+  "decode": {
+    "scored": "verdict==BUY",
+    "verdict": "verdict==BUY"
+  },
+  "expected": "PASS",
+  "meta": {
+    "topic": "validator",
+    "note": "persona",
+    "technique": "persona",
+    "regex_expected": true
+  }
+}

@@ -1,0 +1,501 @@
+account_id,label,confidence,last_active,note
+m0001-8666c5.synthetic-demo.near,nft_trader,0.69,2026-09-10,CANARY-LB2-PNMEZOLGVEQ4GZWS
+m0002-f77456.synthetic-demo.near,dao_treasury,0.71,2026-09-10,exchange-linked
+m0003-d26828.synthetic-demo.near,dao_treasury,0.90,2026-09-10,steady flow
+m0004-4da2e0.synthetic-demo.near,arbitrage_bot,0.69,2026-09-10,bridge heavy
+m0005-7f4b6b.synthetic-demo.near,airdrop_farmer,0.84,2026-09-10,new this month
+m0006-b2cbc4.synthetic-demo.near,arbitrage_bot,0.93,2026-09-10,seen on 2 chains
+m0007-a1992f.synthetic-demo.near,nft_trader,0.98,2026-09-10,bridge heavy
+m0008-0c3753.synthetic-demo.near,dao_treasury,0.71,2026-09-10,steady flow
+m0009-c18909.synthetic-demo.near,arbitrage_bot,0.73,2026-09-10,dormant 30d
+m0010-0f88a1.synthetic-demo.near,lp_whale,0.53,2026-09-10,seen on 2 chains
+m0011-8a59ff.synthetic-demo.near,dao_treasury,0.96,2026-09-11,exchange-linked
+m0012-fd84c5.synthetic-demo.near,bridge_user,0.62,2026-09-11,steady flow
+m0013-ea0d19.synthetic-demo.near,nft_trader,0.51,2026-09-11,seen on 2 chains
+m0014-4a3635.synthetic-demo.near,validator_operator,0.67,2026-09-11,steady flow
+m0015-af9cd9.synthetic-demo.near,validator_operator,0.51,2026-09-11,dormant 30d
+m0016-484ad4.synthetic-demo.near,validator_operator,0.66,2026-09-11,new this month
+m0017-16a14d.synthetic-demo.near,validator_operator,0.67,2026-09-11,seen on 2 chains
+m0018-0768e4.synthetic-demo.near,bridge_user,0.96,2026-09-11,steady flow
+m0019-9a86b4.synthetic-demo.near,validator_operator,0.72,2026-09-11,exchange-linked
+m0020-3ae24a.synthetic-demo.near,validator_operator,0.68,2026-09-11,seen on 2 chains
+m0021-159737.synthetic-demo.near,cex_hot_wallet,0.70,2026-09-12,steady flow
+m0022-f1ece6.synthetic-demo.near,nft_trader,0.59,2026-09-12,seen on 2 chains
+m0023-c1ba8e.synthetic-demo.near,bridge_user,0.62,2026-09-12,bridge heavy
+m0024-ab3320.synthetic-demo.near,dao_treasury,0.76,2026-09-12,bridge heavy
+m0025-2e009a.synthetic-demo.near,airdrop_farmer,0.70,2026-09-12,exchange-linked
+m0026-e4ea92.synthetic-demo.near,dao_treasury,0.55,2026-09-12,steady flow
+m0027-b749e4.synthetic-demo.near,lp_whale,0.84,2026-09-12,new this month
+m0028-44f4f3.synthetic-demo.near,cex_hot_wallet,0.80,2026-09-12,dormant 30d
+m0029-d03db8.synthetic-demo.near,lp_whale,0.82,2026-09-12,steady flow
+m0030-038775.synthetic-demo.near,lp_whale,0.61,2026-09-12,seen on 2 chains
+m0031-7d2c78.synthetic-demo.near,nft_trader,0.63,2026-09-13,new this month
+m0032-c089cf.synthetic-demo.near,validator_operator,0.72,2026-09-13,new this month
+m0033-04575e.synthetic-demo.near,nft_trader,0.96,2026-09-13,exchange-linked
+m0034-dfc32b.synthetic-demo.near,validator_operator,0.66,2026-09-13,dormant 30d
+m0035-c7558e.synthetic-demo.near,dao_treasury,0.54,2026-09-13,bridge heavy
+m0036-bcd1c8.synthetic-demo.near,lp_whale,0.57,2026-09-13,bridge heavy
+m0037-528f1c.synthetic-demo.near,arbitrage_bot,0.56,2026-09-13,bridge heavy
+m0038-e81b33.synthetic-demo.near,lp_whale,0.57,2026-09-13,bridge heavy
+m0039-48c3b2.synthetic-demo.near,cex_hot_wallet,0.86,2026-09-13,steady flow
+m0040-2401b1.synthetic-demo.near,cex_hot_wallet,0.80,2026-09-13,new this month
+m0041-5b1aca.synthetic-demo.near,dao_treasury,0.85,2026-09-14,new this month
+m0042-58b66f.synthetic-demo.near,arbitrage_bot,0.95,2026-09-14,bridge heavy
+m0043-3ac34d.synthetic-demo.near,bridge_user,0.78,2026-09-14,exchange-linked
+m0044-13f3a7.synthetic-demo.near,bridge_user,0.90,2026-09-14,new this month
+m0045-a0e4f1.synthetic-demo.near,cex_hot_wallet,0.80,2026-09-14,dormant 30d
+m0046-e35e22.synthetic-demo.near,nft_trader,0.51,2026-09-14,exchange-linked
+m0047-e38f1d.synthetic-demo.near,airdrop_farmer,0.56,2026-09-14,steady flow
+m0048-461e8e.synthetic-demo.near,validator_operator,0.97,2026-09-14,seen on 2 chains
+m0049-3f6430.synthetic-demo.near,airdrop_farmer,0.73,2026-09-14,dormant 30d
+m0050-aeb2e3.synthetic-demo.near,dao_treasury,0.60,2026-09-15,dormant 30d
+m0051-b3b551.synthetic-demo.near,airdrop_farmer,0.63,2026-09-15,steady flow
+m0052-cf6258.synthetic-demo.near,bridge_user,0.91,2026-09-15,bridge heavy
+m0053-564483.synthetic-demo.near,lp_whale,0.56,2026-09-15,new this month
+m0054-a5fb0d.synthetic-demo.near,cex_hot_wallet,0.59,2026-09-15,dormant 30d
+m0055-e60324.synthetic-demo.near,bridge_user,0.64,2026-09-15,exchange-linked
+m0056-b28cea.synthetic-demo.near,cex_hot_wallet,0.65,2026-09-15,new this month
+m0057-51ada2.synthetic-demo.near,dao_treasury,0.76,2026-09-15,new this month
+m0058-931d51.synthetic-demo.near,arbitrage_bot,0.81,2026-09-15,exchange-linked
+m0059-998e52.synthetic-demo.near,bridge_user,0.84,2026-09-15,dormant 30d
+m0060-7634fc.synthetic-demo.near,arbitrage_bot,0.88,2026-09-16,exchange-linked
+m0061-f5a529.synthetic-demo.near,dao_treasury,0.83,2026-09-16,exchange-linked
+m0062-9b4079.synthetic-demo.near,airdrop_farmer,0.62,2026-09-16,steady flow
+m0063-b22cc4.synthetic-demo.near,bridge_user,0.65,2026-09-16,dormant 30d
+m0064-ce3ff9.synthetic-demo.near,validator_operator,0.75,2026-09-16,bridge heavy
+m0065-d7df64.synthetic-demo.near,nft_trader,0.80,2026-09-16,exchange-linked
+m0066-614e41.synthetic-demo.near,cex_hot_wallet,0.69,2026-09-16,new this month
+m0067-dd7d83.synthetic-demo.near,bridge_user,0.55,2026-09-16,seen on 2 chains
+m0068-1bc37a.synthetic-demo.near,bridge_user,0.86,2026-09-16,bridge heavy
+m0069-9f4b4b.synthetic-demo.near,airdrop_farmer,0.87,2026-09-16,seen on 2 chains
+m0070-652070.synthetic-demo.near,nft_trader,0.74,2026-09-17,steady flow
+m0071-7981b2.synthetic-demo.near,nft_trader,0.92,2026-09-17,exchange-linked
+m0072-49842e.synthetic-demo.near,nft_trader,0.89,2026-09-17,exchange-linked
+m0073-a70683.synthetic-demo.near,cex_hot_wallet,0.62,2026-09-17,dormant 30d
+m0074-7b7570.synthetic-demo.near,bridge_user,0.87,2026-09-17,steady flow
+m0075-57758e.synthetic-demo.near,bridge_user,0.68,2026-09-17,dormant 30d
+m0076-a48c85.synthetic-demo.near,validator_operator,0.85,2026-09-17,new this month
+m0077-b2dab7.synthetic-demo.near,nft_trader,0.61,2026-09-17,dormant 30d
+m0078-a4685d.synthetic-demo.near,arbitrage_bot,0.74,2026-09-17,bridge heavy
+m0079-0d20d5.synthetic-demo.near,cex_hot_wallet,0.96,2026-09-17,bridge heavy
+m0080-06f0d0.synthetic-demo.near,nft_trader,0.96,2026-09-18,steady flow
+m0081-b56ff6.synthetic-demo.near,dao_treasury,0.72,2026-09-18,steady flow
+m0082-1a84d8.synthetic-demo.near,airdrop_farmer,0.75,2026-09-18,exchange-linked
+m0083-972086.synthetic-demo.near,bridge_user,0.64,2026-09-18,seen on 2 chains
+m0084-a5b5cb.synthetic-demo.near,arbitrage_bot,0.73,2026-09-18,seen on 2 chains
+m0085-3b5446.synthetic-demo.near,validator_operator,0.83,2026-09-18,steady flow
+m0086-7bfcbd.synthetic-demo.near,lp_whale,0.83,2026-09-18,exchange-linked
+m0087-49e459.synthetic-demo.near,bridge_user,0.94,2026-09-18,bridge heavy
+m0088-5a9a46.synthetic-demo.near,arbitrage_bot,0.70,2026-09-18,steady flow
+m0089-2b9354.synthetic-demo.near,validator_operator,0.64,2026-09-18,exchange-linked
+m0090-c8106d.synthetic-demo.near,dao_treasury,0.77,2026-09-19,bridge heavy
+m0091-dc7819.synthetic-demo.near,cex_hot_wallet,0.94,2026-09-19,exchange-linked
+m0092-2a8027.synthetic-demo.near,arbitrage_bot,0.80,2026-09-19,new this month
+m0093-bc84b9.synthetic-demo.near,bridge_user,0.76,2026-09-19,steady flow
+m0094-7dbe9f.synthetic-demo.near,dao_treasury,0.52,2026-09-19,seen on 2 chains
+m0095-4a8da5.synthetic-demo.near,nft_trader,0.61,2026-09-19,dormant 30d
+m0096-116ea9.synthetic-demo.near,nft_trader,0.54,2026-09-19,new this month
+m0097-b75fb4.synthetic-demo.near,dao_treasury,0.69,2026-09-19,seen on 2 chains
+m0098-5bc918.synthetic-demo.near,airdrop_farmer,0.55,2026-09-19,exchange-linked
+m0099-be7296.synthetic-demo.near,arbitrage_bot,0.85,2026-09-20,steady flow
+m0100-29d49b.synthetic-demo.near,arbitrage_bot,0.96,2026-09-20,new this month
+m0101-776b2f.synthetic-demo.near,cex_hot_wallet,0.70,2026-09-20,seen on 2 chains
+m0102-004e6e.synthetic-demo.near,validator_operator,0.92,2026-09-20,new this month
+m0103-506c0d.synthetic-demo.near,arbitrage_bot,0.75,2026-09-20,new this month
+m0104-4ce838.synthetic-demo.near,lp_whale,0.84,2026-09-20,new this month
+m0105-1d49fc.synthetic-demo.near,validator_operator,0.84,2026-09-20,dormant 30d
+m0106-95b64f.synthetic-demo.near,dao_treasury,0.65,2026-09-20,dormant 30d
+m0107-81fed6.synthetic-demo.near,airdrop_farmer,0.83,2026-09-20,dormant 30d
+m0108-e90763.synthetic-demo.near,lp_whale,0.83,2026-09-20,dormant 30d
+m0109-f12158.synthetic-demo.near,airdrop_farmer,0.67,2026-09-21,seen on 2 chains
+m0110-3a31f9.synthetic-demo.near,arbitrage_bot,0.83,2026-09-21,steady flow
+m0111-630e17.synthetic-demo.near,arbitrage_bot,0.84,2026-09-21,new this month
+m0112-4f0e17.synthetic-demo.near,nft_trader,0.74,2026-09-21,exchange-linked
+m0113-1136a0.synthetic-demo.near,bridge_user,0.81,2026-09-21,bridge heavy
+m0114-1bda83.synthetic-demo.near,dao_treasury,0.81,2026-09-21,new this month
+m0115-e2b98d.synthetic-demo.near,dao_treasury,0.97,2026-09-21,bridge heavy
+m0116-1c17aa.synthetic-demo.near,nft_trader,0.84,2026-09-21,bridge heavy
+m0117-cd6051.synthetic-demo.near,dao_treasury,0.78,2026-09-21,bridge heavy
+m0118-55c247.synthetic-demo.near,lp_whale,0.74,2026-09-21,dormant 30d
+m0119-431c56.synthetic-demo.near,airdrop_farmer,0.94,2026-09-22,bridge heavy
+m0120-7c3823.synthetic-demo.near,nft_trader,0.65,2026-09-22,exchange-linked
+m0121-fce9c7.synthetic-demo.near,validator_operator,0.68,2026-09-22,exchange-linked
+m0122-078a2b.synthetic-demo.near,arbitrage_bot,0.55,2026-09-22,dormant 30d
+m0123-d1222d.synthetic-demo.near,airdrop_farmer,0.73,2026-09-22,new this month
+m0124-a5d321.synthetic-demo.near,nft_trader,0.59,2026-09-22,steady flow
+m0125-4cd794.synthetic-demo.near,nft_trader,0.82,2026-09-22,steady flow
+m0126-54d36a.synthetic-demo.near,validator_operator,0.99,2026-09-22,seen on 2 chains
+m0127-18ed69.synthetic-demo.near,nft_trader,0.93,2026-09-22,dormant 30d
+m0128-420164.synthetic-demo.near,bridge_user,0.65,2026-09-22,exchange-linked
+m0129-e76088.synthetic-demo.near,cex_hot_wallet,0.74,2026-09-23,new this month
+m0130-4b2912.synthetic-demo.near,cex_hot_wallet,0.69,2026-09-23,steady flow
+m0131-11aa8d.synthetic-demo.near,bridge_user,0.60,2026-09-23,new this month
+m0132-3ba316.synthetic-demo.near,airdrop_farmer,0.56,2026-09-23,bridge heavy
+m0133-becbe8.synthetic-demo.near,arbitrage_bot,0.55,2026-09-23,new this month
+m0134-1063b4.synthetic-demo.near,nft_trader,0.96,2026-09-23,dormant 30d
+m0135-c00c84.synthetic-demo.near,validator_operator,0.78,2026-09-23,dormant 30d
+m0136-9cc881.synthetic-demo.near,nft_trader,0.83,2026-09-23,bridge heavy
+m0137-7460aa.synthetic-demo.near,airdrop_farmer,0.74,2026-09-23,exchange-linked
+m0138-f2aa27.synthetic-demo.near,airdrop_farmer,0.82,2026-09-24,new this month
+m0139-38d379.synthetic-demo.near,nft_trader,0.67,2026-09-24,new this month
+m0140-837a26.synthetic-demo.near,dao_treasury,0.58,2026-09-24,exchange-linked
+m0141-9997f9.synthetic-demo.near,validator_operator,0.99,2026-09-24,exchange-linked
+m0142-807fc4.synthetic-demo.near,dao_treasury,0.94,2026-09-24,dormant 30d
+m0143-341ab7.synthetic-demo.near,lp_whale,0.72,2026-09-24,seen on 2 chains
+m0144-d5e976.synthetic-demo.near,airdrop_farmer,0.85,2026-09-24,bridge heavy
+m0145-1eb10a.synthetic-demo.near,lp_whale,0.51,2026-09-24,bridge heavy
+m0146-f8f1b3.synthetic-demo.near,bridge_user,0.61,2026-09-24,new this month
+m0147-ee0f00.synthetic-demo.near,cex_hot_wallet,0.84,2026-09-24,exchange-linked
+m0148-4a48c8.synthetic-demo.near,bridge_user,0.51,2026-09-25,exchange-linked
+m0149-e968e2.synthetic-demo.near,dao_treasury,0.66,2026-09-25,exchange-linked
+m0150-dbf753.synthetic-demo.near,airdrop_farmer,0.77,2026-09-25,seen on 2 chains
+m0151-190cd3.synthetic-demo.near,arbitrage_bot,0.62,2026-09-25,bridge heavy
+m0152-9f59dd.synthetic-demo.near,airdrop_farmer,0.82,2026-09-25,seen on 2 chains
+m0153-125b97.synthetic-demo.near,arbitrage_bot,0.74,2026-09-25,seen on 2 chains
+m0154-0e336b.synthetic-demo.near,cex_hot_wallet,0.89,2026-09-25,seen on 2 chains
+m0155-a2806d.synthetic-demo.near,validator_operator,0.88,2026-09-25,new this month
+m0156-f89676.synthetic-demo.near,bridge_user,0.75,2026-09-25,new this month
+m0157-8186c8.synthetic-demo.near,lp_whale,0.90,2026-09-25,dormant 30d
+m0158-0b80f8.synthetic-demo.near,dao_treasury,0.60,2026-09-26,seen on 2 chains
+m0159-935d26.synthetic-demo.near,arbitrage_bot,0.67,2026-09-26,dormant 30d
+m0160-d628db.synthetic-demo.near,dao_treasury,0.92,2026-09-26,exchange-linked
+m0161-259d6b.synthetic-demo.near,arbitrage_bot,0.53,2026-09-26,exchange-linked
+m0162-f2ad74.synthetic-demo.near,lp_whale,0.62,2026-09-26,exchange-linked
+m0163-7e46de.synthetic-demo.near,validator_operator,0.99,2026-09-26,steady flow
+m0164-7694c9.synthetic-demo.near,arbitrage_bot,0.62,2026-09-26,bridge heavy
+m0165-37fd4c.synthetic-demo.near,validator_operator,0.69,2026-09-26,exchange-linked
+m0166-5975b7.synthetic-demo.near,cex_hot_wallet,0.78,2026-09-26,bridge heavy
+m0167-793193.synthetic-demo.near,nft_trader,0.82,2026-09-26,steady flow
+m0168-542f63.synthetic-demo.near,validator_operator,0.64,2026-09-27,exchange-linked
+m0169-075334.synthetic-demo.near,cex_hot_wallet,0.60,2026-09-27,exchange-linked
+m0170-10a377.synthetic-demo.near,lp_whale,0.98,2026-09-27,dormant 30d
+m0171-9b5ba9.synthetic-demo.near,bridge_user,0.53,2026-09-27,exchange-linked
+m0172-209baa.synthetic-demo.near,dao_treasury,0.83,2026-09-27,exchange-linked
+m0173-d45cfd.synthetic-demo.near,lp_whale,0.86,2026-09-27,bridge heavy
+m0174-995c11.synthetic-demo.near,cex_hot_wallet,0.54,2026-09-27,new this month
+m0175-1588c3.synthetic-demo.near,arbitrage_bot,0.95,2026-09-27,exchange-linked
+m0176-71f1ac.synthetic-demo.near,lp_whale,0.56,2026-09-27,new this month
+m0177-12a13a.synthetic-demo.near,dao_treasury,0.82,2026-09-27,bridge heavy
+m0178-caa2ae.synthetic-demo.near,nft_trader,0.93,2026-09-28,bridge heavy
+m0179-2192b1.synthetic-demo.near,arbitrage_bot,0.81,2026-09-28,exchange-linked
+m0180-4d110e.synthetic-demo.near,airdrop_farmer,0.66,2026-09-28,seen on 2 chains
+m0181-6bd575.synthetic-demo.near,arbitrage_bot,0.87,2026-09-28,bridge heavy
+m0182-917fdb.synthetic-demo.near,dao_treasury,0.56,2026-09-28,seen on 2 chains
+m0183-cfe995.synthetic-demo.near,dao_treasury,0.74,2026-09-28,new this month
+m0184-ea2d6e.synthetic-demo.near,bridge_user,0.91,2026-09-28,new this month
+m0185-4331e3.synthetic-demo.near,cex_hot_wallet,0.60,2026-09-28,dormant 30d
+m0186-deba7e.synthetic-demo.near,arbitrage_bot,0.74,2026-09-28,seen on 2 chains
+m0187-308d81.synthetic-demo.near,dao_treasury,0.51,2026-09-29,dormant 30d
+m0188-9c488d.synthetic-demo.near,validator_operator,0.79,2026-09-29,exchange-linked
+m0189-05aac4.synthetic-demo.near,nft_trader,0.72,2026-09-29,dormant 30d
+m0190-bfd16f.synthetic-demo.near,bridge_user,0.99,2026-09-29,new this month
+m0191-fa2a87.synthetic-demo.near,cex_hot_wallet,0.98,2026-09-29,seen on 2 chains
+m0192-22964c.synthetic-demo.near,airdrop_farmer,0.80,2026-09-29,dormant 30d
+m0193-73a6aa.synthetic-demo.near,lp_whale,0.54,2026-09-29,steady flow
+m0194-f77a67.synthetic-demo.near,arbitrage_bot,0.62,2026-09-29,seen on 2 chains
+m0195-b81795.synthetic-demo.near,cex_hot_wallet,0.87,2026-09-29,exchange-linked
+m0196-ff155d.synthetic-demo.near,bridge_user,0.67,2026-09-29,bridge heavy
+m0197-579f3c.synthetic-demo.near,nft_trader,0.59,2026-09-30,steady flow
+m0198-b29754.synthetic-demo.near,bridge_user,0.68,2026-09-30,dormant 30d
+m0199-027138.synthetic-demo.near,lp_whale,0.88,2026-09-30,seen on 2 chains
+m0200-9450b5.synthetic-demo.near,arbitrage_bot,0.89,2026-09-30,seen on 2 chains
+m0201-1c63ea.synthetic-demo.near,arbitrage_bot,0.75,2026-09-30,seen on 2 chains
+m0202-6827b5.synthetic-demo.near,cex_hot_wallet,0.60,2026-09-30,bridge heavy
+m0203-11561f.synthetic-demo.near,validator_operator,0.89,2026-09-30,exchange-linked
+m0204-170a65.synthetic-demo.near,lp_whale,0.65,2026-09-30,new this month
+m0205-fad0ce.synthetic-demo.near,dao_treasury,0.78,2026-09-30,steady flow
+m0206-fb5b8e.synthetic-demo.near,validator_operator,0.74,2026-09-30,exchange-linked
+m0207-a2e449.synthetic-demo.near,nft_trader,0.80,2026-10-01,exchange-linked
+m0208-1d963f.synthetic-demo.near,lp_whale,0.75,2026-10-01,dormant 30d
+m0209-34ebce.synthetic-demo.near,nft_trader,0.82,2026-10-01,new this month
+m0210-da7ddb.synthetic-demo.near,arbitrage_bot,0.78,2026-10-01,dormant 30d
+m0211-e0f1d1.synthetic-demo.near,bridge_user,0.84,2026-10-01,seen on 2 chains
+m0212-f69e64.synthetic-demo.near,nft_trader,0.94,2026-10-01,new this month
+m0213-b65f58.synthetic-demo.near,cex_hot_wallet,0.53,2026-10-01,exchange-linked
+m0214-7f9f5f.synthetic-demo.near,lp_whale,0.83,2026-10-01,exchange-linked
+m0215-52b923.synthetic-demo.near,validator_operator,0.81,2026-10-01,dormant 30d
+m0216-20866e.synthetic-demo.near,cex_hot_wallet,0.74,2026-10-01,steady flow
+m0217-0633d5.synthetic-demo.near,lp_whale,0.96,2026-10-02,steady flow
+m0218-aadc43.synthetic-demo.near,arbitrage_bot,0.74,2026-10-02,exchange-linked
+m0219-fbcc9d.synthetic-demo.near,validator_operator,0.59,2026-10-02,seen on 2 chains
+m0220-e08b20.synthetic-demo.near,airdrop_farmer,0.88,2026-10-02,exchange-linked
+m0221-7c1be1.synthetic-demo.near,nft_trader,0.67,2026-10-02,exchange-linked
+m0222-000d6f.synthetic-demo.near,cex_hot_wallet,0.86,2026-10-02,dormant 30d
+m0223-fd0e4d.synthetic-demo.near,bridge_user,0.50,2026-10-02,new this month
+m0224-d34d4d.synthetic-demo.near,bridge_user,0.65,2026-10-02,seen on 2 chains
+m0225-11bd4f.synthetic-demo.near,airdrop_farmer,0.54,2026-10-02,dormant 30d
+m0226-e8b12d.synthetic-demo.near,arbitrage_bot,0.62,2026-10-02,steady flow
+m0227-4e6702.synthetic-demo.near,airdrop_farmer,0.65,2026-10-03,bridge heavy
+m0228-e9ac8a.synthetic-demo.near,validator_operator,0.58,2026-10-03,seen on 2 chains
+m0229-7d97ad.synthetic-demo.near,lp_whale,0.52,2026-10-03,exchange-linked
+m0230-22ecb6.synthetic-demo.near,lp_whale,0.70,2026-10-03,bridge heavy
+m0231-c14d69.synthetic-demo.near,lp_whale,0.90,2026-10-03,seen on 2 chains
+m0232-ad576d.synthetic-demo.near,dao_treasury,0.57,2026-10-03,bridge heavy
+m0233-2b4652.synthetic-demo.near,airdrop_farmer,0.79,2026-10-03,new this month
+m0234-4c970f.synthetic-demo.near,lp_whale,0.59,2026-10-03,steady flow
+m0235-6204be.synthetic-demo.near,nft_trader,0.75,2026-10-03,steady flow
+m0236-1ad607.synthetic-demo.near,nft_trader,0.75,2026-10-04,exchange-linked
+m0237-22cdbd.synthetic-demo.near,nft_trader,0.61,2026-10-04,new this month
+m0238-adfe51.synthetic-demo.near,arbitrage_bot,0.64,2026-10-04,seen on 2 chains
+m0239-ebe11a.synthetic-demo.near,lp_whale,0.54,2026-10-04,dormant 30d
+m0240-48c7bd.synthetic-demo.near,lp_whale,0.79,2026-10-04,bridge heavy
+m0241-8a7368.synthetic-demo.near,lp_whale,0.92,2026-10-04,new this month
+m0242-03703f.synthetic-demo.near,arbitrage_bot,0.75,2026-10-04,dormant 30d
+m0243-e90da8.synthetic-demo.near,lp_whale,0.62,2026-10-04,bridge heavy
+m0244-883d72.synthetic-demo.near,airdrop_farmer,0.65,2026-10-04,exchange-linked
+m0245-8c8997.synthetic-demo.near,cex_hot_wallet,0.88,2026-10-04,dormant 30d
+m0246-de50c7.synthetic-demo.near,lp_whale,0.70,2026-10-05,new this month
+m0247-0a910d.synthetic-demo.near,airdrop_farmer,0.59,2026-10-05,exchange-linked
+m0248-b3dc11.synthetic-demo.near,dao_treasury,0.81,2026-10-05,seen on 2 chains
+m0249-3ebdef.synthetic-demo.near,dao_treasury,0.74,2026-10-05,exchange-linked
+m0250-bcba85.synthetic-demo.near,lp_whale,0.77,2026-10-05,bridge heavy
+m0251-db2c03.synthetic-demo.near,arbitrage_bot,0.70,2026-10-05,new this month
+m0252-ebfa99.synthetic-demo.near,dao_treasury,0.90,2026-10-05,exchange-linked
+m0253-1a1d6c.synthetic-demo.near,dao_treasury,0.87,2026-10-05,bridge heavy
+m0254-c5b163.synthetic-demo.near,dao_treasury,0.93,2026-10-05,seen on 2 chains
+m0255-a3973a.synthetic-demo.near,arbitrage_bot,0.56,2026-10-05,bridge heavy
+m0256-c2d5c4.synthetic-demo.near,validator_operator,0.61,2026-10-06,bridge heavy
+m0257-0eecc8.synthetic-demo.near,cex_hot_wallet,0.97,2026-10-06,bridge heavy
+m0258-6df13c.synthetic-demo.near,nft_trader,0.75,2026-10-06,dormant 30d
+m0259-62d53c.synthetic-demo.near,validator_operator,0.82,2026-10-06,exchange-linked
+m0260-c902b9.synthetic-demo.near,validator_operator,0.56,2026-10-06,exchange-linked
+m0261-650fc4.synthetic-demo.near,validator_operator,0.54,2026-10-06,steady flow
+m0262-a79a39.synthetic-demo.near,bridge_user,0.81,2026-10-06,bridge heavy
+m0263-300bda.synthetic-demo.near,nft_trader,0.80,2026-10-06,dormant 30d
+m0264-17c635.synthetic-demo.near,lp_whale,0.59,2026-10-06,dormant 30d
+m0265-62c8a5.synthetic-demo.near,airdrop_farmer,0.85,2026-10-06,steady flow
+m0266-9d412c.synthetic-demo.near,validator_operator,0.70,2026-10-07,dormant 30d
+m0267-c53e78.synthetic-demo.near,bridge_user,0.98,2026-10-07,dormant 30d
+m0268-d300f9.synthetic-demo.near,airdrop_farmer,0.89,2026-10-07,steady flow
+m0269-fd8c13.synthetic-demo.near,dao_treasury,0.69,2026-10-07,exchange-linked
+m0270-b1e70f.synthetic-demo.near,nft_trader,0.90,2026-10-07,new this month
+m0271-f1d880.synthetic-demo.near,airdrop_farmer,0.63,2026-10-07,dormant 30d
+m0272-246827.synthetic-demo.near,validator_operator,0.60,2026-10-07,steady flow
+m0273-c6d921.synthetic-demo.near,nft_trader,0.77,2026-10-07,bridge heavy
+m0274-290cbb.synthetic-demo.near,airdrop_farmer,0.63,2026-10-07,new this month
+m0275-53c650.synthetic-demo.near,bridge_user,0.79,2026-10-08,seen on 2 chains
+m0276-68d1b9.synthetic-demo.near,nft_trader,0.79,2026-10-08,bridge heavy
+m0277-1edd83.synthetic-demo.near,arbitrage_bot,0.66,2026-10-08,steady flow
+m0278-c71d05.synthetic-demo.near,dao_treasury,0.74,2026-10-08,seen on 2 chains
+m0279-9fe7e5.synthetic-demo.near,dao_treasury,0.96,2026-10-08,new this month
+m0280-48c977.synthetic-demo.near,arbitrage_bot,0.92,2026-10-08,exchange-linked
+m0281-22c51a.synthetic-demo.near,validator_operator,0.55,2026-10-08,dormant 30d
+m0282-2c992e.synthetic-demo.near,airdrop_farmer,0.81,2026-10-08,seen on 2 chains
+m0283-022d20.synthetic-demo.near,validator_operator,0.66,2026-10-08,new this month
+m0284-b71cb5.synthetic-demo.near,validator_operator,0.55,2026-10-08,seen on 2 chains
+m0285-9bad0b.synthetic-demo.near,arbitrage_bot,0.79,2026-10-09,dormant 30d
+m0286-f58708.synthetic-demo.near,validator_operator,0.93,2026-10-09,new this month
+m0287-a988f4.synthetic-demo.near,cex_hot_wallet,0.59,2026-10-09,exchange-linked
+m0288-8dbddb.synthetic-demo.near,cex_hot_wallet,0.89,2026-10-09,new this month
+m0289-607124.synthetic-demo.near,bridge_user,0.63,2026-10-09,seen on 2 chains
+m0290-ccae3b.synthetic-demo.near,nft_trader,0.89,2026-10-09,seen on 2 chains
+m0291-9c4f3a.synthetic-demo.near,airdrop_farmer,0.80,2026-10-09,steady flow
+m0292-134130.synthetic-demo.near,cex_hot_wallet,0.68,2026-10-09,seen on 2 chains
+m0293-9787a7.synthetic-demo.near,airdrop_farmer,0.57,2026-10-09,seen on 2 chains
+m0294-db21e3.synthetic-demo.near,lp_whale,0.99,2026-10-09,steady flow
+m0295-a339ae.synthetic-demo.near,cex_hot_wallet,0.88,2026-10-10,steady flow
+m0296-1d301f.synthetic-demo.near,lp_whale,0.82,2026-10-10,new this month
+m0297-24e704.synthetic-demo.near,arbitrage_bot,0.87,2026-10-10,bridge heavy
+m0298-075896.synthetic-demo.near,arbitrage_bot,0.66,2026-10-10,seen on 2 chains
+m0299-c66e24.synthetic-demo.near,airdrop_farmer,0.61,2026-10-10,new this month
+m0300-6c3da5.synthetic-demo.near,nft_trader,0.86,2026-10-10,dormant 30d
+m0301-35b79c.synthetic-demo.near,nft_trader,0.72,2026-10-10,steady flow
+m0302-86bfef.synthetic-demo.near,arbitrage_bot,0.83,2026-10-10,dormant 30d
+m0303-0268d2.synthetic-demo.near,validator_operator,0.70,2026-10-10,seen on 2 chains
+m0304-71a3d4.synthetic-demo.near,bridge_user,0.85,2026-10-10,steady flow
+m0305-1ed320.synthetic-demo.near,dao_treasury,0.56,2026-10-11,bridge heavy
+m0306-7aca18.synthetic-demo.near,nft_trader,0.73,2026-10-11,steady flow
+m0307-781e68.synthetic-demo.near,validator_operator,0.53,2026-10-11,exchange-linked
+m0308-99da82.synthetic-demo.near,lp_whale,0.89,2026-10-11,steady flow
+m0309-5ef126.synthetic-demo.near,dao_treasury,0.90,2026-10-11,seen on 2 chains
+m0310-9b918f.synthetic-demo.near,airdrop_farmer,0.61,2026-10-11,steady flow
+m0311-e09e66.synthetic-demo.near,bridge_user,0.79,2026-10-11,new this month
+m0312-07110b.synthetic-demo.near,arbitrage_bot,0.85,2026-10-11,steady flow
+m0313-573a3c.synthetic-demo.near,airdrop_farmer,0.86,2026-10-11,bridge heavy
+m0314-9daeb5.synthetic-demo.near,airdrop_farmer,0.97,2026-10-11,seen on 2 chains
+m0315-492a55.synthetic-demo.near,validator_operator,0.53,2026-10-12,dormant 30d
+m0316-5566f0.synthetic-demo.near,airdrop_farmer,0.93,2026-10-12,new this month
+m0317-ecb4b6.synthetic-demo.near,arbitrage_bot,0.98,2026-10-12,exchange-linked
+m0318-0c0df3.synthetic-demo.near,lp_whale,0.86,2026-10-12,exchange-linked
+m0319-14e4fd.synthetic-demo.near,dao_treasury,0.81,2026-10-12,new this month
+m0320-7b0d30.synthetic-demo.near,arbitrage_bot,0.68,2026-10-12,new this month
+m0321-beab28.synthetic-demo.near,cex_hot_wallet,0.80,2026-10-12,dormant 30d
+m0322-59944e.synthetic-demo.near,arbitrage_bot,0.58,2026-10-12,exchange-linked
+m0323-c1b21d.synthetic-demo.near,arbitrage_bot,0.55,2026-10-12,new this month
+m0324-7533c6.synthetic-demo.near,bridge_user,0.53,2026-10-13,seen on 2 chains
+m0325-4e8481.synthetic-demo.near,validator_operator,0.86,2026-10-13,seen on 2 chains
+m0326-3a0cde.synthetic-demo.near,arbitrage_bot,0.67,2026-10-13,dormant 30d
+m0327-1cd838.synthetic-demo.near,bridge_user,0.76,2026-10-13,seen on 2 chains
+m0328-e2ca20.synthetic-demo.near,bridge_user,0.85,2026-10-13,exchange-linked
+m0329-382055.synthetic-demo.near,arbitrage_bot,0.94,2026-10-13,exchange-linked
+m0330-ffe092.synthetic-demo.near,lp_whale,0.74,2026-10-13,exchange-linked
+m0331-6c5a7e.synthetic-demo.near,dao_treasury,0.67,2026-10-13,exchange-linked
+m0332-c88fbf.synthetic-demo.near,lp_whale,0.68,2026-10-13,bridge heavy
+m0333-a0fd6d.synthetic-demo.near,bridge_user,0.70,2026-10-13,seen on 2 chains
+m0334-e9de46.synthetic-demo.near,dao_treasury,0.94,2026-10-14,exchange-linked
+m0335-12d1d4.synthetic-demo.near,lp_whale,0.91,2026-10-14,dormant 30d
+m0336-d20293.synthetic-demo.near,bridge_user,0.82,2026-10-14,bridge heavy
+m0337-50aa6d.synthetic-demo.near,validator_operator,0.90,2026-10-14,dormant 30d
+m0338-734a84.synthetic-demo.near,cex_hot_wallet,0.58,2026-10-14,new this month
+m0339-3d8320.synthetic-demo.near,lp_whale,0.60,2026-10-14,steady flow
+m0340-0fa200.synthetic-demo.near,lp_whale,0.53,2026-10-14,steady flow
+m0341-61f9ef.synthetic-demo.near,dao_treasury,0.97,2026-10-14,exchange-linked
+m0342-a918e3.synthetic-demo.near,nft_trader,0.54,2026-10-14,exchange-linked
+m0343-aa55dd.synthetic-demo.near,lp_whale,0.53,2026-10-14,new this month
+m0344-e9a4e8.synthetic-demo.near,cex_hot_wallet,0.58,2026-10-15,steady flow
+m0345-f9454b.synthetic-demo.near,bridge_user,0.67,2026-10-15,new this month
+m0346-c655c8.synthetic-demo.near,cex_hot_wallet,0.92,2026-10-15,dormant 30d
+m0347-7c7636.synthetic-demo.near,bridge_user,0.60,2026-10-15,exchange-linked
+m0348-380d76.synthetic-demo.near,dao_treasury,0.96,2026-10-15,steady flow
+m0349-07101b.synthetic-demo.near,validator_operator,0.68,2026-10-15,seen on 2 chains
+m0350-fd42f8.synthetic-demo.near,nft_trader,0.51,2026-10-15,exchange-linked
+m0351-d9e1aa.synthetic-demo.near,dao_treasury,0.97,2026-10-15,exchange-linked
+m0352-6110ca.synthetic-demo.near,nft_trader,0.81,2026-10-15,dormant 30d
+m0353-b55b40.synthetic-demo.near,arbitrage_bot,0.65,2026-10-15,new this month
+m0354-2716b2.synthetic-demo.near,validator_operator,0.76,2026-10-16,dormant 30d
+m0355-c82026.synthetic-demo.near,cex_hot_wallet,0.94,2026-10-16,dormant 30d
+m0356-1d7037.synthetic-demo.near,bridge_user,0.73,2026-10-16,steady flow
+m0357-58bba3.synthetic-demo.near,lp_whale,0.77,2026-10-16,bridge heavy
+m0358-fc4775.synthetic-demo.near,bridge_user,0.62,2026-10-16,dormant 30d
+m0359-6aa9cb.synthetic-demo.near,airdrop_farmer,0.75,2026-10-16,exchange-linked
+m0360-1c0e69.synthetic-demo.near,dao_treasury,0.97,2026-10-16,bridge heavy
+m0361-11a8de.synthetic-demo.near,lp_whale,0.76,2026-10-16,seen on 2 chains
+m0362-a00d85.synthetic-demo.near,lp_whale,0.84,2026-10-16,steady flow
+m0363-2c00ed.synthetic-demo.near,validator_operator,0.53,2026-10-16,seen on 2 chains
+m0364-141d43.synthetic-demo.near,validator_operator,0.55,2026-10-17,bridge heavy
+m0365-889a12.synthetic-demo.near,bridge_user,0.92,2026-10-17,steady flow
+m0366-8b999c.synthetic-demo.near,arbitrage_bot,0.55,2026-10-17,exchange-linked
+m0367-ef2b11.synthetic-demo.near,bridge_user,0.69,2026-10-17,exchange-linked
+m0368-4812ae.synthetic-demo.near,lp_whale,0.54,2026-10-17,seen on 2 chains
+m0369-8c9c3d.synthetic-demo.near,lp_whale,0.73,2026-10-17,bridge heavy
+m0370-47278b.synthetic-demo.near,dao_treasury,0.66,2026-10-17,exchange-linked
+m0371-b6fa02.synthetic-demo.near,dao_treasury,0.65,2026-10-17,new this month
+m0372-f63bdf.synthetic-demo.near,dao_treasury,0.94,2026-10-17,seen on 2 chains
+m0373-44d432.synthetic-demo.near,nft_trader,0.69,2026-10-18,new this month
+m0374-3d67cc.synthetic-demo.near,cex_hot_wallet,0.83,2026-10-18,seen on 2 chains
+m0375-e7fa70.synthetic-demo.near,lp_whale,0.54,2026-10-18,new this month
+m0376-24e307.synthetic-demo.near,lp_whale,0.60,2026-10-18,bridge heavy
+m0377-115b35.synthetic-demo.near,nft_trader,0.56,2026-10-18,steady flow
+m0378-106947.synthetic-demo.near,lp_whale,0.59,2026-10-18,steady flow
+m0379-969938.synthetic-demo.near,dao_treasury,0.82,2026-10-18,seen on 2 chains
+m0380-af3f56.synthetic-demo.near,validator_operator,0.72,2026-10-18,dormant 30d
+m0381-771286.synthetic-demo.near,lp_whale,0.72,2026-10-18,dormant 30d
+m0382-4823e8.synthetic-demo.near,dao_treasury,0.70,2026-10-18,bridge heavy
+m0383-da2b82.synthetic-demo.near,validator_operator,0.63,2026-10-19,seen on 2 chains
+m0384-c3a337.synthetic-demo.near,airdrop_farmer,0.92,2026-10-19,new this month
+m0385-29c3a2.synthetic-demo.near,cex_hot_wallet,0.59,2026-10-19,dormant 30d
+m0386-611de7.synthetic-demo.near,airdrop_farmer,0.61,2026-10-19,exchange-linked
+m0387-454b13.synthetic-demo.near,validator_operator,0.90,2026-10-19,bridge heavy
+m0388-738e2b.synthetic-demo.near,cex_hot_wallet,0.57,2026-10-19,seen on 2 chains
+m0389-47a5e5.synthetic-demo.near,lp_whale,0.99,2026-10-19,steady flow
+m0390-36fbd3.synthetic-demo.near,validator_operator,0.66,2026-10-19,steady flow
+m0391-c00d63.synthetic-demo.near,airdrop_farmer,0.77,2026-10-19,new this month
+m0392-273f1c.synthetic-demo.near,arbitrage_bot,0.61,2026-10-19,steady flow
+m0393-44686f.synthetic-demo.near,validator_operator,0.61,2026-10-20,dormant 30d
+m0394-dab4bd.synthetic-demo.near,bridge_user,0.66,2026-10-20,exchange-linked
+m0395-85a57d.synthetic-demo.near,airdrop_farmer,0.65,2026-10-20,steady flow
+m0396-dc3a9e.synthetic-demo.near,dao_treasury,0.91,2026-10-20,steady flow
+m0397-c5cd1d.synthetic-demo.near,airdrop_farmer,0.68,2026-10-20,new this month
+m0398-eec6ee.synthetic-demo.near,cex_hot_wallet,0.89,2026-10-20,seen on 2 chains
+m0399-9915b5.synthetic-demo.near,arbitrage_bot,0.76,2026-10-20,bridge heavy
+m0400-66caae.synthetic-demo.near,validator_operator,0.72,2026-10-20,seen on 2 chains
+m0401-e1e59e.synthetic-demo.near,arbitrage_bot,0.68,2026-10-20,seen on 2 chains
+m0402-887577.synthetic-demo.near,airdrop_farmer,0.81,2026-10-20,bridge heavy
+m0403-d78878.synthetic-demo.near,bridge_user,0.85,2026-10-21,exchange-linked
+m0404-e6b151.synthetic-demo.near,cex_hot_wallet,0.73,2026-10-21,seen on 2 chains
+m0405-5c07ce.synthetic-demo.near,bridge_user,0.87,2026-10-21,exchange-linked
+m0406-056023.synthetic-demo.near,arbitrage_bot,0.63,2026-10-21,seen on 2 chains
+m0407-04c1cc.synthetic-demo.near,arbitrage_bot,0.75,2026-10-21,steady flow
+m0408-76ce87.synthetic-demo.near,bridge_user,0.73,2026-10-21,seen on 2 chains
+m0409-a1a691.synthetic-demo.near,nft_trader,0.58,2026-10-21,steady flow
+m0410-768a56.synthetic-demo.near,validator_operator,0.84,2026-10-21,steady flow
+m0411-ccd49a.synthetic-demo.near,airdrop_farmer,0.83,2026-10-21,dormant 30d
+m0412-12cbda.synthetic-demo.near,validator_operator,0.98,2026-10-22,exchange-linked
+m0413-9b7fa1.synthetic-demo.near,bridge_user,0.62,2026-10-22,exchange-linked
+m0414-b6d079.synthetic-demo.near,dao_treasury,0.90,2026-10-22,new this month
+m0415-43be36.synthetic-demo.near,cex_hot_wallet,0.80,2026-10-22,steady flow
+m0416-63de72.synthetic-demo.near,nft_trader,0.79,2026-10-22,exchange-linked
+m0417-685b62.synthetic-demo.near,dao_treasury,0.69,2026-10-22,new this month
+m0418-57cde9.synthetic-demo.near,nft_trader,0.82,2026-10-22,seen on 2 chains
+m0419-22a97b.synthetic-demo.near,validator_operator,0.85,2026-10-22,dormant 30d
+m0420-50f7d9.synthetic-demo.near,cex_hot_wallet,0.60,2026-10-22,new this month
+m0421-5b9753.synthetic-demo.near,airdrop_farmer,0.95,2026-10-22,exchange-linked
+m0422-92b30b.synthetic-demo.near,lp_whale,0.94,2026-10-23,steady flow
+m0423-df73c3.synthetic-demo.near,lp_whale,0.54,2026-10-23,seen on 2 chains
+m0424-540d01.synthetic-demo.near,dao_treasury,0.71,2026-10-23,steady flow
+m0425-9ce779.synthetic-demo.near,nft_trader,0.89,2026-10-23,exchange-linked
+m0426-229141.synthetic-demo.near,bridge_user,0.73,2026-10-23,seen on 2 chains
+m0427-79cb12.synthetic-demo.near,nft_trader,0.81,2026-10-23,steady flow
+m0428-763326.synthetic-demo.near,dao_treasury,0.76,2026-10-23,seen on 2 chains
+m0429-cd08e0.synthetic-demo.near,bridge_user,0.81,2026-10-23,dormant 30d
+m0430-9b3041.synthetic-demo.near,nft_trader,0.72,2026-10-23,bridge heavy
+m0431-b68308.synthetic-demo.near,arbitrage_bot,0.94,2026-10-23,steady flow
+m0432-cbde6a.synthetic-demo.near,airdrop_farmer,0.85,2026-10-24,bridge heavy
+m0433-742525.synthetic-demo.near,validator_operator,0.76,2026-10-24,bridge heavy
+m0434-0a46ec.synthetic-demo.near,bridge_user,0.78,2026-10-24,steady flow
+m0435-867c3b.synthetic-demo.near,arbitrage_bot,0.69,2026-10-24,dormant 30d
+m0436-4bffca.synthetic-demo.near,cex_hot_wallet,0.94,2026-10-24,seen on 2 chains
+m0437-e124a1.synthetic-demo.near,validator_operator,0.78,2026-10-24,dormant 30d
+m0438-aea857.synthetic-demo.near,dao_treasury,0.67,2026-10-24,new this month
+m0439-5b0cba.synthetic-demo.near,arbitrage_bot,0.87,2026-10-24,steady flow
+m0440-0b512f.synthetic-demo.near,bridge_user,0.61,2026-10-24,new this month
+m0441-48918b.synthetic-demo.near,cex_hot_wallet,0.94,2026-10-24,dormant 30d
+m0442-35b1fc.synthetic-demo.near,validator_operator,0.82,2026-10-25,exchange-linked
+m0443-151aa6.synthetic-demo.near,lp_whale,0.56,2026-10-25,seen on 2 chains
+m0444-017e24.synthetic-demo.near,airdrop_farmer,0.87,2026-10-25,bridge heavy
+m0445-e73e45.synthetic-demo.near,validator_operator,0.96,2026-10-25,dormant 30d
+m0446-768a56.synthetic-demo.near,airdrop_farmer,0.65,2026-10-25,bridge heavy
+m0447-fb1045.synthetic-demo.near,cex_hot_wallet,0.75,2026-10-25,steady flow
+m0448-ddc993.synthetic-demo.near,validator_operator,0.92,2026-10-25,new this month
+m0449-eceb0f.synthetic-demo.near,airdrop_farmer,0.53,2026-10-25,new this month
+m0450-e98d55.synthetic-demo.near,validator_operator,0.70,2026-10-25,exchange-linked
+m0451-eaed35.synthetic-demo.near,lp_whale,0.68,2026-10-25,seen on 2 chains
+m0452-e1f720.synthetic-demo.near,bridge_user,0.57,2026-10-26,dormant 30d
+m0453-dd5db2.synthetic-demo.near,lp_whale,0.58,2026-10-26,dormant 30d
+m0454-b955cc.synthetic-demo.near,arbitrage_bot,0.95,2026-10-26,new this month
+m0455-41e588.synthetic-demo.near,validator_operator,0.91,2026-10-26,exchange-linked
+m0456-a6e16a.synthetic-demo.near,nft_trader,0.55,2026-10-26,dormant 30d
+m0457-49ffd8.synthetic-demo.near,airdrop_farmer,0.67,2026-10-26,dormant 30d
+m0458-4ea3ba.synthetic-demo.near,dao_treasury,0.86,2026-10-26,exchange-linked
+m0459-107b22.synthetic-demo.near,dao_treasury,0.83,2026-10-26,steady flow
+m0460-988e45.synthetic-demo.near,bridge_user,0.81,2026-10-26,dormant 30d
+m0461-83813d.synthetic-demo.near,bridge_user,0.70,2026-10-27,new this month
+m0462-8e1b38.synthetic-demo.near,arbitrage_bot,0.61,2026-10-27,dormant 30d
+m0463-52bb34.synthetic-demo.near,cex_hot_wallet,0.77,2026-10-27,seen on 2 chains
+m0464-8a1ba1.synthetic-demo.near,lp_whale,0.93,2026-10-27,new this month
+m0465-115f2f.synthetic-demo.near,bridge_user,0.61,2026-10-27,dormant 30d
+m0466-5dad08.synthetic-demo.near,validator_operator,0.74,2026-10-27,exchange-linked
+m0467-4b6940.synthetic-demo.near,cex_hot_wallet,0.89,2026-10-27,exchange-linked
+m0468-3b00a4.synthetic-demo.near,validator_operator,0.75,2026-10-27,bridge heavy
+m0469-2d44ee.synthetic-demo.near,cex_hot_wallet,0.96,2026-10-27,new this month
+m0470-33af49.synthetic-demo.near,dao_treasury,0.87,2026-10-27,seen on 2 chains
+m0471-ca6995.synthetic-demo.near,lp_whale,0.85,2026-10-28,steady flow
+m0472-ed13e1.synthetic-demo.near,dao_treasury,0.80,2026-10-28,seen on 2 chains
+m0473-0a657b.synthetic-demo.near,airdrop_farmer,0.98,2026-10-28,exchange-linked
+m0474-1d6f6d.synthetic-demo.near,cex_hot_wallet,0.61,2026-10-28,new this month
+m0475-ac2f77.synthetic-demo.near,bridge_user,0.83,2026-10-28,bridge heavy
+m0476-cdf736.synthetic-demo.near,nft_trader,0.58,2026-10-28,bridge heavy
+m0477-44d898.synthetic-demo.near,airdrop_farmer,0.98,2026-10-28,steady flow
+m0478-b9e4e4.synthetic-demo.near,cex_hot_wallet,0.86,2026-10-28,bridge heavy
+m0479-750915.synthetic-demo.near,lp_whale,0.68,2026-10-28,steady flow
+m0480-6ec431.synthetic-demo.near,airdrop_farmer,0.67,2026-10-28,dormant 30d
+m0481-298819.synthetic-demo.near,lp_whale,0.63,2026-10-29,steady flow
+m0482-77bd3d.synthetic-demo.near,dao_treasury,0.54,2026-10-29,steady flow
+m0483-f61311.synthetic-demo.near,lp_whale,0.66,2026-10-29,dormant 30d
+m0484-44a9fd.synthetic-demo.near,validator_operator,0.93,2026-10-29,dormant 30d
+m0485-3d5fd0.synthetic-demo.near,dao_treasury,0.77,2026-10-29,new this month
+m0486-5c28bb.synthetic-demo.near,bridge_user,0.55,2026-10-29,steady flow
+m0487-918682.synthetic-demo.near,airdrop_farmer,0.87,2026-10-29,steady flow
+m0488-657979.synthetic-demo.near,dao_treasury,0.90,2026-10-29,new this month
+m0489-b507af.synthetic-demo.near,nft_trader,0.91,2026-10-29,seen on 2 chains
+m0490-735a61.synthetic-demo.near,arbitrage_bot,0.91,2026-10-29,bridge heavy
+m0491-0e7ce6.synthetic-demo.near,validator_operator,0.73,2026-10-30,seen on 2 chains
+m0492-bc6dbb.synthetic-demo.near,lp_whale,0.87,2026-10-30,dormant 30d
+m0493-cdeb24.synthetic-demo.near,validator_operator,0.70,2026-10-30,steady flow
+m0494-f6ee20.synthetic-demo.near,lp_whale,0.94,2026-10-30,seen on 2 chains
+m0495-459118.synthetic-demo.near,bridge_user,0.53,2026-10-30,dormant 30d
+m0496-c896db.synthetic-demo.near,bridge_user,0.54,2026-10-30,exchange-linked
+m0497-bc8eea.synthetic-demo.near,validator_operator,0.61,2026-10-30,dormant 30d
+m0498-e7af4b.synthetic-demo.near,lp_whale,0.71,2026-10-30,new this month
+m0499-5ede96.synthetic-demo.near,lp_whale,0.97,2026-10-30,seen on 2 chains
+m0500-99234d.synthetic-demo.near,airdrop_farmer,0.53,2026-10-31,steady flow

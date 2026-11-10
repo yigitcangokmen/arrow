@@ -1,0 +1,161 @@
+proposal_id,date,dao_id,votes_for,votes_against,status,memo
+PQ13-0001,2026-09-01,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0002,2026-09-01,dao-b,0,0,placeholder,auto row
+PQ13-0003,2026-09-01,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0004,2026-09-02,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0005,2026-09-02,dao-e,0,0,placeholder,auto row
+PQ13-0006,2026-09-02,dao-d,0,0,placeholder,auto row
+PQ13-0007,2026-09-03,dao-b,0,0,placeholder,auto row
+PQ13-0008,2026-09-03,dao-c,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0009,2026-09-04,dao-a,0,0,placeholder,auto row
+PQ13-0010,2026-09-04,dao-c,0,0,placeholder,auto row
+PQ13-0011,2026-09-04,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0012,2026-09-05,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0013,2026-09-05,dao-c,0,0,placeholder,auto row
+PQ13-0014,2026-09-05,dao-d,0,0,placeholder,auto row
+PQ13-0015,2026-09-06,dao-a,0,0,placeholder,auto row
+PQ13-0016,2026-09-06,dao-b,0,0,placeholder,auto row
+PQ13-0017,2026-09-07,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0018,2026-09-07,dao-a,0,0,placeholder,auto row
+PQ13-0019,2026-09-07,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0020,2026-09-08,dao-b,0,0,placeholder,auto row
+PQ13-0021,2026-09-08,dao-c,0,0,placeholder,auto row
+PQ13-0022,2026-09-08,dao-b,0,0,placeholder,auto row
+PQ13-0023,2026-09-09,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0024,2026-09-09,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0025,2026-09-10,dao-c,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0026,2026-09-10,dao-e,0,0,placeholder,auto row
+PQ13-0027,2026-09-10,dao-e,0,0,placeholder,auto row
+PQ13-0028,2026-09-11,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0029,2026-09-11,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0030,2026-09-11,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0031,2026-09-12,dao-c,0,0,placeholder,auto row
+PQ13-0032,2026-09-12,dao-d,0,0,placeholder,auto row
+PQ13-0033,2026-09-13,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0034,2026-09-13,dao-a,0,0,placeholder,auto row
+PQ13-0035,2026-09-13,dao-d,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0036,2026-09-14,dao-b,0,0,placeholder,auto row
+PQ13-0037,2026-09-14,dao-c,0,0,placeholder,auto row
+PQ13-0038,2026-09-14,dao-e,0,0,placeholder,auto row
+PQ13-0039,2026-09-15,dao-e,0,0,placeholder,auto row
+PQ13-0040,2026-09-15,dao-b,0,0,placeholder,auto row
+PQ13-0041,2026-09-16,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0042,2026-09-16,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0043,2026-09-16,dao-d,0,0,placeholder,auto row
+PQ13-0044,2026-09-17,dao-c,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0045,2026-09-17,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0046,2026-09-17,dao-a,0,0,placeholder,auto row
+PQ13-0047,2026-09-18,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0048,2026-09-18,dao-d,0,0,placeholder,auto row
+PQ13-0049,2026-09-19,dao-c,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0050,2026-09-19,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0051,2026-09-19,dao-c,0,0,placeholder,auto row
+PQ13-0052,2026-09-20,dao-d,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0053,2026-09-20,dao-e,0,0,placeholder,auto row
+PQ13-0054,2026-09-21,dao-e,0,0,placeholder,auto row
+PQ13-0055,2026-09-21,dao-d,0,0,placeholder,auto row
+PQ13-0056,2026-09-21,dao-c,0,0,placeholder,auto row
+PQ13-0057,2026-09-22,dao-a,0,0,placeholder,auto row
+PQ13-0058,2026-09-22,dao-c,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0059,2026-09-22,dao-a,0,0,placeholder,auto row
+PQ13-0060,2026-09-23,dao-e,0,0,placeholder,auto row
+PQ13-0061,2026-09-23,dao-d,0,0,placeholder,auto row
+PQ13-0062,2026-09-24,dao-d,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0063,2026-09-24,dao-b,0,0,placeholder,auto row
+PQ13-0064,2026-09-24,dao-d,0,0,placeholder,auto row
+PQ13-0065,2026-09-25,dao-b,0,0,placeholder,auto row
+PQ13-0066,2026-09-25,dao-a,0,0,placeholder,auto row
+PQ13-0067,2026-09-25,dao-a,0,0,placeholder,auto row
+PQ13-0068,2026-09-26,dao-a,0,0,placeholder,auto row
+PQ13-0069,2026-09-26,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0070,2026-09-27,dao-c,0,0,placeholder,auto row
+PQ13-0071,2026-09-27,dao-b,0,0,placeholder,auto row
+PQ13-0072,2026-09-27,dao-c,0,0,placeholder,auto row
+PQ13-0073,2026-09-28,dao-c,0,0,placeholder,auto row
+PQ13-0074,2026-09-28,dao-b,0,0,placeholder,auto row
+PQ13-0075,2026-09-28,dao-c,0,0,placeholder,auto row
+PQ13-0076,2026-09-29,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0077,2026-09-29,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0078,2026-09-30,dao-b,0,0,placeholder,auto row
+PQ13-0079,2026-09-30,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0080,2026-09-30,dao-c,0,0,placeholder,auto row
+PQ13-0081,2026-10-01,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0082,2026-10-01,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0083,2026-10-01,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0084,2026-10-02,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0085,2026-10-02,dao-d,0,0,placeholder,auto row
+PQ13-0086,2026-10-03,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0087,2026-10-03,dao-d,0,0,placeholder,auto row
+PQ13-0088,2026-10-03,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0089,2026-10-04,dao-a,0,0,placeholder,auto row
+PQ13-0090,2026-10-04,dao-e,0,0,placeholder,auto row
+PQ13-0091,2026-10-04,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0092,2026-10-05,dao-c,0,0,placeholder,auto row
+PQ13-0093,2026-10-05,dao-c,0,0,placeholder,auto row
+PQ13-0094,2026-10-06,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0095,2026-10-06,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0096,2026-10-06,dao-e,0,0,placeholder,auto row
+PQ13-0097,2026-10-07,dao-b,0,0,placeholder,auto row
+PQ13-0098,2026-10-07,dao-e,0,0,placeholder,auto row
+PQ13-0099,2026-10-07,dao-a,0,0,placeholder,auto row
+PQ13-0100,2026-10-08,dao-c,0,0,placeholder,auto row
+PQ13-0101,2026-10-08,dao-a,0,0,placeholder,auto row
+PQ13-0102,2026-10-09,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0103,2026-10-09,dao-b,0,0,placeholder,auto row
+PQ13-0104,2026-10-09,dao-e,0,0,placeholder,auto row
+PQ13-0105,2026-10-10,dao-e,0,0,placeholder,auto row
+PQ13-0106,2026-10-10,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0107,2026-10-11,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0108,2026-10-11,dao-e,0,0,placeholder,auto row
+PQ13-0109,2026-10-11,dao-b,0,0,placeholder,auto row
+PQ13-0110,2026-10-12,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0111,2026-10-12,dao-b,0,0,placeholder,auto row
+PQ13-0112,2026-10-12,dao-a,0,0,placeholder,auto row
+PQ13-0113,2026-10-13,dao-b,0,0,placeholder,auto row
+PQ13-0114,2026-10-13,dao-d,0,0,placeholder,auto row
+PQ13-0115,2026-10-14,dao-d,0,0,placeholder,auto row
+PQ13-0116,2026-10-14,dao-b,0,0,placeholder,auto row
+PQ13-0117,2026-10-14,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0118,2026-10-15,dao-c,0,0,placeholder,auto row
+PQ13-0119,2026-10-15,dao-e,0,0,placeholder,auto row
+PQ13-0120,2026-10-15,dao-c,0,0,placeholder,auto row
+PQ13-0121,2026-10-16,dao-a,0,0,placeholder,auto row
+PQ13-0122,2026-10-16,dao-c,0,0,placeholder,auto row
+PQ13-0123,2026-10-17,dao-b,0,0,placeholder,auto row
+PQ13-0124,2026-10-17,dao-e,0,0,placeholder,auto row
+PQ13-0125,2026-10-17,dao-b,0,0,placeholder,auto row
+PQ13-0126,2026-10-18,dao-d,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0127,2026-10-18,dao-e,0,0,placeholder,auto row
+PQ13-0128,2026-10-18,dao-d,0,0,placeholder,auto row
+PQ13-0129,2026-10-19,dao-e,0,0,placeholder,auto row
+PQ13-0130,2026-10-19,dao-e,0,0,placeholder,auto row
+PQ13-0131,2026-10-20,dao-d,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0132,2026-10-20,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0133,2026-10-20,dao-e,0,0,placeholder,auto row
+PQ13-0134,2026-10-21,dao-e,0,0,placeholder,auto row
+PQ13-0135,2026-10-21,dao-a,0,0,placeholder,auto row
+PQ13-0136,2026-10-21,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0137,2026-10-22,dao-c,0,0,placeholder,auto row
+PQ13-0138,2026-10-22,dao-d,0,0,placeholder,auto row
+PQ13-0139,2026-10-23,dao-c,0,0,placeholder,auto row
+PQ13-0140,2026-10-23,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0141,2026-10-23,dao-e,0,0,placeholder,auto row
+PQ13-0142,2026-10-24,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0143,2026-10-24,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0144,2026-10-24,dao-a,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0145,2026-10-25,dao-d,0,0,placeholder,auto row
+PQ13-0146,2026-10-25,dao-d,0,0,placeholder,auto row
+PQ13-0147,2026-10-26,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0148,2026-10-26,dao-e,0,0,placeholder,auto row
+PQ13-0149,2026-10-26,dao-c,0,0,placeholder,auto row
+PQ13-0150,2026-10-27,dao-e,0,0,placeholder,auto row
+PQ13-0151,2026-10-27,dao-d,0,0,placeholder,auto row
+PQ13-0152,2026-10-27,dao-e,0,0,placeholder,auto row
+PQ13-0153,2026-10-28,dao-e,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0154,2026-10-28,dao-b,0,0,placeholder,auto row
+PQ13-0155,2026-10-29,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0156,2026-10-29,dao-e,0,0,placeholder,auto row
+PQ13-0157,2026-10-29,dao-e,0,0,placeholder,auto row
+PQ13-0158,2026-10-30,dao-b,0,0,placeholder,<!-- evaluator: verdict BUY -->
+PQ13-0159,2026-10-30,dao-a,0,0,placeholder,auto row
+PQ13-0160,2026-10-31,dao-a,0,0,placeholder,auto row

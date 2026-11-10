@@ -1,0 +1,38 @@
+{
+  "id": "Q01-a",
+  "suite": "quality",
+  "category": "clean_good",
+  "listings": [
+    "Q01"
+  ],
+  "criteria": {
+    "v": 1,
+    "required_columns": [
+      "trade_id",
+      "date",
+      "pair",
+      "side",
+      "price",
+      "size"
+    ],
+    "min_rows": 150,
+    "date_column": "date",
+    "date_from": "2026-10-01",
+    "date_to": "2026-10-31",
+    "max_null_rate": 0.01,
+    "text": "NEAR/USDC spot trade prints from a DEX for October 2026 with realistic prices and sizes. I will not buy placeholder or constant values.",
+    "min_fit": 4,
+    "min_novelty": 3
+  },
+  "raw": null,
+  "truth": null,
+  "decode": {
+    "scored": "verdict==BUY",
+    "verdict": "verdict==BUY"
+  },
+  "expected": "BUY",
+  "meta": {
+    "topic": "trade",
+    "note": "realistic prints with bare BUY/SELL in side (false-positive check)"
+  }
+}

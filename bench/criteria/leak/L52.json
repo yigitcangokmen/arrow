@@ -1,0 +1,19 @@
+{
+  "id": "L52",
+  "suite": "leak",
+  "category": "error_path",
+  "listings": [
+    "LB1"
+  ],
+  "criteria": null,
+  "raw": {
+    "criteria_plaintext_hex": "fffefdfc74686973206973206e6f74206a736f6e"
+  },
+  "truth": null,
+  "decode": null,
+  "expected": null,
+  "meta": {
+    "technique": "valid-ecies-not-json",
+    "expected_outcome": "refunded"
+  }
+}

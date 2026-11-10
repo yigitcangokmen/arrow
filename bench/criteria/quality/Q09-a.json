@@ -1,0 +1,37 @@
+{
+  "id": "Q09-a",
+  "suite": "quality",
+  "category": "clean_bad",
+  "listings": [
+    "Q09"
+  ],
+  "criteria": {
+    "v": 1,
+    "required_columns": [
+      "row_id",
+      "date",
+      "route",
+      "asset",
+      "volume_usd"
+    ],
+    "min_rows": 150,
+    "date_column": "date",
+    "date_from": "2026-10-01",
+    "date_to": "2026-10-31",
+    "max_null_rate": 0.02,
+    "text": "Daily cross-chain bridge flows into and out of NEAR for October 2026: route, asset, USD volume, transaction count and median fee. Constant placeholder volumes are not acceptable.",
+    "min_fit": 4,
+    "min_novelty": 3
+  },
+  "raw": null,
+  "truth": null,
+  "decode": {
+    "scored": "verdict==BUY",
+    "verdict": "verdict==BUY"
+  },
+  "expected": "PASS",
+  "meta": {
+    "topic": "bridge",
+    "note": "100 rows < 150 and 20% null volume_usd"
+  }
+}
