@@ -17,7 +17,8 @@
     "./contract": "./src/contract.ts",
     "./relay": "./src/relay.ts",
     "./x402": "./src/x402.ts",
-    "./flows": "./src/flows.ts"
+    "./flows": "./src/flows.ts",
+    "./verify": "./src/verify/index.ts"
   },
   "dependencies": {
     "@defuse-protocol/intents-sdk": "0.95.0",
