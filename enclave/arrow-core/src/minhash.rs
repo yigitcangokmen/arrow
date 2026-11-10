@@ -77,12 +77,45 @@ pub fn key_hash(key: &str) -> Option<u64> {
     (!n.is_empty()).then(|| base_hash(&n))
 }
 
-/// (a_i·x + b_i) mod P in u128.
+/// v mod P for any u64: 2^61 ≡ 1, so (low 61 bits) + (v >> 61) < 2^61 + 8 < 2P, then one subtraction.
+fn fold(v: u64) -> u64 {
+    let r = (v & P).wrapping_add(v >> 61);
+    if r >= P {
+        r.wrapping_sub(P)
+    } else {
+        r
+    }
+}
+
+/// a·y mod P for a, y < 2^61 in u64 only, with 32-bit halves:
+/// a·y = hh·2^64 + mid·2^32 + ll, 2^64 ≡ 8 and mid·2^32 ≡ (mid >> 29) + (mid mod 2^29)·2^32.
+/// Bounds: hh < 2^58, mid < 2^62, ll < 2^64, so the sum is < 3·2^61 + 2^34 < 2^63 and no
+/// wrapping op below can wrap.
+fn mul_mod(a: u64, y: u64) -> u64 {
+    let (ah, al) = (a >> 32, a & 0xffff_ffff);
+    let (yh, yl) = (y >> 32, y & 0xffff_ffff);
+    let hh = ah.wrapping_mul(yh);
+    let mid = ah.wrapping_mul(yl).wrapping_add(al.wrapping_mul(yh));
+    let ll = al.wrapping_mul(yl);
+    let s = (hh << 3)
+        .wrapping_add(mid >> 29)
+        .wrapping_add((mid & 0x1fff_ffff) << 32)
+        .wrapping_add(ll >> 61)
+        .wrapping_add(ll & P);
+    fold(s)
+}
+
+/// (a_i·x + b_i) mod P, x not reduced first (the value equals the 128-bit definition, since
+/// a·x ≡ a·(x mod P)). u64-only: u128 `%` and `*` are software routines on wasm32, and with them
+/// the 200k-key max case ran out of the 20e9 instruction limit (WS3-T11b, docs/perf.md).
 pub fn perm(p: &Params, i: usize, x: u64) -> Option<u64> {
-    let a = u128::from(*p.a.get(i)?);
-    let b = u128::from(*p.b.get(i)?);
-    let v = a.checked_mul(u128::from(x))?.checked_add(b)?.checked_rem(u128::from(P))?;
-    u64::try_from(v).ok()
+    Some(perm_reduced(*p.a.get(i)?, *p.b.get(i)?, fold(x)))
+}
+
+/// perm with x already reduced (xr = fold(x)), so a loop over the 128 (a, b) pairs folds x once.
+/// a, b < P (checked when the params load), xr < P: mul_mod(..) + b < 2P < 2^62.
+fn perm_reduced(a: u64, b: u64, xr: u64) -> u64 {
+    fold(mul_mod(a, xr).wrapping_add(b))
 }
 
 fn signature_of_hashes<I: Iterator<Item = u64>>(xs: I) -> Result<[u64; K], ArrowErr> {
@@ -138,8 +171,10 @@ pub fn counts(seller_base: &[u64], buyer: &[u64; K]) -> Result<Counts, ArrowErr>
     let mut min_a = [u64::MAX; K];
     let mut hit_b = [false; K];
     for &x in seller_base {
-        for (i, ((m, h), b)) in min_a.iter_mut().zip(hit_b.iter_mut()).zip(buyer.iter()).enumerate() {
-            let v = perm(p, i, x).ok_or(ArrowErr::Internal)?;
+        let xr = fold(x);
+        let pairs = p.a.iter().zip(p.b.iter());
+        for (((m, h), b), (&pa, &pb)) in min_a.iter_mut().zip(hit_b.iter_mut()).zip(buyer.iter()).zip(pairs) {
+            let v = perm_reduced(pa, pb, xr);
             if v < *m {
                 *m = v;
             }
@@ -182,6 +217,31 @@ mod tests {
         assert_eq!(perm(&p, 0, u64::MAX), Some(want));
         assert_eq!(perm(&p, 127, u64::MAX), Some(want));
         assert_eq!(perm(&p, 128, 1), None);
+    }
+
+    #[test]
+    fn perm_fold_equals_u128_rem() {
+        // The Mersenne fold must give exactly (a·x + b) % P, including the edges around P.
+        let mut s = 0x0123_4567_89ab_cdefu64;
+        let mut next = || {
+            s ^= s << 13;
+            s ^= s >> 7;
+            s ^= s << 17;
+            s
+        };
+        let edges = [0, 1, P - 1, P, P + 1, 2 * P, u64::MAX - 1, u64::MAX];
+        for n in 0..200_000 {
+            let (a, b) = (1 + next() % (P - 1), next() % P);
+            let x = if n < edges.len() { edges[n] } else { next() };
+            let p = Params { a: [a; K], b: [b; K] };
+            let want = ((u128::from(a) * u128::from(x) + u128::from(b)) % u128::from(P)) as u64;
+            assert_eq!(perm(&p, 5, x), Some(want), "a={a} b={b} x={x}");
+        }
+        for (a, b, x) in [(1, 0, P), (1, P - 1, 1), (P - 1, P - 1, u64::MAX), (P - 1, 0, P - 1)] {
+            let p = Params { a: [a; K], b: [b; K] };
+            let want = ((u128::from(a) * u128::from(x) + u128::from(b)) % u128::from(P)) as u64;
+            assert_eq!(perm(&p, 0, x), Some(want));
+        }
     }
 
     #[test]
