@@ -11,18 +11,27 @@ import type { Eoa } from "../lib/wallet.ts";
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const eoa = { address: "0xB5EF360E42056049F584FD03BF0FB9B208E28387", intentsId: "0xb5ef360e42056049f584fd03bf0fb9b208e28387" } as unknown as Eoa;
-const world = vi.hoisted(() => ({ uploads: 0, pays: [] as string[], payError: null as Error | null, findFails: 0 }));
+const eoaB = { address: "0x2222222222222222222222222222222222222222", intentsId: "0x2222222222222222222222222222222222222222" } as unknown as Eoa;
+const world = vi.hoisted(() => ({ uploads: 0, pays: [] as string[], payError: null as Error | null, findFails: 0, findRefused: false, wallet: null as unknown, onAccounts: null as ((next: string | null) => void) | null }));
 
 vi.mock("../lib/balance.ts", () => ({ intentsUsdcBalance: async () => 5_000_000n }));
-vi.mock("../lib/wallet.ts", async (orig) => ({ ...(await orig<typeof import("../lib/wallet.ts")>()), connectEoa: async () => eoa, watchAccounts: () => () => undefined }));
+vi.mock("../lib/wallet.ts", async (orig) => ({
+  ...(await orig<typeof import("../lib/wallet.ts")>()),
+  connectEoa: async () => world.wallet,
+  watchAccounts: (cb: (next: string | null) => void) => ((world.onAccounts = cb), () => undefined),
+}));
 vi.mock("@vercel/blob/client", () => ({ upload: async () => (world.uploads++, { url: "https://blob.test/x.bin" }) }));
-vi.mock("../lib/settle.ts", async (orig) => ({
-  ...(await orig<typeof import("../lib/settle.ts")>()),
+vi.mock("../lib/settle.ts", async (orig) => {
+  const real = await orig<typeof import("../lib/settle.ts")>();
+  return {
+  ...real,
   findEventId: async () => {
+    if (world.findRefused) throw new real.PaymentRefused("Arrow: E10 gas tank low");
     if (world.findFails-- > 0) throw new Error("arrow_listed event is still pending");
     return 42;
   },
-}));
+  };
+});
 vi.mock("../lib/pay.ts", async (orig) => {
   const real = await orig<typeof import("../lib/pay.ts")>();
   const { browserStorage, historyStore } = await import("../lib/pending.ts");
@@ -44,7 +53,7 @@ let host: HTMLDivElement;
 let root: Root;
 beforeEach(async () => {
   localStorage.clear();
-  Object.assign(world, { uploads: 0, pays: [], payError: null, findFails: 0 });
+  Object.assign(world, { uploads: 0, pays: [], payError: null, findFails: 0, findRefused: false, wallet: eoa, onAccounts: null });
   host = document.createElement("div");
   document.body.appendChild(host);
   root = createRoot(host);
@@ -102,6 +111,37 @@ describe("/sell in a DOM", () => {
     expect(world.pays[1]).toBe(world.pays[0]); // byte for byte the same list msg: same ciphertext hash, same sealed key
     expect(world.uploads).toBe(1);
     expect(host.querySelector("#listed")!.textContent).toBe("Listed as #42");
+  });
+
+  it("W2-2: after a wallet switch, Retry listing never pays from the new wallet with a key sealed to the old one", async () => {
+    world.payError = Object.assign(new Error("User rejected the request."), { code: 4001 });
+    await connectAndPick();
+    await click(button("Encrypt, upload and list"));
+    expect(world.pays).toHaveLength(1);
+    world.payError = null;
+    world.wallet = eoaB;
+    await act(async () => world.onAccounts!(eoaB.intentsId)); // accountsChanged
+    await click(button("Connect wallet"));
+    await click(button("Retry listing"));
+    expect(world.pays).toHaveLength(1);
+    expect(host.textContent).toMatch(/sealed for wallet 0xb5ef36/i);
+    world.wallet = eoa;
+    await act(async () => world.onAccounts!(eoa.intentsId)); // switched back to the wallet the key was sealed for
+    await click(button("Connect wallet"));
+    await click(button("Retry listing"));
+    expect(world.pays).toHaveLength(2);
+    expect(host.querySelector("#listed")!.textContent).toBe("Listed as #42");
+  });
+
+  it("W2-9: a paid bond the market refused (no arrow_listed, tx final) offers Retry listing and Start over instead of a dead Check listing", async () => {
+    world.findRefused = true;
+    await connectAndPick();
+    await click(button("Encrypt, upload and list"));
+    expect(world.pays).toHaveLength(1);
+    expect(host.textContent).toMatch(/E10 gas tank low/);
+    expect(button("Check listing")).toBeUndefined();
+    await click(button("Start over"));
+    expect(button("Encrypt, upload and list")!.getAttribute("aria-disabled")).toBe("false");
   });
 
   it("A11Y-5: a rejected field is marked invalid and receives focus, and the hint stays linked to its field", async () => {

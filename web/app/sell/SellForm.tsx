@@ -18,7 +18,7 @@ import {
   budgetPreview, buildListMsg, checkBlobUrl, fileKind, inspectFile, listShaOf, MAX_PLAINTEXT_BYTES, normalizePayout, prefixesFor, SellInputError, validateFields,
   type SellFields, type TitlePrefix,
 } from "../../lib/sell.ts";
-import { findEventId } from "../../lib/settle.ts";
+import { findEventId, PaymentRefused } from "../../lib/settle.ts";
 import { suggestTopUp } from "../../lib/topup.ts";
 import type { Eoa } from "../../lib/wallet.ts";
 import { Announcer } from "../../components/Announcer.tsx";
@@ -105,7 +105,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
   /** Between "the file is encrypted" and "the listing exists" the section 3 fields are frozen: what is listed is what was shown. */
   const [inProgress, setInProgress] = useState(false);
   /** The finished list msg (public ciphertext data only) and where it points; it outlives the key, so a retry never re-encrypts. */
-  const [listMsg, setListMsg] = useState<{ msg: string; blobUrl: string; sha: string } | null>(null);
+  const [listMsg, setListMsg] = useState<{ msg: string; blobUrl: string; sha: string; seller: string } | null>(null);
   const [paidTx, setPaidTx] = useState<PaidTx | null>(null);
   const [pending, setPending] = useState<PendingPayment | null>(null);
   const [payNote, setPayNote] = useState<string | null>(null);
@@ -283,7 +283,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
       wipe(s);
       sealed.current = null;
       mark(2, "done");
-      const m = { msg: built.msg, blobUrl, sha: s.sha };
+      const m = { msg: built.msg, blobUrl, sha: s.sha, seller: eoa.intentsId };
       setListMsg(m);
       await payAndFind(m);
     } catch (e) {
@@ -293,8 +293,13 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
   }
 
   /** Pays the bond for a finished msg and looks the listing up. A retry of this function reuses the same msg, never the file. */
-  async function payAndFind(m: { msg: string; sha: string }) {
+  async function payAndFind(m: { msg: string; sha: string; seller: string }) {
     if (!eoa) return;
+    // W2-2: sealed_k names the seller; the bond must come from that wallet or the enclave refuses every eval and buy.
+    if (m.seller !== eoa.intentsId) {
+      fail(new Error(`This listing's key is sealed for wallet ${m.seller}. Connect that wallet to retry, or use Start over to encrypt again for this one.`));
+      return;
+    }
     setError(null);
     setBusy(true);
     let at = 3;
@@ -321,7 +326,14 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
 
   async function findListing(paid: PaidTx) {
     mark(4, "doing");
-    const listingId = await findEventId(network, paid, "arrow_listed", "listing_id");
+    let listingId: number;
+    try {
+      listingId = await findEventId(network, paid, "arrow_listed", "listing_id");
+    } catch (e) {
+      // W2-9: the transaction is final without a listing, so the bond came back; the same msg can be paid again.
+      if (e instanceof PaymentRefused) setPaidTx(null);
+      throw e;
+    }
     mark(4, "done", `listing #${listingId}`);
     finished(listingId, paid.txHash);
   }
@@ -377,6 +389,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
     wipe(sealed.current);
     sealed.current = null;
     setListMsg(null);
+    setPaidTx(null);
     setNeedUrl(null);
     setInProgress(false);
     setSteps(STEPS.map(() => "todo"));
