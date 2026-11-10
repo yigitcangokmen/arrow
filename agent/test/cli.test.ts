@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { generatePrivateKey } from "viem/accounts";
-import { b64, encryptFile, seal, sha256Hex } from "@arrow/sdk";
+import { b64, encryptFile, publicKeyHex, scalarFromLabel, seal, sha256Hex } from "@arrow/sdk";
 import { main } from "../src/cli.ts";
 import { realTransport } from "../src/transport.ts";
 import { DEMO, eventTx, fakeCtx, fixture, NEAR_TX, VIEWS_DIR } from "./helpers.ts";
@@ -151,6 +151,23 @@ describe("list", () => {
     await run(flags(csv(), ["--dry-run", "--out-blob", a]));
     await run(flags(csv(), ["--dry-run", "--out-blob", b]));
     expect(readFileSync(a).equals(readFileSync(b))).toBe(true);
+  });
+
+  it("X12-1: the derived K and nonce are bound to network, contract and program key, so a testnet copy never opens a mainnet listing", async () => {
+    const dry = async (fake: ReturnType<typeof fakeCtx>, name: string) => {
+      const f = join(tmp, name);
+      expect((await run(flags(csv(), ["--dry-run", "--out-blob", f]), fake)).code).toBe(0);
+      return readFileSync(f);
+    };
+    const testnet = await dry(fakeCtx(), "t.bin");
+    expect(testnet.equals(await dry(fakeCtx(), "t2.bin"))).toBe(true); // still reproducible on one market
+    expect(testnet.equals(await dry(fakeCtx({ network: "mainnet" }), "m.bin"))).toBe(false);
+    const otherContract = fakeCtx();
+    otherContract.ctx.contract = "arrow.arrowhq.testnet";
+    expect(testnet.equals(await dry(otherContract, "c.bin"))).toBe(false);
+    const otherProgram = fakeCtx();
+    otherProgram.ctx.views.programPubkey = async () => publicKeyHex(scalarFromLabel("arrow:test:program:v2"));
+    expect(testnet.equals(await dry(otherProgram, "p.bin"))).toBe(false);
   });
 
   it("list_rejects_blob_hash_mismatch", async () => {

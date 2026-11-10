@@ -1,7 +1,7 @@
 // npm run arrow -- list | eval | buy | status | decrypt | transfer   (run through npm: the package has no bin entry)
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import type { Network } from "@arrow/sdk";
+import { type Network, resolveNetwork } from "@arrow/sdk";
 import { appendRun } from "../../scripts/src/lib/evidence.ts";
 import { loadEnv } from "../../scripts/src/lib/env.ts";
 import { confirmSpend } from "../../scripts/src/lib/confirm.ts";
@@ -65,6 +65,7 @@ export function buildCtx(f: Flags, env: Record<string, string | undefined> = pro
   if (relay !== "hosted" && relay !== "direct") throw new CliError("--relay must be hosted or direct", EXIT.usage);
   return {
     network,
+    contract: resolveNetwork(network, env).contract,
     views: makeViews(network, env),
     transport: env.ARROW_TEST_MOCK_RPC ? mockTransport() : realTransport({ network, relay, env }),
     actor: (role, flags) => resolveActor(network, role, { account: f.account, ...flags }),

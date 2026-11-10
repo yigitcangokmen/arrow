@@ -73,6 +73,7 @@ export function fakeCtx(o: { network?: "testnet" | "mainnet"; listing?: object; 
   };
   const ctx: Ctx = {
     network,
+    contract: network === "mainnet" ? "arrow-market.near" : "arrow-v2.arrowhq.testnet",
     views,
     transport,
     actor: (role) => ({ network, id: network === "mainnet" ? (role === "buyer" ? "0x" + "b".repeat(40) : "0x" + "5".repeat(40)) : `e2e-${role}.arrowhq.testnet`, viewingKey: async () => DEMO }),

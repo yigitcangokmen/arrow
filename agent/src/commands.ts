@@ -5,7 +5,7 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "n
 import { dirname, resolve } from "node:path";
 import {
   BlobHashMismatch, Criteria, decodeEvalResult, decryptFile, fetchAndCheckBlob, formatBits, formatUsdc,
-  type Listing, type Mode, type Network, openRelease, parseUsdc, prepareBuy, prepareEval, prepareList, sha256Hex, signature, signatureHex,
+  type Listing, type Mode, type Network, openRelease, parseUsdc, prepareBuy, prepareEval, prepareList, resolveNetwork, sha256Hex, signature, signatureHex,
 } from "@arrow/sdk";
 import { type EvidenceRunInput } from "../../scripts/src/lib/evidence.ts";
 import { readTable } from "./data.ts";
@@ -25,6 +25,8 @@ export class CliError extends Error {
 
 export interface Ctx {
   network: Network;
+  /** The market contract id; the CLI's file key is bound to it (X12-1). Default: the network's configured contract. */
+  contract?: string;
   views: ViewsLike;
   transport: Transport;
   actor(role: Role, flags?: ActorFlags): Actor;
@@ -244,7 +246,11 @@ export interface ListResult {
   msg_masked: Record<string, unknown>;
 }
 
-/** Reproducible K and nonce from a local secret, so the ciphertext uploaded between two runs is the one that gets listed. */
+/**
+ * Reproducible K and nonce from a local secret, so the ciphertext uploaded between two runs is the one that gets listed.
+ * The label binds network, contract and program key: the same file listed on testnet and on mainnet (or on two contracts, or
+ * under two programs) gets two unrelated keys, so a cheap testnet purchase never yields the K of a mainnet listing (X12-1).
+ */
 function sellerSecret(): Buffer {
   const f = resolve(configDir(), "seller-secret");
   if (existsSync(f)) return Buffer.from(readFileSync(f, "utf8").trim(), "hex");
@@ -254,8 +260,8 @@ function sellerSecret(): Buffer {
   chmodSync(f, 0o600);
   return s;
 }
-const derive = (label: string, plaintextSha: string, n: number) =>
-  new Uint8Array(createHmac("sha256", sellerSecret()).update(`arrow:list:${label}:${plaintextSha}`).digest().subarray(0, n));
+const derive = (market: string, label: string, plaintextSha: string, n: number) =>
+  new Uint8Array(createHmac("sha256", sellerSecret()).update(`arrow:list:v2:${market}:${label}:${plaintextSha}`).digest().subarray(0, n));
 
 export async function listCommand(
   ctx: Ctx,
@@ -268,8 +274,9 @@ export async function listCommand(
   if (!a.dryRun && !a.blobUrl) throw new CliError("--blob-url is required: upload the file written by --dry-run, then rerun with its URL", EXIT.usage);
 
   const plainSha = sha256Hex(plaintext);
+  const market = `${ctx.network}:${ctx.contract ?? resolveNetwork(ctx.network, process.env).contract}:${programPk}`;
   const key = new Uint8Array(32);
-  key.set(derive("k", plainSha, 32));
+  key.set(derive(market, "k", plainSha, 32));
   // sealed_k is bound to the account that pays the bond (the contract's sender_id), so resolve it first.
   const seller = ctx.actor("seller", { account: a.account });
   let prepared;
@@ -278,7 +285,7 @@ export async function listCommand(
       plaintext, title: a.title, publicDesc: a.desc, columns: table.columns, rowsClaimed: table.rows,
       blobUrl: a.blobUrl ?? `https://example.invalid/${"0".repeat(64)}.bin`,
       price: parseUsdc(a.price).toString(), evalFee: parseUsdc(a.evalFee).toString(), maxEvals: a.maxEvals, mode: a.mode ?? "scored", programPk,
-      seller: seller.id, key, nonce: derive("nonce", plainSha, 24),
+      seller: seller.id, key, nonce: derive(market, "nonce", plainSha, 24),
     });
   } catch (e) {
     throw new CliError(`cannot build the listing: ${(e as Error).message}`, EXIT.usage);
