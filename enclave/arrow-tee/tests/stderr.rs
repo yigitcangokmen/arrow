@@ -45,6 +45,9 @@ enum Expect {
     Release { k: [u8; 32], h: String },
     /// dev `__panic`: trap, empty stdout, the canary never reaches stderr.
     Panic,
+    /// Out of memory (ENC-A5): trap, empty stdout, and the program itself wrote nothing to stderr
+    /// (only wasmtime's own "Error: failed to run main module" report may follow).
+    Oom,
 }
 
 struct Case {
@@ -55,6 +58,8 @@ struct Case {
     /// Age of the block when the run starts; None leaves NEAR_BLOCK_TIMESTAMP out.
     block_age_s: Option<u64>,
     expect: Expect,
+    /// wasmtime -W max-memory-size, if this case needs a smaller memory than the default.
+    max_mem: Option<u64>,
 }
 
 fn sha(b: &[u8]) -> [u8; 32] {
@@ -171,7 +176,7 @@ fn cases(fx: &Fx) -> (Vec<Case>, Vec<Case>) {
     let (base, h) = fx.eval_input("base", &ok_plain, CRIT);
     let mut errs: Vec<Case> = Vec::new();
     let mut add = |name, wasm, stdin: Vec<u8>, env: Vec<(String, String)>, age: Option<u64>, expect: Expect| {
-        errs.push(Case { name, wasm, stdin, env, block_age_s: age, expect });
+        errs.push(Case { name, wasm, stdin, env, block_age_s: age, expect, max_mem: None });
     };
     let rel = || fx.env(Wasm::Rel, "ok_buy");
     let dev = |m: &str| fx.env(Wasm::Dev, m);
@@ -290,19 +295,23 @@ fn cases(fx: &Fx) -> (Vec<Case>, Vec<Case>) {
     add("llm_slow_times_out_under_40s", Wasm::Dev, b.clone(), with(dev("slow"), "ARROW_DEV_TPAD_MS", Some("0")), Some(1), Expect::ErrWithin(34, 40));
     add("blob_slow_times_out", Wasm::Dev, mutate(&["listing", "blob_url"], url_of("/blob-slow")), with(dev("ok_buy"), "ARROW_DEV_TPAD_MS", Some("0")), Some(1), Expect::ErrWithin(14, 26));
     add("blob_redirect_err", Wasm::Dev, mutate(&["listing", "blob_url"], url_of("/blob-redirect")), dev("ok_buy"), Some(1), e.clone());
+    // ENC-A5: an allocation failure (a 6 MiB download into a 4 MiB memory) aborts without std's
+    // "memory allocation of N bytes failed" line on stderr
+    let huge = release(&{ let mut l = base["listing"].clone(); l["blob_url"] = url_of("/blob-huge"); l });
+    errs.push(Case { name: "release_oom_no_stderr", wasm: Wasm::Dev, stdin: huge, env: dev("ok_buy"), block_age_s: Some(1), expect: Expect::Oom, max_mem: Some(4 << 20) });
 
     // Positives (not counted in N/N). BUY · fit 5 · novelty 3 (no signature) = 25 + 4·5 + 2.
     let ppk_hex = hex::encode(fx.ppk);
     let pos = vec![
-        Case { name: "P1_rel_derive", wasm: Wasm::Rel, stdin: br#"{"v":1,"action":"derive"}"#.to_vec(), env: rel(), block_age_s: Some(1), expect: Expect::Derive(ppk_hex) },
-        Case { name: "post_body_over_4096_ok", wasm: Wasm::Dev, stdin: b.clone(), env: with(dev("ok_buy"), "ARROW_DEV_TPAD_MS", Some("0")), block_age_s: Some(1), expect: Expect::Eval { idx: 47, h: h.clone(), padded: false } },
-        Case { name: "P3_ok_inject_idx0", wasm: Wasm::Dev, stdin: b.clone(), env: with(dev("ok_inject"), "ARROW_DEV_TPAD_MS", Some("0")), block_age_s: Some(1), expect: Expect::Eval { idx: 0, h: h.clone(), padded: false } },
+        Case { name: "P1_rel_derive", wasm: Wasm::Rel, stdin: br#"{"v":1,"action":"derive"}"#.to_vec(), env: rel(), max_mem: None, block_age_s: Some(1), expect: Expect::Derive(ppk_hex) },
+        Case { name: "post_body_over_4096_ok", wasm: Wasm::Dev, stdin: b.clone(), env: with(dev("ok_buy"), "ARROW_DEV_TPAD_MS", Some("0")), max_mem: None, block_age_s: Some(1), expect: Expect::Eval { idx: 47, h: h.clone(), padded: false } },
+        Case { name: "P3_ok_inject_idx0", wasm: Wasm::Dev, stdin: b.clone(), env: with(dev("ok_inject"), "ARROW_DEV_TPAD_MS", Some("0")), max_mem: None, block_age_s: Some(1), expect: Expect::Eval { idx: 0, h: h.clone(), padded: false } },
         // release downloads the blob now; the fake host is http, which only the dev wasm accepts
-        Case { name: "P4_dev_release", wasm: Wasm::Dev, stdin: release(&base["listing"]), env: dev("ok_buy"), block_age_s: Some(1), expect: Expect::Release { k: fx.k, h: h.clone() } },
+        Case { name: "P4_dev_release", wasm: Wasm::Dev, stdin: release(&base["listing"]), env: dev("ok_buy"), max_mem: None, block_age_s: Some(1), expect: Expect::Release { k: fx.k, h: h.clone() } },
         // ARW-C1: a swapped blob gives h = its own hash and a zero key (the contract refunds hash_mismatch)
-        Case { name: "P7_dev_release_swapped_blob", wasm: Wasm::Dev, stdin: release(&{ let mut l = base["listing"].clone(); l["blob_url"] = json!(other_url.clone()); l }), env: dev("ok_buy"), block_age_s: Some(1), expect: Expect::Release { k: [0u8; 32], h: other_h.clone() } },
-        Case { name: "P5_dev_panic_canary", wasm: Wasm::Dev, stdin: br#"{"action":"__panic"}"#.to_vec(), env: dev("ok_buy"), block_age_s: Some(1), expect: Expect::Panic },
-        Case { name: "P6_dev_eval_padded_45s", wasm: Wasm::Dev, stdin: b, env: dev("ok_buy"), block_age_s: Some(1), expect: Expect::Eval { idx: 47, h, padded: true } },
+        Case { name: "P7_dev_release_swapped_blob", wasm: Wasm::Dev, stdin: release(&{ let mut l = base["listing"].clone(); l["blob_url"] = json!(other_url.clone()); l }), env: dev("ok_buy"), max_mem: None, block_age_s: Some(1), expect: Expect::Release { k: [0u8; 32], h: other_h.clone() } },
+        Case { name: "P5_dev_panic_canary", wasm: Wasm::Dev, stdin: br#"{"action":"__panic"}"#.to_vec(), env: dev("ok_buy"), max_mem: None, block_age_s: Some(1), expect: Expect::Panic },
+        Case { name: "P6_dev_eval_padded_45s", wasm: Wasm::Dev, stdin: b, env: dev("ok_buy"), max_mem: None, block_age_s: Some(1), expect: Expect::Eval { idx: 47, h, padded: true } },
     ];
     (errs, pos)
 }
@@ -318,6 +327,9 @@ fn run(c: &Case, rel: &str, dev: &str) -> Run {
     let wasm = if c.wasm == Wasm::Rel { rel } else { dev };
     let mut cmd = Command::new("wasmtime");
     cmd.args(["run", "-S", "http"]);
+    if let Some(m) = c.max_mem {
+        cmd.arg("-W").arg(format!("max-memory-size={m}"));
+    }
     for (k, v) in &c.env {
         cmd.arg("--env").arg(format!("{k}={v}"));
     }
@@ -339,6 +351,14 @@ fn run(c: &Case, rel: &str, dev: &str) -> Run {
 }
 
 fn check(c: &Case, r: &Run, fx: &Fx) -> Result<(), String> {
+    if matches!(c.expect, Expect::Oom) {
+        let err = String::from_utf8_lossy(&r.stderr);
+        let guest = err.split("Error: failed to run main module").next().unwrap_or_default();
+        if !r.stdout.is_empty() || r.ok_exit || !guest.is_empty() {
+            return Err(format!("expected a silent trap, got exit ok={} stdout {} B, program stderr {:?}", r.ok_exit, r.stdout.len(), guest.get(..120).unwrap_or(guest)));
+        }
+        return Ok(());
+    }
     if c.expect.is_panic() {
         if !r.stdout.is_empty() || r.ok_exit {
             return Err(format!("expected a trap with empty stdout, got exit ok={} stdout {} B", r.ok_exit, r.stdout.len()));

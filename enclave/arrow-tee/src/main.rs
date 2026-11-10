@@ -1,4 +1,4 @@
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![cfg_attr(not(test), deny(
     clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::indexing_slicing,
     clippy::arithmetic_side_effects, clippy::string_slice, clippy::unreachable,
@@ -8,12 +8,16 @@
 //! OutLayer WASI P2 program: derive / eval / release. Never writes to stderr; every error is
 //! `{"v":1,"ok":false}` with exit code 0 (DEC I-01).
 
+mod alloc;
 mod consts;
 mod flow;
 mod guard;
 mod http;
 mod io;
 mod keys;
+
+#[global_allocator]
+static ALLOC: alloc::AbortOnNull = alloc::AbortOnNull;
 
 fn main() {
     // First statement: a panic must print nothing (wasm32 has no unwinding to catch it).
