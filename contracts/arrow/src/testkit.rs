@@ -61,3 +61,64 @@ pub fn list_msg() -> ListMsg {
         payout: None,
     }
 }
+
+pub fn setup_with_deposit(predecessor: AccountId, balance: u128, deposit: u128) {
+    let mut b = near_sdk::test_utils::VMContextBuilder::new();
+    b.current_account_id(self_id())
+        .signer_account_id(predecessor.clone())
+        .predecessor_account_id(predecessor)
+        .account_balance(near_sdk::NearToken::from_yoctonear(balance))
+        .attached_deposit(near_sdk::NearToken::from_yoctonear(deposit));
+    near_sdk::testing_env!(b.build());
+}
+
+pub fn setup(predecessor: AccountId, balance: u128) {
+    setup_with_deposit(predecessor, balance, 0);
+}
+
+pub fn intents() -> AccountId {
+    acc("intents.test.near")
+}
+
+pub fn seller() -> AccountId {
+    acc("0x66a0dfed229e920feb17aa3186f87bd00e30844f")
+}
+
+/// A contract with the program key set (list/eval/buy need it).
+pub fn contract() -> crate::Contract {
+    let mut c = crate::Contract::new(test_config());
+    c.program_pubkey = Some(format!("04{}", "11".repeat(64)));
+    c
+}
+
+pub fn msg_json(m: crate::msg::Msg) -> String {
+    near_sdk::serde_json::to_string(&m).unwrap()
+}
+
+/// Calls mt_on_transfer as intents.near with one USDC token and returns the immediate value.
+pub fn mt_call(c: &mut crate::Contract, from: AccountId, amount: u128, msg: String) -> near_sdk::PromiseOrValue<near_sdk::serde_json::Value> {
+    let token = c.cfg.usdc_token_id.clone();
+    c.mt_on_transfer(from.clone(), vec![from], vec![token], vec![U128(amount)], msg)
+}
+
+pub fn value_of(r: near_sdk::PromiseOrValue<near_sdk::serde_json::Value>) -> near_sdk::serde_json::Value {
+    match r {
+        near_sdk::PromiseOrValue::Value(v) => v,
+        near_sdk::PromiseOrValue::Promise(_) => panic!("expected a value, got a promise"),
+    }
+}
+
+/// (receiver, method, args JSON) of every function call receipt created so far.
+pub fn calls() -> Vec<(String, String, near_sdk::serde_json::Value, u128)> {
+    use near_sdk::mock::MockAction;
+    let mut out = Vec::new();
+    for r in near_sdk::test_utils::get_created_receipts() {
+        for a in r.actions {
+            if let MockAction::FunctionCallWeight { method_name, args, attached_deposit, .. } = a {
+                let v = near_sdk::serde_json::from_slice(&args).unwrap_or(near_sdk::serde_json::Value::Null);
+                out.push((r.receiver_id.to_string(), String::from_utf8(method_name).unwrap(), v, attached_deposit.as_yoctonear()));
+            }
+        }
+    }
+    out
+}
