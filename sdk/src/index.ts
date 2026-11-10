@@ -4,3 +4,4 @@ export * from "./state.ts";
 export * from "./bits.ts";
 export * from "./usdc.ts";
 export * from "./crypto.ts";
+export * from "./minhash.ts";
