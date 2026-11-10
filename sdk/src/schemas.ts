@@ -254,3 +254,12 @@ export const EvidenceFile = z.object({
   corrections: z.array(z.unknown()),
 });
 export type EvidenceFile = z.infer<typeof EvidenceFile>;
+
+export const VersionView = z.looseObject({
+  name: z.string(),
+  version: z.string(),
+  payment_path: z.enum(["notify", "escrow"]),
+  result_path: z.string(),
+  build: z.enum(["mainnet", "testnet"]),
+});
+export type VersionView = z.infer<typeof VersionView>;
