@@ -4,6 +4,7 @@ import { execFileSync } from "node:child_process";
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { EvidenceFile, EvidenceRun } from "@arrow/sdk/schemas";
+import { NETWORKS } from "@arrow/sdk";
 import { mainCheckout, repoRoot } from "./env.ts";
 
 export type EvidenceNetwork = "testnet" | "mainnet";
@@ -27,7 +28,7 @@ export function gitCommit(): string {
 
 const SKELETON: Record<EvidenceNetwork, EvidenceFile> = {
   testnet: {
-    network: "testnet", contract: "arrow.arrowhq.testnet", contract_wasm_sha256: null, program_wasm_sha256: null,
+    network: "testnet", contract: NETWORKS.testnet.contract, contract_wasm_sha256: null, program_wasm_sha256: null,
     program_wasm_url: null, lock: { tx: null, block_height: null, timestamp_utc: null }, accounts: {}, runs: [], corrections: [],
   },
   mainnet: {

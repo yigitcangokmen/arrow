@@ -1,4 +1,4 @@
-// Testnet enclave timing, instructions and output size (WS3-T11b) on arrow.arrowhq.testnet.
+// Testnet enclave timing, instructions and output size (WS3-T11b) on the testnet market (ARROW_CONTRACT_TESTNET or the SDK default).
 //   npx tsx scripts/dev/perf-testnet.ts --evals 10 [--listings <unlock id>,<labels id>] [--json <out.json>]
 // Without --listings, the seller spike.arrowhq.testnet opens two scored listings of the synthetic demo data
 // (unlock = PASS scene, labels = BUY scene): the blob goes to testnet FastFS, K is sealed to the live program key.
@@ -17,19 +17,20 @@ import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import {
   b64, type Criteria, decodeEvalResult, encryptFile, keccakScalarHex, ListMsg, parseEvents, prepareEval, publicKeyHex,
-  rpc, seal, sealedKPayload, sha256Hex, txStatus, view,
+  resolveNetwork, rpc, seal, sealedKPayload, sha256Hex, txStatus, view,
 } from "@arrow/sdk";
 import { appendRun } from "../src/lib/evidence.ts";
-import { repoRoot } from "../src/lib/env.ts";
+import { loadEnv, repoRoot } from "../src/lib/env.ts";
 import { explorerTx } from "../src/lib/log.ts";
 import { SPECS } from "../src/make-demo-blobs.ts";
 
+loadEnv();
 const { values } = parseArgs({
   options: { evals: { type: "string", default: "10" }, listings: { type: "string" }, json: { type: "string" } },
 });
 const N = Number(values.evals);
 const NET = "testnet" as const;
-const CONTRACT = "arrow.arrowhq.testnet";
+const CONTRACT = resolveNetwork(NET, process.env).contract; // ARROW_CONTRACT_TESTNET from .env, else the SDK default
 const TOKEN = "arrow-usd.arrowhq.testnet";
 const SELLER = "spike.arrowhq.testnet";
 const BUYER = "bench.arrowhq.testnet";
