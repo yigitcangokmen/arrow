@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { toListingView, ttlCache } from "../lib/server/listingsCache.ts";
 import { handleListings, type ListingsDeps } from "../lib/server/listingsHandler.ts";
+import { tokenBucket } from "../lib/ratelimit.ts";
 import { listingFixture } from "./helpers.ts";
 
 describe("toListingView", () => {
@@ -31,12 +32,25 @@ describe("ttlCache", () => {
     expect(await c("k", load)).toBe(30_000);
     expect(load).toHaveBeenCalledTimes(2);
   });
+
+  it("API-1: holds at most maxEntries keys, dropping the oldest, so arbitrary ?id= values cannot grow the Map", async () => {
+    const load = vi.fn(async () => 1);
+    const c = ttlCache<number>(30_000, () => 0, 3);
+    for (const k of ["a", "b", "c", "d"]) await c(k, load);
+    expect(load).toHaveBeenCalledTimes(4);
+    await c("d", load);
+    await c("c", load);
+    await c("b", load);
+    expect(load).toHaveBeenCalledTimes(4); // b, c, d are still cached
+    await c("a", load);
+    expect(load).toHaveBeenCalledTimes(5); // a was evicted
+  });
 });
 
 describe("GET /api/listings", () => {
   const mk = (listings = [listingFixture(), listingFixture({ id: 2 })]) => {
     const views = { listing: vi.fn(async (id: any) => listings.find((l) => String(l.id) === String(id)) ?? null), listings: vi.fn(async () => listings) };
-    const d: ListingsDeps = { views: () => views as any, teamAccounts: [], cached: ttlCache(30_000) };
+    const d: ListingsDeps = { views: () => views as any, teamAccounts: [], cached: ttlCache(30_000), limiter: tokenBucket({ capacity: 100, refillEveryMs: 60_000 }) };
     return { d, views };
   };
   const get = (q = "") => new Request(`http://localhost/api/listings${q}`);
@@ -72,5 +86,19 @@ describe("GET /api/listings", () => {
     const res = await handleListings(get(), failing);
     expect(res.status).toBe(502);
     expect((await res.json()).code).toBe("RPC_ERROR");
+  });
+
+  it("API-1: the 6th request from one IP is 429 with Retry-After and no chain read; another IP is unaffected", async () => {
+    const { d: base, views } = mk();
+    const d: ListingsDeps = { ...base, limiter: tokenBucket({ capacity: 5, refillEveryMs: 60_000 }) };
+    const ip = (a: string) => new Request("http://localhost/api/listings?id=1", { headers: { "x-forwarded-for": a } });
+    const codes: number[] = [];
+    for (let i = 0; i < 6; i++) codes.push((await handleListings(ip("9.9.9.9"), d)).status);
+    expect(codes).toEqual([200, 200, 200, 200, 200, 429]);
+    const res = await handleListings(ip("9.9.9.9"), d);
+    expect(Number(res.headers.get("retry-after"))).toBeGreaterThan(0);
+    expect((await res.json()).code).toBe("RATE_LIMITED");
+    expect((await handleListings(ip("8.8.8.8"), d)).status).toBe(200);
+    expect(views.listing).toHaveBeenCalledTimes(1); // the 30 s cache served the rest
   });
 });

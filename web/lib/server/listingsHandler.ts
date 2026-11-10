@@ -2,13 +2,16 @@ import { ArrowViews } from "@arrow/sdk/contract";
 import { RpcError } from "@arrow/sdk/rpc";
 import type { Listing } from "@arrow/sdk/schemas";
 import { CONTRACTS, DEFAULT_NETWORK, type Network } from "../config.ts";
-import { apiError, json } from "./http.ts";
+import { clientIp } from "../ip.ts";
+import { type Limiter, tokenBucket } from "../ratelimit.ts";
+import { apiError, json, rateLimited } from "./http.ts";
 import { toListingView, ttlCache, type ListingView } from "./listingsCache.ts";
 
 export interface ListingsDeps {
   views(net: Network): Pick<ArrowViews, "listing" | "listings">;
   teamAccounts: readonly string[];
   cached: (key: string, load: () => Promise<Listing[]>) => Promise<Listing[]>;
+  limiter: Limiter;
 }
 
 const CACHE_CONTROL = "public, s-maxage=30, stale-while-revalidate=30";
@@ -17,6 +20,7 @@ export const realListingsDeps = (teamAccounts: readonly string[]): ListingsDeps 
   views: (net) => new ArrowViews(net, CONTRACTS[net]),
   teamAccounts,
   cached: ttlCache<Listing[]>(30_000),
+  limiter: tokenBucket({ capacity: 30, refillEveryMs: 2_000 }), // per IP: a burst of 30, then 30 a minute; the CDN header below serves repeats
 });
 
 const int = (v: string | null, def: number, min: number, max: number): number | null => {
@@ -25,6 +29,9 @@ const int = (v: string | null, def: number, min: number, max: number): number | 
 };
 
 export async function handleListings(req: Request, d: ListingsDeps): Promise<Response> {
+  const rl = d.limiter.take(clientIp(req));
+  if (!rl.ok) return rateLimited(rl.retryAfterSec);
+
   const q = new URL(req.url).searchParams;
   const netParam = q.get("network");
   if (netParam !== null && netParam !== "mainnet" && netParam !== "testnet") return apiError(400, "BAD_REQUEST", "network must be mainnet or testnet");

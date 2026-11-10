@@ -25,14 +25,19 @@ export function toListingView(l: Listing, teamAccounts: readonly string[]): List
   };
 }
 
-/** Small time-based cache: a fresh entry is returned as is, the loader runs again once it is older than ttlMs. */
-export function ttlCache<T>(ttlMs: number, now: () => number = Date.now) {
+/**
+ * Small time-based cache: a fresh entry is returned as is, the loader runs again once it is older than ttlMs.
+ * It holds at most `maxEntries` keys (the oldest is dropped first), because /api/listings builds keys from the query string.
+ */
+export function ttlCache<T>(ttlMs: number, now: () => number = Date.now, maxEntries = 200) {
   const m = new Map<string, { at: number; value: T }>();
   return async (key: string, load: () => Promise<T>): Promise<T> => {
     const hit = m.get(key);
     if (hit && now() - hit.at < ttlMs) return hit.value;
     const value = await load();
+    m.delete(key); // re-insert so Map order stays oldest-first
     m.set(key, { at: now(), value });
+    if (m.size > maxEntries) m.delete(m.keys().next().value as string);
     return value;
   };
 }
