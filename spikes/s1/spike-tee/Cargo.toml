@@ -1,0 +1,28 @@
+[package]
+name = "spike-tee"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# Own workspace: spikes are excluded from the root workspace (W1-08).
+[workspace]
+
+[[bin]]
+name = "spike-tee"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+hex = "0.4"
+wasi-http-client = "0.2"
+
+# Same as the root release profile.
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = true
+debug = false
+panic = "abort"
+overflow-checks = true
