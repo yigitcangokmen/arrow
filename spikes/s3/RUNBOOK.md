@@ -1,6 +1,7 @@
 # S3 mainnet spike runbook (H-08a … H-08e)
 
 Human-run steps for the mainnet payment-layer gates. The agent only prepares and reads; it never signs on mainnet.
+`HANDOFFS.md` carries the same steps as single copy-paste lines, each with its read-only check.
 Run them in order, from the main checkout, with Node 24:
 
 ```bash
@@ -41,7 +42,7 @@ Paste to the agent: the last 5 lines.
 If it fails: the agent switches to the manual payload fallback (DEC K-03); H-08c waits.
 
 ## H-08c · Spike deploy + S3b notification / refund
-Preconditions: H-07 DONE (`arrow-spike.arrowhq.near` exists with ≥1.4 NEAR), H-08b PASS, `spikes/s3/spike-contract/target/near/spike.wasm` exists (the agent built it).
+Preconditions: H-07 DONE (`arrow-spike.arrowhq.near` exists with ≥1.6 NEAR: `spike.wasm` is 150,703 bytes, which locks 1.507 NEAR of storage at 1e19 yoctoNEAR per byte, and each S3c run sends a 0.02 NEAR OutLayer deposit; H-07 funds it with 1.7 NEAR), H-08b PASS, `spikes/s3/spike-contract/target/near/spike.wasm` exists (the agent built it).
 Run exactly:
 ```bash
 near contract deploy arrow-spike.arrowhq.near use-file spikes/s3/spike-contract/target/near/spike.wasm with-init-call new json-args "$(cat spikes/s3/init-mainnet.json)" prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' network-config mainnet sign-with-keychain send
@@ -57,17 +58,16 @@ If it fails: the agent proposes PAYMENT_PATH=Escrow at K0; H-08d still runs (Out
 Preconditions: H-08c DONE. Buyer Intents balance ≥0.05 USDC. `NEARAI_API_KEY` (H-01a) is in `.env`.
 Run exactly:
 ```bash
-near account export-account arrow-spike.arrowhq.near using-private-key network-config mainnet    # the private key is shown: share it with no one
-outlayer login                        # "Account ID:" → arrow-spike.arrowhq.near · "Private key (ed25519:...):" → the key above
-outlayer whoami                       # arrow-spike.arrowhq.near (mainnet)
+printf '%s\n%s\n' arrow-spike.arrowhq.near "$(near account export-account arrow-spike.arrowhq.near using-private-key network-config mainnet 2>/dev/null | grep -oE 'ed25519:[1-9A-HJ-NP-Za-km-z]{80,}')" | outlayer login mainnet >/dev/null    # the key goes from the keychain to outlayer without being shown
+OUTLAYER_NETWORK=mainnet outlayer whoami    # arrow-spike.arrowhq.near (mainnet)
 set -a; source .env; set +a
-outlayer secrets set "$(jq -cn --arg k "$NEARAI_API_KEY" '{NEARAI_API_KEY:$k}')" --profile arrow --wasm-hash $(cat spikes/s1/release/sha256.txt) --generate PROTECTED_MASTER:hex32 --access allow-all --via arrow-spike.arrowhq.near --build $(cat spikes/s1/release/sha256.txt)
+OUTLAYER_NETWORK=mainnet outlayer secrets set "$(jq -cn --arg k "$NEARAI_API_KEY" '{NEARAI_API_KEY:$k}')" --profile arrow --wasm-hash $(cat spikes/s1/release/sha256.txt) --generate PROTECTED_MASTER:hex32 --access allow-all --via arrow-spike.arrowhq.near --build $(cat spikes/s1/release/sha256.txt)
 npx tsx spikes/s3/s3c-outlayer.ts --mode outlayer
 npx tsx spikes/s3/s3c-outlayer.ts --mode outlayer_refund
 npx tsx spikes/s3/s3c-b5-negative.ts --prepare        # run the command it prints exactly (signed by arrowhq.near, 0.02 NEAR deposit, most of it refunded)
 npx tsx spikes/s3/s3c-b5-negative.ts --read <tx_hash>
-outlayer secrets delete --profile arrow --wasm-hash $(cat spikes/s1/release/sha256.txt)
-outlayer logout
+OUTLAYER_NETWORK=mainnet outlayer secrets delete --profile arrow --wasm-hash $(cat spikes/s1/release/sha256.txt)
+OUTLAYER_NETWORK=mainnet outlayer logout
 ```
 Expected: (1) `outlayer` → keep, `outlayer_refund` → refund, both < 90 s. (2) B5: `PASS` (OutLayer returned `null` or `pm` is null). (3) attestation 200 on `api.outlayer.ai`.
 On testnet (S1-b) the same `--access allow-all --via <contract> --build <H>` form was accepted and the B5-style direct call was refused with "Access denied by access condition".
@@ -82,6 +82,6 @@ near contract call-function as-transaction intents.near mt_transfer json-args '{
 near account delete-account arrow-spike.arrowhq.near beneficiary arrowhq.near network-config mainnet sign-with-keychain send
 near account view-account-summary arrow-spike.arrowhq.near network-config mainnet now
 ```
-Expected: the last command says the account does not exist (UNKNOWN_ACCOUNT); arrowhq.near ≈ +1.4 NEAR.
+Expected: the last command says the account does not exist (UNKNOWN_ACCOUNT); arrowhq.near ≈ +1.6 NEAR.
 Paste to the agent: the two tx hashes.
 If it fails: DeleteAccountWithLargeState is not expected (the state is small); any other error → paste it to the agent.
