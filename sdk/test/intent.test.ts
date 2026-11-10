@@ -3,7 +3,7 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { recoverMessageAddress } from "viem";
 import { describe, expect, it } from "vitest";
 import {
-  arrowTransferIntent, buildAndSignTransfer, buildPayload, MIN_GAS_NOTIFY, NETWORKS, scalarFromLabel, signPayloadViem, simulateIntents,
+  arrowTransferIntent, buildAndSignTransfer, buildPayload, MIN_GAS_NOTIFY, NETWORKS, scalarFromLabel, signPayloadViem, signRawErc191, simulateIntents,
 } from "../src/index.ts";
 import { decodeNonce } from "./helpers/nonce.ts";
 
@@ -69,6 +69,16 @@ describe("intent builder", () => {
     expect(mp.standard).toBe("erc191");
     expect(mp.signature.startsWith("secp256k1:")).toBe(true);
     expect(typeof mp.payload).toBe("string");
+  });
+
+  it("sign_raw_signs_the_given_string_byte_for_byte", async () => {
+    let seen: unknown;
+    const capturing = { address: account.address, signMessage: async (a: { message: string }) => ((seen = a.message), account.signMessage(a as any)) } as typeof account;
+    const payload = '{ "signer_id" : "x",  "intents":[] }'; // odd spacing must survive: no JSON round trip
+    const mp = await signRawErc191(payload, capturing);
+    expect(seen).toBe(payload);
+    expect(mp).toMatchObject({ standard: "erc191", payload });
+    expect(mp.signature.startsWith("secp256k1:")).toBe(true);
   });
 
   it("deadline_default_10min", () => {

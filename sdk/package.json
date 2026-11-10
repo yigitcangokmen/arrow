@@ -18,7 +18,12 @@
     "./relay": "./src/relay.ts",
     "./x402": "./src/x402.ts",
     "./flows": "./src/flows.ts",
-    "./verify": "./src/verify/index.ts"
+    "./verify": "./src/verify/index.ts",
+    "./crypto": "./src/crypto.ts",
+    "./minhash": "./src/minhash.ts",
+    "./intent": "./src/intent.ts",
+    "./viewingKey": "./src/viewingKey.ts",
+    "./oneclick": "./src/oneclick.ts"
   },
   "dependencies": {
     "@defuse-protocol/intents-sdk": "0.95.0",

@@ -46,6 +46,11 @@ export function signPayloadViem(payload: IntentPayload, signer: IntentSigner): P
   return createIntentSignerViem({ signer }).signIntent(payload);
 }
 
+/** Signs a payload string the service built for us (1Click generate-intent); the string is signed byte for byte. */
+export function signRawErc191(payload: string, signer: IntentSigner): Promise<MultiPayloadErc191> {
+  return createIntentSignerViem({ signer }).signRaw({ payload });
+}
+
 export async function buildAndSignTransfer(p: {
   network?: Network;
   signer: IntentSigner;
