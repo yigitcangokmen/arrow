@@ -25,10 +25,11 @@ const DEFAULT_PARAMS = loadParams();
 const DEFAULT_IGNORABLE =
   /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\uFFF0-\uFFF8\u{1BCA0}-\u{1BCA3}\u{1D173}-\u{1D17A}\u{E0000}-\u{E0FFF}]/gu;
 
-/** trim, NFKC, lowercase, Default_Ignorable characters deleted, the U+0307 right after an "i" deleted,
- * whitespace runs to a single space, trim. Invisible characters cannot make a known key look new. */
+/** trim, Default_Ignorable characters deleted, NFKC, lowercase, Default_Ignorable characters deleted again, the U+0307 right
+ * after an "i" deleted, whitespace runs to a single space, trim. Invisible characters cannot make a known key look new; they go
+ * before NFKC too, because one between a letter and its combining mark blocks composition (R2-3). */
 export function normalizeKey(s: string): string {
-  return s.trim().normalize("NFKC").toLowerCase().replace(DEFAULT_IGNORABLE, "").replace(/i\u0307/g, "i").replace(/\s+/gu, " ").trim();
+  return s.trim().replace(DEFAULT_IGNORABLE, "").normalize("NFKC").toLowerCase().replace(DEFAULT_IGNORABLE, "").replace(/i\u0307/g, "i").replace(/\s+/gu, " ").trim();
 }
 
 /** First 8 bytes of sha256(utf8(normalizeKey(s))), big-endian. */

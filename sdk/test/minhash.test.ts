@@ -33,7 +33,7 @@ describe("minhash", () => {
   });
 
   it("normalize_vectors", () => {
-    expect(vectors.cases).toHaveLength(9);
+    expect(vectors.cases).toHaveLength(10);
     for (const c of vectors.cases) expect(c.keys.map(normalizeKey), c.id).toEqual(c.normalized);
   });
 
@@ -43,6 +43,9 @@ describe("minhash", () => {
     expect(normalizeKey("İ")).toBe("i");
     expect(normalizeKey("a\u200Bb")).toBe("ab"); // Default_Ignorable characters go (X12-U1)
     expect(normalizeKey("\u200BACME\u2060")).toBe("acme");
+    // R2-3: an invisible character between a letter and its combining mark must not keep them apart
+    expect(normalizeKey("Jose\u200B\u0301-001")).toBe(normalizeKey("José-001"));
+    expect(normalizeKey("Mu\u2060\u0308ller")).toBe("müller");
   });
 
   it("minhash_vectors_exact", () => {

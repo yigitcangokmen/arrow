@@ -133,6 +133,7 @@ fn minhash_cases() -> Vec<(&'static str, Vec<String>)> {
         ("duplicates", s(&["k1", "k1", "K1", " k1 "])),
         ("empty_and_blank", s(&["", "   ", "\u{3000}"])),
         ("default_ignorable", s(&["\u{200B}ACME\u{2060}", "A\u{FE0F}CME", "\u{E0041}acme\u{E007F}", "\u{200B} acme", "İSTANBUL", "i\u{307}\u{307}"])),
+        ("ignorable_splits_mark", s(&["Jose\u{200B}\u{301}-001", "José-001", "Mu\u{2060}\u{308}ller"])),
         ("random_1000", (0..1000).map(|i| h(format!("arrow:mh:{i}"))).collect()),
     ]
 }

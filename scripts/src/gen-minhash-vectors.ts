@@ -16,10 +16,10 @@ const params = JSON.parse(readFileSync(PARAMS_FILE, "utf8")) as { k: number; pri
 const P = BigInt(params.prime);
 const sha = (s: string) => createHash("sha256").update(s, "utf8").digest();
 
-// Default_Ignorable_Code_Point, written out (X12-U1); then the one U+0307 right after an "i" goes.
+// Default_Ignorable_Code_Point, written out (X12-U1), deleted before NFKC (R2-3) and after it; then the one U+0307 right after an "i" goes.
 const IGNORABLE = /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\uFFF0-\uFFF8\u{1BCA0}-\u{1BCA3}\u{1D173}-\u{1D17A}\u{E0000}-\u{E0FFF}]/gu;
 const normalize = (s: string) =>
-  s.trim().normalize("NFKC").toLowerCase().replace(IGNORABLE, "").replace(/i\u0307/g, "i").replace(/\s+/gu, " ").trim();
+  s.trim().replace(IGNORABLE, "").normalize("NFKC").toLowerCase().replace(IGNORABLE, "").replace(/i\u0307/g, "i").replace(/\s+/gu, " ").trim();
 const u64 = (key: string) => sha(normalize(key)).readBigUInt64BE(0);
 const hex16 = (x: bigint) => x.toString(16).padStart(16, "0");
 
@@ -47,6 +47,7 @@ const CASES: { id: string; keys: string[] }[] = [
   { id: "duplicates", keys: ["a", "a", "A", " a ", "b"] },
   { id: "deterministic_1000", keys: range(1000).map((i) => sha(`arrow:mh:${i}`).toString("hex")) },
   { id: "default_ignorable", keys: ["\u200BACME\u2060", "A\uFE0FCME", "\u{E0041}acme\u{E007F}", "\u200B acme", "İSTANBUL", "i\u0307\u0307"] },
+  { id: "ignorable_splits_mark", keys: ["Jose\u200B\u0301-001", "José-001", "Mu\u2060\u0308ller"] },
   { id: "empty_set", keys: [] },
 ];
 

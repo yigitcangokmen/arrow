@@ -142,6 +142,16 @@ mod tests {
         }
     }
 
+    /// R2-3: the same with accented keys, the invisible character placed between the letter and its
+    /// combining mark (which blocked NFKC composition before the deletion moved ahead of it).
+    #[test]
+    fn invisible_mark_split_does_not_fake_novelty() {
+        let b = keys("José-", 0..1000);
+        let sig = signature(b.iter().map(String::as_str)).unwrap();
+        let base: Vec<u64> = b.iter().filter_map(|k| key_hash(&k.replacen('é', "e\u{200B}\u{301}", 1))).collect();
+        assert_eq!(novelty(true, true, Some(counts(&base, &sig).unwrap())), Some(1));
+    }
+
     /// Deterministic key sets: |A| = 1000, |B| ∈ {100, 1000, 5000}, |A∩B| = pct · min(|A|, |B|).
     /// All within ±1 band; 0% exact; B ⊂ A and A = B exact. (A ⊂ B with |B| = 5|A| is exact here,
     /// but by simulation only in ~85% of random sets: k = 128 limits accuracy when |B| ≫ |A|.)

@@ -1,5 +1,6 @@
 //! Key normalization shared byte for byte with the TS SDK (DEC I-17, fixtures/README.md):
-//! trim → NFKC → lowercase → delete Default_Ignorable code points → delete a U+0307 right after `i`
+//! trim → delete Default_Ignorable code points → NFKC → lowercase → delete them again → delete a
+//! U+0307 right after `i`
 //! → collapse whitespace runs to one space → trim. "Whitespace" is exactly JS `\s` (which is also
 //! what `String.prototype.trim` strips), defined by hand: Rust's `char::is_whitespace` differs (it
 //! includes U+0085 and excludes U+FEFF).
@@ -37,7 +38,8 @@ pub fn normalize_key(s: &str) -> String {
 /// None once the budget is gone (ENC-LEAK-4).
 pub fn normalize_key_within(s: &str, budget: &mut usize) -> Option<String> {
     let mut nfkc = String::new();
-    for c in s.trim_matches(is_js_ws).nfkc() {
+    // Ignorables go before NFKC: one between a letter and its combining mark blocks composition (R2-3).
+    for c in s.trim_matches(is_js_ws).chars().filter(|c| !is_default_ignorable(*c)).nfkc() {
         *budget = budget.checked_sub(c.len_utf8())?;
         nfkc.push(c);
     }
@@ -141,6 +143,15 @@ mod tests {
         }
         assert_eq!(normalize_key("a\u{200B}b"), "ab");
         assert_eq!(normalize_key("\u{3164}\u{FFA0}"), "");
+    }
+
+    /// R2-3: an invisible character between a letter and its combining mark blocked composition, so
+    /// "Jose\u{200B}\u{301}" stayed decomposed and hashed apart from "José".
+    #[test]
+    fn ignorable_between_letter_and_mark_still_composes() {
+        assert_eq!(normalize_key("Jose\u{200B}\u{301}-001"), normalize_key("José-001"));
+        assert_eq!(normalize_key("Mu\u{2060}\u{308}ller"), "müller");
+        assert_eq!(normalize_key("S\u{FE0F}\u{327}i\u{34F}\u{307}"), normalize_key("Şi"));
     }
 
     #[test]
