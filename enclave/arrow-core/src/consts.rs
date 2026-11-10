@@ -15,3 +15,13 @@ pub const BITS_PER_EVAL_MILLI_VERDICT: u32 = 1585;
 pub const MAX_BLOB: usize = 5 * 1024 * 1024;
 pub const MAX_ROWS: u32 = 200_000;
 pub const MAX_COLS: usize = 64;
+
+/// Seeded sample size sent to the LLM (DEC I-06; 20 if the measured p95 exceeds 25 s).
+pub const SAMPLE_ROWS: u32 = 40;
+/// Hard ceilings for one sampled row (DEC I-06).
+pub const MAX_CELL_CHARS: usize = 200;
+pub const MAX_ROW_BYTES: usize = 1024;
+/// Fixed LLM call parameters (DEC I-05, agent guide invariant 4).
+pub const LLM_MAX_TOKENS: u32 = 64;
+/// Largest NEAR AI response body the enclave parses.
+pub const MAX_LLM_RESPONSE: usize = 64 * 1024;

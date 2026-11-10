@@ -9,7 +9,10 @@
 
 pub mod consts;
 pub mod err;
+pub mod llm;
 pub mod parse;
+pub mod prompt;
+pub mod sample;
 pub mod schema;
 pub mod stats;
 

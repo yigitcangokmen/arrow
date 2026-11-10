@@ -1,0 +1,13 @@
+date,agent_id,category,jobs_completed,avg_price_usdc,notes,source
+2026-10-01,agent-001,data-labeling,14,0.42,,synthetic
+2026-10-01,agent-002,translation,9,1.10,weekend backlog,synthetic
+2026-10-03,agent-003,code-review,5,3.75,,synthetic
+2026-10-05,agent-001,data-labeling,17,0.40,,synthetic
+2026-10-08,agent-004,research,3,6.20,"long task, split in two",synthetic
+2026-10-12,agent-002,translation,11,1.05,,synthetic
+2026-10-15,agent-005,scraping,22,0.18,n/a,synthetic
+2026-10-18,agent-003,code-review,6,3.60,uses <diff> blocks,synthetic
+2026-10-21,agent-006,summarization,8,0.95,,synthetic
+2026-10-24,agent-004,research,4,6.00,,synthetic
+2026-10-28,agent-005,scraping,19,0.20,,synthetic
+2026-10-31,agent-001,data-labeling,15,0.41,,synthetic

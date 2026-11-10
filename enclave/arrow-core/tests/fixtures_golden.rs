@@ -79,3 +79,36 @@ fn output_vectors_accept_sizes() {
     }
     assert_eq!(checked, 3);
 }
+
+/// The full prompt pipeline on `fixtures/llm-example/` must give the golden request body byte for
+/// byte. `ARROW_UPDATE_FIXTURES=1` rewrites the golden (never set in CI).
+#[test]
+fn llm_request_matches_fixture() {
+    use arrow_core::{consts, llm, parse, prompt, sample, stats};
+    let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/../../fixtures/");
+    let data = std::fs::read(format!("{dir}llm-example/data.csv")).unwrap();
+    let crit: Value = serde_json::from_slice(&std::fs::read(format!("{dir}llm-example/criteria.json")).unwrap()).unwrap();
+    let seed_hex = std::fs::read_to_string(format!("{dir}llm-example/seed.txt")).unwrap();
+    let seed: [u8; 32] = hex::decode(seed_hex.trim()).unwrap().try_into().unwrap();
+
+    let (f, body) = parse::detect(&data).unwrap();
+    let cols = parse::header(body, f).unwrap();
+    let date_col = cols.iter().position(|c| c == crit["date_column"].as_str().unwrap());
+    let st = stats::compute(body, f, &stats::StatsSpec { date_col }).unwrap();
+    let idx = sample::sample_indices(&seed, st.rows, consts::SAMPLE_ROWS);
+    let rows = stats::collect_rows(body, f, &st.columns, &idx).unwrap();
+    let token = prompt::spotlight_token(&seed);
+    let user = prompt::user_message(&token, crit["text"].as_str().unwrap(), &st, &rows, llm::Reasoning::QwenNoThinking).unwrap();
+    let req = llm::request_body("Qwen/Qwen3.8-27B", llm::Reasoning::QwenNoThinking, prompt::SYSTEM, &user).unwrap();
+
+    let golden = format!("{dir}llm-request-example.json");
+    if std::env::var("ARROW_UPDATE_FIXTURES").as_deref() == Ok("1") {
+        std::fs::write(&golden, &req).unwrap();
+    }
+    assert_eq!(req, std::fs::read(&golden).unwrap());
+    // The seller's "<diff>" cell is escaped, never raw.
+    let s = String::from_utf8(req).unwrap();
+    assert!(s.contains("\\\\u003cdiff\\\\u003e"));
+    assert_eq!(s.matches(&format!("</data-{token}>")).count(), 1);
+    assert_eq!(s.matches("</data-").count(), 2); // SYSTEM names the generic </data-TOKEN> once
+}
