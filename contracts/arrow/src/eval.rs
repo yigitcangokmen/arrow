@@ -556,11 +556,26 @@ mod tests {
         }
     }
 
+    /// C-05: the largest input any valid listing can produce (ASCII, 4-byte characters, or quotes
+    /// that JSON escapes) stays under OutLayer's 10,000-byte event threshold.
     #[test]
     fn input_data_under_event_threshold() {
+        let ascii: Vec<String> = (0..64).map(|i| format!("{i:0>40}")).collect();
+        let emoji = vec!["\u{1F600}".repeat(10); 64];
+        let quotes = vec!["\"".repeat(20); 64];
+        for columns in [ascii, emoji, quotes] {
+            input_under_threshold(columns);
+        }
+        // The audit's case (64 columns of 40 non-ASCII characters, about 13 kB of input) is refused.
+        let mut m = list_msg();
+        m.columns = vec!["\u{1F600}".repeat(40); 64];
+        assert_eq!(crate::validate::validate_list(&m, &test_config()), Err("columns"));
+    }
+
+    fn input_under_threshold(columns: Vec<String>) {
         let mut listing_msg = list_msg();
-        listing_msg.columns = (0..64).map(|i| format!("{i:0>40}")).collect();
-        listing_msg.blob_url = format!("https://b.test/{}", "a".repeat(200 - 15));
+        listing_msg.columns = columns;
+        listing_msg.blob_url = format!("https://b.test/{}", "\"".repeat(200 - 15));
         setup(intents(), 10 * NEAR);
         let mut c = contract();
         let _ = mt_call(&mut c, seller(), 100_000, msg_json(Msg::List(listing_msg)));
@@ -643,6 +658,23 @@ mod tests {
             }
             let err = eval_as(&mut c, "fresh.test.near").err().map(panic_text).unwrap();
             assert!(err.contains("E12"), "{err}");
+        }
+
+        /// STATE-11: free accounts that use up the global pool do not lock out the sponsor's judge
+        /// accounts (sub-accounts of an exempt account); those keep their own per-account cap.
+        #[test]
+        fn sponsored_subaccount_skips_global_cap() {
+            let mut c = listed_testnet();
+            for i in 0..12 {
+                assert!(eval_as(&mut c, &format!("u{}.test.near", i % 6)).is_ok());
+            }
+            assert!(eval_as(&mut c, "fresh.test.near").err().map(panic_text).unwrap().contains("E12"));
+            for _ in 0..10 {
+                assert!(eval_as(&mut c, "j1.bench.test.near").is_ok());
+            }
+            assert!(eval_as(&mut c, "j1.bench.test.near").err().map(panic_text).unwrap().contains("E11"));
+            assert_eq!(c.cap_global_used, 12, "sponsored evals counted in the global pool");
+            assert!(eval_as(&mut c, "xbench.test.near").err().map(panic_text).unwrap().contains("E12"), "a name ending in the exempt id is not a sub-account");
         }
 
         #[test]

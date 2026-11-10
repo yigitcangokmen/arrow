@@ -271,7 +271,9 @@ mod tests {
         assert_eq!(mt_transfers(), vec![(seller().to_string(), "1960000".into()), ("treasury.test.near".into(), "40000".into())]);
 
         setup(intents(), 10 * NEAR);
-        let _ = buy(&mut c, 2_000_000);
+        // A second purchase to a new key (the same key again is E22).
+        let m = BuyMsg { listing_id: 1, buyer_pk: format!("04{}", "23".repeat(64)) };
+        let _ = mt_call(&mut c, buyer(), 2_000_000, msg_json(Msg::Buy(m)));
         relayer_at(0);
         let _ = c.request_release(2);
         callback_env(PromiseResult::Successful(br#"{"v":1,"ok":false}"#.to_vec()));

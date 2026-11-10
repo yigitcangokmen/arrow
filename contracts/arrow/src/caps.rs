@@ -8,6 +8,9 @@ use crate::Contract;
 
 impl Contract {
     /// E11 / E12, then counts the eval. Exempt accounts are neither checked nor counted.
+    /// Sub-accounts of an exempt account (the sponsor's `j….arrow-judge.arrowhq.testnet` judge
+    /// accounts) keep their per-account cap but skip the global one, so free accounts that use up
+    /// the global pool cannot lock judges out for the day (STATE-11).
     pub(crate) fn charge_eval_cap(&mut self, who: &AccountId) {
         if !cfg!(feature = "testnet") {
             return;
@@ -31,10 +34,13 @@ impl Contract {
         if used >= caps.per_account_per_day {
             env::panic_str("Arrow: E11 daily eval cap reached for account");
         }
-        if self.cap_global_used >= caps.global_per_day {
+        let sponsored = caps.exempt.iter().any(|e| who.as_str().strip_suffix(e.as_str()).is_some_and(|p| p.ends_with('.')));
+        if !sponsored && self.cap_global_used >= caps.global_per_day {
             env::panic_str("Arrow: E12 daily global eval cap reached");
         }
         self.cap_by_account.insert(who.clone(), (day, used + 1));
-        self.cap_global_used += 1;
+        if !sponsored {
+            self.cap_global_used += 1;
+        }
     }
 }

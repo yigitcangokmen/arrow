@@ -14,9 +14,19 @@ use crate::paths::{payment_path, PaymentPath};
 use crate::rail::{pay_out, refund_value, split};
 use crate::types::*;
 use crate::validate::validate_buy;
-use crate::{Contract, ContractExt};
+use crate::{Contract, ContractExt, StorageKey};
 
 const ON_RELEASE_GAS: Gas = Gas::from_tgas(60); // [DEC H-11]
+
+/// sha256(listing_id ‖ buyer ‖ buyer_pk) → the newest purchase with that triple (X12-2 tabs, TN-6).
+/// Opened on demand under its own prefix, not a state field.
+fn bought_map() -> near_sdk::store::LookupMap<[u8; 32], u64> {
+    near_sdk::store::LookupMap::new(StorageKey::Bought)
+}
+
+fn bought_key(listing_id: u64, buyer: &AccountId, buyer_pk: &str) -> [u8; 32] {
+    env::sha256_array(format!("{listing_id}:{buyer}:{buyer_pk}").as_bytes())
+}
 
 impl Contract {
     pub(crate) fn handle_buy(&mut self, sender: AccountId, amount: u128, m: BuyMsg, rail: Rail) -> PromiseOrValue<Value> {
@@ -34,11 +44,21 @@ impl Contract {
         if amount < listing.price.0 {
             env::panic_str("Arrow: E08 amount below required");
         }
+        // The same payer buying the same listing to the same key again gets nothing new (the key is
+        // already re-sealed to buyer_pk on chain); a second tab or a re-signed retry would pay twice.
+        let key = bought_key(listing.id, &sender, &m.buyer_pk);
+        let mut bought = bought_map();
+        if let Some(prev) = bought.get(&key).and_then(|pid| self.purchases.get(pid)) {
+            if prev.status != Status::Refunded {
+                env::panic_str("Arrow: E22 already bought");
+            }
+        }
         self.assert_tank(self.cfg.outlayer_deposit_release.0);
 
         // Mutations start here.
         let id = self.next_purchase_id;
         self.next_purchase_id += 1;
+        bought.insert(key, id);
         let mut purchase = Purchase {
             id,
             listing_id: listing.id,
@@ -73,6 +93,12 @@ impl Contract {
         let input = release_input(&listing, &purchase);
         self.purchases.insert(id, purchase);
         PromiseOrValue::Promise(self.release_promise(id, input))
+    }
+
+    /// The newest purchase of `listing_id` by `buyer` to `buyer_pk`, if any (lets a client find a
+    /// purchase again after a reload instead of paying twice).
+    pub(crate) fn purchase_by_buyer(&self, listing_id: u64, buyer: &AccountId, buyer_pk: &str) -> Option<Purchase> {
+        bought_map().get(&bought_key(listing_id, buyer, buyer_pk)).and_then(|id| self.purchases.get(id)).cloned()
     }
 
     /// OutLayer release request chained to `on_release`.
@@ -241,6 +267,48 @@ mod tests {
             let logs = get_logs();
             assert!(logs.iter().any(|l| l.contains(r#""event":"arrow_refund""#) && l.contains(r#""kind":"buy""#) && l.contains(&format!(r#""reason":"{reason}""#)) && l.contains(r#""amount":"2000000""#)), "{reason}: {logs:?}");
         }
+    }
+
+    fn panic_text(r: std::thread::Result<PromiseOrValue<Value>>) -> String {
+        r.err().and_then(|e| e.downcast_ref::<String>().cloned()).unwrap_or_default()
+    }
+
+    /// X12-2 (tabs) / TN-6: the same payer cannot buy the same listing to the same key twice while
+    /// the first purchase is pending or done; a refunded one, a new key or another payer may.
+    #[test]
+    fn second_buy_same_key_is_e22() {
+        crate::paths::TEST_PAYMENT_PATH.with(|p| p.set(Some(crate::paths::PaymentPath::Notify)));
+        let mut c = listed(20);
+        assert!(matches!(buy(&mut c, 2_000_000), PromiseOrValue::Promise(_)));
+        setup(intents(), 10 * NEAR);
+        let pending = panic_text(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| buy(&mut c, 2_000_000))));
+        assert!(pending.contains("Arrow: E22 already bought"), "pending: {pending}");
+        callback_env(PromiseResult::Successful(release_output(&"cd".repeat(32), SEALED_K_LEN)));
+        c.on_release(1);
+        setup(intents(), 10 * NEAR);
+        let done = panic_text(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| buy(&mut c, 2_000_000))));
+        assert!(done.contains("Arrow: E22 already bought"), "done: {done}");
+        assert_eq!(c.next_purchase_id, 2);
+        let found = c.get_purchase_by_buyer(1, buyer(), buyer_pk()).map(|p| (p.id, p.status));
+        assert_eq!(found, Some((1, Status::Done)));
+        // Another key, or another payer with the same key, may buy.
+        let other_key = BuyMsg { listing_id: 1, buyer_pk: format!("04{}", "44".repeat(64)) };
+        assert!(matches!(mt_call(&mut c, buyer(), 2_000_000, msg_json(Msg::Buy(other_key))), PromiseOrValue::Promise(_)));
+        setup(intents(), 10 * NEAR);
+        let same_key = BuyMsg { listing_id: 1, buyer_pk: buyer_pk() };
+        assert!(matches!(mt_call(&mut c, acc("0x3333333333333333333333333333333333333333"), 2_000_000, msg_json(Msg::Buy(same_key))), PromiseOrValue::Promise(_)));
+    }
+
+    #[test]
+    fn rebuy_after_refund_is_allowed() {
+        crate::paths::TEST_PAYMENT_PATH.with(|p| p.set(Some(crate::paths::PaymentPath::Notify)));
+        let mut c = listed(20);
+        let _ = buy(&mut c, 2_000_000);
+        callback_env(PromiseResult::Failed);
+        c.on_release(1);
+        setup(intents(), 10 * NEAR);
+        assert!(matches!(buy(&mut c, 2_000_000), PromiseOrValue::Promise(_)));
+        assert_eq!(c.get_purchase_by_buyer(1, buyer(), buyer_pk()).map(|p| p.id), Some(2));
     }
 
     #[test]

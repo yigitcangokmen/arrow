@@ -11,6 +11,8 @@ mod common;
 
 use common::*;
 use near_sdk::base64::{engine::general_purpose::STANDARD, Engine};
+use near_workspaces::types::NearToken;
+use near_workspaces::Account;
 use serde_json::{json, Value};
 
 async fn matrix(net: Net, mode: &str, bits: u64) -> R<()> {
@@ -271,8 +273,9 @@ async fn late_publication_after_yield_timeout_is_refused() -> R<()> {
     let s0 = e.usdc_of(&seller).await?;
     assert_eq!(s0, PRICE * 98 / 100, "the control sale paid the seller 98 %");
 
-    // Late: the yield times out first, then the worker publishes.
-    let status = e.pay(Who::Buyer, PRICE, &buy_msg(id)).transact_async().await?;
+    // Late: the yield times out first, then the worker publishes. (Another payer: the same payer
+    // and key again would be E22, since the control purchase is done.)
+    let status = e.pay(Who::Buyer2, PRICE, &buy_msg(id)).transact_async().await?;
     let out = e.time_out(status).await?;
     assert_buy_refunded(&e, &out, 2, "null", PRICE).await?;
     assert!(!resume(k).await?.json::<bool>()?, "a late output resumed the yield");
@@ -313,29 +316,178 @@ async fn max_evals() -> R<()> {
 
 // ---------------------------------------------------------------- entry checks
 
-/// ENC-1 (defence in depth; the enclave also refuses a sealed_k bound to another seller): a second
-/// account that copies blob_url, blob_sha256 and sealed_k from `get_listing` cannot list them.
+/// CRY-2 / C-03 / TN-1 / N3: E19 is retired. A squatter who lists the seller's blob_sha256 first,
+/// with a junk sealed_k, no longer blocks the seller; a copy is useless because the enclave binds
+/// sealed_k to the seller (arrow-tee clone_with_other_seller_is_err refuses it).
 #[tokio::test]
-async fn clone_relist_rejected() -> R<()> {
+async fn squatter_cannot_block_seller() -> R<()> {
+    for net in [Net::Mainnet, Net::Testnet] {
+        let e = setup(net, Path::Notify).await?;
+        let mut squat = list_msg("scored", None, 10);
+        squat["sealed_k"] = json!(STANDARD.encode([0xEEu8; 193]));
+        let out = e.pay(Who::Buyer2, BOND, &squat).transact().await?;
+        assert!(out.receipt_failures().is_empty(), "{net:?}: squat failed: {out:?}");
+        let id = e.list("scored", None, 10).await?;
+        assert_eq!(id, 2, "{net:?}");
+        let (a, b): (Value, Value) = (e.view("get_listing", json!({"listing_id": 1})).await?, e.view("get_listing", json!({"listing_id": 2})).await?);
+        assert_eq!((a["blob_sha256"].clone(), a["seller"].as_str()), (json!(blob_sha()), Some(e.id(Who::Buyer2).as_str())), "{net:?}");
+        assert_eq!((b["blob_sha256"].clone(), b["seller"].as_str()), (json!(blob_sha()), Some(e.id(Who::Seller).as_str())), "{net:?}");
+    }
+    Ok(())
+}
+
+/// X12F-2 / C-04: a refused payout is not lost. on_payout records it as owed with an
+/// arrow_payout_failed event, and anyone's retry_payout delivers it once intents accepts again.
+#[tokio::test]
+async fn refused_payout_is_owed_then_retried() -> R<()> {
+    let e = setup(Net::Mainnet, Path::Notify).await?;
+    let seller = e.id(Who::Seller);
+    let id = e.list("scored", None, 10).await?;
+    e.intents().call("set_reject").args_json(json!({"receiver_id": seller})).transact().await?.into_result()?;
+    let out = e.eval(Who::Buyer, id, EVAL_FEE).await?;
+    assert_eq!(e.get_eval(1).await?["status"].as_str(), Some("done"));
+    let failed: Vec<Value> = events(&out).into_iter().filter(|v| v["event"] == "arrow_payout_failed").collect();
+    assert_eq!(failed.len(), 1, "{:?}", out.logs());
+    assert_eq!((failed[0]["data"]["to"].as_str(), failed[0]["data"]["amount"].as_str(), failed[0]["data"]["memo"].as_str()), (Some(seller.as_str()), Some("45000"), Some("arrow:eval:1")));
+    let out = e.buy(Who::Buyer, id, PRICE).await?;
+    assert_eq!(e.get_purchase(1).await?["status"].as_str(), Some("done"), "{out:?}");
+    let owed: String = e.view("get_owed", json!({"account_id": seller, "rail": "mt"})).await?;
+    assert_eq!(owed, (45_000 + 1_960_000).to_string());
+    assert_eq!(e.usdc_of(&seller).await?, 0);
+    assert_eq!(e.usdc_of(&e.treasury_id()).await?, BOND + 5_000 + 40_000, "the treasury shares still landed");
+
+    e.intents().call("set_reject").args_json(json!({"receiver_id": null})).transact().await?.into_result()?;
+    let out = e.stranger.call(e.arrow.id(), "retry_payout").args_json(json!({"account_id": seller})).gas(near_workspaces::types::Gas::from_tgas(100)).transact().await?;
+    assert!(out.receipt_failures().is_empty(), "{out:?}");
+    assert_eq!(e.usdc_of(&seller).await?, 45_000 + 1_960_000);
+    let owed: String = e.view("get_owed", json!({"account_id": seller, "rail": "mt"})).await?;
+    assert_eq!(owed, "0");
+    let out = e.stranger.call(e.arrow.id(), "retry_payout").args_json(json!({"account_id": seller})).transact().await?;
+    assert_panicked(&out, "E24 nothing owed");
+    Ok(())
+}
+
+/// X12-2 (tabs) / TN-6: a second buy of the same listing by the same payer to the same key is
+/// refused (E22) and its payment returned in full; the first purchase can be found again.
+#[tokio::test]
+async fn second_buy_same_key_refunded() -> R<()> {
     for net in [Net::Mainnet, Net::Testnet] {
         let e = setup(net, Path::Notify).await?;
         let id = e.list("scored", None, 10).await?;
-        let listing: Value = e.view("get_listing", json!({"listing_id": id})).await?;
-        let mut clone = list_msg("scored", None, 10);
-        for f in ["blob_url", "blob_sha256", "sealed_k"] {
-            clone[f] = listing[f].clone();
+        assert!(e.buy(Who::Buyer, id, PRICE).await?.receipt_failures().is_empty(), "{net:?}");
+        let seller_before = e.usdc_of(&e.id(Who::Seller)).await?;
+        let buyer_before = if net == Net::Testnet { e.ft_balance(&e.id(Who::Buyer)).await? } else { 0 };
+        let out = e.buy(Who::Buyer, id, PRICE).await?;
+        assert_panicked(&out, "E22 already bought");
+        assert_eq!(e.usdc_of(&e.id(Who::Seller)).await?, seller_before, "{net:?}: seller paid twice");
+        if net == Net::Testnet {
+            assert_eq!(e.ft_balance(&e.id(Who::Buyer)).await?, buyer_before, "the second payment was kept");
         }
-        clone["price"] = json!("100000");
-        let attacker = e.id(Who::Buyer2);
-        let before = e.usdc_of(&attacker).await?;
-        let out = e.pay(Who::Buyer2, BOND, &clone).transact().await?;
-        assert_panicked(&out, "E19 blob listed by another seller");
-        assert_eq!(e.usdc_of(&attacker).await?, before, "{net:?}: the clone's bond was kept");
-        let none: Option<Value> = e.view("get_listing", json!({"listing_id": id + 1})).await?;
-        assert!(none.is_none(), "{net:?}: the clone was listed");
-        // the first seller may list the same blob again (a relist after a program change)
-        assert_eq!(e.list("scored", None, 10).await?, id + 1, "{net:?}");
+        let p: Value = e.view("get_purchase_by_buyer", json!({"listing_id": id, "buyer": e.id(Who::Buyer), "buyer_pk": buyer_pk()})).await?;
+        assert_eq!((p["id"].as_u64(), p["status"].as_str()), (Some(1), Some("done")), "{net:?}");
     }
+    Ok(())
+}
+
+/// X12-3: the seller moves the blob to a new host; the sha stays and the payment comes back.
+#[tokio::test]
+async fn seller_rehosts_blob() -> R<()> {
+    let e = setup(Net::Mainnet, Path::Notify).await?;
+    let id = e.list("scored", None, 10).await?;
+    let url = format!("https://mirror.test/{}.bin", blob_sha());
+    let out = e.pay(Who::Seller, 1, &json!({"op": "rehost", "listing_id": id, "blob_url": url})).transact().await?;
+    assert!(out.receipt_failures().is_empty(), "{out:?}");
+    assert_eq!(unused(&out, &e.arrow), Some(1));
+    let l: Value = e.view("get_listing", json!({"listing_id": id})).await?;
+    assert_eq!((l["blob_url"].as_str(), l["blob_sha256"].clone()), (Some(url.as_str()), json!(blob_sha())));
+    let out = e.pay(Who::Buyer, 1, &json!({"op": "rehost", "listing_id": id, "blob_url": "https://evil.test/x.bin"})).transact().await?;
+    assert_panicked(&out, "E23");
+    assert!(e.eval(Who::Buyer, id, EVAL_FEE).await?.receipt_failures().is_empty());
+    assert_eq!(e.get_eval(1).await?["status"].as_str(), Some("done"));
+    Ok(())
+}
+
+/// C-02 / STATE-3: listings of the largest allowed size stop at the tank reserve (E10, bond back)
+/// and an honest eval still runs afterwards.
+#[tokio::test]
+async fn max_listings_cannot_starve_evals() -> R<()> {
+    let e = setup(Net::Mainnet, Path::Notify).await?;
+    let id = e.list("scored", None, 10).await?;
+    // Free balance: tank_min 0.05 + 10 eval deposits 0.2 + 0.1 NEAR (about two maximal listings).
+    e.worker
+        .patch(e.arrow.id())
+        .account_from_current(|cur| {
+            let bal = u128::from(cur.storage_usage) * 10u128.pow(19) + 35 * NEAR / 100;
+            near_workspaces::types::AccountDetailsPatch::from(cur).balance(near_workspaces::types::NearToken::from_yoctonear(bal))
+        })
+        .transact()
+        .await?;
+    let mut big = list_msg("scored", None, 10);
+    big["title"] = json!("\u{1F600}".repeat(60));
+    big["public_desc"] = json!("\u{1F600}".repeat(210));
+    big["columns"] = json!(vec!["\u{1F600}".repeat(10); 64]);
+    let (mut listed, mut refused) = (0, 0);
+    for _ in 0..6 {
+        let out = e.pay(Who::Buyer2, BOND, &big).transact().await?;
+        if out.receipt_failures().is_empty() {
+            listed += 1;
+        } else {
+            assert_panicked(&out, "E10 gas tank low");
+            refused += 1;
+        }
+    }
+    println!("max_listings_cannot_starve_evals: {listed} listed, {refused} refused, tank {}", e.tank().await?);
+    assert!(listed >= 1 && refused >= 1, "{listed} listed, {refused} refused");
+    assert!(e.tank().await? >= 25 * NEAR / 100, "listings went below the eval reserve");
+    let out = e.eval(Who::Buyer, id, EVAL_FEE).await?;
+    assert!(out.receipt_failures().is_empty(), "{out:?}");
+    assert_eq!(e.get_eval(1).await?["status"].as_str(), Some("done"));
+    Ok(())
+}
+
+/// STATE-1 / X12-6 (storage): redeploying this build over the code that runs on
+/// arrow-v2.arrowhq.testnet (main bfae9c3, testnet build) keeps the state readable and usable.
+/// Needs that wasm: build it from bfae9c3 and run with
+/// `ARROW_PREV_WASM=<path> cargo test -p arrow --test sandbox upgrade_keeps_state -- --ignored`.
+#[tokio::test]
+#[ignore]
+async fn upgrade_keeps_state() -> R<()> {
+    let prev = std::fs::read(std::env::var("ARROW_PREV_WASM")?)?;
+    let worker = near_workspaces::sandbox().await?;
+    let root = worker.root_account()?;
+    let usd = deploy(&sub(&root, "usd", 10).await?, &wasm("arrow-usd"), json!({})).await?;
+    let _mock = deploy(&sub(&root, "outlayer", 10).await?, &wasm("mock-outlayer"), json!({})).await?;
+    let acc = sub(&root, "arrow", 30).await?;
+    let mut cfg = init_cfg(Net::Testnet, acc.id().as_str(), root.id().as_str());
+    cfg["testnet_caps"]["exempt"] = json!([]);
+    let arrow = deploy(&acc, &prev, json!({ "cfg": cfg })).await?;
+    let seller = sub(&root, "seller", 10).await?;
+    let buyer = sub(&root, "buyer", 10).await?;
+    for a in [&seller, &buyer] {
+        a.call(usd.id(), "mint").args_json(json!({"receiver_id": a.id(), "amount": MINT.to_string()})).transact().await?.into_result()?;
+    }
+    acc.call(acc.id(), "init_program_key").deposit(NearToken::from_millinear(50)).gas(near_workspaces::types::Gas::from_tgas(300)).transact().await?.into_result()?;
+    let ft = |who: &Account, amount: u128, msg: Value| {
+        who.call(usd.id(), "ft_transfer_call")
+            .args_json(json!({"receiver_id": arrow.id(), "amount": amount.to_string(), "msg": msg.to_string()}))
+            .deposit(NearToken::from_yoctonear(1))
+            .gas(near_workspaces::types::Gas::from_tgas(300))
+    };
+    assert!(ft(&seller, BOND, list_msg("scored", None, 10)).transact().await?.receipt_failures().is_empty());
+    assert!(ft(&buyer, EVAL_FEE, eval_msg(1)).transact().await?.receipt_failures().is_empty());
+
+    acc.deploy(&wasm("arrow-testnet")).await?.into_result()?; // code only, state kept (testnet.sh)
+    let cfg_view: Value = arrow.view("get_config").await?.json()?;
+    assert_eq!(cfg_view["build"].as_str(), Some("testnet"));
+    let l: Value = arrow.view("get_listing").args_json(json!({"listing_id": 1})).await?.json()?;
+    assert_eq!(l["evals_used"].as_u64(), Some(1));
+    let ev: Value = arrow.view("get_eval").args_json(json!({"eval_id": 1})).await?.json()?;
+    assert_eq!(ev["status"].as_str(), Some("done"));
+    assert!(ft(&seller, BOND, list_msg("verdict", None, 10)).transact().await?.receipt_failures().is_empty());
+    assert!(ft(&buyer, EVAL_FEE, eval_msg(1)).transact().await?.receipt_failures().is_empty());
+    assert!(ft(&buyer, PRICE, buy_msg(1)).transact().await?.receipt_failures().is_empty());
+    let p: Value = arrow.view("get_purchase").args_json(json!({"purchase_id": 1})).await?.json()?;
+    assert_eq!(p["status"].as_str(), Some("done"));
     Ok(())
 }
 

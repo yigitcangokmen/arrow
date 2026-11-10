@@ -12,6 +12,7 @@ pub enum Msg {
     List(ListMsg),
     Eval(EvalMsg),
     Buy(BuyMsg),
+    Rehost(RehostMsg),
 }
 
 #[near(serializers = [json])]
@@ -49,6 +50,15 @@ pub struct BuyMsg {
     pub buyer_pk: String,
 }
 
+/// Seller only: a new URL for the listing's unchanged ciphertext (X12-3).
+#[near(serializers = [json])]
+#[derive(Clone, Debug, PartialEq)]
+#[serde(deny_unknown_fields)]
+pub struct RehostMsg {
+    pub listing_id: u64,
+    pub blob_url: String,
+}
+
 /// Parses the schema only; field rules are in `validate`. The error never echoes user input.
 pub fn parse_msg(s: &str) -> Result<Msg, &'static str> {
     near_sdk::serde_json::from_str(s).map_err(|_| "json")
@@ -69,6 +79,7 @@ mod tests {
             Msg::List(m) => validate_list(&m, &cfg),
             Msg::Eval(m) => validate_eval(&m),
             Msg::Buy(m) => validate_buy(&m),
+            Msg::Rehost(_) => Ok(()),
         }
     }
 

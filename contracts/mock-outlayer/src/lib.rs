@@ -105,6 +105,9 @@ pub struct MockOutlayer {
     pending: u32,
     /// data id of the newest `never` yield, for `resume_last`.
     last_yield: Option<[u8; 32]>,
+    /// `mt_transfer` to this receiver panics (a refused payout, as intents.near does for
+    /// sender == receiver or while mt_transfer is paused).
+    reject: Option<AccountId>,
 }
 
 #[near]
@@ -117,7 +120,13 @@ impl MockOutlayer {
             transfers: Vector::new(StorageKey::Transfers),
             pending: 0,
             last_yield: None,
+            reject: None,
         }
+    }
+
+    /// Anyone may set or clear the refused receiver. Sandbox only.
+    pub fn set_reject(&mut self, receiver_id: Option<AccountId>) {
+        self.reject = receiver_id;
     }
 
     /// Anyone may change the default mode. Sandbox only.
@@ -231,6 +240,7 @@ impl MockOutlayer {
     ) {
         near_sdk::assert_one_yocto();
         require!(amount.0 > 0, "amount should be positive");
+        require!(self.reject.as_ref() != Some(&receiver_id), "mock: transfer refused");
         let _ = approval;
         self.transfers.push(RecordedTransfer {
             seq: u64::from(self.transfers.len()) + 1,

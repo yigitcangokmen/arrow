@@ -31,7 +31,7 @@ use crate::validate::validate_config;
 
 #[derive(BorshStorageKey)]
 #[near]
-enum StorageKey {
+pub(crate) enum StorageKey {
     Listings,
     Evals,
     Purchases,
@@ -39,6 +39,10 @@ enum StorageKey {
     CapByAccount,
     BlobSellers,
     EvalsInFlight,
+    // Maps added after the first deploy are not struct fields (the stored layout stays readable);
+    // they are opened on demand under these prefixes. Append only: the order is the prefix byte.
+    Owed,
+    Bought,
 }
 
 #[near(contract_state)]
@@ -58,7 +62,8 @@ pub struct Contract {
     cap_day: u64,
     cap_global_used: u32,
     cap_by_account: LookupMap<AccountId, (u64, u32)>,
-    /// blob_sha256 → the first account that listed it; another account listing it gets E19 (ENC-1).
+    /// Retired (E19 removed): never read or written now. Kept so the state already on chain
+    /// (arrow-v2.arrowhq.testnet) still deserializes after a code-only redeploy (STATE-1).
     blob_sellers: LookupMap<String, AccountId>,
     /// listing_id → unsettled evals; at MAX_EVALS_IN_FLIGHT a new eval gets E21 (ARW-C2).
     evals_in_flight: LookupMap<u64, u32>,
@@ -153,6 +158,10 @@ impl Contract {
             }
             Msg::Eval(m) => self.handle_eval(sender, amount, m, rail),
             Msg::Buy(m) => self.handle_buy(sender, amount, m, rail),
+            Msg::Rehost(m) => {
+                let refund = self.handle_rehost(sender, amount, m);
+                PromiseOrValue::Value(rail::refund_value(rail, refund))
+            }
         }
     }
 
@@ -232,6 +241,69 @@ mod tests {
         let mut c = test_config();
         c.testnet_caps = None;
         Contract::new(c);
+    }
+
+    /// STATE-1 / X12-6 (storage): the state layout deployed on arrow-v2.arrowhq.testnet (main
+    /// bfae9c3, code hash 89tt21…) must still deserialize after a code-only redeploy, and the
+    /// storage prefixes of the existing maps must not move. A new struct field or a reordered
+    /// StorageKey fails here; new maps are opened on demand under appended prefixes instead.
+    #[test]
+    fn state_layout_reads_deployed_v2() {
+        #[near(serializers = [borsh])]
+        struct DeployedV2 {
+            cfg: Config,
+            paused: bool,
+            program_pubkey: Option<String>,
+            next_listing_id: u64,
+            next_eval_id: u64,
+            next_purchase_id: u64,
+            listings: LookupMap<u64, Listing>,
+            evals: LookupMap<u64, Eval>,
+            purchases: LookupMap<u64, Purchase>,
+            evals_by_listing: LookupMap<u64, Vec<u64>>,
+            cap_day: u64,
+            cap_global_used: u32,
+            cap_by_account: LookupMap<AccountId, (u64, u32)>,
+            blob_sellers: LookupMap<String, AccountId>,
+            evals_in_flight: LookupMap<u64, u32>,
+        }
+        setup(self_id(), 10 * NEAR);
+        let old = DeployedV2 {
+            cfg: test_config(),
+            paused: false,
+            program_pubkey: Some(format!("04{}", "11".repeat(64))),
+            next_listing_id: 7,
+            next_eval_id: 3,
+            next_purchase_id: 2,
+            listings: LookupMap::new(vec![0u8]),
+            evals: LookupMap::new(vec![1u8]),
+            purchases: LookupMap::new(vec![2u8]),
+            evals_by_listing: LookupMap::new(vec![3u8]),
+            cap_day: 20_403,
+            cap_global_used: 9,
+            cap_by_account: LookupMap::new(vec![4u8]),
+            blob_sellers: LookupMap::new(vec![5u8]),
+            evals_in_flight: LookupMap::new(vec![6u8]),
+        };
+        let bytes = near_sdk::borsh::to_vec(&old).unwrap();
+        let now: Contract = near_sdk::borsh::from_slice(&bytes).expect("deployed state no longer deserializes");
+        assert_eq!((now.next_listing_id, now.cap_global_used), (7, 9));
+        assert_eq!(near_sdk::borsh::to_vec(&now).unwrap(), bytes, "layout changed");
+        let prefixes: Vec<Vec<u8>> = [
+            StorageKey::Listings,
+            StorageKey::Evals,
+            StorageKey::Purchases,
+            StorageKey::EvalsByListing,
+            StorageKey::CapByAccount,
+            StorageKey::BlobSellers,
+            StorageKey::EvalsInFlight,
+            StorageKey::Owed,
+            StorageKey::Bought,
+        ]
+        .iter()
+        .map(|k| near_sdk::borsh::to_vec(k).unwrap())
+        .collect();
+        assert_eq!(prefixes, (0u8..9).map(|b| vec![b]).collect::<Vec<_>>());
     }
 
     #[test]

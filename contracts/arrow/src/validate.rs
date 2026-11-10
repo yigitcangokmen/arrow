@@ -27,10 +27,32 @@ pub fn b64_len(s: &str) -> Option<usize> {
     STANDARD.decode(s).ok().map(|v| v.len())
 }
 
-/// Character count in `min..=max`, no control characters, no `EVENT_JSON`.
+/// Invisible or reordering characters a reader cannot see (X12-U7): bidi controls (Bidi_Control),
+/// tag characters U+E0000-E007F, and the zero-width space, word joiner, invisible operators and BOM.
+/// ZWJ and ZWNJ stay allowed (emoji sequences, Persian and Indic text).
+pub fn is_hidden_char(c: char) -> bool {
+    matches!(c, '\u{061C}' | '\u{200B}' | '\u{200E}' | '\u{200F}' | '\u{202A}'..='\u{202E}' | '\u{2060}'..='\u{2069}' | '\u{FEFF}' | '\u{E0000}'..='\u{E007F}')
+}
+
+/// Character count in `min..=max`, no control or hidden characters, no `EVENT_JSON`.
 pub fn check_text(s: &str, min: usize, max: usize) -> bool {
     let n = s.chars().count();
-    n >= min && n <= max && !s.chars().any(char::is_control) && !s.contains("EVENT_JSON")
+    n >= min && n <= max && !s.chars().any(|c| c.is_control() || is_hidden_char(c)) && !s.contains("EVENT_JSON")
+}
+
+/// Bytes `s` takes inside a JSON string: serde_json escapes `"` and `\` (control characters are refused).
+pub fn json_len(s: &str) -> usize {
+    s.len() + s.bytes().filter(|b| *b == b'"' || *b == b'\\').count()
+}
+
+/// A payout id that can hold USDC (X12-2): a 64-hex implicit id, an `0x` (eth-implicit) or `0s`
+/// (deterministic) id with 40 lowercase hex, or a named sub-account (has a dot). A bare top-level
+/// name such as a lowercased Solana address is refused: on mainnet only the registrar can create one,
+/// so the proceeds would be lost or go to whoever already owns that name.
+pub fn is_payout_shape(id: &str) -> bool {
+    is_lower_hex(id, 64)
+        || ((id.starts_with("0x") || id.starts_with("0s")) && is_lower_hex(&id[2..], 40))
+        || id.contains('.')
 }
 
 pub fn is_buyer_pk(s: &str) -> bool {
@@ -43,15 +65,16 @@ pub fn is_secrets_profile(s: &str) -> bool {
 }
 
 pub fn validate_list(m: &ListMsg, cfg: &Config) -> Result<(), &'static str> {
-    if !check_text(&m.title, 1, TITLE_MAX_CHARS) {
+    if !check_text(&m.title, 1, TITLE_MAX_CHARS) || m.title.len() > TITLE_MAX_BYTES {
         return Err("title");
     }
-    if !check_text(&m.public_desc, 0, DESC_MAX_CHARS) {
+    if !check_text(&m.public_desc, 0, DESC_MAX_CHARS) || m.public_desc.len() > DESC_MAX_BYTES {
         return Err("public_desc");
     }
     if m.columns.is_empty()
         || m.columns.len() > COLUMNS_MAX
         || !m.columns.iter().all(|c| check_text(c, 1, COLUMN_MAX_CHARS))
+        || m.columns.iter().map(|c| json_len(c)).sum::<usize>() > COLUMNS_MAX_JSON_BYTES
     {
         return Err("columns");
     }
@@ -70,11 +93,19 @@ pub fn validate_list(m: &ListMsg, cfg: &Config) -> Result<(), &'static str> {
     if m.price.0 < cfg.min_price.0 {
         return Err("price");
     }
-    if m.eval_fee.0 < cfg.min_eval_fee.0 {
+    // SCAM-6: an inspection never costs more than the data itself.
+    if m.eval_fee.0 < cfg.min_eval_fee.0 || m.eval_fee.0 > m.price.0 {
         return Err("eval_fee");
     }
     if m.max_evals == 0 || m.max_evals > cfg.max_evals_cap {
         return Err("max_evals");
+    }
+    // C-04 / TN-2: intents.near refuses a transfer to its sender, so a payout to the intents
+    // contract (or, checked in handle_list, to this contract) would strand the seller's share.
+    if let Some(p) = &m.payout {
+        if !is_payout_shape(p.as_str()) || cfg.intents.as_ref() == Some(p) {
+            return Err("payout");
+        }
     }
     Ok(())
 }
@@ -142,6 +173,7 @@ pub fn validate_config(cfg: &Config) -> Result<(), &'static str> {
 mod tests {
     use super::*;
     use crate::testkit::{list_msg, test_config};
+    use near_sdk::json_types::U128;
 
     fn pk(prefix: &str) -> String {
         format!("{prefix}{}", "ab".repeat(64))
@@ -208,6 +240,84 @@ mod tests {
         assert_eq!(validate_buy(&BuyMsg { listing_id: 1, buyer_pk: pk("04") }), Ok(()));
         assert_eq!(validate_buy(&BuyMsg { listing_id: 1, buyer_pk: pk("05") }), Err("buyer_pk"));
         assert_eq!(validate_buy(&BuyMsg { listing_id: 1, buyer_pk: pk("04").to_uppercase() }), Err("buyer_pk"));
+    }
+
+    /// X12-U7: bidi controls, tag characters and zero-width/invisible characters are refused in
+    /// every seller string; ZWJ emoji sequences stay valid.
+    #[test]
+    fn hidden_characters_rejected() {
+        for bad in ["Prices \u{202E}DSU 00.1", "a\u{E0041}b", "a\u{200B}b", "a\u{2066}b\u{2069}", "\u{FEFF}a", "a\u{200F}"] {
+            assert!(!check_text(bad, 1, 80), "{bad:?} accepted");
+        }
+        assert!(check_text("family \u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}", 1, 80));
+        assert!(check_text("\u{0645}\u{06CC}\u{200C}\u{062E}\u{0648}\u{0627}\u{0647}\u{0645}", 1, 80), "ZWNJ (Persian) refused");
+        let cfg = test_config();
+        let mut m = list_msg();
+        m.title = "a\u{202E}b".into();
+        assert_eq!(validate_list(&m, &cfg), Err("title"));
+        let mut m = list_msg();
+        m.columns = vec!["sku\u{E0069}".into()];
+        assert_eq!(validate_list(&m, &cfg), Err("columns"));
+    }
+
+    /// STATE-3 / C-02 / C-05: UTF-8 byte caps next to the character caps. Every ASCII listing that
+    /// was valid stays valid; 4-byte characters at the character limits are refused.
+    #[test]
+    fn listing_byte_caps() {
+        let cfg = test_config();
+        let ok = |m: &ListMsg| validate_list(m, &cfg);
+        let emoji = "\u{1F600}";
+        let mut m = list_msg();
+        m.title = emoji.repeat(80);
+        assert_eq!(ok(&m), Err("title"));
+        m.title = emoji.repeat(60); // 240 bytes
+        assert_eq!(ok(&m), Ok(()));
+        m.title = "\u{8868}".repeat(80); // CJK, 3 bytes each
+        assert_eq!(ok(&m), Ok(()));
+
+        let mut m = list_msg();
+        m.public_desc = emoji.repeat(280);
+        assert_eq!(ok(&m), Err("public_desc"));
+        m.public_desc = "\u{8868}".repeat(280);
+        assert_eq!(ok(&m), Ok(()));
+
+        let mut m = list_msg();
+        m.columns = vec![emoji.repeat(40); 64];
+        assert_eq!(ok(&m), Err("columns"));
+        m.columns = vec![emoji.repeat(10); 64]; // 2560 bytes
+        assert_eq!(ok(&m), Ok(()));
+        m.columns = vec!["x".repeat(40); 64]; // the ASCII maximum stays valid
+        assert_eq!(ok(&m), Ok(()));
+        m.columns = vec!["\"".repeat(40); 64]; // 5120 bytes once JSON-escaped
+        assert_eq!(ok(&m), Err("columns"));
+    }
+
+    /// X12-2 / C-04 / TN-2: a payout must be an id that can hold USDC inside intents.near.
+    #[test]
+    fn payout_rules() {
+        let cfg = test_config();
+        let with = |p: &str| {
+            let mut m = list_msg();
+            m.payout = Some(p.parse().unwrap());
+            validate_list(&m, &cfg)
+        };
+        for bad in ["9wzdxwbbmkg8ztbnmquxvqrayrzzdsgydlvl9zytawwm", "near", "alice", "intents.test.near", "0x66a0dfed229e920feb17aa3186f87bd00e30844", "0xzz"] {
+            assert_eq!(with(bad), Err("payout"), "{bad}");
+        }
+        for good in ["alice.near", "seller-payout.arrowhq.near", "0x66a0dfed229e920feb17aa3186f87bd00e30844f", &"ab".repeat(32), "0s66a0dfed229e920feb17aa3186f87bd00e30844f"] {
+            assert_eq!(with(good), Ok(()), "{good}");
+        }
+    }
+
+    /// SCAM-6: the inspection fee may not exceed the price.
+    #[test]
+    fn eval_fee_not_above_price() {
+        let cfg = test_config();
+        let mut m = list_msg();
+        m.eval_fee = U128(m.price.0 + 1);
+        assert_eq!(validate_list(&m, &cfg), Err("eval_fee"));
+        m.eval_fee = m.price;
+        assert_eq!(validate_list(&m, &cfg), Ok(()));
     }
 
     #[test]

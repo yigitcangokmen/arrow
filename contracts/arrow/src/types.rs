@@ -19,6 +19,16 @@ pub const TITLE_MAX_CHARS: usize = 80;
 pub const DESC_MAX_CHARS: usize = 280;
 pub const COLUMNS_MAX: usize = 64;
 pub const COLUMN_MAX_CHARS: usize = 40;
+/// UTF-8 byte caps next to the character caps (C-02, STATE-3, C-05): 3 bytes per character for the
+/// title and description, so CJK text fits; the columns' JSON-escaped total equals the ASCII maximum
+/// (64 x 40), so every ASCII listing that was valid stays valid. Together they bound a listing's
+/// storage (paid from the gas tank) and keep `eval_input` under `INPUT_EVENT_THRESHOLD`.
+pub const TITLE_MAX_BYTES: usize = 240;
+pub const DESC_MAX_BYTES: usize = 840;
+pub const COLUMNS_MAX_JSON_BYTES: usize = 2560;
+/// A listing may not leave the tank below `tank_min` plus this many eval deposits, so listing
+/// storage can never take the last NEAR that honest evals need (C-02).
+pub const LIST_TANK_RESERVE_EVALS: u128 = 10;
 pub const BLOB_URL_MAX_BYTES: usize = 200;
 pub const ROWS_CLAIMED_MAX: u64 = 200_000;
 pub const MAX_EVALS_HARD_CAP: u32 = 500;
@@ -111,7 +121,7 @@ impl Mode {
 
 /// Mt = intents.near NEP-245, Ft = arrow-usd NEP-141 (testnet).
 #[near(serializers = [borsh, json])]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "lowercase")]
 pub enum Rail {
     Mt,

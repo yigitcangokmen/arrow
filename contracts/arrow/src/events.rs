@@ -47,6 +47,19 @@ pub enum ArrowEvent {
         #[serde(skip_serializing_if = "Option::is_none")]
         h: Option<String>,
     },
+    /// `op=rehost`: the listing's blob moved to `blob_url` (same blob_sha256).
+    #[event_version("1.0.0")]
+    ArrowRehosted {
+        listing_id: u64,
+        blob_url: String,
+    },
+    /// A payout transfer failed; `amount` is now owed to `to` and `retry_payout` re-sends it.
+    #[event_version("1.0.0")]
+    ArrowPayoutFailed {
+        to: AccountId,
+        amount: U128,
+        memo: String,
+    },
     #[event_version("1.0.0")]
     ArrowRefund {
         kind: String,

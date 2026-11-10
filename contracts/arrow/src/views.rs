@@ -102,6 +102,12 @@ impl Contract {
         self.purchases.get(&purchase_id).cloned()
     }
 
+    /// The newest purchase of `listing_id` by `buyer` to `buyer_pk` (E22 refuses a second one
+    /// unless this one was refunded).
+    pub fn get_purchase_by_buyer(&self, listing_id: u64, buyer: near_sdk::AccountId, buyer_pk: String) -> Option<Purchase> {
+        self.purchase_by_buyer(listing_id, &buyer, &buyer_pk)
+    }
+
     /// G1 counter [DEC A.1 G1]: spent = evals_used x bits, budget = max_evals x bits.
     pub fn leak_budget(&self, listing_id: u64) -> Option<LeakBudget> {
         self.listings.get(&listing_id).map(|l| {
