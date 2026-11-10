@@ -1,0 +1,19 @@
+{
+  "transaction": {
+    "hash": "FixtureTxEvalDone"
+  },
+  "transaction_outcome": {
+    "outcome": {
+      "logs": []
+    }
+  },
+  "receipts_outcome": [
+    {
+      "outcome": {
+        "logs": [
+          "EVENT_JSON:{\"standard\": \"arrow\", \"version\": \"1.0.0\", \"event\": \"arrow_refund\", \"data\": {\"kind\": \"eval\", \"listing_id\": 1, \"id\": 43, \"reason\": \"hash_mismatch\", \"amount\": \"50000\"}}"
+        ]
+      }
+    }
+  ]
+}

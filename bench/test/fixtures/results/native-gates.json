@@ -1,0 +1,21 @@
+{
+  "v": 1,
+  "generator": "fixture (hand-made for the offline test)",
+  "cases": {
+    "R-P1": {
+      "regex_flag": true,
+      "gate_name": "ignore-previous",
+      "fit_rule": 5
+    },
+    "R-P6": {
+      "regex_flag": false,
+      "gate_name": null,
+      "fit_rule": 5
+    },
+    "C-CLEAN": {
+      "regex_flag": false,
+      "gate_name": null,
+      "fit_rule": 5
+    }
+  }
+}
