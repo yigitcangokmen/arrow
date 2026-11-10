@@ -1,14 +1,14 @@
 {
-  "gate": "S3a(i)",
-  "timestamp_utc": "2026-11-10T09:10:35.923Z",
-  "address": "0x43795233c094a03adf26218aca210aae37587e13",
+  "gate": "S3a(ii)",
+  "timestamp_utc": "2026-11-10T15:07:22.180Z",
+  "address": "0xb5ef360e42056049f584fd03bf0fb9b208e28387",
   "carries_msg": true,
   "carries_min_gas": true,
   "payload_body": {
-    "signer_id": "0x43795233c094a03adf26218aca210aae37587e13",
+    "signer_id": "0xb5ef360e42056049f584fd03bf0fb9b208e28387",
     "verifying_contract": "intents.near",
-    "deadline": "2026-11-10T09:20:32.795Z",
-    "nonce": "Vij2xgAlKBKzwNSkTpyk5hjJtXbKZdT+mJegEPvsUU4=",
+    "deadline": "2026-11-10T15:17:19.058Z",
+    "nonce": "Vij2xgAlKBKzgJBYVxS45hjUuWqRBcSPdFyA+UjiNFo=",
     "intents": [
       {
         "intent": "transfer",
@@ -21,7 +21,7 @@
       }
     ]
   },
-  "error": "wasm execution failed with error: HostError(GuestPanic { panic_msg: \"insufficient balance or overflow\" })",
-  "intents_executed": null,
-  "class": "SIGNATURE_OK_BALANCE_ERROR"
+  "error": null,
+  "intents_executed": 1,
+  "class": "OK"
 }
