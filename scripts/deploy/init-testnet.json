@@ -16,6 +16,6 @@
   "outlayer_deposit_release": "10000000000000000000000",
   "tank_min": "50000000000000000000000",
   "limits_eval": { "max_instructions": 20000000000, "max_memory_mb": 512, "max_execution_seconds": 100 },
-  "limits_release": { "max_instructions": 2000000000, "max_memory_mb": 128, "max_execution_seconds": 30 },
-  "testnet_caps": { "per_account_per_day": 10, "global_per_day": 400, "exempt": ["bench.arrowhq.testnet"] }
+  "limits_release": { "max_instructions": 4000000000, "max_memory_mb": 128, "max_execution_seconds": 30 },
+  "testnet_caps": { "per_account_per_day": 10, "global_per_day": 400, "exempt": ["bench.arrowhq.testnet", "arrow-judge.arrowhq.testnet"] }
 }

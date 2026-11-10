@@ -683,7 +683,7 @@ async fn outlayer_request_args() -> R<()> {
     check(&r, "20000000000000000000000", json!({"max_instructions": 20_000_000_000u64, "max_memory_mb": 512, "max_execution_seconds": 100}), "eval");
     assert!(e.buy(Who::Buyer, id, PRICE).await?.receipt_failures().is_empty());
     let r: Value = e.mock.view("last_request").await?.json()?;
-    check(&r, "10000000000000000000000", json!({"max_instructions": 2_000_000_000u64, "max_memory_mb": 128, "max_execution_seconds": 30}), "release");
+    check(&r, "10000000000000000000000", json!({"max_instructions": 4_000_000_000u64, "max_memory_mb": 128, "max_execution_seconds": 30}), "release");
     Ok(())
 }
 

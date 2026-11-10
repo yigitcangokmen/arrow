@@ -27,7 +27,7 @@
         "max_execution_seconds": 100
       },
       "limits_release": {
-        "max_instructions": 2000000000,
+        "max_instructions": 4000000000,
         "max_memory_mb": 128,
         "max_execution_seconds": 30
       },
