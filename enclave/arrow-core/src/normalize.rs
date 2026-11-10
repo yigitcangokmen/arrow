@@ -53,10 +53,10 @@ pub fn normalize_key(s: &str) -> String {
     out.trim_matches(' ').to_owned()
 }
 
-/// Format characters the G5 scan deletes (DEC I-19): zero-width, word joiner, BOM, soft hyphen,
-/// invisible operators, Mongolian vowel separator.
+/// Format characters the G5 scan deletes (DEC I-19): every Default_Ignorable code point, so bidi
+/// marks, variation selectors, fillers and tag characters inside a keyword do not hide it (X12-U5).
 pub fn is_scan_format(c: char) -> bool {
-    matches!(c, '\u{200B}'..='\u{200D}' | '\u{2060}'..='\u{2064}' | '\u{FEFF}' | '\u{AD}' | '\u{180E}')
+    is_default_ignorable(c)
 }
 
 /// NFKC, then the scan's format characters removed. Case is kept (base64 needs it).
