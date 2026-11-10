@@ -13,6 +13,7 @@ jobs:
         with: { node-version-file: .nvmrc, cache: npm }
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=critical   # the 28 highs are transitive with no forward fix; a critical fails CI
+      - run: node web/scripts/copy-assets.mjs   # writes the gitignored web/generated/data.ts that the page tests import
       - run: npm test
       - run: bash scripts/secret-scan.sh --ci
   rust:
