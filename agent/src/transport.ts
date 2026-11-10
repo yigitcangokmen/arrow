@@ -2,7 +2,7 @@
 //  testnet: ft_transfer_call on the arrow-usd token from the buyer's NEAR account (300 TGas + 1 yocto, DEC D4-07).
 //  mainnet: an ERC-191 transfer intent signed by the buyer's EVM wallet, sent through the hosted relay or the relayer account.
 // Both return as soon as the transaction is included; callers wait for the contract's answer with settle.ts.
-import { Account } from "near-api-js";
+import { Account, FailoverRpcProvider, JsonRpcProvider } from "near-api-js";
 import {
   arrowTransferIntent, buildAndSignTransfer, type IntentTransfer, type MultiPayload, type Network, NETWORKS, type NearCaller, relayDirect, relayHosted, resolveNetwork,
 } from "@arrow/sdk";
@@ -26,7 +26,9 @@ export interface Transport {
 }
 
 const FT_TRANSFER_CALL_GAS = 300_000_000_000_000n;
-const rpcUrl = (network: Network, env: Record<string, string | undefined>) => resolveNetwork(network, env).rpc[0];
+/** rpc.*.near.org rate-limits and answers -429 "deprecated" under load, so near-api-js gets the whole RPC list and fails over. */
+export const rpcProvider = (network: Network, env: Record<string, string | undefined>) =>
+  new FailoverRpcProvider(resolveNetwork(network, env).rpc.map((url) => new JsonRpcProvider({ url })));
 
 function hostedBase(env: Record<string, string | undefined>): string {
   const base = env.ARROW_RELAY_URL || (env.NEXT_PUBLIC_SITE_DOMAIN ? `https://${env.NEXT_PUBLIC_SITE_DOMAIN}` : "");
@@ -53,7 +55,7 @@ export function realTransport(p: { network: Network; relay: RelayMode; env?: Rec
     } else {
       const key = env.RELAYER_PRIVATE_KEY;
       if (!key) throw new Error("RELAYER_PRIVATE_KEY is empty: direct relay needs the relayer key (H-07)");
-      const relayer = new Account(env.RELAYER_ACCOUNT_ID || "arrow-relayer.arrowhq.near", rpcUrl("mainnet", env), key as `ed25519:${string}`);
+      const relayer = new Account(env.RELAYER_ACCOUNT_ID || "arrow-relayer.arrowhq.near", rpcProvider("mainnet", env), key as `ed25519:${string}`);
       ({ txHash, signerId } = await relayDirect(nearCaller(relayer), multipayload));
     }
     return { txHash, signerId, url: explorerTx("mainnet", "near", txHash) };
@@ -65,7 +67,7 @@ export function realTransport(p: { network: Network; relay: RelayMode; env?: Rec
         return relayIntent(actor, arrowTransferIntent({ receiverId: cfg.contract, tokenId: NETWORKS.mainnet.usdcToken, amount: amount.toString(), msg }));
       }
       if (!actor.nearSecret) throw new Error("testnet payments need a NEAR account key");
-      const account = new Account(actor.id, rpcUrl("testnet", env), actor.nearSecret);
+      const account = new Account(actor.id, rpcProvider("testnet", env), actor.nearSecret);
       const out = await account.callFunctionRaw({
         contractId: NETWORKS.testnet.usdcToken,
         methodName: "ft_transfer_call",
