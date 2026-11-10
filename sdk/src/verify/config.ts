@@ -1,4 +1,4 @@
-// verify settings (WS4-T13). The two hash semantics values are explained in tasks/WS-4.md (T13) and DEC O-03.
+// verify settings (WS4-T13). The two hash semantics values are explained below and in DEC O-03.
 //
 // "source-read":   input_hash / output_hash are read from the worker source (sha256 of the input string, sha256 of the
 //                  serde_json output). Row I1 is informational and the input-hash part of R3 is a detail only.

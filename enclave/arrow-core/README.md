@@ -1,7 +1,7 @@
 # enclave/arrow-core
 
 Pure, panic-free evaluation logic shared by `arrow-tee`. Tested natively with `cargo test -p arrow-core`, so judges can run it without OutLayer.
-Spec: KICKOFF.md §2.6 and §2.8, plus architect spec §3.5 and §4.
+Behaviour is pinned by the vectors in `fixtures/`.
 
 Modules:
 - `parse`: CSV/JSONL, ≤5 MB.

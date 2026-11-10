@@ -6,7 +6,7 @@
 - `minhash-params.json`, `minhash-vectors.json`, `ecies-vectors.json`: shared TS ↔ Rust test vectors.
 - `criteria/`: example buyer criteria, including `print-row-1.json` (README step 7) and `demo.json`.
 
-No keys here. The demo buyer viewing key, if kept (KICKOFF.md §2.7), is derived in code from a public label, not stored as a key file.
+No keys here. The demo buyer viewing key, if kept, is derived in code from a public label, not stored as a key file.
 
 ## Shared vectors (binding)
 

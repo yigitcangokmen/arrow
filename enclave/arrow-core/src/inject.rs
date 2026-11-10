@@ -91,7 +91,7 @@ pub struct Hit {
     pub via: Via,
 }
 
-/// English patterns, run on pass1, pass2 and pass3. The first seven are KICKOFF §2.6 (DEC I-19 (a)),
+/// English patterns, run on pass1, pass2 and pass3. The first seven are the original set (DEC I-19 (a)),
 /// with `system:`, `you are`, `verdict` and `fit` narrowed to instruction contexts (ENC-5); the rest
 /// are the WS-3 additions (still instruction contexts only).
 const EN: &[(Family, &str)] = &[

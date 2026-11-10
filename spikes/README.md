@@ -1,6 +1,6 @@
 # spikes/
 
-Throwaway code for the day-1 gates (KICKOFF.md §5). Fill in the gate log there.
+Throwaway code for the day-1 gates (see `GATES.md`). Fill in the gate log there.
 
 - `s1/`: `spike-tee` (ai-example + PROTECTED_MASTER + env echo) and a spike contract on testnet.
 - `s2/`: arrow-usd `ft_transfer_call` refund, plus sandbox null/timeout tests.

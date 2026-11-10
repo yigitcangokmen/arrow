@@ -10,7 +10,7 @@ members = [
 ]
 exclude = ["spikes"]
 
-# Versions verified 2026-11-09 (crates.io + out-layer/private-dao-example Cargo.lock). See KICKOFF.md section 2.3.
+# Versions verified 2026-11-09 (crates.io + out-layer/private-dao-example Cargo.lock). Pinned for the OutLayer WASI P2 build; the toolchain is in rust-toolchain.toml.
 # Enclave crates stay on the RustCrypto generation that ecies 0.2.11 uses (k256 0.13, hkdf 0.12, sha2 0.10,
 # chacha20poly1305 0.10, rand_core 0.6). Do not bump one without the others.
 [workspace.dependencies]
@@ -38,7 +38,7 @@ chacha20poly1305 = "0.10"
 rand_chacha = "0.3"
 csv = "1"
 regex = "1"
-# G5 injection scan (DECISIONS F-09)
+# G5 injection scan
 unicode-normalization = "0.1"
 base64 = "0.22"
 

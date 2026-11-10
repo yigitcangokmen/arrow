@@ -2,7 +2,7 @@
 
 OutLayer WASI P2 program (`wasm32-wasip2`). Scaffold it from `out-layer/private-dao-example` (ECIES, HKDF, `PROTECTED_` secret) and `out-layer/ai-example` (wasi-http POST).
 
-Behaviour (KICKOFF.md §2.6):
+Behaviour:
 - **Guard.** `OUTLAYER_EXECUTION_TYPE == "NEAR"`, and `NEAR_PREDECESSOR_ID` is in the allowlist for `NEAR_NETWORK_ID`: `{mainnet: [arrow-market.near, arrow-market-v2.near], testnet: [arrow.arrowhq.testnet, arrow-v2.arrowhq.testnet]}`. The same wasm hash runs on both networks.
 - **eval.** Steps:
   1. Unseal `K‖blob_sha256‖sha256(seller)`; the listing's `blob_sha256` and `seller` must match. Unseal the criteria; their first 32 bytes must equal `sha256(buyer_pk‖listing_id BE)`.

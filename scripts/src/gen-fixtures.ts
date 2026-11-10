@@ -140,7 +140,7 @@ function msgVectors(): Obj {
   ];
   return {
     version: 1,
-    source: "DECISIONS.md H-06 (+ W1 encoding rules in fixtures/README.md)",
+    source: "DEC H-06 (+ encoding rules in fixtures/README.md)",
     limits: {
       title_max_chars: 80,
       public_desc_max_chars: 280,

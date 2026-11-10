@@ -22,5 +22,5 @@
     }
   ],
   "solana": [],
-  "note": "Team-controlled accounts. Any seller not listed here counts as external (DECISIONS H-07). EVM/Solana addresses only, never keys."
+  "note": "Team-controlled accounts. Any seller not listed here counts as external (DEC H-07). EVM/Solana addresses only, never keys."
 }

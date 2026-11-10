@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/yigitcangokmen/arrow/fixtures/criteria-schema.json",
   "title": "Arrow buyer criteria v1",
-  "$comment": "Size budget (W1-10, DECISIONS I-14 + H-06): sealed_criteria is at most 4096 base64 chars = 3072 bytes, ECIES adds 97, so the minified UTF-8 criteria JSON must be at most 2975 bytes. minhash is ONE 2048-char lowercase hex string (128 values x 16 hex, in order, zero-padded), not an array; with it about 600 ASCII bytes remain for text. The SDK checks the byte size before sealing and says 'criteria too large: shorten text'.",
+  "$comment": "Size budget (W1-10, DEC I-14 + H-06): sealed_criteria is at most 4096 base64 chars = 3072 bytes, ECIES adds 97, so the minified UTF-8 criteria JSON must be at most 2975 bytes. minhash is ONE 2048-char lowercase hex string (128 values x 16 hex, in order, zero-padded), not an array; with it about 600 ASCII bytes remain for text. The SDK checks the byte size before sealing and says 'criteria too large: shorten text'.",
   "x-arrow-max-bytes": 2975,
   "type": "object",
   "additionalProperties": false,
