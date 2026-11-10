@@ -10,7 +10,8 @@ import type { ViewsLike } from "../src/views.ts";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 export const VIEWS_DIR = resolve(ROOT, "sdk/test/fixtures/views");
 export const fixture = (name: string) => JSON.parse(readFileSync(resolve(VIEWS_DIR, `${name}.json`), "utf8"));
-export const PROGRAM_PK = publicKeyHex(scalarFromLabel("arrow:test:program:v1"));
+export const PROGRAM_SCALAR = scalarFromLabel("arrow:test:program:v1");
+export const PROGRAM_PK = publicKeyHex(PROGRAM_SCALAR);
 export const DEMO = demoViewingKey();
 
 export const NEAR_TX = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"; // shaped like a NEAR tx hash (base58)

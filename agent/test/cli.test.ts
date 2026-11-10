@@ -6,10 +6,10 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { generatePrivateKey } from "viem/accounts";
-import { b64, encryptFile, publicKeyHex, scalarFromLabel, seal, sha256Hex } from "@arrow/sdk";
+import { b64, encryptFile, publicKeyHex, scalarFromLabel, seal, sha256Hex, unseal } from "@arrow/sdk";
 import { buildCtx, main } from "../src/cli.ts";
 import { realTransport } from "../src/transport.ts";
-import { DEMO, eventTx, fakeCtx, fixture, NEAR_TX, VIEWS_DIR } from "./helpers.ts";
+import { DEMO, eventTx, fakeCtx, fixture, NEAR_TX, PROGRAM_SCALAR, VIEWS_DIR } from "./helpers.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 let tmp: string;
@@ -200,21 +200,29 @@ describe("list", () => {
     expect(readFileSync(a).equals(readFileSync(b))).toBe(true);
   });
 
-  it("X12-1: the derived K and nonce are bound to network, contract and program key, so a testnet copy never opens a mainnet listing", async () => {
-    const dry = async (fake: ReturnType<typeof fakeCtx>, name: string) => {
+  it("X12-1 / R2-6: the file key K itself is bound to network, contract and program key, so a testnet copy never opens a mainnet listing", async () => {
+    // K is read back from sealed_k (opened with the test program key), not inferred from the ciphertext: the nonce alone
+    // would already make two ciphertexts differ.
+    const PROGRAM_V2 = scalarFromLabel("arrow:test:program:v2");
+    const kOf = async (fake: ReturnType<typeof fakeCtx>, scalar: string, name: string) => {
       const f = join(tmp, name);
       expect((await run(flags(csv(), ["--dry-run", "--out-blob", f]), fake)).code).toBe(0);
-      return readFileSync(f);
+      const blob = readFileSync(f);
+      fake.ctx.fetchImpl = (async () => new Response(blob)) as unknown as typeof fetch;
+      fake.ctx.wait!.txStatusImpl = (async () => eventTx("arrow_listed", { listing_id: 12 })) as any;
+      expect((await run(flags(csv(), ["--blob-url", "https://blobs.example/x.bin"]), fake)).code).toBe(0);
+      const sealedK = JSON.parse(fake.payCalls.at(-1)!.msg).sealed_k as string;
+      return Buffer.from(unseal(scalar, b64.dec(sealedK)).slice(0, 32)).toString("hex");
     };
-    const testnet = await dry(fakeCtx(), "t.bin");
-    expect(testnet.equals(await dry(fakeCtx(), "t2.bin"))).toBe(true); // still reproducible on one market
-    expect(testnet.equals(await dry(fakeCtx({ network: "mainnet" }), "m.bin"))).toBe(false);
+    const testnet = await kOf(fakeCtx(), PROGRAM_SCALAR, "t.bin");
+    expect(await kOf(fakeCtx(), PROGRAM_SCALAR, "t2.bin")).toBe(testnet); // still reproducible on one market
+    expect(await kOf(fakeCtx({ network: "mainnet" }), PROGRAM_SCALAR, "m.bin")).not.toBe(testnet);
     const otherContract = fakeCtx();
     otherContract.ctx.contract = "arrow.arrowhq.testnet";
-    expect(testnet.equals(await dry(otherContract, "c.bin"))).toBe(false);
+    expect(await kOf(otherContract, PROGRAM_SCALAR, "c.bin")).not.toBe(testnet);
     const otherProgram = fakeCtx();
-    otherProgram.ctx.views.programPubkey = async () => publicKeyHex(scalarFromLabel("arrow:test:program:v2"));
-    expect(testnet.equals(await dry(otherProgram, "p.bin"))).toBe(false);
+    otherProgram.ctx.views.programPubkey = async () => publicKeyHex(PROGRAM_V2);
+    expect(await kOf(otherProgram, PROGRAM_V2, "p.bin")).not.toBe(testnet);
   });
 
   it("list_rejects_blob_hash_mismatch", async () => {
