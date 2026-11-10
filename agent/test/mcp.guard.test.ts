@@ -1,5 +1,5 @@
 // MCP-1 / MCP-2: the buy tool's file sink and the spend guards, driven in-process through the SDK's in-memory transport.
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -9,6 +9,7 @@ import { b64, encryptFile, seal } from "@arrow/sdk";
 import { decryptCommand } from "../src/commands.ts";
 import { createServer } from "../src/mcp.ts";
 import { DEMO, eventTx, fakeCtx, fixture } from "./helpers.ts";
+import { SettleTimeout } from "../src/settle.ts";
 
 const plaintext = new TextEncoder().encode("id,label\n1,a\n2,b\n");
 let tmp: string;
@@ -163,5 +164,98 @@ describe("MCP-2: spend guards", () => {
     const r = await call("get_listing", buy);
     expect(r.isError).toBe(false);
     expect(JSON.parse(r.text).untrusted_seller_text_notice).toMatch(/untrusted/i);
+  });
+});
+
+describe("PRIV-7 / X12-7: decrypted purchases are private to the user", () => {
+  it("the file is 0600 inside a 0700 folder, and the default name carries the purchase id", async () => {
+    const { call } = await setup(ALLOW);
+    const r = await call("buy", buy);
+    expect(r.isError, r.text).toBe(false);
+    const out = JSON.parse(r.text).out_path as string;
+    expect(out).toBe(join(outDir, "arrow-listing-1-purchase-4.dat"));
+    expect(statSync(out).mode & 0o777).toBe(0o600);
+    expect(statSync(outDir).mode & 0o777).toBe(0o700);
+  });
+
+  it("refuses an output folder that is a symlink, before paying", async () => {
+    const real = join(tmp, "elsewhere");
+    mkdirSync(real);
+    symlinkSync(real, outDir);
+    const { fake, call } = await setup(ALLOW);
+    const r = await call("buy", buy);
+    expect(r.isError).toBe(true);
+    expect(r.text).toContain("not a plain directory");
+    expect(fake.payCalls).toHaveLength(0);
+  });
+
+  it("the MCP default folder is per user, not the shared temp folder", async () => {
+    const cfg = join(tmp, "cfg");
+    process.env.ARROW_CONFIG_DIR = cfg;
+    try {
+      const { key, blob, blobSha256 } = encryptFile(plaintext);
+      const fake = fakeCtx({ listing: { blob_url: "https://b.example/b.bin", blob_sha256: blobSha256, price: "250000" }, fetchImpl: (async () => new Response(blob)) as any, accepted: { event: "arrow_purchase", data: { phase: "accepted", purchase_id: 4 } } });
+      fake.state.records["purchase:4"] = { ...fixture("purchase"), id: 4, status: "done", buyer_pk: DEMO.buyerPk, sealed_k_buyer: b64.enc(seal(DEMO.buyerPk, key)), h: blobSha256, refund_reason: null };
+      const server = createServer({ env: ALLOW, ctx: () => fake.ctx });
+      const [a, b] = InMemoryTransport.createLinkedPair();
+      const client = new Client({ name: "t", version: "0" });
+      await Promise.all([server.connect(a), client.connect(b)]);
+      clients.push(client);
+      const r: any = await client.callTool({ name: "buy", arguments: buy });
+      expect(JSON.parse(r.content[0].text).out_path).toBe(join(cfg, "purchases", "arrow-listing-1-purchase-4.dat"));
+    } finally {
+      delete process.env.ARROW_CONFIG_DIR;
+    }
+  });
+});
+
+describe("X12-5 / QA-07: a paid buy is never answered with an error that invites paying again", () => {
+  it("two parallel buys of one listing pay once; the second is told a buy is running", async () => {
+    const { fake, call } = await setup(ALLOW);
+    const [a, b] = await Promise.all([call("buy", { ...buy, out_path: "a.csv" }), call("buy", { ...buy, out_path: "b.csv" })]);
+    expect(fake.payCalls).toHaveLength(1);
+    expect([a, b].filter((r) => r.isError).map((r) => r.text)).toEqual([expect.stringContaining("already running")]);
+  });
+
+  it("a download failure after payment returns the purchase id and tx instead of an error", async () => {
+    const { fake, call, blob } = await setup(ALLOW);
+    fake.ctx.fetchImpl = (async () => {
+      throw new Error("blob host down");
+    }) as any;
+    const r = await call("buy", buy);
+    expect(r.isError).toBe(false);
+    const j = JSON.parse(r.text);
+    expect(j).toMatchObject({ paid: true, status: "unfinished", purchase_id: 4 });
+    expect(j.tx_url).toMatch(/^https:/);
+    expect(j.next).toContain("decrypt_purchase");
+    // and decrypt_purchase finishes it later without paying
+    fake.ctx.fetchImpl = (async () => new Response(blob)) as any;
+    const d = await call("decrypt_purchase", { purchase_id: "4" });
+    expect(d.isError, d.text).toBe(false);
+    expect(JSON.parse(d.text).hashes_ok).toBe(true);
+    expect(fake.payCalls).toHaveLength(1);
+  });
+
+  it("a settle timeout after payment names the recovery tools", async () => {
+    const { fake, call } = await setup(ALLOW);
+    fake.ctx.views.purchase = async () => {
+      throw new SettleTimeout("purchase", 4);
+    };
+    fake.ctx.wait!.timeoutMs = 0;
+    const r = await call("buy", buy);
+    expect(r.isError).toBe(false);
+    expect(JSON.parse(r.text)).toMatchObject({ paid: true, purchase_id: 4 });
+    expect(JSON.parse(r.text).detail).toContain("get_purchase");
+  });
+
+  it("get_eval_result decodes a done eval sealed to this key; get_purchase reads the record", async () => {
+    const { fake, call } = await setup(ALLOW);
+    fake.state.records["eval:9"] = { ...fixture("eval"), id: 9, listing_id: 1, buyer_pk: DEMO.buyerPk, status: "done", sealed_result: b64.enc(seal(DEMO.buyerPk, Uint8Array.of(0))) };
+    const e = await call("get_eval_result", { eval_id: "9" });
+    expect(e.isError, e.text).toBe(false);
+    expect(JSON.parse(e.text)).toMatchObject({ eval_id: 9, status: "done", verdict: expect.stringMatching(/^(BUY|PASS)$/) });
+    const p = await call("get_purchase", { purchase_id: "4" });
+    expect(JSON.parse(p.text)).toMatchObject({ purchase_id: 4, status: "done" });
+    expect(fake.payCalls).toHaveLength(0);
   });
 });

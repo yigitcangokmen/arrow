@@ -55,9 +55,13 @@ const call = async (c: Client, name: string, args: Record<string, unknown>) => {
 };
 
 describe("arrow MCP server", () => {
-  it("tools_list_exactly_four", async () => {
+  it("tools_list_exactly_seven: the four market tools plus the three recovery tools (QA-07)", async () => {
     const { tools } = await (await connect()).listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(["buy", "get_listing", "inspect_before_buy", "list_listings"]);
+    expect(tools.map((t) => t.name).sort()).toEqual(["buy", "decrypt_purchase", "get_eval_result", "get_listing", "get_purchase", "inspect_before_buy", "list_listings"]);
+    const inspect = tools.find((t) => t.name === "inspect_before_buy")!.description!;
+    expect(inspect).toContain("mainnet: to your NEAR Intents balance; testnet: arrow-usd"); // CLM-12
+    expect(inspect).toContain("at most 5.68 bits"); // NUM-2: an upper bound rounds up
+    expect(inspect).toContain("get_eval_result");
     for (const t of tools) {
       expect(t.description && t.description.length > 20).toBe(true);
       expect(t.inputSchema.type).toBe("object");

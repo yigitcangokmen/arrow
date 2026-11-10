@@ -2,7 +2,7 @@
 // Nothing here prints criteria text, list contents, keys or plaintext.
 import { createHmac, randomBytes } from "node:crypto";
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import {
   BlobHashMismatch, Criteria, decodeEvalResult, decryptFile, fetchAndCheckBlob, formatBits, formatUsdc,
   type Listing, type Mode, type Network, openRelease, parseUsdc, prepareBuy, prepareEval, prepareList, resolveNetwork, sha256Hex, signature, signatureHex,
@@ -10,7 +10,7 @@ import {
 import { type EvidenceRunInput } from "../../scripts/src/lib/evidence.ts";
 import { readTable } from "./data.ts";
 import { type Actor, type ActorFlags, configDir, type Role } from "./keys.ts";
-import { findEventId, pollRecord, type WaitDeps } from "./settle.ts";
+import { findEventId, pollRecord, recoveryHint, type WaitDeps } from "./settle.ts";
 import type { PaidTx, Transport } from "./transport.ts";
 import type { ViewsLike } from "./views.ts";
 
@@ -20,6 +20,25 @@ export class CliError extends Error {
   constructor(message: string, public readonly exit: number = EXIT.error) {
     super(message);
     this.name = "CliError";
+  }
+}
+
+/**
+ * A failure after the money went out (X12-5): the purchase is paid, so callers report its ids and the recovery command
+ * instead of an error that invites paying again.
+ */
+export class PaidButUnfinished extends CliError {
+  constructor(message: string, public readonly txUrl: string, public readonly purchaseId: number) {
+    super(`${message} · paid, purchase #${purchaseId}, tx ${txUrl}: ${recoveryHint("purchase", purchaseId)}`);
+    this.name = "PaidButUnfinished";
+  }
+}
+
+/** The contract refused the payment (an Exx panic in the transfer callback), so the token's resolve step returned it all (X12F-5). */
+export class PaymentRefused extends CliError {
+  constructor(what: string, rejection: string | undefined, network: Network) {
+    super(`the market refused the ${what}: ${rejection} · the full amount went back to your ${network === "mainnet" ? "NEAR Intents" : "arrow-usd"} balance`);
+    this.name = "PaymentRefused";
   }
 }
 
@@ -72,6 +91,8 @@ export interface EvalResult {
   refund_reason?: string;
   tx: string;
   tx_url: string;
+  /** set by `result`, which has no payment tx */
+  network?: Network;
 }
 
 /** criteria JSON (an object, or a path to a file) plus the optional key list -> sealed-ready Criteria. */
@@ -110,7 +131,7 @@ export async function evalCommand(
   const tx = await ctx.transport.pay({ actor: buyer, amount: fee, msg });
   ctx.progress?.(`paid ${formatUsdc(fee)} USDC · tx ${link(tx)} · waiting for the enclave (60-118 s)`);
   const { id, rejection } = await findEventId(waitDeps(ctx), tx, "arrow_eval", "eval_id", "accepted");
-  if (id === undefined) throw new CliError(`the market refused the payment: ${rejection}`);
+  if (id === undefined) throw new PaymentRefused("payment", rejection, ctx.network);
   const ev = await pollRecord(waitDeps(ctx), "eval", id, () => ctx.views.eval(id));
   const after = await ctx.views.leakBudget(a.listingId);
 
@@ -139,15 +160,48 @@ export async function evalCommand(
 }
 
 export function formatEval(r: EvalResult): string {
-  if (r.status === "refunded") return `REFUNDED (${r.refund_reason}) · eval fee less the treasury share returned to your ${refundTarget(r.tx_url)} · eval #${r.eval_id} · tx ${r.tx_url}`;
+  if (r.status === "refunded") return `REFUNDED (${r.refund_reason}) · eval fee less the treasury share returned to your ${refundTarget(r.tx_url || (r.network ?? ""))} · eval #${r.eval_id}${r.tx_url ? ` · tx ${r.tx_url}` : ""}`;
   const parts: string[] = [r.verdict!];
   if (r.fit !== undefined) parts.push(`fit ${r.fit}/5`, `novelty ${r.novelty !== undefined ? `${r.novelty}/5` : "n/a"}`);
-  parts.push(`out ${r.bits_out} bits`, `budget left ${r.budget_left_bits}/${r.budget_total_bits} bits`, `eval #${r.eval_id}`, `tx ${r.tx_url}`);
+  parts.push(`out ${r.bits_out} bits`, `budget left ${r.budget_left_bits}/${r.budget_total_bits} bits`, `eval #${r.eval_id}`);
+  if (r.tx_url) parts.push(`tx ${r.tx_url}`);
   return parts.join(" · ");
 }
 
 /** DEC K-05: money comes back to the Intents balance on mainnet, to the token balance on testnet; never "your wallet". */
 export const refundTarget = (txUrl: string) => (txUrl.includes("testnet") ? "arrow-usd balance" : "NEAR Intents balance");
+
+/** QA-07: reads an eval that settled after `eval` stopped waiting, and decodes the verdict when it was sealed to this key. */
+export async function resultCommand(ctx: Ctx, a: { evalId: number; demoKey?: boolean; account?: string }): Promise<EvalResult | { eval_id: number; listing_id: number; status: "pending" }> {
+  const ev = await ctx.views.eval(a.evalId);
+  if (!ev) throw new CliError(`eval #${a.evalId} not found on ${ctx.network}`);
+  const listing = await requireListing(ctx, num(ev.listing_id));
+  if (ev.status === "pending") return { eval_id: a.evalId, listing_id: num(ev.listing_id), status: "pending" };
+  const after = await ctx.views.leakBudget(num(ev.listing_id));
+  const res: EvalResult = {
+    listing_id: num(ev.listing_id),
+    eval_id: a.evalId,
+    status: ev.status as "done" | "refunded",
+    bits_out: formatBits(listing.bits_per_eval_milli),
+    budget_left_bits: formatBits(after?.left_milli ?? 0),
+    budget_total_bits: formatBits(after?.budget_milli ?? 0),
+    tx: "",
+    tx_url: "",
+    network: ctx.network,
+  };
+  if (ev.status === "refunded" || !ev.sealed_result) {
+    res.status = "refunded";
+    res.refund_reason = ev.refund_reason ?? "unknown";
+    return res;
+  }
+  const viewing = await ctx.actor("buyer", { demoKey: a.demoKey, account: a.account }).viewingKey();
+  if (ev.buyer_pk !== viewing.buyerPk) throw new CliError("this eval was paid with a different viewing key (try --demo-key, or the account that paid it)");
+  const state = decodeEvalResult(ev.sealed_result, viewing.scalarHex, listing.mode as Mode);
+  res.verdict = state.verdict;
+  res.fit = state.fit;
+  res.novelty = state.novelty; // the record does not say whether a list was sent; without one novelty is the fixed value
+  return res;
+}
 
 // ---------------------------------------------------------------- buy + decrypt
 
@@ -170,7 +224,7 @@ export interface BuyResult {
   decrypt?: DecryptResult;
 }
 
-export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boolean; out?: string; exclusive?: boolean; account?: string; recordDemo?: boolean }): Promise<BuyResult> {
+export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boolean; out?: string; outDir?: string; exclusive?: boolean; account?: string; recordDemo?: boolean }): Promise<BuyResult> {
   const listing = await requireListing(ctx, a.listingId);
   const programPk = await ctx.views.programPubkey();
   if (!programPk) throw new CliError("the market has no program key yet (init_program_key not run)");
@@ -182,7 +236,7 @@ export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boo
   const tx = await ctx.transport.pay({ actor: buyer, amount: price, msg: prepareBuy({ listingId: a.listingId, buyerPk: viewing.buyerPk }) });
   ctx.progress?.(`paid ${formatUsdc(price)} USDC · tx ${link(tx)} · waiting for the key release`);
   const { id, rejection } = await findEventId(waitDeps(ctx), tx, "arrow_purchase", "purchase_id", "accepted");
-  if (id === undefined) throw new CliError(`the market refused the payment: ${rejection}`);
+  if (id === undefined) throw new PaymentRefused("payment", rejection, ctx.network);
   const p = await pollRecord(waitDeps(ctx), "purchase", id, () => ctx.views.purchase(id));
   const res: BuyResult = { listing_id: a.listingId, purchase_id: id, status: p.status as "done" | "refunded", tx: tx.txHash, tx_url: tx.url };
   const demo = a.recordDemo && a.demoKey ? " (demo:true)" : "";
@@ -191,13 +245,17 @@ export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boo
     record(ctx, { id: `cli-buy-${ctx.network}-${id}`, kind: "refund", tx: tx.txHash, chain: "near", block_height: null, listing_id: a.listingId, eval_id: null, purchase_id: id, oneclick_deposit: null, expect: "price refunded on failure", observed: `refunded (${res.refund_reason})` });
     return res;
   }
-  res.decrypt = await decryptCommand(ctx, { purchaseId: id, demoKey: a.demoKey, out: a.out, exclusive: a.exclusive, account: a.account });
+  try {
+    res.decrypt = await decryptCommand(ctx, { purchaseId: id, demoKey: a.demoKey, out: a.out, outDir: a.outDir, exclusive: a.exclusive, account: a.account });
+  } catch (e) {
+    throw new PaidButUnfinished((e as Error).message, tx.url, id);
+  }
   record(ctx, { id: `cli-buy-${ctx.network}-${id}`, kind: "buy", tx: tx.txHash, chain: "near", block_height: null, listing_id: a.listingId, eval_id: null, purchase_id: id, oneclick_deposit: null, expect: "key released, hashes equal", observed: `${res.decrypt.ok ? "hashes equal, decrypted" : "HASH CHECK FAILED"}${demo}` });
   return res;
 }
 
 /** `exclusive`: never overwrite (flag "wx"; also refuses a symlink at `out`). The MCP buy tool sets it; the CLI keeps overwriting what the user named. */
-export async function decryptCommand(ctx: Ctx, a: { purchaseId: number; demoKey?: boolean; out?: string; exclusive?: boolean; account?: string }): Promise<DecryptResult> {
+export async function decryptCommand(ctx: Ctx, a: { purchaseId: number; demoKey?: boolean; out?: string; outDir?: string; exclusive?: boolean; account?: string }): Promise<DecryptResult> {
   const p = await ctx.views.purchase(a.purchaseId);
   if (!p) throw new CliError(`purchase #${a.purchaseId} not found on ${ctx.network}`);
   if (p.status !== "done" || !p.sealed_k_buyer) throw new CliError(`purchase #${a.purchaseId} is ${p.status}${p.refund_reason ? ` (${p.refund_reason})` : ""}: nothing to decrypt`);
@@ -220,10 +278,12 @@ export async function decryptCommand(ctx: Ctx, a: { purchaseId: number; demoKey?
   checks.push(mine ? { label: `eval.h == listing.blob_sha256 (eval #${mine.id})`, ok: mine.h === listing.blob_sha256, value: mine.h ?? undefined } : { label: "eval.h == listing.blob_sha256 (no completed eval by this key)", ok: true });
 
   const ok = checks.every((c) => c.ok);
-  const out = resolve(a.out ?? `arrow-listing-${listing.id}-purchase-${p.id}.dat`);
+  // X12-7: by default into the per-user config folder (0700), never the working directory (the repo root is not ignored).
+  const out = resolve(a.out ?? join(a.outDir ?? join(configDir(), "purchases"), `arrow-listing-${listing.id}-purchase-${p.id}.dat`));
   if (ok) {
-    mkdirSync(dirname(out), { recursive: true });
-    writeFileSync(out, plain, a.exclusive ? { flag: "wx" } : undefined);
+    mkdirSync(dirname(out), { recursive: true, mode: 0o700 });
+    writeFileSync(out, plain, { mode: 0o600, ...(a.exclusive && { flag: "wx" }) });
+    chmodSync(out, 0o600); // an existing file keeps its old mode on overwrite
   }
   return { purchase_id: num(p.id), listing_id: num(p.listing_id), checks, ok, ...(ok && { out, bytes: plain.length }) };
 }
@@ -312,7 +372,7 @@ export async function listCommand(
 
   const tx = await ctx.transport.pay({ actor: seller, amount: bond, msg: prepared.msg });
   const { id, rejection } = await findEventId(waitDeps(ctx), tx, "arrow_listed", "listing_id");
-  if (id === undefined) throw new CliError(`the market refused the listing: ${rejection}`);
+  if (id === undefined) throw new PaymentRefused("listing", rejection, ctx.network);
   record(ctx, { id: `cli-list-${ctx.network}-${id}`, kind: "list", tx: tx.txHash, chain: "near", block_height: null, listing_id: id, eval_id: null, purchase_id: null, oneclick_deposit: null, expect: "listing created", observed: `listed #${id}` });
   return { dry_run: false, ...base, listing_id: id, tx: tx.txHash, tx_url: tx.url };
 }

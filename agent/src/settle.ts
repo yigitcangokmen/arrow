@@ -18,9 +18,17 @@ export interface WaitDeps {
   txStatusImpl?: typeof txStatus;
 }
 
+/** Where a caller reads a record that settled after the wait ended (QA-07): the verdict and the file are not lost. */
+export function recoveryHint(what: string, id: number | undefined): string {
+  if (id === undefined) return "the payment was sent; check the transaction link, then `npm run arrow -- status`";
+  if (what === "eval") return `read the verdict later with \`npm run arrow -- result ${id}\` (MCP: get_eval_result)`;
+  if (what === "purchase") return `decrypt it later with \`npm run arrow -- decrypt ${id}\` (MCP: get_purchase, then decrypt_purchase)`;
+  return "continue with `npm run arrow -- status`";
+}
+
 export class SettleTimeout extends Error {
   constructor(what: string, public readonly id: number | undefined) {
-    super(`${what} still pending after ${SETTLE_TIMEOUT_MS / 1000} s${id !== undefined ? ` (#${id})` : ""}: continue with \`status\``);
+    super(`${what} still pending after ${SETTLE_TIMEOUT_MS / 1000} s${id !== undefined ? ` (#${id})` : ""}: ${recoveryHint(what, id)}`);
     this.name = "SettleTimeout";
   }
 }

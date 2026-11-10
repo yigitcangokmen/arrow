@@ -7,7 +7,7 @@ import { loadEnv } from "../../scripts/src/lib/env.ts";
 import { confirmSpend } from "../../scripts/src/lib/confirm.ts";
 import { mask } from "../../scripts/src/lib/log.ts";
 import {
-  buyCommand, CliError, type Ctx, decryptCommand, EXIT, evalCommand, formatDecrypt, formatEval, listCommand, statusCommand, transferCommand,
+  buyCommand, CliError, type Ctx, decryptCommand, EXIT, evalCommand, formatDecrypt, formatEval, listCommand, resultCommand, statusCommand, transferCommand,
 } from "./commands.ts";
 import { resolveActor } from "./keys.ts";
 import { SettleTimeout } from "./settle.ts";
@@ -33,9 +33,10 @@ commands
         encrypt locally and list. Run once with --dry-run to get the ciphertext, upload it, rerun with --blob-url.
   eval <listing_id> --criteria <file.json> [--my-list <file.csv> --key-column <name>] [--demo-key]
         pay the eval fee; prints a capped verdict (PASS/BUY, optionally fit and novelty)
+  result <eval_id> [--demo-key]                     read the verdict of an eval you already paid (after exit 3)
   buy <listing_id> [--demo-key] [--out <path>]      pay the price, receive the key, decrypt, check the hashes
   status [--listing <id> | --eval <id> | --purchase <id>] [--limit N]   listings, or one record
-  decrypt <purchase_id> [--demo-key] [--out <path>] decrypt a purchase you already made
+  decrypt <purchase_id> [--demo-key] [--out <path>] decrypt a purchase you already made (default: ~/.config/arrow/purchases, mode 0600)
   transfer --to buyer|seller --amount <usdc> [--from buyer|seller]      move USDC between the team wallets (mainnet only)
 
 options
@@ -109,6 +110,15 @@ export async function main(argv: string[], deps: { ctx?: (f: Flags) => Ctx; out?
     switch (command) {
       case "eval": {
         const r = await evalCommand(ctx, { listingId: int(arg, "listing_id"), criteria: need(f.criteria, "--criteria"), myList: f["my-list"], keyColumn: f["key-column"], demoKey });
+        emit(r, [formatEval(r)]);
+        return r.status === "refunded" ? EXIT.refunded : EXIT.ok;
+      }
+      case "result": {
+        const r = await resultCommand(ctx, { evalId: int(arg, "eval_id"), demoKey });
+        if (r.status === "pending") {
+          emit(r, [`eval #${r.eval_id} is still pending: try again in a minute`]);
+          return EXIT.pending;
+        }
         emit(r, [formatEval(r)]);
         return r.status === "refunded" ? EXIT.refunded : EXIT.ok;
       }

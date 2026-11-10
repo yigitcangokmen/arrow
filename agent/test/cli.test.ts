@@ -1,6 +1,6 @@
 // WS4-T11 acceptance. In-process tests use fakes (helpers.ts); the spawn tests run the real entry file against the mock views.
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,6 +43,12 @@ describe("help and usage", () => {
     expect((await run(["frobnicate"])).code).toBe(2);
     vi.spyOn(console, "error").mockImplementation(() => {});
     expect((await run(["status", "--nope"])).code).toBe(2);
+  });
+
+  it("X12-4: the documented MCP launch runs the lockfile's tsx, never npx -y", () => {
+    const readme = readFileSync(join(ROOT, "agent/README.md"), "utf8");
+    expect(readme).not.toMatch(/npx -y|"command":\s*"npx"|"-y"/);
+    expect(readme).toContain('"command":"node","args":["<repo>/node_modules/tsx/dist/cli.mjs","<repo>/agent/src/mcp.ts"]');
   });
 
   it("no_npx_arrow_anywhere", () => {
@@ -117,6 +123,35 @@ describe("eval", () => {
     let t = 0;
     fake.ctx.wait!.now = () => (t += 100_000);
     expect((await run(["eval", "1", "--criteria", criteriaFile], fake)).code).toBe(3);
+  });
+
+  it("QA-07: the timeout names `result <id>`, and `result` decodes the verdict later without paying", async () => {
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    const fake = fakeCtx();
+    const real = fake.ctx.views.eval;
+    fake.ctx.views.eval = async () => ({ ...fixture("eval"), id: 9, status: "pending", sealed_result: null }) as any;
+    let t = 0;
+    fake.ctx.wait!.now = () => (t += 100_000);
+    expect((await run(["eval", "1", "--criteria", criteriaFile], fake)).code).toBe(3);
+    expect(err.mock.calls.flat().join(" ")).toContain("npm run arrow -- result 9");
+    fake.ctx.views.eval = real; // the enclave answered after the wait (the fake transport sealed a PASS·4·1)
+    const r = await run(["result", "9"], fake);
+    expect(r.code).toBe(0);
+    expect(r.out).toMatch(/^PASS · fit 4\/5 · novelty 1\/5 · out 5\.67 bits · .* · eval #9$/);
+    expect(fake.payCalls).toHaveLength(1);
+  });
+
+  it("X12F-5: a refused payment says the money is already back", async () => {
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    const t = fakeCtx();
+    t.state.txEvents.current = { ...eventTx("noise", {}), final_execution_status: "FINAL", status: { Failure: "Arrow: E10 gas tank low" } };
+    expect((await run(["eval", "1", "--criteria", criteriaFile], t)).code).toBe(1);
+    expect(err.mock.calls.flat().join(" ")).toMatch(/E10 gas tank low · the full amount went back to your arrow-usd balance/);
+    err.mockClear();
+    const m = fakeCtx({ network: "mainnet" });
+    m.state.txEvents.current = { ...eventTx("noise", {}), final_execution_status: "FINAL" };
+    expect((await run(["buy", "1", "--network", "mainnet"], m)).code).toBe(1);
+    expect(err.mock.calls.flat().join(" ")).toContain("went back to your NEAR Intents balance");
   });
 
   it("an invalid criteria file exits 2 and says which field", async () => {
@@ -219,6 +254,19 @@ describe("buy and decrypt", () => {
     expect(r.out).toContain("✔ release.h == sha256(downloaded)");
     expect(r.out).toContain(`wrote ${out} (${plaintext.length} bytes)`);
     expect(readFileSync(out)).toEqual(Buffer.from(plaintext));
+  });
+
+  it("X12-7: without --out the file goes to ~/.config/arrow/purchases at mode 0600, not the working directory", async () => {
+    const p = purchaseFixture();
+    const fake = fakeCtx({ listing: p.listing, fetchImpl: p.fetchImpl });
+    fake.state.records["purchase:4"] = p.purchase;
+    const r = await run(["decrypt", "4"], fake);
+    expect(r.code).toBe(0);
+    const out = join(tmp, "config", "purchases", "arrow-listing-1-purchase-4.dat");
+    expect(r.out).toContain(`wrote ${out}`);
+    expect(statSync(out).mode & 0o777).toBe(0o600);
+    expect(statSync(dirname(out)).mode & 0o777).toBe(0o700);
+    expect(existsSync(resolve("arrow-listing-1-purchase-4.dat"))).toBe(false);
   });
 
   it("decrypt refuses and writes nothing when release.h differs", async () => {
