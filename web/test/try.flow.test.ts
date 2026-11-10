@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { b64, publicKeyHex, scalarFromLabel, seal, unseal } from "@arrow/sdk/crypto";
 import { prepareList } from "@arrow/sdk/flows";
 import { ListMsg } from "@arrow/sdk/schemas";
+import { CONTRACTS } from "../lib/config.ts";
 import { PaymentRefused } from "../lib/settle.ts";
 import {
   CAP_MESSAGE, DATASETS, mapTryError, pickDemoListing, programHashBand, realDeps, runTry, TryError, TRY_STEPS, type NearApi, type StepInfo, type TryDeps, type TryStep,
@@ -21,7 +22,7 @@ const BUY_STATE = 25 + 4 * 5 + 3; // BUY fit 5 novelty 4
 interface Calls { near: { contractId: string; methodName: string; args: Record<string, string>; deposit?: bigint }[]; fetched: string[]; steps: [TryStep, StepInfo][] }
 
 /** A small fake chain: it records what the page sends and answers views from those msgs. */
-function world(o: { faucet?: number; sponsor?: { status: number; body: object }; uploadFails?: boolean; evidence?: unknown; storage?: string | null; balance?: bigint; tamper?: boolean; evalPanic?: boolean; evalRefund?: boolean; verdictIdx?: number } = {}) {
+function world(o: { faucet?: number; sponsor?: { status: number; body: object }; uploadFails?: boolean; evidence?: unknown; storage?: string | null; balance?: bigint; tamper?: boolean; evalPanic?: boolean; evalRefund?: boolean; verdictIdx?: number; endless?: { pulled: () => number }; programWasmHash?: string; listingHash?: string } = {}) {
   const calls: Calls = { near: [], fetched: [], steps: [] };
   let listMsg: ListMsg | null = null;
   let evalMsg: { buyer_pk: string } | null = null;
@@ -65,6 +66,11 @@ function world(o: { faucet?: number; sponsor?: { status: number; body: object };
       return new Response(JSON.stringify(s.body), { status: s.status });
     }
     if (url.startsWith("/demo/")) return new Response(fixture(`demo/${url.slice(6)}`));
+    if (url === "https://blob.test/b.bin" && o.endless) {
+      let pulls = 0;
+      o.endless.pulled = () => pulls;
+      return new Response(new ReadableStream<Uint8Array>({ pull(c) { pulls++; c.enqueue(new Uint8Array(65_536)); } }));
+    }
     if (url === "https://blob.test/b.bin") {
       const bytes = blob ? blob.slice() : new Uint8Array();
       if (o.tamper) bytes[bytes.length - 1] ^= 1;
@@ -73,7 +79,7 @@ function world(o: { faucet?: number; sponsor?: { status: number; body: object };
     throw new Error(`unexpected fetch ${url} ${init?.method ?? ""}`);
   }) as typeof fetch;
 
-  const listingRec = () => ({ id: 7, blob_url: "https://blob.test/b.bin", blob_sha256: listMsg?.blob_sha256 ?? "00".repeat(32), eval_fee: "100000", price: "250000", mode: "scored" as const });
+  const listingRec = () => ({ id: 7, blob_url: "https://blob.test/b.bin", blob_sha256: listMsg?.blob_sha256 ?? "00".repeat(32), eval_fee: "100000", price: "250000", mode: "scored" as const, ...(o.listingHash ? { program_hash_at_list: o.listingHash } : {}) });
   const deps: TryDeps = {
     loadNear: async () => near,
     fetch: fetchFake,
@@ -107,12 +113,12 @@ function world(o: { faucet?: number; sponsor?: { status: number; body: object };
     criteria: criteriaFiles,
   };
   const run = (criteria: keyof typeof criteriaFiles = "demo-buy") =>
-    runTry({ criteria, config, deps, signal: new AbortController().signal, onStep: (s, i) => calls.steps.push([s, i]) });
+    runTry({ criteria, config: o.programWasmHash ? { ...config, programWasmHash: o.programWasmHash } : config, deps, signal: new AbortController().signal, onStep: (s, i) => calls.steps.push([s, i]) });
   return { calls, run, stored, plainOf: () => fixture(`demo/${DATASETS["demo-buy"].file}`) };
 }
 
 const evidenceWith = (listingId: number | null) => ({
-  network: "testnet", contract: "arrow.arrowhq.testnet", contract_wasm_sha256: null, program_wasm_sha256: null, program_wasm_url: null,
+  network: "testnet", contract: CONTRACTS.testnet, contract_wasm_sha256: null, program_wasm_sha256: null, program_wasm_url: null,
   lock: { tx: null, block_height: null, timestamp_utc: null }, accounts: {}, corrections: [],
   runs: listingId === null ? [] : [{ id: "w1", kind: "list", tx: "h", chain: "near", block_height: null, timestamp_utc: "t", listing_id: listingId, eval_id: null, purchase_id: null, oneclick_deposit: null, expect: "e", observed: "o", script: "s", commit: "c" }],
 });
@@ -141,7 +147,7 @@ describe("runTry, the BUY scene", () => {
     expect(calls.map((c) => c.methodName)).toEqual(["mint", "ft_transfer_call", "ft_transfer_call", "ft_transfer_call"]);
     expect(calls[0]).toMatchObject({ contractId: "arrow-usd.arrowhq.testnet", args: { amount: "5000000" } });
     expect(calls.slice(1).map((c) => c.args.amount)).toEqual(["100000", "100000", "250000"]);
-    expect(calls.slice(1).every((c) => c.deposit === 1n && c.args.receiver_id === "arrow.arrowhq.testnet")).toBe(true);
+    expect(calls.slice(1).every((c) => c.deposit === 1n && c.args.receiver_id === CONTRACTS.testnet)).toBe(true);
     expect(calls.slice(1).map((c) => JSON.parse(c.args.msg).op)).toEqual(["list", "eval", "buy"]);
   });
 
@@ -219,6 +225,47 @@ describe("runTry, failures", () => {
     const deps = { ...realDeps({ evidence: null, criteria: {} }), loadNear: async (): Promise<NearApi> => { throw Object.assign(new Error("aborted"), { name: "AbortError" }); } };
     await expect(runTry({ criteria: "demo", config, deps, signal: new AbortController().signal, onStep: (s, i) => steps.push(`${s}:${i.state}`) })).rejects.toMatchObject({ name: "AbortError" });
     expect(steps).toEqual(["account:doing"]); // an abort is not reported as a failed step
+  });
+});
+
+describe("WEB-5: the browser download is bounded", () => {
+  it("a host that streams for ever is cut off after 5 MiB and reported, not buffered", async () => {
+    const endless = { pulled: () => 0 };
+    const w = world({ endless });
+    const err = await w.run().catch((e) => e);
+    expect(err).toBeInstanceOf(TryError);
+    expect(err.message).toMatch(/larger than the 5 MB limit/);
+    expect(endless.pulled()).toBeLessThanOrEqual(5 * 16 + 4);
+  });
+});
+
+describe("STATE-4: the recorded demo listing", () => {
+  const run = (id: string, listing: number, observed: string) => ({ id, kind: "list", tx: "h", chain: "near", block_height: null, timestamp_utc: "t", listing_id: listing, eval_id: null, purchase_id: null, oneclick_deposit: null, expect: "e", observed, script: "s", commit: "c" });
+  const ev = (runs: unknown[], contract = CONTRACTS.testnet) => ({ network: "testnet", contract, contract_wasm_sha256: null, program_wasm_sha256: null, program_wasm_url: null, lock: { tx: null, block_height: null, timestamp_utc: null }, accounts: {}, corrections: [], runs });
+  const e2e = [
+    run("e2e-1-list-L1-1", 1, "listed #1 (ciphertext served)"),
+    run("e2e-1-list-L2-2", 2, "listed #2 (ciphertext served)"),
+    run("e2e-1-list-L3-3", 3, "listed #3 (broken host on purpose)"),
+  ];
+  it("never picks the broken-host listing, which is the newest list run of every e2e", () => {
+    expect(pickDemoListing(ev(e2e))).not.toBe(3);
+    expect(pickDemoListing(ev(e2e))).toBe(2);
+  });
+  it("picks the listing of the scene being run", () => {
+    expect(pickDemoListing(ev(e2e), "L1")).toBe(1);
+    expect(pickDemoListing(ev(e2e), "L2")).toBe(2);
+    expect(DATASETS.demo.scene).toBe("L1");
+    expect(DATASETS["demo-buy"].scene).toBe("L2");
+  });
+  it("ignores evidence recorded on another contract", () => {
+    expect(pickDemoListing(ev(e2e, "arrow.arrowhq.testnet"), "L1")).toBeNull();
+  });
+  it("refuses a recorded listing sealed to an older program instead of failing later with E13", async () => {
+    const stale = world({ uploadFails: true, evidence: evidenceWith(2), programWasmHash: "ab".repeat(32), listingHash: "cd".repeat(32) });
+    await expect(stale.run("demo-buy")).rejects.toMatchObject({ code: "NO_DEMO_LISTING", message: expect.stringMatching(/older enclave program/) });
+    expect(stale.calls.near.filter((c) => c.methodName === "ft_transfer_call")).toHaveLength(0); // nothing was paid
+    const fresh = world({ uploadFails: true, evidence: evidenceWith(2), programWasmHash: "ab".repeat(32), listingHash: "ab".repeat(32) });
+    expect((await fresh.run("demo-buy")).usedDemoListing).toBe(true);
   });
 });
 

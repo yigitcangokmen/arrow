@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Network } from "../lib/config.ts";
 import { formatUsdc } from "../lib/format.ts";
-import { listingLinks } from "../lib/links.ts";
+import { addressUrl, listingLinks } from "../lib/links.ts";
 import type { ListingView } from "../lib/server/listingsCache.ts";
 import { Badge } from "./Badge.tsx";
 import { BitCounter } from "./BitCounter.tsx";
@@ -18,6 +18,9 @@ export function ListingCard({ listing: l, network }: { listing: ListingView; net
         <Badge kind={l.label} />
         {l.budget.leftBits === 0 ? <span className={styles.spent}>Inspection budget used up: buy-only</span> : null}
       </header>
+      <p className={styles.meta}>
+        Seller <a href={addressUrl(l.seller, network)} target="_blank" rel="noopener noreferrer" className="mono" title={l.seller}>{l.seller.length > 16 ? `${l.seller.slice(0, 6)}…${l.seller.slice(-4)}` : l.seller}</a>
+      </p>
       {l.public_desc ? <p className={styles.desc}>{l.public_desc}</p> : null}
       <p className={styles.meta}>
         {l.columns.length} columns: <span className="mono">{shown.join(", ")}{more > 0 ? `, +${more} more` : ""}</span>

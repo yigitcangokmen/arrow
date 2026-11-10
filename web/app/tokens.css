@@ -4,6 +4,7 @@
   --text: #16181d;
   --muted: #5b616e;
   --border: #d9dbe0;
+  --control-border: #868b95; /* form field edges: 3:1 against the page and the panel (WCAG 1.4.11) */
   --accent: #1b5fd6;
   --proven: #11703f;
   --notproven: #8a5a00;
@@ -23,6 +24,7 @@
     --text: #e8eaee;
     --muted: #9aa1ae;
     --border: #2b303a;
+    --control-border: #666d79;
     --accent: #7aa7ff;
     --proven: #52c98a;
     --notproven: #e0b04a;
@@ -38,6 +40,7 @@
   --text: #e8eaee;
   --muted: #9aa1ae;
   --border: #2b303a;
+  --control-border: #666d79;
   --accent: #7aa7ff;
   --proven: #52c98a;
   --notproven: #e0b04a;

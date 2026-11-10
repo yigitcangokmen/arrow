@@ -12,6 +12,13 @@ export function txUrl(chain: Chain, network: Network, hash: string): string {
   return network === "mainnet" ? `https://nearblocks.io/txns/${h}` : `https://testnet.nearblocks.io/txns/${h}`;
 }
 
+/** The explorer page of a seller: an Intents account that is an EVM address shows on Basescan, a NEAR account on NearBlocks. */
+export function addressUrl(account: string, network: Network): string {
+  const a = encodeURIComponent(account);
+  if (/^0x[0-9a-fA-F]{40}$/.test(account)) return `https://basescan.org/address/${a}`;
+  return network === "mainnet" ? `https://nearblocks.io/address/${a}` : `https://testnet.nearblocks.io/address/${a}`;
+}
+
 /** First 6 and last 4 characters: "ED5VCv…jT4k". Short hashes are shown whole. */
 export function shortHash(hash: string): string {
   return hash.length <= 12 ? hash : `${hash.slice(0, 6)}…${hash.slice(-4)}`;
@@ -25,4 +32,18 @@ export function withNetwork(path: string, net: Network): string {
 /** Page links of one listing: its inspect/buy page and its x402-shaped 402 endpoint. */
 export function listingLinks(id: number | string, net: Network): { buy: string; x402: string } {
   return { buy: withNetwork(`/buy/${id}`, net), x402: withNetwork(`/l/${id}/data`, net) };
+}
+
+export const NAV_LINKS = [
+  ["/", "Arrow"],
+  ["/sell", "Sell"],
+  ["/seller", "Payouts"],
+  ["/verify", "Verify"],
+  ["/attack", "Attack"],
+  ["/try", "Try"],
+] as const;
+
+/** The main navigation for the network being viewed: `?network=` is kept on every link that reads it. /attack and /try ignore it. */
+export function navLinks(net: Network): { href: string; label: string }[] {
+  return NAV_LINKS.map(([path, label]) => ({ href: path === "/attack" || path === "/try" ? path : withNetwork(path, net), label }));
 }

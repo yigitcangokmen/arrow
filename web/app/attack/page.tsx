@@ -47,6 +47,8 @@ function RoomTable({ rows, withGroup }: { rows: RoomRow[]; withGroup: boolean })
   );
 }
 
+export const metadata = { title: "Attack" };
+
 export default async function Attack() {
   const { inputs, errors } = readAttackInputs({ bench, room: benchRoom, live: benchLive });
   const leak = leakLines(inputs.summary);

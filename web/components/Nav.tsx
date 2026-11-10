@@ -1,31 +1,27 @@
+"use client";
 import Link from "next/link";
-import { DEFAULT_NETWORK } from "../lib/config.ts";
+import { useSearchParams } from "next/navigation";
+import { parseNetwork } from "../lib/config.ts";
+import { navLinks } from "../lib/links.ts";
 import { Badge } from "./Badge.tsx";
 import { ThemeToggle } from "./ThemeToggle.tsx";
 import styles from "./Nav.module.css";
 
-const LINKS = [
-  ["/", "Arrow"],
-  ["/sell", "Sell"],
-  ["/seller", "Payouts"],
-  ["/verify", "Verify"],
-  ["/attack", "Attack"],
-  ["/try", "Try"],
-] as const;
-
+/** Reads ?network= so the badge and the links follow the network being viewed (QA-16). Render it inside <Suspense>. */
 export function Nav() {
+  const net = parseNetwork(useSearchParams().get("network"));
   return (
     <header className={styles.header}>
       <nav className={styles.nav} aria-label="Main">
         <ul className={styles.links}>
-          {LINKS.map(([href, label]) => (
+          {navLinks(net).map(({ href, label }) => (
             <li key={href}>
               <Link href={href} className={href === "/" ? styles.brand : undefined}>{label}</Link>
             </li>
           ))}
         </ul>
         <div className={styles.right}>
-          <Badge kind={DEFAULT_NETWORK} />
+          <Badge kind={net} />
           <ThemeToggle />
         </div>
       </nav>

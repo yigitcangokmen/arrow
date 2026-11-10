@@ -7,7 +7,7 @@ import { decodeEvalResult, MAX_BLOB_BYTES, openRelease, prepareBuy } from "@arro
 import { view } from "@arrow/sdk/rpc";
 import { Criteria, EvidenceFile } from "@arrow/sdk/schemas";
 import type { State } from "@arrow/sdk/state";
-import { buildEvalMsg } from "../buy.ts";
+import { buildEvalMsg, downloadCiphertext } from "../buy.ts";
 import { CONTRACTS } from "../config.ts";
 import { hashCheck, type HashCheck } from "../hashes.ts";
 import { buildListMsg, fullTitle, inspectFile, type SellFields } from "../sell.ts";
@@ -25,10 +25,10 @@ export interface StepInfo {
 }
 
 /** Which synthetic file each scene lists (fixtures/demo/README.md). print-row-1 reads whatever is listed. */
-export const DATASETS: Record<TryCriteria, { file: string; title: string; keyColumn: string }> = {
-  demo: { file: "unlock-schedule-412.csv", title: "Q1 2027 token unlock schedule (412 rows)", keyColumn: "token_contract" },
-  "demo-buy": { file: "wallet-labels-1000.csv", title: "NEAR DeFi wallet labels (1,000 rows)", keyColumn: "account_id" },
-  "print-row-1": { file: "wallet-labels-1000.csv", title: "NEAR DeFi wallet labels (1,000 rows)", keyColumn: "account_id" },
+export const DATASETS: Record<TryCriteria, { file: string; title: string; keyColumn: string; scene: "L1" | "L2" }> = {
+  demo: { file: "unlock-schedule-412.csv", title: "Q1 2027 token unlock schedule (412 rows)", keyColumn: "token_contract", scene: "L1" },
+  "demo-buy": { file: "wallet-labels-1000.csv", title: "NEAR DeFi wallet labels (1,000 rows)", keyColumn: "account_id", scene: "L2" },
+  "print-row-1": { file: "wallet-labels-1000.csv", title: "NEAR DeFi wallet labels (1,000 rows)", keyColumn: "account_id", scene: "L2" },
 };
 
 export const CAP_MESSAGE =
@@ -45,6 +45,8 @@ export class TryError extends Error {
 
 export interface TryConfig {
   programPk: string;
+  /** The program hash the contract runs now. A recorded demo listing sealed to another program is refused (E13). */
+  programWasmHash?: string | null;
   /** listing_bond in USDC base units. */
   bond: string;
 }
@@ -136,12 +138,18 @@ export function realDeps(env: { evidence: unknown; criteria: Record<string, unkn
 
 const randomHex = (n: number): string => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => b.toString(16).padStart(2, "0")).join("");
 
-/** The newest `list` run in the testnet evidence file: the demo listing used when a fresh upload is not possible. */
-export function pickDemoListing(evidence: unknown): number | null {
+/**
+ * The recorded `list` run to use when a fresh upload is not possible: the newest one of the wanted scene (L1 unlock schedule,
+ * L2 wallet labels) on the contract this page talks to. The e2e runs also record a listing whose host is gone on purpose
+ * ("broken host"); it can only ever refund, so it is never picked.
+ */
+export function pickDemoListing(evidence: unknown, scene?: "L1" | "L2"): number | null {
   const parsed = EvidenceFile.safeParse(evidence);
-  if (!parsed.success) return null;
-  const lists = parsed.data.runs.filter((r) => r.kind === "list" && r.listing_id !== null);
-  const last = lists[lists.length - 1];
+  if (!parsed.success || parsed.data.contract !== CONTRACTS.testnet) return null;
+  const lists = parsed.data.runs.filter((r) => r.kind === "list" && r.listing_id !== null && !/broken host/i.test(r.observed));
+  const ofScene = scene ? lists.filter((r) => r.id.includes(`-list-${scene}-`)) : [];
+  const pool = ofScene.length > 0 ? ofScene : lists;
+  const last = pool[pool.length - 1];
   return last ? Number(last.listing_id) : null;
 }
 
@@ -214,7 +222,7 @@ export async function runTry(opts: {
       step("list", { state: "done", txHash: paid.txHash, detail: `${fullTitle(fields)} as listing #${listingId}` });
     } else {
       // No fresh upload (Blob not configured, rate limited or offline): eval and buy work on any listing, so use a recorded one.
-      const demo = pickDemoListing(deps.evidence);
+      const demo = pickDemoListing(deps.evidence, dataset.scene);
       if (demo === null) throw new TryError("NO_DEMO_LISTING", "Uploading a fresh listing is not available right now and there is no pre-listed demo listing. Run `npm run try:testnet` instead.", "list");
       listingId = demo;
       usedDemoListing = true;
@@ -223,6 +231,9 @@ export async function runTry(opts: {
 
     const listing = await deps.views.listing(listingId);
     if (!listing) throw new TryError("OTHER", `Listing #${listingId} does not exist on testnet.`, "list");
+    if (usedDemoListing && config.programWasmHash && (listing as { program_hash_at_list?: string }).program_hash_at_list !== config.programWasmHash) {
+      throw new TryError("NO_DEMO_LISTING", `The recorded demo listing #${listingId} was sealed to an older enclave program and can no longer be inspected. Run \`npm run try:testnet\` instead.`, "list");
+    }
 
     // 4. eval
     step("eval", { state: "doing" });
@@ -266,16 +277,17 @@ export async function runTry(opts: {
 
     // 7. decrypt
     step("decrypt", { state: "doing" });
-    const res = await deps.fetch(listing.blob_url);
-    if (!res.ok) throw new TryError("OTHER", `The encrypted file could not be downloaded (HTTP ${res.status}).`, "decrypt");
-    const bytes = new Uint8Array(await res.arrayBuffer());
-    if (bytes.length > MAX_BLOB_BYTES) throw new TryError("OTHER", "The encrypted file is larger than the 5 MB limit.", "decrypt");
-    const hashInput = { onChain: listing.blob_sha256, evalH: evalRec.h ?? null, releaseH: buyRec.h ?? null, downloaded: sha256Hex(bytes) };
+    // The browser reads the host's body with the SDK's capped reader: a host that never stops cannot make the tab buffer without end.
+    const got = await downloadCiphertext(listing.blob_url, listing.blob_sha256, deps.fetch);
+    if (got.kind === "too-large") throw new TryError("OTHER", "The encrypted file is larger than the 5 MB limit.", "decrypt");
+    if (got.kind === "manual") throw new TryError("OTHER", "The encrypted file could not be downloaded from its host.", "decrypt");
+    const hashInput = { onChain: listing.blob_sha256, evalH: evalRec.h ?? null, releaseH: buyRec.h ?? null, downloaded: got.kind === "ok" ? listing.blob_sha256 : got.actual };
     const hashes = hashCheck(hashInput);
-    if (!hashes.match) {
+    if (!hashes.match || got.kind !== "ok") {
       key.fill(0);
       throw new TryError("HASH_MISMATCH", `sha256 mismatch: ${hashes.mismatched.join(", ") || "a hash is missing"}. The file was not decrypted.`, "decrypt");
     }
+    const bytes = got.bytes;
     const plain = decryptFile(bytes, key);
     key.fill(0);
     step("decrypt", { state: "done", detail: "sha256 match ✔" });

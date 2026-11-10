@@ -5,10 +5,11 @@
 .field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 12px; min-width: 0; }
 .field > label, .legend { font-weight: 600; font-size: 0.9rem; }
 .field input, .field select, .field textarea {
-  font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--control-border); border-radius: var(--radius);
   padding: 8px 10px; min-height: 40px; width: 100%; min-width: 0;
 }
 .field textarea { min-height: 88px; resize: vertical; }
+.field [aria-invalid="true"] { border-color: var(--danger); border-width: 2px; }
 .hint { color: var(--muted); font-size: 0.85rem; margin: 0; overflow-wrap: anywhere; }
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0 16px; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 8px 0 0; }

@@ -6,7 +6,7 @@ export const DEFAULT_NETWORK: Network =
 
 export const CONTRACTS: Record<Network, string> = {
   mainnet: process.env.NEXT_PUBLIC_ARROW_CONTRACT_MAINNET ?? "arrow-market.near",
-  testnet: process.env.NEXT_PUBLIC_ARROW_CONTRACT_TESTNET ?? "arrow.arrowhq.testnet",
+  testnet: process.env.NEXT_PUBLIC_ARROW_CONTRACT_TESTNET ?? "arrow-v2.arrowhq.testnet", // the testnet market that runs rc2; arrow.arrowhq.testnet still runs the old program
 };
 
 export const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "";

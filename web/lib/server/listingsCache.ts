@@ -1,4 +1,5 @@
 import type { Listing } from "@arrow/sdk/schemas";
+import { isTeamAccount } from "@arrow/sdk/team";
 import { displayTitle, labelOf, type ListingLabel } from "../labels.ts";
 
 export interface ListingView extends Listing {
@@ -13,7 +14,7 @@ export function toListingView(l: Listing, teamAccounts: readonly string[]): List
   return {
     ...l,
     label: labelOf(l, teamAccounts),
-    displayTitle: displayTitle(l.title),
+    displayTitle: displayTitle(l.title, !isTeamAccount(l.seller, teamAccounts)),
     budget: {
       bitsPerEval: per / 1000,
       maxEvals: l.max_evals,

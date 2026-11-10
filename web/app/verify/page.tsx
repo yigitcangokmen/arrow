@@ -22,6 +22,8 @@ const reports = ttlCache<Awaited<ReturnType<typeof loadReport>>>(300_000, Date.n
 
 const NEAR_AI_URL = `${NEAR_AI_API}/v1/attestation/report?model=${encodeURIComponent(NEAR_AI_MODEL)}&provider=near&signing_algo=ecdsa`;
 
+export const metadata = { title: "Verify" };
+
 export default async function Verify({ searchParams }: { searchParams: Promise<{ network?: string }> }) {
   const net = parseNetwork((await searchParams).network);
 

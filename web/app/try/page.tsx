@@ -17,6 +17,8 @@ const SCENES: { id: TryCriteria; label: string }[] = [
 
 const isScene = (v: string | undefined): v is TryCriteria => SCENES.some((s) => s.id === v);
 
+export const metadata = { title: "Try on testnet" };
+
 export default async function Try({ searchParams }: { searchParams: Promise<{ criteria?: string }> }) {
   const sp = await searchParams;
   const chosen: TryCriteria = isScene(sp.criteria) ? sp.criteria : "demo-buy";
@@ -59,7 +61,7 @@ export default async function Try({ searchParams }: { searchParams: Promise<{ cr
       ) : (
         <TryFlow
           scene={chosen}
-          config={{ programPk: cfg.programPk, bond: cfg.bond }}
+          config={{ programPk: cfg.programPk, bond: cfg.bond, programWasmHash: cfg.programWasmHash }}
           evidence={evidence.testnet}
           criteria={criteria}
         />

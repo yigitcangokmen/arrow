@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { NEAR_AI_API, NEAR_AI_MODEL, type Report } from "@arrow/sdk/verify";
 import { NETWORKS } from "@arrow/sdk/config";
 import { Badge } from "../../../components/Badge.tsx";
@@ -20,9 +21,13 @@ import styles from "../verify.module.css";
 // The engine reads the chain, the archival RPC and OutLayer for every recorded run: about 90 s for the testnet evidence today.
 export const maxDuration = 300;
 
-const evals = ttlCache<EvalPageData>(300_000);
+const evals = ttlCache<EvalPageData>(300_000, Date.now, 200, { failTtlMs: 60_000, maxWaiters: 12 }); // one load per eval at a time, a failure is not retried for a minute
 
 const NEAR_AI_URL = `${NEAR_AI_API}/v1/attestation/report?model=${encodeURIComponent(NEAR_AI_MODEL)}&provider=near&signing_algo=ecdsa`;
+
+export async function generateMetadata({ params }: { params: Promise<{ evalId: string }> }): Promise<Metadata> {
+  return { title: `Verify eval ${(await params).evalId}` };
+}
 
 export default async function VerifyEval({ params, searchParams }: { params: Promise<{ evalId: string }>; searchParams: Promise<{ network?: string }> }) {
   const { evalId: raw } = await params;

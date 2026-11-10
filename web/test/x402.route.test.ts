@@ -15,7 +15,7 @@ describe("x402-shaped 402", () => {
   it("402 with X-Arrow-Listing and no PAYMENT-REQUIRED header (testnet default)", async () => {
     const res = await handleX402(get("/api/x402/1"), "1", deps());
     expect(res.status).toBe(402);
-    expect(res.headers.get("x-arrow-listing")).toBe("arrow.arrowhq.testnet/1");
+    expect(res.headers.get("x-arrow-listing")).toBe("arrow-v2.arrowhq.testnet/1");
     expect(res.headers.get("payment-required")).toBeNull();
     expect(res.headers.get("access-control-allow-origin")).toBe("*");
     expect(res.headers.get("access-control-expose-headers")).toBe("X-Arrow-Listing");
@@ -29,7 +29,7 @@ describe("x402-shaped 402", () => {
     expect(b.accepts).toEqual([]);
     expect(b.resource.url).toBe("http://localhost:3000/l/1/data");
     const ext = b.extensions["arrow-inspect"];
-    expect(ext.info.listing).toBe("arrow.arrowhq.testnet/1");
+    expect(ext.info.listing).toBe("arrow-v2.arrowhq.testnet/1");
     expect(ext.info.leak_budget_left_bits).toBeCloseTo((47 * 5673) / 1000, 6);
     expect(typeof ext.schema).toBe("object");
   });
@@ -44,7 +44,7 @@ describe("x402-shaped 402", () => {
   it("HEAD returns the same status and headers without a body", async () => {
     const res = await handleX402(get("/api/x402/1", "HEAD"), "1", deps());
     expect(res.status).toBe(402);
-    expect(res.headers.get("x-arrow-listing")).toBe("arrow.arrowhq.testnet/1");
+    expect(res.headers.get("x-arrow-listing")).toBe("arrow-v2.arrowhq.testnet/1");
     expect(await res.text()).toBe("");
   });
 

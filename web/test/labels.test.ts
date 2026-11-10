@@ -18,8 +18,10 @@ describe("labelOf", () => {
     expect(labelOf({ title: "Sales", seller: "someone.near" }, team)).toBe("external");
   });
 
-  it("the prefix wins even for an outside seller (the label is the seller's claim)", () => {
-    expect(labelOf({ title: "[team-made] Fake", seller: "someone.near" }, team)).toBe("team-made");
+  it("SCAM-2: an outside seller cannot give themselves the team-made label; [synthetic] is their own claim and stays", () => {
+    expect(labelOf({ title: "[team-made] NEAR DeFi wallet labels (official)", seller: "0xbad0000000000000000000000000000000000000" }, team)).toBe("external");
+    expect(labelOf({ title: "[v2] [team-made] Fake", seller: "someone.near" }, team)).toBe("external");
+    expect(labelOf({ title: "[synthetic] Mine", seller: "someone.near" }, team)).toBe("synthetic");
   });
 });
 
@@ -43,6 +45,12 @@ describe("labelOf with several leading tags", () => {
 describe("displayTitle", () => {
   it("drops only the label tag from a run of tags", () => {
     expect(displayTitle("[perf] [synthetic] Unlock schedule")).toBe("[perf] Unlock schedule");
+  });
+
+  it("SCAM-2: an unbelieved [team-made] stays in the shown title; a team account's is dropped", () => {
+    expect(displayTitle("[team-made] Chain stats", true)).toBe("[team-made] Chain stats");
+    expect(displayTitle("[team-made] Chain stats", false)).toBe("Chain stats");
+    expect(displayTitle("[synthetic] Mine", true)).toBe("Mine");
   });
 
   it("drops the prefix only at the start", () => {

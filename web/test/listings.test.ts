@@ -64,7 +64,7 @@ describe("GET /api/listings", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("cache-control")).toBe("public, s-maxage=30, stale-while-revalidate=30");
     const b = await res.json();
-    expect(b).toMatchObject({ network: "testnet", contract: "arrow.arrowhq.testnet" });
+    expect(b).toMatchObject({ network: "testnet", contract: "arrow-v2.arrowhq.testnet" });
     expect(b.listings).toHaveLength(2);
     expect(b.listings[0].budget.spentBits).toBeCloseTo(3 * 5.673, 9);
   });

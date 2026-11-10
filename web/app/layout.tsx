@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import { Footer } from "../components/Footer.tsx";
 import { Nav } from "../components/Nav.tsx";
 import "./tokens.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Arrow",
+  title: { default: "Arrow", template: "%s · Arrow" }, // each page names itself, so tabs and history entries tell apart (WCAG 2.4.2)
   description:
     "Inspect before you pay: the buyer's AI reads the sealed data inside a TEE, and only a capped verdict (≤5.67 bits on the output channel) comes back to the buyer.",
 };
@@ -24,7 +24,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <a className="skip-link" href="#main">Skip to content</a>
-        <Nav />
+        <Suspense fallback={null}>
+          <Nav />
+        </Suspense>
         <main id="main">{children}</main>
         <Footer />
       </body>
