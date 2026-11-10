@@ -105,6 +105,6 @@ describe("audit wording of the UI table", () => {
   it("ARW-C2: the gas tank is a RISKY row", () => {
     const g = row("Gas tank");
     expect(g.flag).toBe("RISKY");
-    expect(g.check).toMatch(/drains the tank/);
+    expect(g.check).toMatch(/run the tank down/);
   });
 });

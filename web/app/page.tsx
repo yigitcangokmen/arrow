@@ -32,7 +32,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
       <section className={styles.hero}>
         <h1>Inspect before you pay.</h1>
         <p className={styles.lead}>
-          The buyer&apos;s AI reads the sealed data inside a TEE, and only a capped verdict (≤5.67 bits on the output channel) comes back to the buyer.
+          A fixed model in NEAR AI&apos;s TEE reads a 40-row sample of the sealed data, and only a capped verdict (≤5.67 bits on the output channel) comes back to the buyer.
         </p>
         <p className={styles.sub}>
           Sellers list encrypted data. Buyers pay a small inspection fee to let their own AI inspect it inside an Intel TDX

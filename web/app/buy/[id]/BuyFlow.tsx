@@ -528,8 +528,8 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
         ) : null}
         {waitingSince !== null && busy === "eval" ? (
           <p>
-            Your AI is reading the data inside the enclave (about 45 to 120 s). <Countdown startedAt={waitingSince} label="waiting" />
-            {slow ? " Still waiting. If OutLayer does not answer within its window, your fee is refunded to your NEAR Intents balance." : ""}
+            The enclave and NEAR AI are evaluating the listing (about 45 to 120 s). <Countdown startedAt={waitingSince} label="waiting" />
+            {slow ? " Still waiting. If OutLayer does not answer within its window, your payment is refunded to your NEAR Intents balance, less the treasury's 10% share of an inspection fee." : ""}
           </p>
         ) : null}
         {evalTx ? <p>Payment <TxLink chain="near" network={network} hash={evalTx.txHash} /></p> : null}

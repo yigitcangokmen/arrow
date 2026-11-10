@@ -23,8 +23,10 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     part: "Program key / PROTECTED_MASTER",
     trust: "OutLayer keystore (TDX) and the shared OutLayer master",
     sees: "Inside the TEE",
-    cannot: "Release to an unpinned wasm or a non-Arrow caller",
-    check: "WasmHash and Predecessor conditions; in-wasm network allowlist; negative test: a non-Arrow caller gets \"Access denied by access condition\" (testnet tx smm9T86m4RU8, mainnet tx Bzzg22r9tRpU, both linked in the README)",
+    cannot: "Release to a non-Arrow caller (tested); release to an unpinned wasm (configured, not tested)",
+    check:
+      "WasmHash and Predecessor conditions are configured; in-wasm network allowlist. Negative tests: an attacker account calling OutLayer directly is refused (testnet tx smm9T86m…, mainnet tx Bzzg22r9…). Both call the pinned wasm, so they test the Predecessor condition only; no transaction tests WasmHash",
+    flag: "NOT PROVEN",
   },
   {
     part: "OutLayer keystore DAO",
@@ -90,12 +92,21 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     flag: "RISKY",
   },
   {
+    part: "Relayer account",
+    trust: "Whoever holds the keys of arrow-relayer.arrowhq.near (the team)",
+    sees: "The intents it relays: signer, msg, IP",
+    cannot: "Spend or move user funds: the relayer holds none",
+    check:
+      "The server's relayer key is a function-call key limited to execute_intents on intents.near. The same account also holds a FullAccess key; whoever holds it can drain the relayer's gas or stop /api/relay. The lock of the market contract does not cover this account",
+    flag: "RISKY",
+  },
+  {
     part: "Gas tank",
-    trust: "The contract's own NEAR balance, topped up by hand",
+    trust: "The operator (tops it up) and OutLayer's NEAR charge",
     sees: "—",
     cannot: "—",
     check:
-      "Every eval and release spends tank NEAR (about 0.0057 NEAR per eval). A failed eval keeps 10% of its fee for the treasury, which is not the tank, so a stream of failing evals drains the tank faster than it refills. Under tank_min the contract refuses new requests (E10); the hosted relay stops evals earlier to keep gas for purchases",
+      "Every eval costs the contract's tank a NEAR charge, whether or not it succeeds. A failed eval keeps the treasury's 10% of its fee, which goes to the treasury and not the tank, so forced failures still run the tank down and op=eval is refused until someone refills it. At most 5 evals are in flight per listing, and the relay limits each signer per server instance",
     flag: "RISKY",
   },
   {
@@ -104,7 +115,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "Usage volume",
     cannot: "See content",
     check:
-      "The mainnet inference key is the NEAR Builders hackathon key. It cannot be topped up and its expiry is not published; if it runs out, evals refund by design.",
+      "The mainnet inference key is the NEAR Builders hackathon key. It cannot be topped up and its expiry is not published; if it runs out, evals fail and are refunded less the treasury's 10% share of their fee.",
     flag: "RISKY",
   },
   {
