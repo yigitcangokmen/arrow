@@ -137,14 +137,13 @@ impl StorageManagement for ArrowUsd {
         self.token.storage_withdraw(amount)
     }
 
+    /// Refused: the token pays every registration itself (mint and transfers), so the standard
+    /// unregister would refund that storage NEAR to the caller, and a mint + unregister loop would
+    /// drain the token until no account can be registered (X12-6).
     #[payable]
     fn storage_unregister(&mut self, force: Option<bool>) -> bool {
-        if let Some((account_id, balance)) = self.token.internal_storage_unregister(force) {
-            log!("Closed @{} with {}", account_id, balance);
-            true
-        } else {
-            false
-        }
+        let _ = force;
+        env::panic_str("Arrow-USD: storage_unregister is not supported (the token paid for the registration)")
     }
 
     fn storage_balance_bounds(&self) -> StorageBalanceBounds {
@@ -189,6 +188,20 @@ mod tests {
         assert_eq!(c.ft_total_supply().0, 10_000_000);
         let logs = get_logs();
         assert!(logs.iter().any(|l| l.starts_with("EVENT_JSON") && l.contains(r#""event":"ft_mint""#)), "{logs:?}");
+    }
+
+    /// X12-6: mint registers the receiver at the token's cost; unregistering would hand that
+    /// storage NEAR to the caller, so a mint + unregister loop drained the token. It is refused.
+    #[test]
+    fn storage_unregister_after_mint_pays_nothing() {
+        ctx(accounts(1), 0);
+        let mut c = ArrowUsd::new();
+        c.mint(accounts(1), U128(1));
+        ctx(accounts(1), 1);
+        let res = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| c.storage_unregister(Some(true))));
+        let text = res.err().and_then(|e| e.downcast_ref::<String>().cloned()).unwrap_or_default();
+        assert!(text.contains("storage_unregister is not supported"), "unregister ran: {text}");
+        assert!(near_sdk::test_utils::get_created_receipts().is_empty(), "storage NEAR was sent back");
     }
 
     #[test]
