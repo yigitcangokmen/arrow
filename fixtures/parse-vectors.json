@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "note": "What arrow-core accepts. Every input with enclave != ok ends every eval as ok:false (refund not_ok), so the /sell and CLI preflight must refuse it too. `generate` = header line, then `row` repeated `rows` times, each ending in \\n.",
+  "cases": [
+    {
+      "name": "csv_ok",
+      "hex": "612c620a312c320a332c340a",
+      "enclave": "ok",
+      "rows": 2
+    },
+    {
+      "name": "csv_bom_start_ok",
+      "hex": "efbbbf612c620a312c320a",
+      "enclave": "ok",
+      "rows": 1
+    },
+    {
+      "name": "jsonl_ok",
+      "hex": "7b2261223a312c2262223a2278227d0a7b2261223a327d0a",
+      "enclave": "ok",
+      "rows": 2
+    },
+    {
+      "name": "csv_cp1252",
+      "hex": "de656869722c6e0a612c310a",
+      "enclave": "Format",
+      "why": "not UTF-8 (Windows-1254 Excel export)"
+    },
+    {
+      "name": "csv_ragged",
+      "hex": "612c620a312c320a330a",
+      "enclave": "Format",
+      "why": "a row with fewer fields than the header"
+    },
+    {
+      "name": "csv_header_only",
+      "hex": "612c620a",
+      "enclave": "Empty",
+      "why": "no data row"
+    },
+    {
+      "name": "jsonl_non_object_line",
+      "hex": "7b2261223a317d0a5b315d0a",
+      "enclave": "Format",
+      "why": "every JSONL line must be an object"
+    },
+    {
+      "name": "jsonl_lone_surrogate",
+      "hex": "7b2261223a225c7564383364227d0a",
+      "enclave": "Format",
+      "why": "an unpaired surrogate escape"
+    },
+    {
+      "name": "jsonl_bom_mid_file",
+      "hex": "7b2261223a317d0aefbbbf7b2261223a327d0a",
+      "enclave": "Format",
+      "why": "a BOM is allowed only at the start of the file"
+    },
+    {
+      "name": "csv_200001_rows",
+      "generate": {
+        "header": "k",
+        "row": "1",
+        "rows": 200001
+      },
+      "enclave": "Limits",
+      "why": "more than 200000 rows"
+    }
+  ]
+}
