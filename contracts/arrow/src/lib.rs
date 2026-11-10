@@ -5,6 +5,7 @@
 pub mod admin;
 pub mod buy;
 pub mod caps;
+pub mod escrow;
 pub mod eval;
 pub mod events;
 pub mod listing;

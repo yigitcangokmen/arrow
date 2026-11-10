@@ -16,6 +16,8 @@ The tests are the source of truth; this is a map.
 | `on_eval(eval_id)`, `on_release(purchase_id)`, `on_program_key()` | self (callbacks) | read the raw OutLayer result; `null`, a bad payload, `ok:false` or a wrong `h` refund in full |
 | `init_program_key()` (payable, ≥ `outlayer_deposit_release`), `set_program(url, hash)`, `set_config(patch)`, `set_paused(paused)` | self only | `set_program` clears the program key; listings sealed to the old program get E13 |
 | `fund_tank()` | anyone (payable) | NEAR for OutLayer deposits and storage |
+| `request_eval(eval_id)`, `request_release(purchase_id)` | anyone (the relayer) | escrow build only, else E16. The notification holds the fee or price and returns the overpay; this call starts OutLayer. A second call fails with E17 |
+| `refund_stale(kind, id)` | anyone, also while paused | escrow build only. `kind` = `eval` or `buy`; after 15 minutes without a request, pays the held amount back (reason `stale`) |
 | `get_config`, `program_pubkey`, `get_listing(listing_id)`, `get_listings(from_index, limit)`, `get_eval(eval_id)`, `get_evals_by_listing(listing_id, from_index, limit)`, `get_purchase(purchase_id)`, `leak_budget(listing_id)`, `version` | views | ids start at 1; `get_listings` reads ids ≥ `from_index`, `get_evals_by_listing` skips `from_index` entries; pages are capped at 50. `get_eval` never returns `sealed_criteria` |
 
 ### `msg`
@@ -64,7 +66,10 @@ EVENT_JSON:{"standard":"arrow","version":"1.0.0","event":"arrow_eval","data":{"p
 EVENT_JSON:{"standard":"arrow","version":"1.0.0","event":"arrow_purchase","data":{"phase":"done","listing_id":1,"purchase_id":1,"buyer":"0x…","price":"250000","h":"…"}}
 EVENT_JSON:{"standard":"arrow","version":"1.0.0","event":"arrow_refund","data":{"kind":"eval","listing_id":1,"id":1,"reason":"null","amount":"100000"}}
 ```
-`arrow_eval` and `arrow_purchase` have `phase` `accepted` (in the notification) and `done` (with `h`). Refund reasons: `null`, `bad_output`, `not_ok`, `hash_mismatch`.
+`arrow_eval` and `arrow_purchase` have `phase` `accepted` (in the notification) and `done` (with `h`). Refund reasons: `null`, `bad_output`, `not_ok`, `hash_mismatch`, and `stale` (escrow only).
+
+### Payment path
+`version()` and `get_config()` report `payment_path`. `notify` (default): the notification calls OutLayer and the callback returns the unused amount, so `intents.near` refunds the buyer. `escrow` (compile-time switch `ARROW_PAYMENT_PATH=escrow`, or the committed default in `src/paths.rs`): the contract holds the fee or price and pays refunds itself; its callbacks return `null`.
 
 ### Gas
 - Testnet: `ft_transfer_call` to the contract needs **300 TGas + 1 yoctoNEAR**.

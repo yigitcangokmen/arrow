@@ -7,12 +7,12 @@
 use near_sdk::base64::{engine::general_purpose::STANDARD, Engine};
 use near_sdk::json_types::U128;
 use near_sdk::serde_json::{self, Value};
-use near_sdk::{env, near, AccountId, Gas, PromiseError, PromiseOrValue};
+use near_sdk::{env, near, AccountId, Gas, Promise, PromiseError, PromiseOrValue};
 
 use crate::events::ArrowEvent;
 use crate::msg::EvalMsg;
 use crate::outlayer::{eval_input, request};
-use crate::paths::{PaymentPath, PAYMENT_PATH};
+use crate::paths::{payment_path, PaymentPath};
 use crate::rail::{pay_out, refund_value, split};
 use crate::types::*;
 use crate::validate::{is_lower_hex, validate_eval};
@@ -106,16 +106,13 @@ impl Contract {
             env::panic_str("Arrow: E09 leak budget exhausted");
         }
         self.assert_tank(self.cfg.outlayer_deposit_eval.0);
-        if PAYMENT_PATH == PaymentPath::Escrow {
-            env::panic_str("Arrow: E16 escrow path disabled");
-        }
         self.charge_eval_cap(&sender);
 
         // Mutations start here. The budget counts the eval now and is never given back.
         listing.evals_used += 1;
         let id = self.next_eval_id;
         self.next_eval_id += 1;
-        let eval = Eval {
+        let mut eval = Eval {
             id,
             listing_id: listing.id,
             buyer: sender,
@@ -132,7 +129,6 @@ impl Contract {
             settled_at_ns: None,
             sealed_criteria: None,
         };
-        let input = eval_input(&listing, &eval, &m.sealed_criteria);
         let (spent, left) = budget(&listing);
         ArrowEvent::ArrowEval {
             phase: "accepted".into(),
@@ -146,21 +142,38 @@ impl Contract {
         }
         .emit();
         self.evals_by_listing.entry(listing.id).or_default().push(id);
+
+        if payment_path() == PaymentPath::Escrow {
+            // The fee stays with the contract until a relayer calls request_eval; the rest goes back now.
+            let unused = amount - eval.fee.0;
+            eval.status = Status::Escrowed;
+            eval.sealed_criteria = Some(m.sealed_criteria);
+            self.listings.insert(listing.id, listing);
+            self.evals.insert(id, eval);
+            return PromiseOrValue::Value(refund_value(rail, unused));
+        }
+        let input = eval_input(&listing, &eval, &m.sealed_criteria);
         self.listings.insert(listing.id, listing);
         self.evals.insert(id, eval);
+        PromiseOrValue::Promise(self.eval_promise(id, input))
+    }
 
+    /// OutLayer eval request chained to `on_eval` (Notify: from the notification; Escrow: from request_eval).
+    pub(crate) fn eval_promise(&self, eval_id: u64, input: String) -> Promise {
         let call = request(&self.cfg, input, self.cfg.outlayer_deposit_eval.0, &self.cfg.limits_eval);
         let callback = Self::ext(env::current_account_id())
             .with_static_gas(ON_EVAL_GAS)
             .with_unused_gas_weight(1)
-            .on_eval(id);
-        PromiseOrValue::Promise(call.then(callback))
+            .on_eval(eval_id);
+        call.then(callback)
     }
 }
 
 #[near]
 impl Contract {
-    /// OutLayer callback. Returns the unused amount in the rail's resolver shape.
+    /// OutLayer callback. Notify: returns the unused amount in the rail's resolver shape.
+    /// Escrow: the overpay was returned at accept time, so a refund is a payout of the fee
+    /// back to the buyer and the return value is `null`.
     #[private]
     pub fn on_eval(&mut self, eval_id: u64) -> Value {
         let mut eval = match self.evals.get(&eval_id) {
@@ -171,6 +184,7 @@ impl Contract {
             Some(l) => l.clone(),
             None => env::panic_str("Arrow: E07 unknown listing"),
         };
+        let escrow = payment_path() == PaymentPath::Escrow;
         let result = classify(env::promise_result_checked(0, MAX_OUTPUT_BYTES), &listing.blob_sha256, Action::Eval);
         eval.settled_at_ns = Some(env::block_timestamp());
         let refund = match result {
@@ -197,12 +211,16 @@ impl Contract {
                 eval.paid.0 - fee
             }
             Err(reason) => {
+                let amount = if escrow { eval.fee } else { eval.paid };
+                if escrow {
+                    pay_out(&self.cfg, eval.rail, eval.buyer.clone(), amount.0, format!("arrow:refund:eval:{eval_id}"));
+                }
                 ArrowEvent::ArrowRefund {
                     kind: "eval".into(),
                     listing_id: listing.id,
                     id: eval_id,
                     reason: reason.into(),
-                    amount: eval.paid,
+                    amount,
                 }
                 .emit();
                 eval.status = Status::Refunded;
@@ -212,7 +230,11 @@ impl Contract {
         };
         let rail = eval.rail;
         self.evals.insert(eval_id, eval);
-        refund_value(rail, refund)
+        if escrow {
+            Value::Null
+        } else {
+            refund_value(rail, refund)
+        }
     }
 }
 

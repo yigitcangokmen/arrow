@@ -4,7 +4,7 @@
 use near_sdk::json_types::U128;
 use near_sdk::near;
 
-use crate::paths::{PaymentPath, ResultPath, PAYMENT_PATH, RESULT_PATH};
+use crate::paths::{payment_path, PaymentPath, ResultPath, RESULT_PATH};
 use crate::types::*;
 use crate::{tank_available, Contract, ContractExt};
 
@@ -30,7 +30,7 @@ pub struct VersionView {
 }
 
 fn payment_path_name() -> &'static str {
-    match PAYMENT_PATH {
+    match payment_path() {
         PaymentPath::Notify => "notify",
         PaymentPath::Escrow => "escrow",
     }

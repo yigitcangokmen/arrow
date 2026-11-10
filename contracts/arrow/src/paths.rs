@@ -37,6 +37,21 @@ pub const PAYMENT_PATH: PaymentPath = match option_env!("ARROW_PAYMENT_PATH") {
 };
 
 #[cfg(test)]
+thread_local! {
+    /// Unit tests set this to cover both paths in one build; production code never sees it.
+    pub static TEST_PAYMENT_PATH: std::cell::Cell<Option<PaymentPath>> = const { std::cell::Cell::new(None) };
+}
+
+/// The payment path this build runs ([`PAYMENT_PATH`]); unit tests may override it per thread.
+pub fn payment_path() -> PaymentPath {
+    #[cfg(test)]
+    if let Some(p) = TEST_PAYMENT_PATH.with(|c| c.get()) {
+        return p;
+    }
+    PAYMENT_PATH
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
 

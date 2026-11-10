@@ -4,13 +4,13 @@
 
 use near_sdk::json_types::U128;
 use near_sdk::serde_json::Value;
-use near_sdk::{env, near, AccountId, Gas, PromiseOrValue};
+use near_sdk::{env, near, AccountId, Gas, Promise, PromiseOrValue};
 
 use crate::eval::{classify, Action};
 use crate::events::ArrowEvent;
 use crate::msg::BuyMsg;
 use crate::outlayer::{release_input, request};
-use crate::paths::{PaymentPath, PAYMENT_PATH};
+use crate::paths::{payment_path, PaymentPath};
 use crate::rail::{pay_out, refund_value, split};
 use crate::types::*;
 use crate::validate::validate_buy;
@@ -35,14 +35,11 @@ impl Contract {
             env::panic_str("Arrow: E08 amount below required");
         }
         self.assert_tank(self.cfg.outlayer_deposit_release.0);
-        if PAYMENT_PATH == PaymentPath::Escrow {
-            env::panic_str("Arrow: E16 escrow path disabled");
-        }
 
         // Mutations start here.
         let id = self.next_purchase_id;
         self.next_purchase_id += 1;
-        let purchase = Purchase {
+        let mut purchase = Purchase {
             id,
             listing_id: listing.id,
             buyer: sender,
@@ -66,21 +63,33 @@ impl Contract {
             h: None,
         }
         .emit();
+        if payment_path() == PaymentPath::Escrow {
+            // The price stays with the contract until a relayer calls request_release.
+            let unused = amount - purchase.price.0;
+            purchase.status = Status::Escrowed;
+            self.purchases.insert(id, purchase);
+            return PromiseOrValue::Value(refund_value(rail, unused));
+        }
         let input = release_input(&listing, &purchase);
         self.purchases.insert(id, purchase);
+        PromiseOrValue::Promise(self.release_promise(id, input))
+    }
 
+    /// OutLayer release request chained to `on_release`.
+    pub(crate) fn release_promise(&self, purchase_id: u64, input: String) -> Promise {
         let call = request(&self.cfg, input, self.cfg.outlayer_deposit_release.0, &self.cfg.limits_release);
         let callback = Self::ext(env::current_account_id())
             .with_static_gas(ON_RELEASE_GAS)
             .with_unused_gas_weight(1)
-            .on_release(id);
-        PromiseOrValue::Promise(call.then(callback))
+            .on_release(purchase_id);
+        call.then(callback)
     }
 }
 
 #[near]
 impl Contract {
-    /// OutLayer callback. Returns the unused amount in the rail's resolver shape.
+    /// OutLayer callback. Notify: returns the unused amount in the rail's resolver shape.
+    /// Escrow: a refund pays the price back to the buyer and the return value is `null`.
     #[private]
     pub fn on_release(&mut self, purchase_id: u64) -> Value {
         let mut p = match self.purchases.get(&purchase_id) {
@@ -91,6 +100,7 @@ impl Contract {
             Some(l) => l.clone(),
             None => env::panic_str("Arrow: E07 unknown listing"),
         };
+        let escrow = payment_path() == PaymentPath::Escrow;
         let result = classify(env::promise_result_checked(0, MAX_OUTPUT_BYTES), &listing.blob_sha256, Action::Release);
         p.settled_at_ns = Some(env::block_timestamp());
         let refund = match result {
@@ -114,12 +124,16 @@ impl Contract {
                 p.paid.0 - price
             }
             Err(reason) => {
+                let amount = if escrow { p.price } else { p.paid };
+                if escrow {
+                    pay_out(&self.cfg, p.rail, p.buyer.clone(), amount.0, format!("arrow:refund:buy:{purchase_id}"));
+                }
                 ArrowEvent::ArrowRefund {
                     kind: "buy".into(),
                     listing_id: listing.id,
                     id: purchase_id,
                     reason: reason.into(),
-                    amount: p.paid,
+                    amount,
                 }
                 .emit();
                 p.status = Status::Refunded;
@@ -129,7 +143,11 @@ impl Contract {
         };
         let rail = p.rail;
         self.purchases.insert(purchase_id, p);
-        refund_value(rail, refund)
+        if escrow {
+            Value::Null
+        } else {
+            refund_value(rail, refund)
+        }
     }
 }
 
