@@ -10,6 +10,7 @@
 mod common;
 
 use common::*;
+use near_sdk::base64::{engine::general_purpose::STANDARD, Engine};
 use serde_json::{json, Value};
 
 async fn matrix(net: Net, mode: &str, bits: u64) -> R<()> {
@@ -245,6 +246,41 @@ async fn eval_in_flight_cap() -> R<()> {
     e.wait_pending(1).await?;
     assert_eq!(e.leak(id).await?["evals_used"].as_u64(), Some(6), "slots were not freed");
     drop(next);
+    Ok(())
+}
+
+/// ARW-C3: the worker publishes a release output after the 200-block yield window. The callback has
+/// already refunded with `null`, and the late output reaches no callback: the refund is final and the
+/// seller is not paid. (The late output's tx args are still public; the trust table says so.)
+#[tokio::test]
+async fn late_publication_after_yield_timeout_is_refused() -> R<()> {
+    let e = setup(Net::Mainnet, Path::Notify).await?;
+    let id = e.list("scored", Some("never"), 10).await?;
+    let seller = e.id(Who::Seller);
+    let k = json!({"v": 1, "ok": true, "k": STANDARD.encode([2u8; 129]), "h": blob_sha()}).to_string();
+    let resume = |out: String| e.stranger.call(e.mock.id(), "resume_last").args_json(json!({"output": out})).gas(near_workspaces::types::Gas::from_tgas(50)).transact();
+
+    // Control: published inside the window, the same output settles the purchase.
+    let status = e.pay(Who::Buyer, PRICE, &buy_msg(id)).transact_async().await?;
+    e.wait_pending(1).await?;
+    assert!(resume(k.clone()).await?.json::<bool>()?, "an in-window output did not resume the yield");
+    let out = tokio::time::timeout(std::time::Duration::from_secs(60), std::future::IntoFuture::into_future(status)).await??;
+    assert!(out.receipt_failures().is_empty(), "{out:?}");
+    assert_eq!(e.get_purchase(1).await?["status"].as_str(), Some("done"));
+    e.worker.fast_forward(5).await?;
+    let s0 = e.usdc_of(&seller).await?;
+    assert_eq!(s0, PRICE * 98 / 100, "the control sale paid the seller 98 %");
+
+    // Late: the yield times out first, then the worker publishes.
+    let status = e.pay(Who::Buyer, PRICE, &buy_msg(id)).transact_async().await?;
+    let out = e.time_out(status).await?;
+    assert_buy_refunded(&e, &out, 2, "null", PRICE).await?;
+    assert!(!resume(k).await?.json::<bool>()?, "a late output resumed the yield");
+    e.worker.fast_forward(5).await?;
+    let p = e.get_purchase(2).await?;
+    assert_eq!((p["status"].as_str(), p["refund_reason"].as_str()), (Some("refunded"), Some("null")));
+    assert!(p["sealed_k_buyer"].is_null() && p["h"].is_null());
+    assert_eq!(e.usdc_of(&seller).await?, s0, "seller paid for a refunded purchase");
     Ok(())
 }
 

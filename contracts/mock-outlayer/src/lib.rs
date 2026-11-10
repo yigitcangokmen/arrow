@@ -8,6 +8,9 @@
 //!
 //! Mode selection: `?mock=<mode>` in `input_data.listing.blob_url`, else the mode stored
 //! with `set_mode`, else `auto`.
+//!
+//! `never` yields; `resume_last(output)` then plays the worker publishing `output` for the newest
+//! yield, inside the 200-block window or after it (a late publication, ARW-C3).
 
 use near_sdk::base64::{engine::general_purpose::STANDARD, Engine};
 use near_sdk::json_types::U128;
@@ -100,6 +103,8 @@ pub struct MockOutlayer {
     requests: Vector<RecordedRequest>,
     transfers: Vector<RecordedTransfer>,
     pending: u32,
+    /// data id of the newest `never` yield, for `resume_last`.
+    last_yield: Option<[u8; 32]>,
 }
 
 #[near]
@@ -111,6 +116,7 @@ impl MockOutlayer {
             requests: Vector::new(StorageKey::Requests),
             transfers: Vector::new(StorageKey::Transfers),
             pending: 0,
+            last_yield: None,
         }
     }
 
@@ -182,6 +188,7 @@ impl MockOutlayer {
                 GasWeight(0),
                 0,
             );
+            self.last_yield = env::read_register(0).and_then(|id| id.try_into().ok());
             env::promise_return(idx);
             return;
         }
@@ -191,13 +198,25 @@ impl MockOutlayer {
         env::value_return(out.as_bytes());
     }
 
-    /// Yield callback. Never resumed by this mock, so it only runs after the
-    /// yield timeout and answers like OutLayer does on timeout: raw `null`.
+    /// Yield callback. Resumed through `resume_last` it answers with the published output; after
+    /// the yield timeout it answers like OutLayer does on timeout: raw `null`.
     #[private]
     pub fn mock_on_response(&mut self, payer: AccountId, refund: U128) {
         self.pending = self.pending.saturating_sub(1);
         self::refund(payer, refund.0);
-        env::value_return(b"null");
+        match env::promise_result_checked(0, 1024) {
+            Ok(out) => env::value_return(&out),
+            Err(_) => env::value_return(b"null"),
+        }
+    }
+
+    /// The worker publishing `output` for the newest yield. Returns false when the yield is gone
+    /// (already resumed or timed out): the output then reaches nobody's callback. Sandbox only.
+    pub fn resume_last(&mut self, output: String) -> bool {
+        match self.last_yield {
+            Some(id) => env::promise_yield_resume(&id, output.as_bytes()),
+            None => false,
+        }
     }
 
     /// Records intents-style NEP-245 transfers (no balances kept).
