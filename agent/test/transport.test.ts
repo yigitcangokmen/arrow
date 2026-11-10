@@ -91,13 +91,26 @@ describe("RELAY-3: the CLI never re-signs after an unclear relay answer", () => 
   it("re-sends the identical signed payload on the next run and signs only once", async () => {
     const w = world([unclear(), done()]);
     const first = await w.transport.pay({ actor: w.actor, amount: 2_000_000n, msg: msg(1) }).catch((e) => e);
-    const tx = await w.transport.pay({ actor: w.actor, amount: 2_000_000n, msg: msg(2) });
+    const tx = await w.transport.pay({ actor: w.actor, amount: 2_000_000n, msg: msg(1) });
     expect(tx.txHash).toBe("TX9");
     expect(w.signMessage).toHaveBeenCalledTimes(1);
     expect(w.relayBodies).toHaveLength(2);
     expect(w.relayBodies[1]).toEqual(w.relayBodies[0]);
     expect(first).toBeInstanceOf(PaymentUnclear);
     expect(readdirSync(join(tmp, "pending"))).toEqual([]); // settled: the next payment signs anew
+  });
+
+  it("R2-2: a different msg or amount for the same listing never re-sends the old signed payload", async () => {
+    const w = world([unclear()]);
+    await w.transport.pay({ actor: w.actor, amount: 2_000_000n, msg: msg(1) }).catch(() => {});
+    for (const [amount, m] of [[2_000_000n, msg(2)], [3_000_000n, msg(1)]] as const) {
+      const e = await w.transport.pay({ actor: w.actor, amount, msg: m }).catch((x) => x);
+      expect(e).toBeInstanceOf(PaymentUnclear);
+      expect(e.message).toMatch(/different payment .*nonce \S+/);
+    }
+    expect(w.relayBodies).toHaveLength(1);
+    expect(w.signMessage).toHaveBeenCalledTimes(1);
+    expect(readdirSync(join(tmp, "pending"))).toHaveLength(1); // the earlier payment stays pending
   });
 
   it("stops without paying when the earlier nonce was already used", async () => {

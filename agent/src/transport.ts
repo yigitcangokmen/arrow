@@ -106,6 +106,12 @@ function writePending(file: string, multipayload: MultiPayload): PendingIntent {
   return p;
 }
 
+/** R2-2: the stored payload pays for exactly this intent (receiver, tokens and msg), not only the same op and listing. */
+function samePayment(pending: PendingIntent, intent: IntentTransfer): boolean {
+  const signed = (JSON.parse(pending.multipayload.payload) as { intents?: IntentTransfer[] }).intents?.[0];
+  return signed !== undefined && signed.receiver_id === intent.receiver_id && JSON.stringify(signed.tokens) === JSON.stringify(intent.tokens) && signed.msg === intent.msg;
+}
+
 /** A signed intent cannot execute after its deadline; two minutes cover the clock difference to the chain. */
 const EXPIRED_AFTER_MS = 120_000;
 
@@ -144,6 +150,8 @@ export function realTransport(p: { network: Network; relay: RelayMode; env?: Rec
       if (Date.parse(pending.deadline) + EXPIRED_AFTER_MS < Date.now()) {
         rmSync(file, { force: true });
         pending = undefined; // expired and never executed: a fresh intent cannot pay twice
+      } else if (!samePayment(pending, intent)) {
+        throw new PaymentUnclear(`a different payment for this was signed earlier (nonce ${pending.nonce}, signer ${pending.signer_id}) and is not settled yet: not signing another. Run the earlier command again to re-send it, or wait until its deadline ${pending.deadline} has passed.`);
       } else {
         log(`re-sending the payment signed earlier (nonce ${pending.nonce}); no new signature`);
       }
