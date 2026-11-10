@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { BASE_USDC_ASSET, NETWORKS, SOL_USDC_ASSET } from "../src/config.ts";
 import { oneclick } from "../src/index.ts";
 
-const { inboundQuoteRequest, outboundQuoteRequest, quote, status, waitForStatus, generateIntent, submitIntent, submitDeposit, OneClickError } = oneclick;
+const { assertWithdrawIntent, inboundQuoteRequest, outboundQuoteRequest, quote, status, waitForStatus, generateIntent, submitIntent, submitDeposit, OneClickError } = oneclick;
 
 const EVM = "0x1111111111111111111111111111111111111111" as const; // never a burn address: 1Click rejects refundTo 0x...dead
 const SOLANA = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"; // example address, used for dry quotes only
@@ -115,6 +115,17 @@ describe("transport", () => {
     await quote(inboundQuoteRequest({ amount: "1", evm: EVM, dry: true }), { fetchImpl: none, sleep: noSleep, jwt: "" });
   });
 
+  it("X12F-4: submit-intent is sent once, even when the answer is lost or a 5xx", async () => {
+    for (const fail of [() => Promise.reject(new TypeError("fetch failed")), () => Promise.resolve(json(502, { message: "bad gateway" }))]) {
+      const fetchImpl = vi.fn(fail) as unknown as typeof fetch;
+      await expect(submitIntent({ standard: "erc191" }, { fetchImpl, sleep: noSleep })).rejects.toBeInstanceOf(OneClickError);
+      expect(fetchImpl).toHaveBeenCalledTimes(1);
+    }
+    const quoteFetch = vi.fn(() => Promise.reject(new TypeError("fetch failed"))) as unknown as typeof fetch; // reads still retry
+    await expect(status("d", { fetchImpl: quoteFetch, sleep: noSleep })).rejects.toBeInstanceOf(OneClickError);
+    expect(quoteFetch).toHaveBeenCalledTimes(4);
+  });
+
   it("posts the documented bodies for deposit/submit, generate-intent and submit-intent", async () => {
     const calls: Array<{ url: string; body: unknown }> = [];
     const fetchImpl = vi.fn(async (url: unknown, init: RequestInit) => {
@@ -146,4 +157,38 @@ describe.skipIf(!process.env.ARROW_E2E)("live dry quotes", () => {
     expect(Number(r.quote.amountOut)).toBeGreaterThan(2_800_000);
     expect(r.quote.depositAddress).toBeUndefined();
   }, 60_000);
+});
+
+describe("QA-08 / CRY-1 / WEB-6: the withdrawal payload is checked before signing", () => {
+  const seller = "0x" + "a".repeat(40);
+  const dep = "f".repeat(64);
+  const exp = { signerId: seller, depositAddress: dep, amount: "1500000" };
+  const payload = (over: Record<string, unknown> = {}, intent: Record<string, unknown> = {}) =>
+    JSON.stringify({
+      signer_id: seller, verifying_contract: "intents.near", deadline: "2026-11-14T00:00:00.000Z", nonce: "AAAA",
+      intents: [{ intent: "transfer", receiver_id: dep, tokens: { [NETWORKS.mainnet.usdcToken]: "1500000" }, ...intent }],
+      ...over,
+    });
+
+  it("accepts exactly one transfer of the quoted amount to the deposit address", () => {
+    expect(() => assertWithdrawIntent(payload(), exp)).not.toThrow();
+    expect(() => assertWithdrawIntent(payload({}, { memo: "1click" }), exp)).not.toThrow();
+  });
+
+  it("refuses add_public_key, another receiver, amount or token, a msg, a second intent, another signer or verifier", () => {
+    const usdc = NETWORKS.mainnet.usdcToken;
+    const bad = [
+      payload({ intents: [{ intent: "add_public_key", public_key: "ed25519:x" }] }),
+      payload({}, { receiver_id: "mallory.near" }),
+      payload({}, { tokens: { [usdc]: "150000000" } }),
+      payload({}, { tokens: { "nep141:wrap.near": "1500000" } }),
+      payload({}, { tokens: { [usdc]: "1500000", "nep141:wrap.near": "1" } }),
+      payload({}, { msg: "{}" }),
+      payload({ intents: [{ intent: "transfer", receiver_id: dep, tokens: { [usdc]: "1500000" } }, { intent: "transfer", receiver_id: "m.near", tokens: { [usdc]: "1" } }] }),
+      payload({ signer_id: "0x" + "b".repeat(40) }),
+      payload({ verifying_contract: "evil.near" }),
+      "not json",
+    ];
+    for (const p of bad) expect(() => assertWithdrawIntent(p, exp), p).toThrow(/nothing was signed/);
+  });
 });

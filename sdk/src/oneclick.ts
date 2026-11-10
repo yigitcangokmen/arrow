@@ -101,7 +101,7 @@ export function outboundQuoteRequest(p: { amount: string; sellerEvm: `0x${string
   };
 }
 
-async function call<T>(method: "GET" | "POST", path: string, o: OneClickOptions, body?: unknown, query?: Record<string, string>): Promise<T> {
+async function call<T>(method: "GET" | "POST", path: string, o: OneClickOptions, body?: unknown, query?: Record<string, string>, retries = RETRY_MS.length): Promise<T> {
   const base = (o.base ?? envOf("ONECLICK_API_BASE") ?? ONECLICK_API_BASE).replace(/\/+$/, "");
   const jwt = o.jwt ?? envOf("ONECLICK_JWT");
   const f = o.fetchImpl ?? fetch;
@@ -112,7 +112,7 @@ async function call<T>(method: "GET" | "POST", path: string, o: OneClickOptions,
   if (jwt) headers.authorization = `Bearer ${jwt}`;
 
   let last: OneClickError | undefined;
-  for (let attempt = 0; attempt <= RETRY_MS.length; attempt++) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
     if (attempt > 0) await sleep(RETRY_MS[attempt - 1]);
     let res: Response;
     try {
@@ -156,9 +156,42 @@ export const generateIntent = (p: { signerId: string; depositAddress: string }, 
     depositAddress: p.depositAddress,
   });
 
-/** POST /v0/submit-intent with the signed payload from generateIntent. */
+/**
+ * QA-08 / CRY-1 / WEB-6: the payload 1Click asks the seller to sign is checked before any signature. It must be exactly one
+ * transfer of `amount` of the token to the quote's deposit address, signed by this seller on intents.near. Anything else
+ * (another receiver or amount, a second intent, add_public_key, a msg that calls a contract) is refused: one signed
+ * add_public_key would hand the seller's whole Intents balance to whoever runs or impersonates the API.
+ */
+export function assertWithdrawIntent(payload: string, expected: { signerId: string; depositAddress: string; amount: string; tokenId?: string }): void {
+  const bad = (why: string) => {
+    throw new OneClickError(`1Click asked to sign something other than this withdrawal (${why}); nothing was signed`, 0, payload);
+  };
+  let p: any;
+  try {
+    p = JSON.parse(payload);
+  } catch {
+    return bad("not JSON");
+  }
+  const tokenId = expected.tokenId ?? NETWORKS.mainnet.usdcToken;
+  if (p?.signer_id !== expected.signerId.toLowerCase()) bad(`signer ${String(p?.signer_id)}`);
+  if (p.verifying_contract !== NETWORKS.mainnet.intents) bad(`verifying contract ${String(p.verifying_contract)}`);
+  if (!Array.isArray(p.intents) || p.intents.length !== 1) bad(`${Array.isArray(p.intents) ? p.intents.length : "no"} intents`);
+  const t = p.intents[0];
+  const extra = Object.keys(t ?? {}).filter((k) => !["intent", "receiver_id", "tokens", "memo"].includes(k));
+  if (t?.intent !== "transfer") bad(`intent ${String(t?.intent)}`);
+  if (extra.length) bad(`unexpected ${extra.join(", ")}`);
+  if (t.receiver_id !== expected.depositAddress) bad(`receiver ${String(t.receiver_id)}`);
+  const tokens = Object.entries(t.tokens ?? {});
+  if (tokens.length !== 1 || tokens[0][0] !== tokenId || tokens[0][1] !== expected.amount) bad(`tokens ${JSON.stringify(t.tokens)}`);
+}
+
+/**
+ * POST /v0/submit-intent with the signed payload from generateIntent. Never retried (X12F-4): a lost answer may hide an
+ * accepted withdrawal, and the duplicate would be refused, so after any error the caller polls /v0/status for the deposit
+ * address instead of reporting a failure.
+ */
 export const submitIntent = (signedData: unknown, o: OneClickOptions = {}) =>
-  call<{ intentHash: string; correlationId: string }>("POST", "/v0/submit-intent", o, { type: "swap_transfer", signedData });
+  call<{ intentHash: string; correlationId: string }>("POST", "/v0/submit-intent", o, { type: "swap_transfer", signedData }, undefined, 0);
 
 /** Polls /v0/status until SUCCESS, REFUNDED or FAILED. Throws when timeoutMs passes first. */
 export async function waitForStatus(
