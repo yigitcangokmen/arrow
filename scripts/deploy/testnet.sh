@@ -17,7 +17,7 @@ cd "$(git rev-parse --show-toplevel)"
 ENV_FILE=$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' .env) # .env is a symlink in worktrees
 envget() { grep -E "^$1=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true; }
 OWNER=arrowhq.testnet
-C=$(envget ARROW_CONTRACT_TESTNET); C=${C:-arrow.arrowhq.testnet}
+C=$(envget ARROW_CONTRACT_TESTNET); C=${C:-arrow-v2.arrowhq.testnet}
 TOKEN=arrow-usd.arrowhq.testnet
 RPC=https://rpc.testnet.near.org
 CREDS=$HOME/.near-credentials/testnet

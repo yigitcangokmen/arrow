@@ -4,7 +4,7 @@
   "usdc_token_id": "arrow-usd.arrowhq.testnet",
   "program_wasm_url": "__PROGRAM_WASM_URL__",
   "program_wasm_hash": "__PROGRAM_WASM_SHA256__",
-  "secrets_ref": { "profile": "arrow", "account_id": "arrow.arrowhq.testnet" },
+  "secrets_ref": { "profile": "arrow", "account_id": "arrow-v2.arrowhq.testnet" },
   "treasury": "arrowhq.testnet",
   "fee_bps_eval": 1000,
   "fee_bps_sale": 200,

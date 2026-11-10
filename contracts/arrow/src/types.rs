@@ -243,7 +243,7 @@ mod tests {
         assert_eq!(crate::validate::validate_config(&cfg), Ok(()), "{name}");
         assert_eq!((cfg.secrets_ref.profile.as_str(), cfg.fee_bps_eval, cfg.fee_bps_sale), ("arrow", 1000, 200));
         if cfg!(feature = "testnet") {
-            assert_eq!((cfg.intents.is_none(), cfg.usdc_token_id.as_str(), cfg.secrets_ref.account_id.as_str()), (true, "arrow-usd.arrowhq.testnet", "arrow.arrowhq.testnet"));
+            assert_eq!((cfg.intents.is_none(), cfg.usdc_token_id.as_str(), cfg.secrets_ref.account_id.as_str()), (true, "arrow-usd.arrowhq.testnet", "arrow-v2.arrowhq.testnet"));
         } else {
             assert_eq!(cfg.intents.as_ref().map(|a| a.as_str()), Some("intents.near"));
             assert!(cfg.usdc_token_id.starts_with("nep141:17208628"));
