@@ -49,7 +49,7 @@ describe("fixtures v1", () => {
       if (v.msg.op === "list") {
         expect(v.msg.sealed_k).toHaveLength(260);
         expect(Buffer.from(v.msg.sealed_k, "base64")).toHaveLength(193);
-      } else {
+      } else if (v.msg.op !== "rehost") {
         expect(v.msg.buyer_pk).toMatch(/^04[0-9a-f]{128}$/);
       }
     }
