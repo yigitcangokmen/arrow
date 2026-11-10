@@ -1,7 +1,7 @@
 # fixtures/
 
 - `blobs/`: ciphertexts of the demo listings (`<sha256>.bin`), also served from `web/public/blobs/`. The host is untrusted because the sha256 is on chain.
-- `team-made/`: the team's real dataset (Agent Market catalog + job stats, November 2026), with source URLs and collection date. Labelled "team-made".
+- `team-made/`: the team's real dataset, NEAR mainnet chain statistics (200 rows, one per 600 blocks, about 19 hours) computed from public RPC, November 2026. `SOURCE.md` names the RPC endpoint, the block heights and the UTC collection time. Labelled "team-made" and not synthetic. Rebuild with `npx tsx scripts/src/collect-chain-stats.ts`; `--check` verifies it without network.
 - Demo datasets: fictional and labelled "synthetic".
 - `minhash-params.json`, `minhash-vectors.json`, `ecies-vectors.json`: shared TS ↔ Rust test vectors.
 - `criteria/`: example buyer criteria, including `print-row-1.json` (README step 7) and `demo.json`.
