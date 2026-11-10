@@ -1,7 +1,7 @@
 // WS4-T04 acceptance: the ERC-191 transfer intent (offline), plus the live unfunded simulate (ARROW_E2E=1).
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { recoverMessageAddress } from "viem";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   arrowTransferIntent, buildAndSignTransfer, buildPayload, MIN_GAS_NOTIFY, NETWORKS, scalarFromLabel, signPayloadViem, signRawErc191, simulateIntents,
 } from "../src/index.ts";
@@ -107,4 +107,25 @@ describe.skipIf(!process.env.ARROW_E2E)("simulate (network)", () => {
     expect(err).toMatch(/insufficient balance or overflow|account '0x[0-9a-f]{40}' not found/);
     expect(err).not.toMatch(/invalid signature|public key|invalid nonce|invalid salt|deadline|wrong verifying_contract|JSON:/);
   }, 60_000);
+});
+
+describe("X12-T06: deadlines from chain time", () => {
+  it("a computer clock 15 min slow still signs a deadline 10 min past the chain's time", async () => {
+    const chain = Date.UTC(2026, 10, 12, 10, 0, 0);
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(chain - 15 * 60_000);
+    const bytes = (v: unknown) => Array.from(new TextEncoder().encode(JSON.stringify(v)));
+    vi.stubGlobal("fetch", vi.fn(async (_u: string, init: RequestInit) => {
+      const { method } = JSON.parse(String(init.body));
+      const result = method === "block" ? { header: { timestamp_nanosec: (BigInt(chain) * 1_000_000n).toString() } } : { result: bytes("252812b3") };
+      return new Response(JSON.stringify({ jsonrpc: "2.0", id: "arrow", result }));
+    }));
+    try {
+      const { payload } = await buildAndSignTransfer({ signer: account, intents: [transfer()] });
+      expect(Date.parse(payload.deadline)).toBeGreaterThan(chain + 9 * 60_000);
+    } finally {
+      vi.unstubAllGlobals();
+      vi.useRealTimers();
+    }
+  });
 });

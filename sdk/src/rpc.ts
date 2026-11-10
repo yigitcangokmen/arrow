@@ -134,6 +134,14 @@ export function functionCallArgs(tx: any, { receiverId, methodName }: { receiver
   return found;
 }
 
+/** The latest block's timestamp in ms (finality optimistic): the clock intents.near checks deadlines against (X12-T06). */
+export async function chainNowMs(network: Network = "mainnet", o?: RpcOptions): Promise<number> {
+  const b = await rpc<{ header?: { timestamp_nanosec?: string } }>(network, "block", { finality: "optimistic" }, o);
+  const ns = b?.header?.timestamp_nanosec;
+  if (typeof ns !== "string" || !/^\d+$/.test(ns)) throw new RpcError("block answer has no timestamp");
+  return Number(BigInt(ns) / 1_000_000n);
+}
+
 /** intents.near current_salt ("252812b3") as 4 bytes. */
 export async function currentSalt(network: Network = "mainnet", o?: RpcOptions): Promise<Uint8Array> {
   const intents = NETWORKS[network].intents;

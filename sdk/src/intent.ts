@@ -5,7 +5,7 @@ import {
 } from "@defuse-protocol/intents-sdk";
 import type { Account } from "viem";
 import { MIN_GAS_NOTIFY, NETWORKS, type Network } from "./config.ts";
-import { currentSalt } from "./rpc.ts";
+import { chainNowMs, currentSalt } from "./rpc.ts";
 
 export type IntentTransfer = Extract<IntentPrimitive, { intent: "transfer" }>;
 export type { IntentPayload, IntentPrimitive };
@@ -64,6 +64,9 @@ export async function buildAndSignTransfer(p: {
   deadlineMs?: number;
 }): Promise<{ payload: IntentPayload & { signer_id: string }; multipayload: MultiPayloadErc191 }> {
   const salt = await currentSalt(p.network ?? "mainnet");
-  const payload = buildPayload({ signer: p.signer.address, intents: p.intents, salt, deadlineMs: p.deadlineMs });
+  // X12-T06: the deadline counts from chain time, so a computer clock 10+ min slow no longer signs an already expired intent.
+  // If the block read fails, the computer clock is used as before.
+  const now = await chainNowMs(p.network ?? "mainnet").catch(() => Date.now());
+  const payload = buildPayload({ signer: p.signer.address, intents: p.intents, salt, deadlineMs: p.deadlineMs, now });
   return { payload, multipayload: await signPayloadViem(payload, p.signer) };
 }
