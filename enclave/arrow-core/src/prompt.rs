@@ -36,7 +36,8 @@ pub fn escape_angles(json: &str) -> String {
     json.replace('<', "\\u003c").replace('>', "\\u003e")
 }
 
-fn truncate(s: &str, cap: usize) -> &str {
+/// The first `cap` characters: what the prompt shows of a cell (and all the G5 scan reads, ENC-A4).
+pub fn truncate(s: &str, cap: usize) -> &str {
     match s.char_indices().nth(cap) {
         Some((i, _)) => s.get(..i).unwrap_or(s),
         None => s,
