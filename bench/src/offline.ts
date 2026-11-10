@@ -167,7 +167,10 @@ export function summarize(inp: Inputs): Summary {
   const liveRows = rows.filter((r) => r.live !== "n/a");
   const llmRows = rows.filter((r) => r.llm_only !== "n/a");
 
-  const states = live.filter((e) => e.idx !== null).map((e) => e.idx!);
+  // idx 0..50 (scored) and 0..2 (verdict) are different state spaces: pooled, verdict BUY and scored PASS·1·1 would count as one symbol
+  const statesOf = (mode: "scored" | "verdict") => live.filter((e) => e.idx !== null && e.mode === mode).map((e) => e.idx!);
+  const scoredStates = statesOf("scored");
+  const verdictStates = statesOf("verdict");
   const cl = closure(live.map((e) => ({ idx: e.idx, mode: e.mode, output_bytes: e.outlayer.output_bytes, status: e.status })));
   const count = (xs: { suite: string }[]) => Object.fromEntries(["room", "quality", "leak", "mainnet-subset"].map((s) => [s, xs.filter((x) => x.suite === s).length]));
 
@@ -179,7 +182,8 @@ export function summarize(inp: Inputs): Summary {
       native_gates: inp.native ? Object.keys(inp.native).length : 0,
     },
     closure: { n: cl.n, violations: cl.violations.length, refunds: cl.refunds },
-    entropy_bits: { n: states.length, bits: fx(outputEntropy(states)), max_bits: fx(Math.log2(51)) },
+    entropy_bits: { n: scoredStates.length, bits: fx(outputEntropy(scoredStates)), max_bits: fx(Math.log2(51)) },
+    entropy_bits_verdict: { n: verdictStates.length, bits: fx(outputEntropy(verdictStates)), max_bits: fx(Math.log2(3)) },
     leak: {
       evals: leak.length,
       verbatim: { evals: verb.length, substring20_hits: sub, canary_hits: can },

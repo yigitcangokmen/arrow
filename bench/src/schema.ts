@@ -119,7 +119,7 @@ export const SignaturesFile = z
   .refine((s) => s.captured <= s.total, { message: "captured must not exceed total" });
 export type SignaturesFile = z.infer<typeof SignaturesFile>;
 
-// native gates (bench:native, or the WS-3 injection_room test with ARROW_WRITE_NATIVE_GATES=1): {v, cases: {dataset_id: gate}}
+// native gates (the WS-3 injection_room test with ARROW_WRITE_NATIVE_GATES=1 writes native-gates.json; bench:native writes native-stats.json in the same shape): {v, cases: {dataset_id: gate}}
 export const NativeGate = z.looseObject({
   dataset: z.string().optional(),
   regex_flag: z.boolean().nullable(),
@@ -136,7 +136,8 @@ export const Summary = z.strictObject({
   v: z.literal(1),
   inputs: z.strictObject({ live: z.record(z.string(), z.number().int()), baselines: z.record(z.string(), z.number().int()), native_gates: z.number().int() }),
   closure: z.strictObject({ n: z.number().int(), violations: z.number().int(), refunds: z.number().int() }),
-  entropy_bits: z.strictObject({ n: z.number().int(), bits: z.string(), max_bits: z.string() }),
+  entropy_bits: z.strictObject({ n: z.number().int(), bits: z.string(), max_bits: z.string() }), // scored mode, cap log2 51
+  entropy_bits_verdict: z.strictObject({ n: z.number().int(), bits: z.string(), max_bits: z.string() }), // verdict mode, cap log2 3
   leak: z.strictObject({
     evals: z.number().int(),
     verbatim: z.strictObject({ evals: z.number().int(), substring20_hits: z.number().int(), canary_hits: z.number().int() }),

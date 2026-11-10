@@ -932,6 +932,28 @@
         ],
         "additionalProperties": false
       },
+      "entropy_bits_verdict": {
+        "type": "object",
+        "properties": {
+          "n": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "bits": {
+            "type": "string"
+          },
+          "max_bits": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "n",
+          "bits",
+          "max_bits"
+        ],
+        "additionalProperties": false
+      },
       "leak": {
         "type": "object",
         "properties": {
@@ -1450,6 +1472,7 @@
       "inputs",
       "closure",
       "entropy_bits",
+      "entropy_bits_verdict",
       "leak",
       "quality",
       "room"

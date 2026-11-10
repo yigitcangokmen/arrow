@@ -139,6 +139,23 @@ describe("offline", () => {
     expect(s.leak.error_path).toEqual({ n: 1, refunded_or_error: 1 });
     expect(s.leak.targeted).toMatchObject({ n: 3, accuracy: "0.667" });
   });
+  it("NUM-5: verdict-mode and scored-mode states are separate symbols with their own caps", () => {
+    const inp = loadInputs(FIX);
+    const base = inp.live.find((e) => e.status === "done" && e.idx !== null)!;
+    const mk = (mode: "scored" | "verdict", i: number) => ({ ...base, mode, idx: 1, case_id: `${base.case_id}#${mode}${i}` });
+    const live = [0, 1, 2, 3, 4].flatMap((i) => [mk("scored", i), mk("verdict", i)]);
+    const s = summarize({ ...inp, live });
+    // five results per mode, each mode constant: 0 bits against its own cap (the old pooled count said n=10 against log2 51)
+    expect(s.entropy_bits).toEqual({ n: 5, bits: "0.000", max_bits: "5.672" });
+    expect(s.entropy_bits_verdict).toEqual({ n: 5, bits: "0.000", max_bits: "1.585" });
+    // scored idx 1 and 2, verdict idx 1 and 0: one bit in each mode (pooled by bare idx it would be 3 symbols, 1.5 bits)
+    const half = [mk("scored", 0), mk("verdict", 0), { ...mk("scored", 9), idx: 2 }, { ...mk("verdict", 9), idx: 0 }];
+    const t = summarize({ ...inp, live: half });
+    expect(t.entropy_bits).toMatchObject({ n: 2, bits: "1.000" });
+    expect(t.entropy_bits_verdict).toMatchObject({ n: 2, bits: "1.000" });
+    expect(renderMarkdown(t, "table")).toContain("scored results");
+    expect(renderMarkdown(t, "table")).toContain("verdict-mode results");
+  });
   it("offline_has_no_fetch_outside_verify_chain", () => {
     for (const f of ["offline.ts", "metrics.ts", "report.ts", "schema.ts", "truth.ts"]) expect(read(`bench/src/${f}`), f).not.toMatch(/\bfetch\s*\(/);
     expect(read("bench/src/offline.ts")).toMatch(/await import\("\.\/chain\.ts"\)/); // the only network path, imported lazily
