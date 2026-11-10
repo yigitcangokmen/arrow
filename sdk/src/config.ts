@@ -27,7 +27,7 @@ export const NETWORKS: Record<Network, NetworkConfig> = {
   testnet: {
     rpc: ["https://rpc.testnet.fastnear.com", "https://rpc.testnet.near.org"],
     archivalRpc: "https://archival-rpc.testnet.fastnear.com",
-    contract: "arrow.arrowhq.testnet",
+    contract: "arrow-v2.arrowhq.testnet",
     usdcToken: "arrow-usd.arrowhq.testnet",
     outlayer: "outlayer.testnet",
     outlayerApi: "https://testnet-api.outlayer.ai",

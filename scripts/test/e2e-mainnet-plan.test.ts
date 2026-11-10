@@ -163,7 +163,7 @@ function setup(o: { mainnet?: boolean; release?: MainnetDeps["release"]; confirm
         : e,
     );
   const deps: MainnetDeps = {
-    ctx, dry: !o.mainnet, buyerId: BUYER, sellerId: SELLER, contract: "arrow.arrowhq.testnet",
+    ctx, dry: !o.mainnet, buyerId: BUYER, sellerId: SELLER, contract: NETWORKS.testnet.contract,
     release: o.release === undefined ? { sha: SHA, source: "release/sha256.txt", frozen: true } : o.release,
     balanceOf: async (id) => w.balances.get(id) ?? 0n,
     host: async (blob, sha) => {

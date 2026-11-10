@@ -154,7 +154,7 @@ describe("e2e-testnet steps", () => {
     const r = await runE2e(deps, { steps: new Set([0]), publishDemo: true, listingsOut: out });
     expect(r.results.at(-1)).toMatchObject({ n: 9, status: "PASS" });
     const file = JSON.parse(readFileSync(out, "utf8"));
-    expect(file).toMatchObject({ contract: "arrow.arrowhq.testnet", pass_listing_id: 1, buy_listing_id: 2 });
+    expect(file).toMatchObject({ contract: "arrow-v2.arrowhq.testnet", pass_listing_id: 1, buy_listing_id: 2 });
     expect(file.program_wasm_sha256).toMatch(/^[0-9a-f]{64}$/);
     const titles = [...w.listings.values()].map((l) => l.title);
     expect(titles[0]).toContain("[synthetic] Q1 2027 token unlock schedule");
