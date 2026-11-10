@@ -1,7 +1,7 @@
 // WS4-T14: the judge path. A fresh testnet account, test money, two evals, a purchase and a hash check, in about three minutes.
 //   npm run try:testnet -- [--criteria <file>] [--with-list --blob-url <https> [--file <csv>]] [--reset]
 //                          [--sponsor-url <url>] [--listings <file>] [--record]
-// Scope (DEC P-01, D4-12): eval (PASS scene) -> eval (BUY scene) -> buy -> decrypt -> sha256 check. The judge cannot host a blob,
+// Scope (DEC P-01, D4-12): eval (PASS scene) and eval (BUY scene) at the same time -> buy -> decrypt -> sha256 check. The judge cannot host a blob,
 // so listing is shown by `npm run arrow -- list --dry-run` and the e2e evidence; `--with-list` lists a file if you host the blob.
 // The account key and the decrypt key live in ~/.config/arrow/judge-testnet.json (mode 0600, outside the repo). Nothing is committed.
 // Exit: 0 ok · 1 error · 2 a cap or the enclave stopped the run (see bench:offline).
@@ -148,7 +148,19 @@ export async function runTry(d: TryDeps, o: TryOpts): Promise<TryReport> {
   const demo = d.listings();
   const live = await d.programHash();
   if (demo.program_wasm_sha256 !== live) throw new TryStop("testnet demo listings are stale; re-run e2e-testnet --publish-demo (team step)");
-  const ctx: Ctx = { ...d.ctx, actor: (role, flags) => resolveActor("testnet", role, { account: acct.id, ...flags }) };
+  // The two evals wait on the enclave at the same time (60-118 s each), but they are signed by one key, so the payments go out
+  // one after the other: two transactions with the same nonce would make one of them fail.
+  let paying: Promise<unknown> = Promise.resolve();
+  const inTurn = <T>(fn: () => Promise<T>): Promise<T> => {
+    const turn = paying.then(fn, fn);
+    paying = turn.catch(() => {});
+    return turn;
+  };
+  const ctx: Ctx = {
+    ...d.ctx,
+    transport: { ...d.ctx.transport, pay: (a) => inTurn(() => d.ctx.transport.pay(a)) },
+    actor: (role, flags) => resolveActor("testnet", role, { account: acct.id, ...flags }),
+  };
 
   if (o.withList) {
     const file = o.withList.file ?? join(d.dir, "try-testnet-sample.csv");
@@ -164,15 +176,21 @@ export async function runTry(d: TryDeps, o: TryOpts): Promise<TryReport> {
   const criteriaDir = join(d.repo, "fixtures/criteria");
   const run = async (what: string, listingId: number, criteria: string): Promise<EvalResult> => {
     try {
-      const r = await evalCommand(ctx, { listingId, criteria });
+      const r = await evalCommand({ ...ctx, progress: (l) => ctx.progress?.(`${what}: ${l}`) }, { listingId, criteria });
       d.say(`${what}: ${formatEval(r)}`);
       return r;
     } catch (e) {
       return capOrRethrow(e);
     }
   };
-  const pass = await run("PASS scene", demo.pass_listing_id, o.criteria ?? join(criteriaDir, "demo.json"));
-  const buyScene = await run("BUY scene", demo.buy_listing_id, join(criteriaDir, "demo-buy.json"));
+  d.say("PASS and BUY scenes: two evals in the enclave at the same time (about 1-2 minutes)");
+  const settled = await Promise.allSettled([
+    run("PASS scene", demo.pass_listing_id, o.criteria ?? join(criteriaDir, "demo.json")),
+    run("BUY scene", demo.buy_listing_id, join(criteriaDir, "demo-buy.json")),
+  ]);
+  const failed = settled.find((x): x is PromiseRejectedResult => x.status === "rejected");
+  if (failed) throw failed.reason;
+  const [pass, buyScene] = settled.map((x) => (x as PromiseFulfilledResult<EvalResult>).value) as [EvalResult, EvalResult];
   if (pass.status === "refunded" && buyScene.status === "refunded" && pass.refund_reason === "not_ok" && buyScene.refund_reason === "not_ok") {
     throw new TryStop(ENCLAVE_MESSAGE, EXIT.usage);
   }

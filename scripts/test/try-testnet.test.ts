@@ -181,6 +181,62 @@ describe("try-testnet", () => {
     expect(err.exit).toBe(2);
   });
 
+  it("pass_and_buy_evals_run_at_the_same_time_but_pay_one_at_a_time", async () => {
+    seedJudge();
+    const a = await setup();
+    const log: string[] = [];
+    let paying = 0;
+    let maxPaying = 0;
+    const realPay = a.deps.ctx.transport.pay;
+    a.deps.ctx.transport.pay = async (x) => {
+      paying++;
+      maxPaying = Math.max(maxPaying, paying);
+      await new Promise((r) => setTimeout(r, 5));
+      try {
+        const out = await realPay(x);
+        const m = JSON.parse(x.msg);
+        log.push(`pay:${m.op}:${m.listing_id}`);
+        return out;
+      } finally {
+        paying--;
+      }
+    };
+    // an eval stays pending until the other one has been paid; run one after the other, the first would never finish
+    let polls = 0;
+    const realEval = a.deps.ctx.views.eval;
+    a.deps.ctx.views.eval = async (id) => {
+      const evals = log.filter((l) => l.startsWith("pay:eval")).length;
+      if (evals < 2 && polls++ < 500) {
+        await new Promise((r) => setTimeout(r, 2)); // the fake sleep is a no-op, so give the other payment a real turn
+        return null;
+      }
+      log.push(`done:eval:${id}`);
+      return realEval(id);
+    };
+    const r = await runTry(a.deps, {});
+    expect(r.exit).toBe(0);
+    expect(log.slice(0, 2)).toEqual([`pay:eval:${a.ids.L1}`, `pay:eval:${a.ids.L2}`]);
+    expect(log.indexOf("done:eval:1")).toBeGreaterThan(1);
+    expect(maxPaying).toBe(1);
+    expect(a.lines.findIndex((l) => l.startsWith("PASS scene:"))).toBeGreaterThan(-1);
+    expect(a.lines.findIndex((l) => l.startsWith("BUY scene:"))).toBeGreaterThan(-1);
+  });
+
+  it("when one of the two parallel evals fails, the run stops with that error after both have settled", async () => {
+    seedJudge();
+    const a = await setup();
+    const real = a.deps.ctx.transport.pay;
+    a.deps.ctx.transport.pay = async (x) => {
+      if (JSON.parse(x.msg).op !== "eval" || JSON.parse(x.msg).listing_id !== a.ids.L2) return real(x);
+      a.w.txs.set("capped", { final_execution_status: "FINAL", status: { Failure: "Smart contract panicked: Arrow: E12 global eval cap reached" }, receipts_outcome: [] });
+      return { txHash: "capped", signerId: x.actor.id, url: "https://testnet.nearblocks.io/txns/capped" };
+    };
+    const err = await runTry(a.deps, {}).catch((e) => e);
+    expect(err).toBeInstanceOf(TryStop);
+    expect(err.exit).toBe(2);
+    expect(a.lines.some((l) => l.startsWith("PASS scene:"))).toBe(true);
+  });
+
   it("a stale demo listing file is reported before any payment", async () => {
     seedJudge();
     const a = await setup({}, { programHash: async () => "cd".repeat(32) });
