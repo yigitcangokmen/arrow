@@ -43,6 +43,35 @@ try {
   // not frozen yet
 }
 
+// /attack: only the fields the tables show. The attack payload text stays in bench/, it is not shipped to the page.
+const jsonl = (p) => {
+  try {
+    return readFileSync(p, "utf8").split("\n").filter((l) => l.trim() !== "").map((l) => JSON.parse(l));
+  } catch {
+    return [];
+  }
+};
+const liveRows = (suite) =>
+  jsonl(join(repo, "bench/results/live", `${suite}.jsonl`)).map((e) => ({
+    case_id: e.case_id, network: e.network, tx_hash: e.tx_hash, status: e.status, state: e.state, eval_id: e.eval_id, refund_reason: e.refund_reason,
+  }));
+const roomManifest = readJson(join(repo, "bench/injection-room/attacks.json"));
+const benchRoom = roomManifest
+  ? {
+      attacks: (roomManifest.attacks ?? []).map((a) => ({ id: a.id, category: a.category, technique: a.technique, lang: a.lang, regex_expected: a.regex_expected, mainnet_subset: a.mainnet_subset })),
+      controls: (roomManifest.controls ?? []).map((c) => ({ id: c.id, expected: c.expected })),
+    }
+  : null;
+const qualityWrappers = filesIn(join(repo, "bench/criteria/quality"), ".json").map((f) => {
+  const w = readJson(join(repo, "bench/criteria/quality", f));
+  return { id: w.id, category: w.category, expected: w.expected };
+});
+const benchLive = {
+  room: liveRows("room"),
+  "mainnet-subset": liveRows("mainnet-subset"),
+  quality: { wrappers: qualityWrappers, llmOnly: jsonl(join(repo, "bench/results/baselines/llm_only.jsonl")).map((b) => ({ case_id: b.case_id, verdict: b.parsed?.verdict ?? null })) },
+};
+
 mkdirSync(join(web, "generated"), { recursive: true });
 writeFileSync(
   join(web, "generated/data.ts"),
@@ -55,6 +84,8 @@ export const teamAccounts: string[] = ${JSON.stringify(teamAccounts)};
 export const bench: Record<string, unknown> = ${JSON.stringify(bench)};
 export const criteria: Record<string, unknown> = ${JSON.stringify(criteria)};
 export const releaseSha256: string | null = ${JSON.stringify(releaseSha256)};
+export const benchRoom: unknown = ${JSON.stringify(benchRoom)};
+export const benchLive: Record<string, unknown> = ${JSON.stringify(benchLive)};
 `,
 );
 console.log(`copy-assets: dcap wasm, ${filesIn(join(repo, "fixtures/demo"), ".csv").length} demo csv, ${Object.keys(bench).length} bench, ${Object.keys(criteria).length} criteria`);
