@@ -13,7 +13,7 @@ export { bytesToHex, hexToBytes };
 const NONCE_LEN = 24;
 const TAG_LEN = 16;
 export const ECIES_OVERHEAD = 97; // ephemeral pk 65 + nonce 16 + tag 16
-const SECP256K1_N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+export const SECP256K1_N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
 
 export const sha256Hex = (b: Uint8Array): string => bytesToHex(sha256(b));
 

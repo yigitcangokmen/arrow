@@ -7,3 +7,4 @@ export * from "./crypto.ts";
 export * from "./minhash.ts";
 export * from "./rpc.ts";
 export * from "./intent.ts";
+export * from "./viewingKey.ts";
