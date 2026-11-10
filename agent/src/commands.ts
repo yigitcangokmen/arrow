@@ -218,7 +218,10 @@ export async function decryptCommand(ctx: Ctx, a: { purchaseId: number; demoKey?
 
   const ok = checks.every((c) => c.ok);
   const out = resolve(a.out ?? `arrow-listing-${listing.id}-purchase-${p.id}.dat`);
-  if (ok) writeFileSync(out, plain);
+  if (ok) {
+    mkdirSync(dirname(out), { recursive: true });
+    writeFileSync(out, plain);
+  }
   return { purchase_id: num(p.id), listing_id: num(p.listing_id), checks, ok, ...(ok && { out, bytes: plain.length }) };
 }
 
