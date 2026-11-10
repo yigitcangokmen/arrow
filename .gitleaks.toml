@@ -1,0 +1,8 @@
+title = "arrow"
+[extend]
+useDefault = true
+[allowlist]
+description = "test vectors derive keys from public labels (W1-09); sanitized planning copies only if W-17 says commit; an empty .env.example value makes generic-api-key read the next variable NAME as the secret"
+paths = ['''fixtures/.*-vectors\.json''', '''docs/planning/.*''']
+regexTarget = "secret"
+regexes = ['''^[A-Z][A-Z0-9_]*=?$''']

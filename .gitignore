@@ -1,0 +1,40 @@
+# Node
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+.vercel/
+
+# Rust
+target/
+**/target/
+
+# Env and secrets (never commit keys, including testnet ones)
+.env
+.env.*
+!.env.example
+keys/
+*.pem
+*.key
+*-key.json
+*_key.json
+*.keystore.json
+**/credentials/*.json
+id.json
+
+# OutLayer / near-cli local state
+.near-credentials/
+.outlayer/
+
+# Hackathon submission payload contains personal data
+submission*.json
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Local agent instructions (never committed)
+/*.local.md

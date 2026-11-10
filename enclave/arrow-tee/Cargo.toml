@@ -1,0 +1,24 @@
+[package]
+name = "arrow-tee"
+description = "OutLayer WASI P2 program (wasm32-wasip2): eval / release. No stderr, ever."
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+# WASI binary, as in out-layer/private-dao-example and ai-example
+[[bin]]
+name = "arrow-tee"
+path = "src/main.rs"
+
+[dependencies]
+arrow-core = { path = "../arrow-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+hex = { workspace = true }
+wasi-http-client = { workspace = true }
+ecies = { workspace = true }
+libsecp256k1 = { workspace = true }
+k256 = { workspace = true }
+hkdf = { workspace = true }
+sha2 = { workspace = true }
+chacha20poly1305 = { workspace = true }

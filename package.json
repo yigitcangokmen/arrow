@@ -1,0 +1,31 @@
+{
+  "name": "arrow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Arrow: inspect-before-pay data market on NEAR (OutLayer TDX + NEAR AI + NEAR Intents)",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "workspaces": [
+    "sdk",
+    "web",
+    "agent",
+    "scripts",
+    "bench"
+  ],
+  "scripts": {
+    "verify": "tsx scripts/src/verify.ts",
+    "try:testnet": "tsx scripts/src/try-testnet.ts",
+    "replay": "tsx scripts/src/replay.ts",
+    "bench:offline": "tsx bench/src/offline.ts",
+    "bench:live": "tsx bench/src/live.ts",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "5.1.0"
+  }
+}

@@ -1,0 +1,26 @@
+[package]
+name = "arrow"
+description = "Arrow market contract: mt_on_transfer (Intents) -> OutLayer request_execution -> on_eval/on_release"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+# Fill [package.metadata.near.reproducible_build] (image + image_digest) from `cargo near new` with cargo-near 0.23.0
+# before the final NEP-330 build. Not filled here to avoid a guessed digest.
+
+[features]
+# Enables ft_on_transfer (arrow-usd on testnet) and per-account / global daily eval caps. Never in the mainnet build.
+testnet = []
+
+[dependencies]
+near-sdk = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+near-sdk = { workspace = true, features = ["unit-testing"] }
+near-workspaces = { workspace = true }
+tokio = { workspace = true }
+serde_json = { workspace = true }

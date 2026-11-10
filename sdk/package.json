@@ -1,0 +1,17 @@
+{
+  "name": "@arrow/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@defuse-protocol/intents-sdk": "0.95.0",
+    "@defuse-protocol/one-click-sdk-typescript": "0.1.26",
+    "@noble/ciphers": "2.4.0",
+    "@noble/hashes": "2.4.0",
+    "eciesjs": "^0.4.16",
+    "viem": "2.57.16",
+    "zod": "4.6.7"
+  }
+}
