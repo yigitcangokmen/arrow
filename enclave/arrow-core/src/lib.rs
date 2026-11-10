@@ -9,6 +9,8 @@
 
 pub mod consts;
 pub mod err;
+pub mod parse;
 pub mod schema;
+pub mod stats;
 
 pub use err::ArrowErr;

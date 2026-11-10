@@ -10,3 +10,8 @@ pub const ECIES_OVERHEAD: usize = 97;
 pub const BITS_PER_EVAL_MILLI_SCORED: u32 = 5673;
 /// ceil(1000 * log2(3)): PASS, BUY and the error state.
 pub const BITS_PER_EVAL_MILLI_VERDICT: u32 = 1585;
+
+/// Dataset limits (DEC I-13). The blob size is checked again on download (arrow-tee http.rs).
+pub const MAX_BLOB: usize = 5 * 1024 * 1024;
+pub const MAX_ROWS: u32 = 200_000;
+pub const MAX_COLS: usize = 64;
