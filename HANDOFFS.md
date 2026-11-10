@@ -8,9 +8,9 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 
 | Due GMT+7 [UTC] | H | Owner (card) | Blocks what | Status |
 |---|---|---|---|---|
-| 10 Kas 16:49 [09:49Z] (was 08:00) | H-01a | WS-1 T02 | WS1-T06 (S1-a), S1-b NEAR AI call, bench | OPEN |
-| 10 Kas 17:49 [10:49Z] (was 09:00; latest 20:49 [13:49Z]) | H-02 | WS-1 T09 | H-07, all mainnet gates | OPEN (money approved by the user 2026-11-10, DEC §K KU-06) |
-| 10 Kas 17:49 [10:49Z] (was 09:00) | H-03 | WS-4 T08 | H-08a (S4-a) | OPEN (money approved by the user 2026-11-10, DEC §K KU-06) |
+| 10 Kas 16:49 [09:49Z] (was 08:00) | H-01a | WS-1 T02 | WS1-T06 (S1-a), S1-b NEAR AI call, bench | OPEN, OVERDUE (NEARAI_API_KEY still length 0 at 17:56) |
+| 10 Kas 17:49 [10:49Z] (was 09:00; latest 20:49 [13:49Z]) | H-02 | WS-1 T09 | H-07, all mainnet gates | OPEN, OVERDUE at 17:56 (money approved by the user 2026-11-10, DEC §K KU-06) |
+| 10 Kas 17:49 [10:49Z] (was 09:00) | H-03 | WS-4 T08 | H-08a (S4-a) | OPEN, OVERDUE at 17:56 (money approved by the user 2026-11-10, DEC §K KU-06) |
 | 10 Kas 18:49 [11:49Z] (was 10:00) | H-05 | WS-1 T04 | raw GitHub WasmUrl (S-02 primary); push DONE by agent 15:08 (origin/main 6c7b4d37, K-02) | OPEN (public step only; not approved, K-03) |
 | 10 Kas 20:49 [13:49Z] (was 12:00) | H-04 | WS-4 T05 | S4-a Solana dry quote | OPEN (money approved by the user 2026-11-10, DEC §K KU-06) |
 | 10 Kas 20:49 [13:49Z] (was 12:00) | H-06 | WS-5 T10 | WS5-T10 hosted deploy | OPEN |
@@ -25,7 +25,7 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | when triggered | H-25 | WS-1 T05 | WS1-T05 testnet faucet fallback | N/A (faucet worked 15:10, block below) |
 | 11 Kas 12:00 [05:00Z] | H-07b | WS-1 T11 | H-12 (only if K0 picks Escrow) | N/A unless Escrow |
 | 11 Kas 12:00 [05:00Z] | H-W6e | WS-6 T02 | WS6-T02 | DONE: B (KU-10) |
-| 11 Kas 15:00 [08:00Z] | H-21 | WS-6 T04 | WS6-T05 | OPEN |
+| 11 Kas 15:00 [08:00Z] | H-21 | WS-6 T04 + WS-3 T06 (two blocks below: WS-3 pattern review, WS-6 bench review) | WS6-T05, WS3-T06 pattern sign-off | OPEN |
 | 11 Kas 23:00 [16:00Z] | H-WS2-a | WS-2 T12b | reproducible build (only if Docker is down) | N/A unless triggered |
 | when it appears | H-WS2-b | WS-2 | macOS Keychain prompt | N/A unless triggered |
 | daily 13:00 and 21:00 [06:00Z / 14:00Z] | H-10 | WS-1 T14 | push | N/A as human step: agent pushes (K-02) |
@@ -207,7 +207,7 @@ Result (human fills): <number sent> / <number of rows>, <UTC time of last send>
 
 ## H-08a · S4-a $2 inbound (1Click) · due 10 Kas 21:49 GMT+7 [14:49Z] (was 13:00) · status: OPEN (money approved by the user 2026-11-10, DEC §K KU-06)
 Purpose: Base → NEAR Intents 0x hesabı gerçek akışı (S4-a). Script WS4-T05'in. Adımların tamamı `spikes/s3/RUNBOOK.md`'de (WS1-T09, main f8c4c94).
-Preconditions: H-03 DONE (Arrow Buyer EOA Base'de ≥15 USDC + ≥0,0008 ETH). `npx tsx spikes/s4/s4a-inbound.ts --dry` → quote 200 (script WS4-T05 ile gelir; 2026-11-10 15:30'da main'de yok). Para kararı (DEC K-06) kullanıcı tarafından onaylandı.
+Preconditions: H-03 DONE (Arrow Buyer EOA Base'de ≥15 USDC + ≥0,0008 ETH). `npx tsx spikes/s4/s4a-inbound.ts --dry` → quote 200 (script WS4-T05, main d25f9b8..3e447d6, was ws/4-sdk c90066a..5b50c21; agent ran it 16:05: `dry quote 200 · amountOut 1.999765 · timeEstimate 35 s`; buyer still has 0 Base USDC / 0 ETH, so H-03 funding comes first). The real run asks `proceed? [y/N]` in a terminal. Para kararı (DEC K-06) kullanıcı tarafından onaylandı.
 Run exactly:
     cd ~/Desktop/hackathon/near-builds/arrow && source ~/.nvm/nvm.sh && nvm use 24.15.0
     npx tsx spikes/s4/s4a-inbound.ts --amount 2
@@ -283,4 +283,26 @@ Run exactly:
 Expected: `near account view-account-summary arrowhq.testnet network-config testnet now` bakiyesi arttı
 Write result to: Result satırı
 If it fails: NEAR DevHub Telegram (https://t.me/neardev) faucet kanalı; ajan bu arada sandbox testleriyle devam eder
+Result (human fills):
+
+## H-21 (WS-3 part) · G5 pattern review · due 11 Kas 15:00 GMT+7 [08:00Z] · status: OPEN
+Purpose: a human reads the injection and exfil patterns once before the wasm freeze (WS3-T06 card). Block written by S-β 2026-11-10 16:10 GMT+7 [09:10Z].
+Preconditions: WS3-T06 merged to main: DONE 17:34 GMT+7 (main a13f3a2, e7e615f; was ws/3-enclave 3158151).
+Run exactly (in the repo root, ≈15 min):
+    cargo run -q -p arrow-core --example explain -- --list-patterns
+    cargo test -p arrow-core --test injection_room -- --nocapture 2>&1 | grep "room:"
+Expected: the pattern table (11 English + 16 for 8 languages + 1 exfil) and "room: 19/19 regex_expected flagged, 0/5 bypass-by-design also flagged, …".
+Write result to: Result line below: "OK" or the list of patterns to change. The agent applies changes before the freeze (12 Kas 18:00).
+If it fails / no answer by 12 Kas 12:00: the patterns stay as they are; the freeze goes ahead.
+Result (human fills):
+
+## H-21 (WS-6 part) · Bench criteria review (15 min) · due 11 Kas 15:00 GMT+7 [08:00Z] (an 11 Kas time, not shifted by Δ) · status: OPEN
+Purpose: DEC C-12. The bench attacks and criteria are agent-written; a human reads them once so the README may say "human-reviewed". Until then bench/README.md says "human review: not done". Block written by S-epsilon, WS6-T04, 2026-11-10 16:55 GMT+7 [09:55Z].
+Preconditions: the review list exists: `~/Desktop/hackathon/near-builds/arrow/bench/REVIEW.md` (115 lines; merged to main 17:45 GMT+7 as bc10ea6, was ws/6-data 56687e1).
+Run exactly:
+    open ~/Desktop/hackathon/near-builds/arrow/bench/REVIEW.md
+    # optional: open ~/Desktop/hackathon/near-builds/arrow/bench/injection-room/README.md
+Expected: reply "OK" or a list like "R-P6: make it shorter; L44: drop; Q20: use Spanish". Optional: up to 10 attacks you write yourself (they will be labelled "human-written").
+Write result to: paste the reply to the WS-6 session. The agent applies the changes, re-runs `npm run bench:gen -- --check` and `npx vitest run bench/test`, and writes "reviewed by <name>, <date>" in bench/README.md.
+If it fails / no answer by 11 Kas 18:00: proceed; bench/README.md keeps saying "human review: not done" (no false claim). Any later change to the datasets means `npm run bench:prepare` must be re-run before the blobs are committed (WS6-T05).
 Result (human fills):

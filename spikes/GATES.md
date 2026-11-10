@@ -73,30 +73,30 @@ Acceptance: `tools_versions_pinned` PASS · `outlayer_cli_present` PASS.
   - s2-004 mint 10000001 rejected ("Arrow-USD: mint cap is 10 USDC per call"): https://testnet.nearblocks.io/txns/9VEBgna2bjfFLFa2efZjPamL7H6tYsu9kzDkxjpcSd1K
   - s2-005 `ft_transfer_call(s2, 100000, "refund_all")`: https://testnet.nearblocks.io/txns/5toQSSaeNKNYyE1WAmEeZtMFwCvyLptKgraS1DT5srrV (buyer 10000000 → 10000000, receiver 0 → 0)
   - s2-006 `ft_transfer_call(s2, 100000, "keep")`: https://testnet.nearblocks.io/txns/Ajx43mbGw8pv6fWTPW5FCAww9bvwhux2DzhWh3uuKtzH (buyer 10000000 → 9900000, receiver 0 → 100000)
-  - Runs are in `../arrow-ws-2/spikes/s2/out/runs.jsonl` (gitignored) because `scripts/src/evidence-add.ts` is not on main yet; import with `--file` when it lands (not yet in evidence/testnet.json).
+  - Imported into `evidence/testnet.json` at 16:07 GMT+7 [09:07Z] by S-α (WS1-T05) with `scripts/src/evidence-add.ts --file` (ws/1-gates b86a8f3 = main f8e198c): runs s2-001..006, block heights 277043102..277043205 from the archival RPC, `commit` = 2510d4e (main's rebased copy of f6075ab; spikes/s2 identical). The jsonl kinds `mint`, `mint_cap`, `refund_all`, `keep` are not in the evidence schema (PLAN A.3), so s2-003..006 are `kind:"spike"` with the original label kept as the `expect` prefix (e.g. `mint: buyer +10000000`); s2-001/002 stay `deploy`.
 - PASS items: (1) **PASS** arrow-usd deployed + public mint OK, `ft_balance_of(arrowhq.testnet)` = 10000000, over-cap mint rejected. (2) **PASS** refund_all leaves both balances unchanged, keep moves exactly 100000. (3) **PASS (sandbox)** mock OutLayer `null` → receiver returns the full amount, `EVENT_JSON … "event":"arrow_refund" … "reason":"null"`, buyer balance restored (`s2_ft_refund_on_null`), intents rail returns `["100000"]` (`s2_mt_refund_on_null`). (4) **PASS (sandbox)** mock `never` (yield, no resume) + `fast_forward(210)` → yield callback answers `null` → same refund on both rails (`s2_ft_refund_on_yield_timeout`, `s2_mt_refund_on_yield_timeout`); the sandbox fallback (real OutLayer sleeping wasm) was not needed.
 - Chosen path: arrow-usd (own NEP-141 with public capped mint) on testnet + raw `promise_result_checked` callback that maps `null`/error to a full refund in the rail's shape (`"n"` for NEP-141, `["n"]` for intents). Callers of `ft_transfer_call` attach 300 TGas + 1 yocto.
 - Changed claim: none.
 - Tool versions: near-cli-rs 0.31.1, cargo-near 0.23.0, rustc 1.97.1, near-workspaces 0.24.0 (sandbox binary from near-sandbox 0.4.0 cache).
 
-### S3a · Signature simulation · (i) PASS (WS-4 run) · (ii) WAITING H-08b · 2026-11-10 15:26 GMT+7 [08:26Z]
+### S3a · Signature simulation · (i) PASS (WS1-T08 acceptance re-run 16:10 GMT+7 [09:10Z]) · (ii) WAITING H-08b · 2026-11-10 15:26 / 16:10 GMT+7 [08:26Z / 09:10Z]
 - Commands: `npx tsx spikes/s3/s3a-simulate.ts` (S-δ under WS4-T04; script and result on main since a055271). (ii): `npx tsx spikes/s3/s3a-simulate.ts --funded` after H-03 funding (H-08b).
 - Evidence: `spikes/s3/s3a-results.json` (2026-11-10T08:26:32Z): signed ERC-191 transfer intent to `arrow-spike.arrowhq.near` with `msg` and `min_gas` in the signed payload; mainnet `simulate_intents` → `insufficient balance or overflow` only (class SIGNATURE_OK_BALANCE_ERROR).
-- PASS items: (i) msg + min_gas carried, signature accepted, only balance error → PASS as recorded by WS-4; the WS1-T08 card acceptance was not re-run by the integrator. (ii) funded simulate WAITING H-08b.
+- PASS items: (i) msg + min_gas carried, signature accepted, only balance error → PASS (WS-4 run 15:26; WS1-T08 owner re-run 16:10 on ws/1-gates 87ee813 (= main 493f651) with a fresh in-memory EOA 0x4379…7e13: `payload carries msg: yes · min_gas: yes`, `class: SIGNATURE_OK_BALANCE_ERROR`, `insufficient balance or overflow` only; `spikes/s3/s3a-results.json` timestamp 2026-11-10T09:10:35.923Z). Nothing signed with a team wallet, nothing sent. (ii) funded simulate WAITING H-08b.
 - Chosen path: —
 - Changed claim: —
 
-### S3b · Transfer notification + refund (mainnet) · PENDING · —
-- Commands: —
-- Evidence: —
-- PASS items: —
+### S3b · Transfer notification + refund (mainnet) · PENDING (mainnet run waiting H-08c; dry PASS 16:09 GMT+7 [09:09Z]) · —
+- Commands: `npx tsx spikes/s3/s3b-notify.ts --mode refund_all|keep [--dry]` (main a9936a0, was ws/1-gates 73115a5; shared flow `spikes/s3/intent-run.ts`).
+- Evidence: dry only: `--mode refund_all --dry` and `--mode keep --dry` → `payload carries msg: yes · min_gas: yes`, `class: SIGNATURE_OK_BALANCE_ERROR` (throwaway in-memory EOA, free mainnet `simulate_intents` view, nothing sent). Real runs write `evidence/mainnet.json` ids `spike-s3b-refund_all` / `spike-s3b-keep`.
+- PASS items: dry_runs_ok (WS1-T09) PASS. Gate items wait H-08c (human: deploy + two runs). The real-send path (near-api-js `Account.callFunctionRaw` from the relayer FC key) is type-checked only; it cannot be exercised without mainnet funds.
 - Chosen path: —
 - Changed claim: —
 
-### S3c · OutLayer composition + B5 (mainnet) · PENDING · —
-- Commands: —
-- Evidence: —
-- PASS items: —
+### S3c · OutLayer composition + B5 (mainnet) · PENDING (mainnet run waiting H-08d; dry PASS 16:09 GMT+7 [09:09Z]) · —
+- Commands: `npx tsx spikes/s3/s3c-outlayer.ts --mode outlayer|outlayer_refund [--dry]` (main a9936a0, was ws/1-gates 73115a5), `spikes/s3/s3c-b5-negative.ts --prepare | --read <tx>`.
+- Evidence: dry only: `--mode outlayer --dry` and `--mode outlayer_refund --dry` → `payload carries msg: yes · min_gas: yes`, `class: SIGNATURE_OK_BALANCE_ERROR` (throwaway EOA, free view, nothing sent). Real runs write `evidence/mainnet.json` ids `spike-s3c-outlayer` / `spike-s3c-outlayer_refund`.
+- PASS items: dry_runs_ok (WS1-T09) PASS. Gate items wait H-08d (also needs `NEARAI_API_KEY`, H-01a, for the echo+ai program). Real-send path type-checked only.
 - Chosen path: —
 - Changed claim: —
 
