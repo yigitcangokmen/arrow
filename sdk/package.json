@@ -8,7 +8,16 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./schemas": "./src/schemas.ts"
+    "./schemas": "./src/schemas.ts",
+    "./config": "./src/config.ts",
+    "./bits": "./src/bits.ts",
+    "./usdc": "./src/usdc.ts",
+    "./state": "./src/state.ts",
+    "./rpc": "./src/rpc.ts",
+    "./contract": "./src/contract.ts",
+    "./relay": "./src/relay.ts",
+    "./x402": "./src/x402.ts",
+    "./flows": "./src/flows.ts"
   },
   "dependencies": {
     "@defuse-protocol/intents-sdk": "0.95.0",
