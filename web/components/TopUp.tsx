@@ -2,9 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 import { erc20Abi } from "viem";
 import { base } from "viem/chains";
-import { inboundQuoteRequest, quote, status, submitDeposit, TERMINAL_STATUSES, type OneClickStatus } from "@arrow/sdk/oneclick";
+import { inboundQuoteRequest, quote, submitDeposit, TERMINAL_STATUSES, type OneClickStatus } from "@arrow/sdk/oneclick";
 import { formatUsdc, REFUND_LINE } from "../lib/format.ts";
 import { parseUsdc } from "@arrow/sdk/usdc";
+import { watchSwap } from "../lib/swap.ts";
 import { BASE_USDC_ADDRESS, type Eoa, ensureBase } from "../lib/wallet.ts";
 import { Countdown } from "./Countdown.tsx";
 import { TxLink } from "./TxLink.tsx";
@@ -18,24 +19,24 @@ type Phase =
   | { k: "waiting"; startedAt: number; status: OneClickStatus; txHash: string }
   | { k: "done"; status: OneClickStatus; txHash: string };
 
-const POLL_MS = 5_000;
-const POLL_LIMIT_MS = 15 * 60_000; // INCOMPLETE_DEPOSIT keeps being polled for a while (research 13 section 74)
-
 /** Base USDC to the buyer's Intents balance through 1Click (DEC K-01). `defaultAmount` is in base units. */
 export function TopUp({ eoa, defaultAmount, onSuccess }: { eoa: Eoa; defaultAmount: bigint; onSuccess?(): void }) {
   const [amount, setAmount] = useState(formatUsdc(defaultAmount));
   const [phase, setPhase] = useState<Phase>({ k: "idle" });
   const [error, setError] = useState<string | null>(null);
   const alive = useRef(true);
+  const abort = useRef(new AbortController());
   useEffect(() => {
     alive.current = true;
+    const ac = (abort.current = new AbortController()); // a fresh one per mount: strict mode runs effects twice in dev
     return () => {
       alive.current = false;
+      ac.abort();
     };
   }, []);
 
   const fail = (e: unknown, fallback: string) => {
-    if (!alive.current) return;
+    if (!alive.current || (e instanceof Error && e.name === "AbortError")) return;
     const msg = e instanceof Error ? e.message : "";
     setError(/rejected|denied/i.test(msg) ? "You rejected the request in your wallet." : msg ? `${fallback} (${msg.slice(0, 160)})` : fallback);
     setPhase({ k: "idle" });
@@ -79,23 +80,13 @@ export function TopUp({ eoa, defaultAmount, onSuccess }: { eoa: Eoa; defaultAmou
       await submitDeposit({ txHash, depositAddress: deposit }).catch(() => undefined); // 1Click also scans the chain itself
       const startedAt = Date.now();
       if (alive.current) setPhase({ k: "waiting", startedAt, status: "KNOWN_DEPOSIT_TX", txHash });
-      for (;;) {
-        await new Promise((r) => setTimeout(r, POLL_MS));
-        if (!alive.current) return;
-        const s = await status(deposit).catch(() => null);
-        if (!s) continue;
-        const terminal = TERMINAL_STATUSES.includes(s.status);
-        if (terminal) {
-          setPhase({ k: "done", status: s.status, txHash });
-          if (s.status === "SUCCESS") onSuccess?.();
-          return;
-        }
-        if (Date.now() - startedAt > POLL_LIMIT_MS) {
-          setPhase({ k: "done", status: s.status, txHash });
-          return;
-        }
-        setPhase({ k: "waiting", startedAt, status: s.status, txHash });
-      }
+      const last = await watchSwap(deposit, {
+        signal: abort.current.signal,
+        onTick: (st) => alive.current && setPhase({ k: "waiting", startedAt, status: st.status, txHash }),
+      });
+      if (!alive.current) return;
+      setPhase({ k: "done", status: last?.status ?? "PROCESSING", txHash });
+      if (last?.status === "SUCCESS") onSuccess?.();
     } catch (e) {
       fail(e, "The top-up did not complete.");
     }
