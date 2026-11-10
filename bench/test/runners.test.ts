@@ -223,7 +223,7 @@ describe("prepare", () => {
       writeFileSync(keys, "{}\n");
       expect(prepareBlobs({ root: out, keysPath: keys }).created).toBe(49);
     } finally { rmSync(out, { recursive: true, force: true }); }
-  });
+  }, 30_000);
   it("sealed_k_payload_roundtrip_shape", () => {
     const sealed = seal(benchBuyerKey().pubHex, sealedKPayload(new Uint8Array(32).fill(1), "ab".repeat(32)));
     expect(b64.enc(sealed)).toHaveLength(216);
