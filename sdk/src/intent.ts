@@ -1,10 +1,10 @@
 // ERC-191 transfer intents for intents.near (DEC K-03, D4-05). Built with the intents-sdk payload builder and signed
 // with a viem-style signer (a local account, or a MetaMask personal_sign adapter in the browser).
 import {
-  createIntentSignerViem, IntentsSDK, type IntentPayload, type IntentPrimitive, type MultiPayload, VersionedNonceBuilder,
+  createIntentSignerViem, IntentPayloadBuilder, type IntentPayload, type IntentPrimitive, type MultiPayload, VersionedNonceBuilder,
 } from "@defuse-protocol/intents-sdk";
 import type { Account } from "viem";
-import { MIN_GAS_NOTIFY, type Network } from "./config.ts";
+import { MIN_GAS_NOTIFY, NETWORKS, type Network } from "./config.ts";
 import { currentSalt } from "./rpc.ts";
 
 export type IntentTransfer = Extract<IntentPrimitive, { intent: "transfer" }>;
@@ -24,8 +24,14 @@ export function arrowTransferIntent(p: { receiverId: string; tokenId: string; am
   return intent;
 }
 
-let sdk: IntentsSDK | undefined;
-const builder = () => (sdk ??= new IntentsSDK({ referral: "arrow", env: "production" })).intentBuilder();
+// The builder alone, not `new IntentsSDK(...)`: the full client wires every bridge route, which drags near-api-js 4/5 into
+// browser bundles (DEC L-06). buildWithSalt() needs only the verifying contract; the salt always comes from currentSalt().
+type BuilderConfig = ConstructorParameters<typeof IntentPayloadBuilder>[0];
+const builder = () =>
+  new IntentPayloadBuilder({
+    envConfig: { contractID: NETWORKS.mainnet.intents } as BuilderConfig["envConfig"],
+    saltManager: { getCachedSalt: () => Promise.reject(new Error("pass the salt to buildWithSalt")) } as unknown as BuilderConfig["saltManager"],
+  });
 
 /** Synchronous build with an explicit salt. `signer` must be lowercase (setSigner rejects checksum addresses). */
 export function buildPayload(p: {
