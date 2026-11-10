@@ -405,7 +405,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
         <div className={form.field}>
           <label htmlFor="file">CSV or JSONL file (up to {Math.floor(MAX_PLAINTEXT_BYTES / 1_000_000 * 10) / 10} MB)</label>
           <input id="file" type="file" accept=".csv,.jsonl" aria-describedby="file-hint" disabled={inProgress} onChange={(e) => void onFile(e.target.files?.[0])} {...invalid("file")} />
-          <p id="file-hint" className={form.hint}>The file is read here and encrypted here. Row data is in no request: only the ciphertext is uploaded. Column names and the row count are public.</p>
+          <p id="file-hint" className={form.hint}>The file is read here and encrypted here. Row data is in no request: only the ciphertext is uploaded. Column names, the row count and the exact file size are public.</p>
         </div>
         {picked ? (
           <p className={styles.file}>

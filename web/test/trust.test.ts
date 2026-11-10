@@ -76,3 +76,35 @@ describe("trust table", () => {
     expect(side.sees).toMatch(/not counted/);
   });
 });
+
+describe("audit wording of the UI table", () => {
+  const row = (part: string) => TRUST_ROWS.find((r) => r.part === part)!;
+  it("CLM-5: the program-key row cites transactions, not a /verify row that does not exist", () => {
+    const k = row("Program key / PROTECTED_MASTER");
+    expect(k.check).not.toMatch(/recorded on \/verify/);
+    expect(k.check).toContain("smm9T86m");
+    expect(k.check).toContain("Bzzg22r9");
+  });
+  it("CLM-10: the 1Click row says the buyer holds native NEAR USDC after a swap", () => {
+    const r = TRUST_ROWS.find((x) => x.part.startsWith("1Click"))!;
+    expect(r.trust).toMatch(/swaps? into native NEAR USDC/);
+    expect(r.trust).not.toMatch(/arrive as omft\.near bridged tokens/);
+  });
+  it("PRIV-3: the operator sees IP, 0x and listing, and the served JavaScript is its own RISKY row", () => {
+    expect(row("Arrow operator").sees).toMatch(/IP address, 0x address and listing/);
+    const w = row("Arrow web app (served JavaScript)");
+    expect(w.flag).toBe("RISKY");
+    expect(`${w.sees} ${w.check}`).toMatch(/viewing-key signature/);
+    expect(`${w.sees} ${w.check}`).toMatch(/use the CLI/i);
+  });
+  it("PRIV-8: the blob host sees the downloader and the exact size is public", () => {
+    const d = row("Seller data at rest");
+    expect(d.sees).toMatch(/IP address/);
+    expect(d.sees).toMatch(/exact plaintext size is public/);
+  });
+  it("ARW-C2: the gas tank is a RISKY row", () => {
+    const g = row("Gas tank");
+    expect(g.flag).toBe("RISKY");
+    expect(g.check).toMatch(/drains the tank/);
+  });
+});

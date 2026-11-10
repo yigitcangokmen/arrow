@@ -14,7 +14,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
   {
     part: "Seller data at rest",
     trust: "Nobody (ciphertext; the host is untrusted)",
-    sees: "—",
+    sees: "Whoever hosts the file sees each downloader's IP address and user agent. The exact plaintext size is public (ciphertext length minus 40 bytes), as are the column names and the row count",
     cannot: "Decrypt",
     check: "blob_sha256 is on chain and the enclave checks it before reading. Not yet shown on mainnet",
     flag: "TODO",
@@ -24,7 +24,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "OutLayer keystore (TDX) and the shared OutLayer master",
     sees: "Inside the TEE",
     cannot: "Release to an unpinned wasm or a non-Arrow caller",
-    check: "WasmHash and Predecessor conditions; in-wasm network allowlist; negative tests recorded on /verify",
+    check: "WasmHash and Predecessor conditions; in-wasm network allowlist; negative test: a non-Arrow caller gets \"Access denied by access condition\" (testnet tx smm9T86m4RU8, mainnet tx Bzzg22r9tRpU, both linked in the README)",
   },
   {
     part: "OutLayer keystore DAO",
@@ -75,10 +75,28 @@ export const TRUST_ROWS: readonly TrustRow[] = [
   {
     part: "Arrow operator",
     trust: "Relayer liveness and the gas tank",
-    sees: "Encrypted blobs",
+    sees: "The encrypted blobs it hosts, and the IP address, 0x address and listing of every payment relayed through /api/relay",
     cannot: "The plan after the lock, not yet a fact: read data, take funds, or change the contract or wasm hash",
     check: "Not locked yet: there is no lock transaction, and the mainnet market contract is not deployed. The contract is meant to own itself with no access keys; npm run verify (row R6) shows it once it is done",
     flag: "TODO",
+  },
+  {
+    part: "Arrow web app (served JavaScript)",
+    trust: "Whoever deploys the site (a modified deploy is not detectable from the page)",
+    sees: "Everything the page handles: the file you encrypt and its key, your criteria, your own list's keys, and the signature that derives your viewing key",
+    cannot: "—",
+    check:
+      "One viewing-key signature derives every past and future verdict key of that wallet for the domain, so served JavaScript that captures it reads them all. No script policy is set on the pages (frames, plugins and base tags are blocked). For sensitive data use the CLI",
+    flag: "RISKY",
+  },
+  {
+    part: "Gas tank",
+    trust: "The contract's own NEAR balance, topped up by hand",
+    sees: "—",
+    cannot: "—",
+    check:
+      "Every eval and release spends tank NEAR (about 0.0057 NEAR per eval). A failed eval keeps 10% of its fee for the treasury, which is not the tank, so a stream of failing evals drains the tank faster than it refills. Under tank_min the contract refuses new requests (E10); the hosted relay stops evals earlier to keep gas for purchases",
+    flag: "RISKY",
   },
   {
     part: "NEAR AI API key (inside the OutLayer secret)",
@@ -91,7 +109,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
   },
   {
     part: "1Click and the PoA bridge (Intents Technology)",
-    trust: "Short custody during swaps. Users do not see a bridge step, but Base and Solana USDC arrive as omft.near bridged tokens",
+    trust: "Short custody during swaps. Base USDC is a bridged token (omft.near) that 1Click swaps into native NEAR USDC, the only token the market accepts; a Solana withdrawal is the reverse swap. The swap is a trust step",
     sees: "Swap transactions",
     cannot: "—",
     check: "1Click /v0/status. Paid inbound ran once on mainnet (2 USDC from Base); the outbound Solana withdrawal is a dry quote only. Custody is not shown",

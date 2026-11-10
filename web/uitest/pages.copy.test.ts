@@ -72,3 +72,22 @@ describe("SCAM-2: the card shows who the seller is", () => {
     expect(html).toContain("https://basescan.org/address/0xbad0000000000000000000000000000000000001");
   });
 });
+
+describe("CLM-3: no absolute-privacy wording in the web app", () => {
+  it("the criteria form says the seller cannot read the criteria and that the column choice is a public side channel", async () => {
+    const { CriteriaForm } = await import("../app/buy/[id]/CriteriaForm.tsx");
+    const { EMPTY_CRITERIA } = await import("../lib/buy.ts");
+    const html = renderToStaticMarkup(h(CriteriaForm, { columns: ["a"], value: EMPTY_CRITERIA, onChange: () => undefined }));
+    expect(html).not.toMatch(/never sees|nobody can (look|see)|can see into/i);
+    expect(html).toMatch(/the seller cannot read them/);
+    expect(html).toMatch(/instruction count/);
+  });
+  it("no source file of the web app uses the absolute wording", async () => {
+    const { readdirSync, readFileSync, statSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const walk = (d: string): string[] => readdirSync(d).flatMap((f) => (statSync(join(d, f)).isDirectory() ? (["node_modules", ".next", "generated", "public"].includes(f) ? [] : walk(join(d, f))) : [join(d, f)]));
+    const root = new URL("../", import.meta.url).pathname;
+    const hits = walk(join(root, "app")).concat(walk(join(root, "components")), walk(join(root, "lib"))).filter((f) => /\.(tsx?|css)$/.test(f)).filter((f) => /never sees|nobody can (look|see)|can see into/i.test(readFileSync(f, "utf8")));
+    expect(hits).toEqual([]);
+  });
+});
