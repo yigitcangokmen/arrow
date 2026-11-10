@@ -20,12 +20,12 @@ Two cuts from one set of shots: **full** (YouTube, unlisted, at most 3:00) and *
 | id | start | end | screen (shot id) | voice-over (English) | on-screen text |
 |---|---|---|---|---|---|
 | F01 | 0:00 | 0:14 | S01 | Data is hard to sell. To judge a dataset, a buyer has to see it. Once they have seen it, why pay? So buyers pay blind, and often get lemons. | Arrow's information paradox (1962) |
-| F02 | 0:14 | 0:30 | S02 | I'm a fund analyst. This listing claims a token unlock schedule, 412 rows. Before I pay, my own AI reads it inside a TEE enclave that neither the seller nor Arrow can see into. | synthetic · seller is us (demo) |
+| F02 | 0:14 | 0:30 | S02 | I'm a fund analyst. This listing claims a token unlock schedule, 412 rows. Before I pay, a TEE-hosted model reads a 40-row sample for me, and I see no row. | synthetic · seller is us (demo) |
 | F03 | 0:30 | 0:46 | S03 | Inspection costs twenty-five cents. The verdict is PASS, fit {{PASS_FIT}}, novelty {{PASS_NOVELTY}}. I already have most of these rows, and I never saw one. That was the lemon. | sped up x{{SPEEDUP}} |
 | F04 | 0:46 | 1:12 | S04 | Second listing: wallet labels. BUY, fit {{BUY_FIT}}, novelty {{BUY_NOVELTY}}. I pay {{BUY_PRICE}} in USDC from Base through NEAR Intents. The data key is sealed to my key on chain, and the file I download has the same hash the enclave inspected and the seller listed. | listed = inspected = delivered |
 | F05 | 1:12 | 1:26 | S05 | The seller lists with MetaMask and withdraws USDC to Solana. Neither of us needed a NEAR account. | Solscan link, TODO(K4) |
 | F06 | 1:26 | 1:50 | S06 | Can a buyer extract rows? Asking for row one returns PASS, fit one, and no text. Can a seller inject an instruction to answer BUY? In our refusal room, {{ROOM_BUY}} of 24 attacks got BUY. | {{ROOM_BUY}}/24 BUY · false flags on clean BUY/SELL data: {{FALSE_FLAGS}} |
-| F07 | 1:50 | 2:05 | S07 | If the enclave fails, intents.near's own refund code returns the fee to my NEAR Intents balance. It is not instant: every eval takes at least 45 seconds, and a stall adds more. | nearblocks link |
+| F07 | 1:50 | 2:05 | S07 | If the enclave fails, intents.near's own refund code returns my payment to my NEAR Intents balance, less ten percent of an inspection fee. It is not instant: every eval takes at least 45 seconds. | nearblocks link |
 | F08 | 2:05 | 2:25 | S08 | Agents get the same flow: a command line, an MCP tool, and an HTTP 402 response. The 402 tells an agent how to inspect and pay. Arrow tells it whether it's worth paying. | the 402 response carries no payment |
 | F09 | 2:25 | 2:42 | S09 | NEAR makes this one flow: a TEE model on NEAR AI Cloud, an OutLayer enclave answering the contract, NEAR Intents for payment and refunds. Every listing has an on-chain leak budget for the verdict. Time and instruction count are public; the trust table says so. | leak budget (verdict output only): spent {{SPENT}} / {{BUDGET}} bits · side channels: see trust table |
 | F10 | 2:42 | 3:00 | S10 | Every claim has a command. Verify prints what is proven, what is not, and what is risky. {{DEMAND_LINE_SPOKEN}} Built at NEAR HACKATHON. Code and steps are in the repo. | {{DEMAND_LINE}} · repo · Built at NEAR HACKATHON |
@@ -35,11 +35,11 @@ Two cuts from one set of shots: **full** (YouTube, unlisted, at most 3:00) and *
 | id | start | end | screen (shot id) | voice-over (English) | on-screen text |
 |---|---|---|---|---|---|
 | X01 | 0:00 | 0:10 | S01 | Data is hard to sell. To judge a dataset, a buyer has to see it. Once they have, why pay? | Arrow's information paradox (1962) |
-| X02 | 0:10 | 0:24 | S02 | I'm a fund analyst. This listing claims a token unlock schedule. Before I pay, my own AI reads it inside a TEE enclave that neither the seller nor Arrow can see into. | synthetic · seller is us (demo) |
+| X02 | 0:10 | 0:24 | S02 | I'm a fund analyst. This listing claims a token unlock schedule. Before I pay, a TEE-hosted model reads a 40-row sample for me, and I see no row. | synthetic · seller is us (demo) |
 | X03 | 0:24 | 0:38 | S03 | Inspection costs twenty-five cents. The verdict is PASS, fit {{PASS_FIT}}, novelty {{PASS_NOVELTY}}. I never saw a row. That was the lemon. | sped up x{{SPEEDUP}} |
 | X04 | 0:38 | 1:04 | S04 | Second listing: BUY, fit {{BUY_FIT}}, novelty {{BUY_NOVELTY}}. I pay {{BUY_PRICE}} in USDC from Base through NEAR Intents. The file I download has the same hash the enclave inspected and the seller listed. | listed = inspected = delivered |
 | X05 | 1:04 | 1:20 | S06 | Can a seller inject an instruction to answer BUY? In our refusal room, {{ROOM_BUY}} of 24 attacks got BUY. Asking for row one returns no text. | {{ROOM_BUY}}/24 BUY |
-| X06 | 1:20 | 1:32 | S07 | If the enclave fails, intents.near's own refund code returns the fee to my NEAR Intents balance. | nearblocks link |
+| X06 | 1:20 | 1:32 | S07 | If the enclave fails, intents.near's own refund code returns my payment to my NEAR Intents balance, less ten percent of an inspection fee. | nearblocks link |
 | X07 | 1:32 | 1:48 | S08 | Agents use the same flow through a command line, an MCP tool and an HTTP 402. Arrow tells an agent whether it's worth paying. | the 402 response carries no payment |
 | X08 | 1:48 | 2:00 | S09 | A TEE model on NEAR AI Cloud, an OutLayer enclave, and NEAR Intents for payment and refunds. | leak budget (verdict output only): spent {{SPENT}} / {{BUDGET}} bits · side channels: see trust table |
 | X09 | 2:00 | 2:14 | S10 | Every claim has a command. {{DEMAND_LINE_SPOKEN}} Built at NEAR HACKATHON. | {{DEMAND_LINE}} · repo · Built at NEAR HACKATHON |
