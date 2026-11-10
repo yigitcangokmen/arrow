@@ -1,0 +1,7 @@
+{
+  "name": "arrow",
+  "version": "0.1.0",
+  "payment_path": "notify",
+  "result_path": "chain",
+  "build": "testnet"
+}

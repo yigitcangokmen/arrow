@@ -1,0 +1,31 @@
+{
+  "config": {
+    "outlayer": "outlayer.testnet",
+    "intents": null,
+    "usdc_token_id": "arrow-usd.arrowhq.testnet",
+    "program_wasm_url": "https://example.com/arrow-tee.wasm",
+    "program_wasm_hash": "abababababababababababababababababababababababababababababababab",
+    "secrets_ref": {
+      "profile": "arrow",
+      "account_id": "arrow.arrowhq.testnet"
+    },
+    "treasury": "arrowhq.testnet",
+    "fee_bps_eval": 1000,
+    "fee_bps_sale": 200,
+    "min_eval_fee": "50000",
+    "min_price": "100000",
+    "listing_bond": "100000",
+    "max_evals_cap": 500,
+    "outlayer_deposit_eval": "20000000000000000000000",
+    "outlayer_deposit_release": "10000000000000000000000",
+    "tank_min": "50000000000000000000000",
+    "testnet_caps": {
+      "per_call": 10
+    }
+  },
+  "paused": false,
+  "tank_available": "300000000000000000000000",
+  "payment_path": "notify",
+  "result_path": "chain",
+  "build": "testnet"
+}

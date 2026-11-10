@@ -1,0 +1,16 @@
+{
+  "id": 3,
+  "listing_id": 1,
+  "buyer": "0xabababababababababababababababababababab",
+  "buyer_pk": "04cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+  "paid": "100000",
+  "fee": "10000",
+  "seed": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef",
+  "rail": "mt",
+  "status": "done",
+  "sealed_result": "AAAA",
+  "h": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+  "refund_reason": null,
+  "created_at_ns": 1762761600000000000,
+  "settled_at_ns": 1762761630000000000
+}

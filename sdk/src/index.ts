@@ -8,3 +8,7 @@ export * from "./minhash.ts";
 export * from "./rpc.ts";
 export * from "./intent.ts";
 export * from "./viewingKey.ts";
+export * from "./relay.ts";
+export * from "./contract.ts";
+export * from "./flows.ts";
+export * from "./x402.ts";

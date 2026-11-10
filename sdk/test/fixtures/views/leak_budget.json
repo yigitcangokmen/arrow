@@ -1,0 +1,9 @@
+{
+  "listing_id": 1,
+  "bits_per_eval_milli": 5673,
+  "max_evals": 50,
+  "evals_used": 3,
+  "budget_milli": 283650,
+  "spent_milli": 17019,
+  "left_milli": 266631
+}

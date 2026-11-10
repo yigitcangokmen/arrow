@@ -1,0 +1,26 @@
+{
+  "id": 1,
+  "seller": "arrowhq.testnet",
+  "payout": "arrowhq.testnet",
+  "title": "Retail sales by SKU, 2025 (synthetic)",
+  "public_desc": "Daily units and prices per SKU and region. Synthetic demo data.",
+  "columns": [
+    "date",
+    "region",
+    "sku",
+    "units",
+    "price_usd"
+  ],
+  "rows_claimed": 12000,
+  "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+  "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+  "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+  "price": "250000",
+  "eval_fee": "100000",
+  "max_evals": 50,
+  "evals_used": 3,
+  "bits_per_eval_milli": 5673,
+  "mode": "scored",
+  "program_hash_at_list": "abababababababababababababababababababababababababababababababab",
+  "created_at_ns": 1762761600000000000
+}
