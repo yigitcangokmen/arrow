@@ -6,8 +6,9 @@ use std::ops::ControlFlow;
 
 use sha2::{Digest, Sha256};
 
+use crate::consts::MAX_KEY_NORM_BYTES;
 use crate::err::ArrowErr;
-use crate::minhash::key_hash;
+use crate::minhash::key_hash_within;
 use crate::parse::{header, walk, Format};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -91,6 +92,7 @@ pub fn compute(body: &[u8], f: Format, spec: &StatsSpec) -> Result<Stats, ArrowE
     let mut date_min: Option<Date> = None;
     let mut date_max: Option<Date> = None;
     let mut keys: HashSet<u64> = HashSet::new();
+    let mut key_budget = MAX_KEY_NORM_BYTES;
     let rows = walk(body, f, &columns, |_, cells| {
         for (n, c) in nulls.iter_mut().zip(cells.iter()) {
             if is_null(*c) {
@@ -107,8 +109,10 @@ pub fn compute(body: &[u8], f: Format, spec: &StatsSpec) -> Result<Stats, ArrowE
             }
         }
         if let Some(kc) = spec.key_col {
-            if let Some(h) = cells.get(kc).copied().flatten().and_then(key_hash) {
-                keys.insert(h);
+            if let Some(cell) = cells.get(kc).copied().flatten() {
+                if let Some(h) = key_hash_within(cell, &mut key_budget)? {
+                    keys.insert(h);
+                }
             }
         }
         Ok(ControlFlow::Continue(()))
@@ -142,6 +146,7 @@ pub fn collect_rows(body: &[u8], f: Format, cols: &[String], idx_sorted: &[u32])
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::minhash::key_hash;
     use crate::parse::detect;
     use rand_chacha::rand_core::{RngCore, SeedableRng};
     use rand_chacha::ChaCha20Rng;
@@ -194,6 +199,32 @@ mod tests {
         assert_eq!(s.key_base_hashes, want);
         let s = compute(body, f, &StatsSpec::default()).unwrap();
         assert!(s.key_base_hashes.is_empty());
+    }
+
+    /// ENC-LEAK-4: U+FDFA NFKC-expands to 18 characters, so a key column of it ran the eval out of
+    /// fuel only when the buyer named it as key_column: a buyer-steered trap (`null`). The key
+    /// normalization now has a byte budget; going over it is Err(Limits), the ordinary ok:false.
+    #[test]
+    fn key_column_normalization_is_capped() {
+        let spec = StatsSpec { date_col: None, key_col: Some(0) };
+        let mut csv = String::from("k,v\n");
+        for i in 0..50_000 {
+            csv.push_str(&format!("{},{}\n", "\u{FDFA}".repeat(7), i % 10));
+        }
+        let (f, body) = detect(csv.as_bytes()).unwrap();
+        assert_eq!(compute(body, f, &spec), Err(ArrowErr::Limits));
+        assert!(compute(body, f, &StatsSpec::default()).is_ok(), "no key column, no key work");
+        // one giant cell is cut off while it is being normalized, not after
+        let one = format!("k\n{}\n", "\u{FDFA}".repeat(400_000));
+        let (f, body) = detect(one.as_bytes()).unwrap();
+        assert_eq!(compute(body, f, &spec), Err(ArrowErr::Limits));
+        // N6: an honest non-ASCII key column of the same row count is well inside the budget
+        let mut csv = String::from("k,v\n");
+        for i in 0..200_000u32 {
+            csv.push_str(&format!("Şİ-Жд{i:06},{}\n", i % 10));
+        }
+        let (f, body) = detect(csv.as_bytes()).unwrap();
+        assert_eq!(compute(body, f, &spec).unwrap().key_base_hashes.len(), 200_000);
     }
 
     #[test]

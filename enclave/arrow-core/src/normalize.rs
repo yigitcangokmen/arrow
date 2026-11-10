@@ -28,7 +28,19 @@ pub fn is_default_ignorable(c: char) -> bool {
 }
 
 pub fn normalize_key(s: &str) -> String {
-    let nfkc: String = s.trim_matches(is_js_ws).nfkc().collect();
+    let mut unlimited = usize::MAX;
+    normalize_key_within(s, &mut unlimited).unwrap_or_default()
+}
+
+/// normalize_key with a work budget shared by a whole key column: the NFKC output may use at most
+/// `*budget` bytes, counted while it is produced, so one giant cell cannot expand past it either.
+/// None once the budget is gone (ENC-LEAK-4).
+pub fn normalize_key_within(s: &str, budget: &mut usize) -> Option<String> {
+    let mut nfkc = String::new();
+    for c in s.trim_matches(is_js_ws).nfkc() {
+        *budget = budget.checked_sub(c.len_utf8())?;
+        nfkc.push(c);
+    }
     let lower = nfkc.to_lowercase();
     let mut out = String::with_capacity(lower.len());
     let mut in_ws = false;
@@ -50,7 +62,7 @@ pub fn normalize_key(s: &str) -> String {
             in_ws = false;
         }
     }
-    out.trim_matches(' ').to_owned()
+    Some(out.trim_matches(' ').to_owned())
 }
 
 /// Format characters the G5 scan deletes (DEC I-19): every Default_Ignorable code point, so bidi

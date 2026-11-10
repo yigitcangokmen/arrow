@@ -9,7 +9,7 @@ use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
 use crate::err::ArrowErr;
-use crate::normalize::normalize_key;
+use crate::normalize::{normalize_key, normalize_key_within};
 
 pub const K: usize = 128;
 pub const P: u64 = (1u64 << 61) - 1;
@@ -75,6 +75,12 @@ pub fn base_hash(norm: &str) -> u64 {
 pub fn key_hash(key: &str) -> Option<u64> {
     let n = normalize_key(key);
     (!n.is_empty()).then(|| base_hash(&n))
+}
+
+/// key_hash under the key column's normalization budget: Err(Limits) once it is spent (ENC-LEAK-4).
+pub fn key_hash_within(key: &str, budget: &mut usize) -> Result<Option<u64>, ArrowErr> {
+    let n = normalize_key_within(key, budget).ok_or(ArrowErr::Limits)?;
+    Ok((!n.is_empty()).then(|| base_hash(&n)))
 }
 
 /// v mod P for any u64: 2^61 ≡ 1, so (low 61 bits) + (v >> 61) < 2^61 + 8 < 2P, then one subtraction.

@@ -15,6 +15,10 @@ pub const BITS_PER_EVAL_MILLI_VERDICT: u32 = 1585;
 pub const MAX_BLOB: usize = 5 * 1024 * 1024;
 pub const MAX_ROWS: u32 = 200_000;
 pub const MAX_COLS: usize = 64;
+/// Bytes of NFKC output the key column may produce in one eval, summed over its cells (ENC-LEAK-4).
+/// An honest key column is at most MAX_BLOB bytes and NFKC barely grows real keys; U+FDFA-style
+/// expansion (18 characters from one) stops here as Err(Limits) instead of running out of fuel.
+pub const MAX_KEY_NORM_BYTES: usize = 2 * MAX_BLOB;
 
 /// Seeded sample size sent to the LLM (DEC I-06; 20 if the measured p95 exceeds 25 s).
 pub const SAMPLE_ROWS: u32 = 40;
