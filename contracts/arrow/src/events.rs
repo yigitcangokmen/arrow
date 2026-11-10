@@ -23,4 +23,25 @@ pub enum ArrowEvent {
         blob_sha256: String,
         program_wasm_hash: String,
     },
+    /// `phase:"accepted"` in mt_on_transfer (budget already counted), `phase:"done"` on success.
+    #[event_version("1.0.0")]
+    ArrowEval {
+        phase: String,
+        listing_id: u64,
+        eval_id: u64,
+        buyer: AccountId,
+        fee: U128,
+        spent_milli: u64,
+        left_milli: u64,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        h: Option<String>,
+    },
+    #[event_version("1.0.0")]
+    ArrowRefund {
+        kind: String,
+        listing_id: u64,
+        id: u64,
+        reason: String,
+        amount: U128,
+    },
 }
