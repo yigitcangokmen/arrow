@@ -242,3 +242,14 @@ export function normalizePayout(raw: string, market = "arrow-market.near"): stri
   }
   throw bad("Use a 0x address, a 64-character hex account or a NEAR account with a dot (alice.near). A Solana address is not a payout account here; withdraw to Solana from the Payouts page.");
 }
+
+/** The blob_sha256 inside a stored signed list payment, so a reloaded page can still find the listing it paid for. */
+export function listShaOf(multipayload: { payload: string }): string | null {
+  try {
+    const intent = (JSON.parse(multipayload.payload) as { intents?: { msg?: string }[] }).intents?.[0];
+    const sha = (JSON.parse(intent?.msg ?? "") as { op?: string; blob_sha256?: string }).blob_sha256;
+    return typeof sha === "string" && /^[0-9a-f]{64}$/.test(sha) ? sha : null;
+  } catch {
+    return null;
+  }
+}

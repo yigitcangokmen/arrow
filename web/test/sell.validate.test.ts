@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { b64, decryptFile, encryptFile, publicKeyHex, scalarFromLabel, sha256Hex, unseal } from "@arrow/sdk/crypto";
 import { ListMsg } from "@arrow/sdk/schemas";
 import {
-  budgetPreview, buildListMsg, checkBlobUrl, columnsBytes, columnsFromHeader, csvRecords, fileKind, fullTitle, inspectFile, MAX_PLAINTEXT_BYTES, normalizePayout, prefixesFor,
+  budgetPreview, buildListMsg, checkBlobUrl, columnsBytes, columnsFromHeader, csvRecords, fileKind, fullTitle, inspectFile, listShaOf, MAX_PLAINTEXT_BYTES, normalizePayout, prefixesFor,
   SellInputError, validateFields, type SellFields,
 } from "../lib/sell.ts";
 
@@ -213,5 +213,15 @@ describe("web halves of the contract's list rules (SCAM-6, X12-U3, X12-U7, X12-2
     expect(normalizePayout("ab".repeat(32))).toBe("ab".repeat(32));
     expect(() => normalizePayout("arrow-market.near", "arrow-market.near")).toThrow(/market/);
     expect(bad({ payout: "9wzdxwbbmkg8ztbnmquxvqrayrzzdsgydlvl9zytawwm" })?.field).toBe("payout");
+  });
+});
+
+describe("listShaOf (reload after an unclear bond payment)", () => {
+  it("reads blob_sha256 out of the stored signed list payment", () => {
+    const sha = "ab".repeat(32);
+    const payload = JSON.stringify({ intents: [{ intent: "transfer", msg: JSON.stringify({ op: "list", blob_sha256: sha }) }] });
+    expect(listShaOf({ payload })).toBe(sha);
+    expect(listShaOf({ payload: JSON.stringify({ intents: [{ msg: JSON.stringify({ op: "eval" }) }] }) })).toBeNull();
+    expect(listShaOf({ payload: "nope" })).toBeNull();
   });
 });

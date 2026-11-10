@@ -90,6 +90,7 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
   const deliveryHeading = useRef<HTMLHeadingElement>(null);
   const cancelButton = useRef<HTMLButtonElement>(null);
   const buyButton = useRef<HTMLButtonElement>(null);
+  const refocusBuy = useRef(false);
 
   useEffect(() => {
     setHost(window.location.host);
@@ -130,6 +131,10 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
   }, [delivery?.saveUrl, buyTx]);
   useEffect(() => {
     if (confirmBuy) cancelButton.current?.focus();
+    else if (refocusBuy.current) {
+      refocusBuy.current = false;
+      buyButton.current?.focus(); // Cancel removed itself; the Buy button is back after this render
+    }
   }, [confirmBuy]);
 
   const resetWallet = useCallback(() => {
@@ -595,7 +600,7 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
                   ? "Your inspection said PASS. Buy anyway?"
                   : "You have no verdict from this page for this listing (the budget may be used up, or the inspection was refunded or made earlier). Buy without one?"}
               </p>
-              <button type="button" ref={cancelButton} onClick={() => { setConfirmBuy(null); buyButton.current?.focus(); }}>Cancel</button>{" "}
+              <button type="button" ref={cancelButton} onClick={() => { refocusBuy.current = true; setConfirmBuy(null); }}>Cancel</button>{" "}
               <button type="button" className={form.primary} disabled={buyBlocked} onClick={() => void buy()}>Buy anyway</button>
             </div>
           ) : (

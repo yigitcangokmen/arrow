@@ -15,7 +15,7 @@ import { locateLatest } from "../../lib/locate.ts";
 import { checkPayment, pendingPayment, payWithIntent, PaymentPending, PaymentUnclear, type PaidTx } from "../../lib/pay.ts";
 import type { PendingPayment } from "../../lib/pending.ts";
 import {
-  budgetPreview, buildListMsg, checkBlobUrl, fileKind, inspectFile, MAX_PLAINTEXT_BYTES, normalizePayout, prefixesFor, SellInputError, validateFields,
+  budgetPreview, buildListMsg, checkBlobUrl, fileKind, inspectFile, listShaOf, MAX_PLAINTEXT_BYTES, normalizePayout, prefixesFor, SellInputError, validateFields,
   type SellFields, type TitlePrefix,
 } from "../../lib/sell.ts";
 import { findEventId } from "../../lib/settle.ts";
@@ -337,12 +337,16 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
 
   /** "Check payment": sends the stored signed bond payment again; it never asks the wallet to sign. */
   async function checkPay() {
-    if (!eoa || !listMsg) return;
+    if (!eoa) return;
     setError(null);
     setBusy(true);
     try {
       const r = await checkPayment(eoa);
       setPending(pendingPayment(eoa));
+      if ((r.state === "paid" || r.state === "paid-no-tx") && r.pending.kind !== "list") {
+        setPayNote("The payment went through. Open the listing it was for to see its result.");
+        return;
+      }
       if (r.state === "paid") {
         setPayNote("The payment went through.");
         setPaidTx(r.paid);
@@ -351,7 +355,8 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
       } else if (r.state === "paid-no-tx") {
         setPayNote("The payment went through, but the relay lost its transaction link. Looking for the listing on chain.");
         const views = new ArrowViews(network, CONTRACTS[network]);
-        const found = await locateLatest((id) => views.listing(id), (l) => l.blob_sha256 === listMsg.sha && l.seller.toLowerCase() === eoa.intentsId);
+        const sha = listMsg?.sha ?? listShaOf(r.pending.multipayload);
+        const found = await locateLatest((id) => views.listing(id), (l) => l.blob_sha256 === sha && l.seller.toLowerCase() === eoa.intentsId);
         if (!found) throw new Error("The payment went through, but the listing is not on chain yet. Check again in a minute.");
         mark(3, "done");
         mark(4, "done", `listing #${found.id}`);
@@ -531,7 +536,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
       ) : null}
       {pending ? (
         <p className={form.band}>
-          You signed the ${formatUsdc(BigInt(pending.amount))} bond payment and the relay could not say whether it went through. Do not pay again: use Check payment.
+          You signed a payment of ${formatUsdc(BigInt(pending.amount))} USDC{pending.kind === "list" ? " (the listing bond)" : pending.kind === "eval" ? " (an inspection)" : " (a purchase)"} and the relay could not say whether it went through. Do not pay again: use Check payment.
           {payNote ? <> {payNote}</> : null}
         </p>
       ) : payNote ? (

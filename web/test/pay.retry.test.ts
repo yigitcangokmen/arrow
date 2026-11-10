@@ -108,3 +108,28 @@ describe("locateLatest", () => {
     expect(await locateLatest(async (id) => rows[id] ?? null, (r) => r.pk === "nobody")).toBeNull();
   });
 });
+
+describe("paid history (QA-02)", () => {
+  it("keeps the newest 30 records per wallet and lists those of one listing; setResultId names the record by time", () => {
+    const h = historyStore(memoryStorage());
+    for (let i = 0; i < 35; i++) h.add("mainnet", SIGNER, { v: 1, kind: "eval", listingId: i % 2, tx: { txHash: `T${i}`, signerId: "r" }, resultId: null, at: 1000 + i });
+    expect(h.list("mainnet", SIGNER, 0).length + h.list("mainnet", SIGNER, 1).length).toBe(30);
+    expect(h.list("mainnet", SIGNER, 1).at(-1)!.tx!.txHash).toBe("T33");
+    h.setResultId("mainnet", SIGNER, 1034, 99);
+    expect(h.list("mainnet", SIGNER, 0).at(-1)).toMatchObject({ at: 1034, resultId: 99 });
+    expect(h.list("testnet", SIGNER, 1)).toEqual([]); // per network
+    expect(h.list("mainnet", "0x" + "1".repeat(40), 1)).toEqual([]); // per wallet
+  });
+  it("a blocked or corrupt storage never throws: resume is lost, the page still works", () => {
+    const broken = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("quota"); }, removeItem: () => { throw new Error("blocked"); } };
+    const h = historyStore(broken);
+    expect(h.list("mainnet", SIGNER, 1)).toEqual([]);
+    expect(() => h.add("mainnet", SIGNER, { v: 1, kind: "buy", listingId: 1, tx: null, resultId: null, at: 1 })).not.toThrow();
+    const p = pendingStore(broken);
+    expect(p.get("mainnet", SIGNER)).toBeNull();
+    expect(() => p.clear("mainnet", SIGNER)).not.toThrow();
+    const corrupt = memoryStorage();
+    corrupt.setItem("arrow:pending-pay:v1:mainnet:" + SIGNER, "{not json");
+    expect(pendingStore(corrupt).get("mainnet", SIGNER)).toBeNull();
+  });
+});
