@@ -20,7 +20,7 @@ import { buyCommand, type Ctx, evalCommand, type EvalResult } from "../../agent/
 import { configDir, resolveActor } from "../../agent/src/keys.ts";
 import { readTable } from "../../agent/src/data.ts";
 import { findEventId, SettleTimeout } from "../../agent/src/settle.ts";
-import { type PaidTx, realTransport, rpcProvider } from "../../agent/src/transport.ts";
+import { type PaidTx, muteRateLimitNoise, realTransport, retryRateLimited, rpcProvider } from "../../agent/src/transport.ts";
 import { makeViews } from "../../agent/src/views.ts";
 import { loadEnv, repoRoot } from "./lib/env.ts";
 import { appendRun } from "./lib/evidence.ts";
@@ -388,7 +388,7 @@ function fileKeys(path: string): E2eDeps["keys"] {
       const c = globalThis.crypto;
       e = { k_hex: bytesToHex(c.getRandomValues(new Uint8Array(32))), nonce_hex: bytesToHex(c.getRandomValues(new Uint8Array(24))), source, created_utc: new Date().toISOString() };
       store[plaintextSha] = e;
-      mkdirSync(dirname(path), { recursive: true });
+      mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
       writeFileSync(path, JSON.stringify(store, null, 2) + "\n", { mode: 0o600 });
       chmodSync(path, 0o600);
     }
@@ -463,6 +463,7 @@ export async function main(argv: string[]): Promise<number> {
     return 0;
   }
   loadEnv();
+  muteRateLimitNoise();
   const buyerId = f.buyer ?? "e2e-buyer.arrowhq.testnet";
   const sellerId = f.seller ?? "e2e-seller.arrowhq.testnet";
   const env = process.env;
@@ -487,9 +488,10 @@ export async function main(argv: string[]): Promise<number> {
     mint: async (id) => {
       const role = id === sellerId ? "seller" : "buyer";
       const a = actor(role);
-      const out = await new Account(a.id, rpcProvider("testnet", env), a.nearSecret!).callFunctionRaw({
+      const account = new Account(a.id, rpcProvider("testnet", env), a.nearSecret!);
+      const out = await retryRateLimited(() => account.callFunctionRaw({
         contractId: cfg.usdcToken, methodName: "mint", args: { receiver_id: id, amount: MINT_AMOUNT.toString() }, gas: 30_000_000_000_000n, waitUntil: "INCLUDED_FINAL",
-      });
+      }));
       const txHash = out.transaction.hash as string;
       return { txHash, signerId: id, url: nearTx(txHash) };
     },

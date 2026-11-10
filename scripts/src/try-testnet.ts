@@ -13,7 +13,7 @@ import { Account, KeyPair } from "near-api-js";
 import { formatUsdc, resolveNetwork, view, viewAccount } from "@arrow/sdk";
 import { buyCommand, CliError, type Ctx, EXIT, evalCommand, type EvalResult, formatEval, listCommand } from "../../agent/src/commands.ts";
 import { configDir, newScalarHex, resolveActor } from "../../agent/src/keys.ts";
-import { realTransport, rpcProvider } from "../../agent/src/transport.ts";
+import { muteRateLimitNoise, realTransport, retryRateLimited, rpcProvider } from "../../agent/src/transport.ts";
 import { makeViews } from "../../agent/src/views.ts";
 import { loadEnv, repoRoot } from "./lib/env.ts";
 import { appendRun } from "./lib/evidence.ts";
@@ -217,6 +217,7 @@ export async function main(argv: string[]): Promise<number> {
     return 0;
   }
   loadEnv();
+  muteRateLimitNoise();
   const env = process.env;
   const cfg = resolveNetwork("testnet", env);
   const repo = repoRoot();
@@ -260,9 +261,10 @@ export async function main(argv: string[]): Promise<number> {
     },
     balanceOf: async (id) => BigInt(await view<string>("testnet", cfg.usdcToken, "ft_balance_of", { account_id: id })),
     mint: async (id, secret, amount) => {
-      await new Account(id, rpcProvider("testnet", env), secret as `ed25519:${string}`).callFunctionRaw({
+      const account = new Account(id, rpcProvider("testnet", env), secret as `ed25519:${string}`);
+      await retryRateLimited(() => account.callFunctionRaw({
         contractId: cfg.usdcToken, methodName: "mint", args: { receiver_id: id, amount: amount.toString() }, gas: 30_000_000_000_000n, waitUntil: "INCLUDED_FINAL",
-      });
+      }));
       for (let i = 0; i < 20; i++) {
         if ((await deps.balanceOf(id)) >= amount) return;
         await new Promise((r) => setTimeout(r, 2000));

@@ -2,7 +2,7 @@
 //  testnet: ft_transfer_call on the arrow-usd token from the buyer's NEAR account (300 TGas + 1 yocto, DEC D4-07).
 //  mainnet: an ERC-191 transfer intent signed by the buyer's EVM wallet, sent through the hosted relay or the relayer account.
 // Both return as soon as the transaction is included; callers wait for the contract's answer with settle.ts.
-import { Account, FailoverRpcProvider, JsonRpcProvider } from "near-api-js";
+import { Account, FailoverRpcError, FailoverRpcProvider, JsonRpcProvider } from "near-api-js";
 import {
   arrowTransferIntent, buildAndSignTransfer, type IntentTransfer, type MultiPayload, type Network, NETWORKS, type NearCaller, relayDirect, relayHosted, resolveNetwork,
 } from "@arrow/sdk";
@@ -29,6 +29,33 @@ const FT_TRANSFER_CALL_GAS = 300_000_000_000_000n;
 /** rpc.*.near.org rate-limits and answers -429 "deprecated" under load, so near-api-js gets the whole RPC list and fails over. */
 export const rpcProvider = (network: Network, env: Record<string, string | undefined>) =>
   new FailoverRpcProvider(resolveNetwork(network, env).rpc.map((url) => new JsonRpcProvider({ url })));
+
+/** FailoverRpcProvider console.errors every failed provider, stack and all; the 429s are expected under load and retried, so hide only those. */
+export function muteRateLimitNoise(): void {
+  const original = console.error.bind(console);
+  console.error = (...args: unknown[]) => {
+    if (args.length === 1 && isRateLimited(args[0])) return;
+    original(...args);
+  };
+}
+
+const isRateLimited = (e: unknown): boolean =>
+  e instanceof FailoverRpcError ? e.errors.length > 0 && e.errors.every(isRateLimited) : /\b429\b/.test(`${e instanceof Error ? e.message : String(e)} ${String((e as { cause?: unknown })?.cause ?? "")}`);
+
+/**
+ * The public RPCs answer 429 when several sessions poll at once. The request is refused before it runs, so a retry cannot
+ * pay twice. Only errors that are all 429s are retried (3, 6, 12, 24, 30, 30 s); a timeout or a contract error is not.
+ */
+export async function retryRateLimited<T>(fn: () => Promise<T>, sleep: (ms: number) => Promise<void> = (ms) => new Promise((r) => setTimeout(r, ms))): Promise<T> {
+  for (let i = 0; ; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (i >= 6 || !isRateLimited(e)) throw e;
+      await sleep(Math.min(3_000 * 2 ** i, 30_000));
+    }
+  }
+}
 
 function hostedBase(env: Record<string, string | undefined>): string {
   const base = env.ARROW_RELAY_URL || (env.NEXT_PUBLIC_SITE_DOMAIN ? `https://${env.NEXT_PUBLIC_SITE_DOMAIN}` : "");
@@ -68,14 +95,14 @@ export function realTransport(p: { network: Network; relay: RelayMode; env?: Rec
       }
       if (!actor.nearSecret) throw new Error("testnet payments need a NEAR account key");
       const account = new Account(actor.id, rpcProvider("testnet", env), actor.nearSecret);
-      const out = await account.callFunctionRaw({
+      const out = await retryRateLimited(() => account.callFunctionRaw({
         contractId: NETWORKS.testnet.usdcToken,
         methodName: "ft_transfer_call",
         args: { receiver_id: cfg.contract, amount: amount.toString(), msg },
         deposit: 1n,
         gas: FT_TRANSFER_CALL_GAS,
         waitUntil: "INCLUDED_FINAL",
-      });
+      }));
       const txHash = out.transaction.hash as string;
       return { txHash, signerId: actor.id, url: explorerTx("testnet", "near", txHash) };
     },
