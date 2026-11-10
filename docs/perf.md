@@ -111,7 +111,7 @@ Where the remaining 1.33e10 goes at 200 000 rows (from runs at 10 000 rows):
 - The minhash change is not in the testnet rc. It changes the wasm hash, so it ships with the freeze candidate (WS3-T12). The testnet program key and listings stay valid until then.
 - `time_ms` and `instructions` are public on chain:
   - T_PAD makes `time_ms` the same for every input.
-  - `instructions` does not stay the same. It tracks the dataset size (2.67e8 against 4.02e8 here), and between runs on one listing it varies by less than 0.4 %. This is the side channel the trust table already lists ("instruction and time_ms are public on chain").
+  - `instructions` does not stay the same. It tracks the dataset size (2.67e8 against 4.02e8 here), and between runs on one listing it varies by less than 0.4 %. It also depends on the buyer's choice of `key_column` (with MinHash) and `date_column`, which add per-cell and per-distinct-key work, so the buyer steers it and it is not counted in the leak budget. This is the side channel the trust table already lists ("instruction and time_ms are public on chain").
 - Cost: OutLayer charged 0.00570 NEAR for one eval (run 8, `Cost: 5702040000000000000000 yoctoNEAR`), and the rest of the 0.02 NEAR deposit came back as a refund. Most of the charge is the 47 s of `time_ms`. The contract's tank pays it.
 - Not measured on testnet: the 5 MB max case. That would need a 5 MB FastFS upload, and the card measures the max case locally.
 - FastFS: a newly uploaded file returned 404 for about 2.5 minutes before test.fastfs.io served it. `perf-testnet.ts` waits up to 10 minutes for it.
