@@ -1,16 +1,19 @@
+import { isTeamAccount } from "../../team.ts";
 import { DOD_TARGETS } from "../config.ts";
 import { num, type VerifyCtx } from "../context.ts";
 import { row } from "./util.ts";
 
 export const TITLE = "counts against the definition-of-done targets";
 
-/** A team account is listed in team-accounts.json or is a subaccount of a team root (DEC H-07, Q-07). */
 function isTeam(ctx: VerifyCtx, account: string): boolean {
   const t = ctx.opts.teamAccounts;
-  const a = account.toLowerCase();
-  if ((t?.near ?? []).some((n) => n.toLowerCase() === a)) return true;
-  if ((t?.evm ?? []).some((e) => e.address.toLowerCase() === a)) return true;
-  return a === "arrowhq.near" || a === "arrowhq.testnet" || a.endsWith(".arrowhq.near") || a.endsWith(".arrowhq.testnet");
+  return isTeamAccount(account, [...(t?.near ?? []), ...(t?.evm ?? []).map((e) => e.address)]);
+}
+
+/** "a, b, c (+2 more)": the ids behind a count, so a team account missing from team-accounts.json shows up. */
+function ids(set: Set<string>): string {
+  const all = [...set];
+  return all.length === 0 ? "none" : all.slice(0, 5).join(", ") + (all.length > 5 ? ` (+${all.length - 5} more)` : "");
 }
 
 const count = (ctx: VerifyCtx, kind: Parameters<VerifyCtx["runs"]>[0]) => ctx.runs(kind).length;
@@ -18,14 +21,22 @@ const count = (ctx: VerifyCtx, kind: Parameters<VerifyCtx["runs"]>[0]) => ctx.ru
 /** I4: no label; the counts are printed as PROVEN when every target is met and NOT PROVEN otherwise. Never REQUIRED. */
 export async function i4(ctx: VerifyCtx) {
   const listings = await ctx.listings();
+  const externalSellers = new Set<string>();
+  const externalBuyers = new Set<string>();
   let externalListings = 0;
   let externalEvals = 0;
   let totalEvals = 0;
   for (const l of listings) {
-    if (!isTeam(ctx, l.seller)) externalListings++;
+    if (!isTeam(ctx, l.seller)) {
+      externalListings++;
+      externalSellers.add(l.seller);
+    }
     for (const e of await ctx.evalsOf(num(l.id))) {
       totalEvals++;
-      if (!isTeam(ctx, e.buyer)) externalEvals++;
+      if (!isTeam(ctx, e.buyer)) {
+        externalEvals++;
+        externalBuyers.add(e.buyer);
+      }
     }
   }
   const evalRuns = ctx.runs("eval");
@@ -48,6 +59,6 @@ export async function i4(ctx: VerifyCtx) {
   const detail =
     `listings ${c.listing}/${DOD_TARGETS.listings} · evals ${c.eval}/${DOD_TARGETS.evals} (PASS ${c.pass}, BUY ${c.buy}; from the runs' observed text) · ` +
     `purchases ${c.purchase}/${DOD_TARGETS.purchases} · refunds ${c.refund}/${DOD_TARGETS.refunds}${money} · ` +
-    `external: ${externalListings} listings, ${externalEvals} evals (sellers and buyers not in team-accounts.json)`;
+    `external: ${externalListings} listings, ${externalEvals} evals (sellers and buyers not in team-accounts.json). External sellers: ${ids(externalSellers)}. External buyers: ${ids(externalBuyers)}`;
   return row("I4", met ? "PROVEN" : "NOT PROVEN", false, TITLE, detail);
 }
