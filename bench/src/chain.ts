@@ -1,17 +1,15 @@
 // Testnet chain access for the bench (WS6-T05, card section B). near-api-js 7.4.0 is used here (bench is not the SDK);
-// reads go through the SDK's fetch-based ArrowViews. Sends are serialized by the caller (one nonce queue per key).
+// reads and tx status polling go through the SDK RPC client (URL failover, retry, archival fallback). Sends are serialized by the caller (one nonce queue per key).
 // NOT exercised against a live contract in WS6-T05: the testnet contract is deployed in WS1-T15. Log parsing is
 // tested against bench/test/fixtures/tx-eval-done.json; live behaviour is checked in WS6-T06.
 import { Account, JsonRpcProvider } from "near-api-js";
-import { ArrowViews, decodeEvalResult, decodeState, encodeState, NETWORKS, prepareList, sealCriteria, view, type Criteria } from "@arrow/sdk";
+import { ArrowViews, decodeEvalResult, decodeState, encodeState, NETWORKS, prepareList, RpcError, sealCriteria, txStatus, view, type Criteria } from "@arrow/sdk";
 import { benchBuyerKey, loadNearSigner } from "./keys.ts";
 import type { LiveEval } from "./schema.ts";
 
 export const GAS_300T = 300_000_000_000_000n;
 export const POLL_MS = 5000;
 export const WAIT_LIMIT_MS = 180_000;
-const RPC = "https://rpc.testnet.fastnear.com";
-const ARCHIVAL = "https://archival-rpc.testnet.fastnear.com";
 
 export type Outcome = {
   eval_id: number | null;
@@ -68,10 +66,9 @@ export function stateString(idx: number, mode: "scored" | "verdict"): string {
 export { encodeState };
 
 export function makeChain(accountId: string, network: "testnet" = "testnet") {
-  const provider = new JsonRpcProvider({ url: RPC });
-  const archival = new JsonRpcProvider({ url: ARCHIVAL });
-  const account = new Account(accountId, provider, loadNearSigner(accountId, network));
   const cfg = NETWORKS[network];
+  const provider = new JsonRpcProvider({ url: cfg.rpc[cfg.rpc.length - 1] }); // signing/sending only; reads use the SDK failover
+  const account = new Account(accountId, provider, loadNearSigner(accountId, network));
   const views = new ArrowViews(network);
   const ftTransferCall = (amount: string, msg: string) =>
     account.callFunctionRaw({
@@ -114,12 +111,11 @@ export function makeChain(accountId: string, network: "testnet" = "testnet") {
       const t0 = Date.now();
       for (;;) {
         try {
-          const p = Date.now() - t0 > 2 * 24 * 3600_000 ? archival : provider;
-          const tx = await p.viewTransactionStatusWithReceipts({ txHash, accountId: sender, waitUntil: "EXECUTED_OPTIMISTIC" });
-          const outcome = parseOutcomeLogs(tx as unknown as TxLike);
+          const tx = await txStatus(network, txHash, sender, "NONE", { archival: Date.now() - t0 > 2 * 24 * 3600_000 });
+          const outcome = parseOutcomeLogs(tx as TxLike);
           if (outcome.success !== null || outcome.refund_reason !== null) return { done: true, outcome };
         } catch (e) {
-          if (!/TIMEOUT/i.test(String((e as Error).message))) throw e;
+          if (!(e instanceof RpcError && e.retryable) && !/TIMEOUT|UNKNOWN_TRANSACTION/i.test(String((e as Error).message))) throw e;
         }
         if (Date.now() - t0 > WAIT_LIMIT_MS) return { done: false, outcome: parseOutcomeLogs({}) };
         await sleep(POLL_MS);
