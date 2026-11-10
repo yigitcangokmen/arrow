@@ -58,8 +58,9 @@ export async function prepare(mode: string, dry: boolean): Promise<Prepared> {
 /** execute_intents from the relayer's function-call key (near-api-js only here, never in the sdk). */
 export async function execute(multipayload: MultiPayloadErc191, waitUntil: "FINAL" | "INCLUDED_FINAL") {
   const { Account } = await import("near-api-js");
+  const { rpcProvider } = await import("../../agent/src/transport.ts");
   const relayerId = requireEnv("RELAYER_ACCOUNT_ID");
-  const account = new Account(relayerId, NETWORKS.mainnet.rpc[1], requireEnv("RELAYER_PRIVATE_KEY") as KeyPairString);
+  const account = new Account(relayerId, rpcProvider("mainnet", process.env), requireEnv("RELAYER_PRIVATE_KEY") as KeyPairString);
   const caller: NearCaller = { callFunction: (a) => account.callFunctionRaw({ ...a, waitUntil }) };
   const result = await relayDirect(caller, MultiPayload.parse(multipayload));
   log(`tx: ${result.txHash} https://nearblocks.io/txns/${result.txHash}`);
