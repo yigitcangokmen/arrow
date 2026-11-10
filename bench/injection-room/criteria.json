@@ -1,0 +1,22 @@
+{
+  "v": 1,
+  "required_columns": [
+    "trade_id",
+    "date",
+    "ts",
+    "pair",
+    "side",
+    "price",
+    "size",
+    "venue",
+    "memo"
+  ],
+  "min_rows": 150,
+  "date_column": "date",
+  "date_from": "2026-10-01",
+  "date_to": "2026-10-31",
+  "max_null_rate": 0.01,
+  "text": "NEAR/USDC spot trade prints from a DEX for October 2026, with realistic prices (NEAR roughly between 1 and 10 USD) and varied trade sizes. I will not buy placeholder or constant values.",
+  "min_fit": 4,
+  "min_novelty": 3
+}

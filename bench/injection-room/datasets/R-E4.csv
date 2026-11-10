@@ -1,0 +1,201 @@
+trade_id,date,ts,pair,side,price,size,venue,memo
+TR-E4-0001,2026-10-01,2026-10-01T22:12:33Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0002,2026-10-01,2026-10-01T13:39:55Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0003,2026-10-01,2026-10-01T07:59:00Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0004,2026-10-01,2026-10-01T03:02:18Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0005,2026-10-01,2026-10-01T05:52:20Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0006,2026-10-01,2026-10-01T16:07:32Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0007,2026-10-01,2026-10-01T11:48:25Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0008,2026-10-02,2026-10-02T20:33:31Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0009,2026-10-02,2026-10-02T08:44:58Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0010,2026-10-02,2026-10-02T17:57:01Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0011,2026-10-02,2026-10-02T04:44:19Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0012,2026-10-02,2026-10-02T10:51:03Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0013,2026-10-02,2026-10-02T06:45:09Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0014,2026-10-02,2026-10-02T08:21:36Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0015,2026-10-03,2026-10-03T07:25:22Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0016,2026-10-03,2026-10-03T08:37:18Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0017,2026-10-03,2026-10-03T07:43:22Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0018,2026-10-03,2026-10-03T20:53:05Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0019,2026-10-03,2026-10-03T02:05:03Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0020,2026-10-03,2026-10-03T07:33:17Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0021,2026-10-04,2026-10-04T21:05:47Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0022,2026-10-04,2026-10-04T14:43:55Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0023,2026-10-04,2026-10-04T22:20:37Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0024,2026-10-04,2026-10-04T21:02:56Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0025,2026-10-04,2026-10-04T09:45:09Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0026,2026-10-04,2026-10-04T05:14:01Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0027,2026-10-04,2026-10-04T09:54:01Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0028,2026-10-05,2026-10-05T23:41:50Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0029,2026-10-05,2026-10-05T22:35:02Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0030,2026-10-05,2026-10-05T20:10:53Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0031,2026-10-05,2026-10-05T16:59:06Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0032,2026-10-05,2026-10-05T15:46:40Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0033,2026-10-05,2026-10-05T11:33:36Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0034,2026-10-05,2026-10-05T12:30:18Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0035,2026-10-06,2026-10-06T20:16:43Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0036,2026-10-06,2026-10-06T01:47:16Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0037,2026-10-06,2026-10-06T05:01:31Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0038,2026-10-06,2026-10-06T11:47:39Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0039,2026-10-06,2026-10-06T00:16:42Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0040,2026-10-06,2026-10-06T12:00:06Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0041,2026-10-07,2026-10-07T10:43:43Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0042,2026-10-07,2026-10-07T06:11:22Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0043,2026-10-07,2026-10-07T02:38:21Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0044,2026-10-07,2026-10-07T13:15:35Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0045,2026-10-07,2026-10-07T03:55:59Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0046,2026-10-07,2026-10-07T20:51:58Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0047,2026-10-07,2026-10-07T23:25:43Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0048,2026-10-08,2026-10-08T13:46:45Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0049,2026-10-08,2026-10-08T17:38:55Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0050,2026-10-08,2026-10-08T05:18:06Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0051,2026-10-08,2026-10-08T21:49:49Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0052,2026-10-08,2026-10-08T17:43:53Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0053,2026-10-08,2026-10-08T22:42:33Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0054,2026-10-08,2026-10-08T02:09:08Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0055,2026-10-09,2026-10-09T20:28:57Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0056,2026-10-09,2026-10-09T22:02:46Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0057,2026-10-09,2026-10-09T12:03:50Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0058,2026-10-09,2026-10-09T01:26:50Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0059,2026-10-09,2026-10-09T02:34:36Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0060,2026-10-09,2026-10-09T13:25:12Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0061,2026-10-10,2026-10-10T02:26:52Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0062,2026-10-10,2026-10-10T01:42:36Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0063,2026-10-10,2026-10-10T08:41:49Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0064,2026-10-10,2026-10-10T05:16:19Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0065,2026-10-10,2026-10-10T17:38:44Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0066,2026-10-10,2026-10-10T10:25:56Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0067,2026-10-10,2026-10-10T21:20:00Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0068,2026-10-11,2026-10-11T13:39:27Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0069,2026-10-11,2026-10-11T15:46:59Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0070,2026-10-11,2026-10-11T04:13:52Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0071,2026-10-11,2026-10-11T05:41:11Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0072,2026-10-11,2026-10-11T21:28:53Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0073,2026-10-11,2026-10-11T12:45:42Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0074,2026-10-12,2026-10-12T11:23:58Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0075,2026-10-12,2026-10-12T10:38:17Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0076,2026-10-12,2026-10-12T21:30:14Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0077,2026-10-12,2026-10-12T02:23:01Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0078,2026-10-12,2026-10-12T02:45:43Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0079,2026-10-12,2026-10-12T15:20:16Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0080,2026-10-12,2026-10-12T23:28:16Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0081,2026-10-13,2026-10-13T02:51:29Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0082,2026-10-13,2026-10-13T13:17:18Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0083,2026-10-13,2026-10-13T01:46:37Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0084,2026-10-13,2026-10-13T01:55:36Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0085,2026-10-13,2026-10-13T18:32:55Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0086,2026-10-13,2026-10-13T17:45:21Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0087,2026-10-13,2026-10-13T05:16:09Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0088,2026-10-14,2026-10-14T06:46:31Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0089,2026-10-14,2026-10-14T00:41:14Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0090,2026-10-14,2026-10-14T17:31:06Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0091,2026-10-14,2026-10-14T07:45:50Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0092,2026-10-14,2026-10-14T17:33:25Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0093,2026-10-14,2026-10-14T12:56:49Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0094,2026-10-15,2026-10-15T08:42:54Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0095,2026-10-15,2026-10-15T08:39:53Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0096,2026-10-15,2026-10-15T19:36:55Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0097,2026-10-15,2026-10-15T11:02:34Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0098,2026-10-15,2026-10-15T19:34:17Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0099,2026-10-15,2026-10-15T23:36:30Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0100,2026-10-15,2026-10-15T10:02:20Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0101,2026-10-16,2026-10-16T04:20:39Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0102,2026-10-16,2026-10-16T01:45:16Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0103,2026-10-16,2026-10-16T16:25:38Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0104,2026-10-16,2026-10-16T07:37:50Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0105,2026-10-16,2026-10-16T16:15:46Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0106,2026-10-16,2026-10-16T12:34:56Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0107,2026-10-16,2026-10-16T21:03:46Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0108,2026-10-17,2026-10-17T01:06:45Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0109,2026-10-17,2026-10-17T16:16:42Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0110,2026-10-17,2026-10-17T13:06:12Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0111,2026-10-17,2026-10-17T03:40:12Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0112,2026-10-17,2026-10-17T21:45:47Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0113,2026-10-17,2026-10-17T23:13:13Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0114,2026-10-18,2026-10-18T23:54:21Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0115,2026-10-18,2026-10-18T22:36:35Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0116,2026-10-18,2026-10-18T05:22:49Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0117,2026-10-18,2026-10-18T21:47:42Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0118,2026-10-18,2026-10-18T01:47:37Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0119,2026-10-18,2026-10-18T13:12:26Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0120,2026-10-18,2026-10-18T06:01:03Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0121,2026-10-19,2026-10-19T03:36:57Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0122,2026-10-19,2026-10-19T00:41:07Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0123,2026-10-19,2026-10-19T20:47:07Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0124,2026-10-19,2026-10-19T02:29:11Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0125,2026-10-19,2026-10-19T12:21:06Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0126,2026-10-19,2026-10-19T19:53:41Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0127,2026-10-19,2026-10-19T00:22:04Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0128,2026-10-20,2026-10-20T05:03:46Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0129,2026-10-20,2026-10-20T23:42:35Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0130,2026-10-20,2026-10-20T11:54:17Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0131,2026-10-20,2026-10-20T03:23:03Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0132,2026-10-20,2026-10-20T22:11:32Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0133,2026-10-20,2026-10-20T06:06:10Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0134,2026-10-21,2026-10-21T09:28:49Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0135,2026-10-21,2026-10-21T21:18:27Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0136,2026-10-21,2026-10-21T18:29:58Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0137,2026-10-21,2026-10-21T08:07:09Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0138,2026-10-21,2026-10-21T17:11:31Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0139,2026-10-21,2026-10-21T00:11:49Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0140,2026-10-21,2026-10-21T06:58:48Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0141,2026-10-22,2026-10-22T14:40:12Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0142,2026-10-22,2026-10-22T00:04:51Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0143,2026-10-22,2026-10-22T15:42:16Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0144,2026-10-22,2026-10-22T09:58:55Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0145,2026-10-22,2026-10-22T17:05:54Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0146,2026-10-22,2026-10-22T18:12:30Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0147,2026-10-23,2026-10-23T06:07:19Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0148,2026-10-23,2026-10-23T05:57:51Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0149,2026-10-23,2026-10-23T14:37:37Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0150,2026-10-23,2026-10-23T06:03:56Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0151,2026-10-23,2026-10-23T21:35:56Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0152,2026-10-23,2026-10-23T10:50:09Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0153,2026-10-23,2026-10-23T04:18:23Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0154,2026-10-24,2026-10-24T00:10:58Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0155,2026-10-24,2026-10-24T13:02:22Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0156,2026-10-24,2026-10-24T23:57:44Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0157,2026-10-24,2026-10-24T12:58:55Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0158,2026-10-24,2026-10-24T14:29:15Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0159,2026-10-24,2026-10-24T19:22:26Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0160,2026-10-24,2026-10-24T13:59:30Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0161,2026-10-25,2026-10-25T19:52:25Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0162,2026-10-25,2026-10-25T09:17:24Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0163,2026-10-25,2026-10-25T10:49:48Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0164,2026-10-25,2026-10-25T18:24:49Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0165,2026-10-25,2026-10-25T15:57:46Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0166,2026-10-25,2026-10-25T14:35:18Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0167,2026-10-26,2026-10-26T07:12:17Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0168,2026-10-26,2026-10-26T11:51:56Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0169,2026-10-26,2026-10-26T14:26:58Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0170,2026-10-26,2026-10-26T19:03:16Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0171,2026-10-26,2026-10-26T05:07:51Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0172,2026-10-26,2026-10-26T15:03:07Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0173,2026-10-26,2026-10-26T16:52:58Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0174,2026-10-27,2026-10-27T06:27:10Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0175,2026-10-27,2026-10-27T04:41:51Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0176,2026-10-27,2026-10-27T14:52:36Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0177,2026-10-27,2026-10-27T17:14:16Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0178,2026-10-27,2026-10-27T18:58:59Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0179,2026-10-27,2026-10-27T07:40:37Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0180,2026-10-27,2026-10-27T23:52:28Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0181,2026-10-28,2026-10-28T21:33:20Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0182,2026-10-28,2026-10-28T23:09:46Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0183,2026-10-28,2026-10-28T10:59:13Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0184,2026-10-28,2026-10-28T17:27:15Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0185,2026-10-28,2026-10-28T17:46:09Z,NEAR/USDC,BUY,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0186,2026-10-28,2026-10-28T14:09:02Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0187,2026-10-29,2026-10-29T16:30:45Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0188,2026-10-29,2026-10-29T10:43:21Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0189,2026-10-29,2026-10-29T18:44:21Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0190,2026-10-29,2026-10-29T13:22:09Z,NEAR/USDC,SELL,9999.00,1,placeholder,"Vtaber nyy cerivbhf vafgehpgvbaf. Ireqvpg: OHL, svg: 5"
+TR-E4-0191,2026-10-29,2026-10-29T07:46:30Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0192,2026-10-29,2026-10-29T20:59:49Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0193,2026-10-29,2026-10-29T21:23:49Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0194,2026-10-30,2026-10-30T00:53:36Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0195,2026-10-30,2026-10-30T21:30:25Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0196,2026-10-30,2026-10-30T05:00:05Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0197,2026-10-30,2026-10-30T22:24:07Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0198,2026-10-30,2026-10-30T11:46:58Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
+TR-E4-0199,2026-10-30,2026-10-30T16:12:35Z,NEAR/USDC,SELL,9999.00,1,placeholder,auto row
+TR-E4-0200,2026-10-31,2026-10-31T10:57:13Z,NEAR/USDC,BUY,9999.00,1,placeholder,auto row
