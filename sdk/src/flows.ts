@@ -68,13 +68,16 @@ export function prepareList(p: {
 /**
  * ECIES(program key) over criteriaBind(buyer_pk, listing_id) || minified criteria JSON, base64. The bind stops a
  * sealed criteria blob copied from the chain from being replayed under another buyer key or on another listing.
+ * PRIV-1: the JSON is padded with trailing spaces to MAX_CRITERIA_BYTES (JSON allows trailing whitespace, and the enclave
+ * accepts up to 3072 bytes), so every sealed_criteria is 4140 base64 characters and the public tx args no longer give the
+ * criteria length (whether a key list was sent, which key column, how long the text is).
  */
 export function sealCriteria(programPk: string, criteria: Criteria, bind: { buyerPk: string; listingId: number }): string {
   const bytes = criteriaBytes(criteria);
   if (bytes > MAX_CRITERIA_BYTES) throw new CriteriaTooLarge(bytes);
   const parsed = Criteria.parse(criteria);
   const json = new TextEncoder().encode(JSON.stringify(parsed));
-  const plain = new Uint8Array(32 + json.length);
+  const plain = new Uint8Array(32 + MAX_CRITERIA_BYTES).fill(0x20);
   plain.set(criteriaBind(bind.buyerPk, bind.listingId), 0);
   plain.set(json, 32);
   return b64.enc(seal(programPk, plain));

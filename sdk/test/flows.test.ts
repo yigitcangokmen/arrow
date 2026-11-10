@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ArrowMsg, ArrowViews, b64, BlobHashMismatch, bytesToHex, Criteria, criteriaBind, CriteriaTooLarge, decodeEvalResult, decryptFile,
   fetchAndCheckBlob, MAX_BLOB_BYTES, openRelease, prepareBuy, prepareEval, prepareList, publicKeyHex, scalarFromLabel,
-  seal, sealCriteria, sha256Hex, unseal,
+  seal, sealCriteria, sha256Hex, signature, signatureHex, unseal,
 } from "../src/index.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -61,7 +61,21 @@ describe("criteria and messages", () => {
   it("sealCriteria seals bind(buyer_pk, listing_id) || minified JSON to the program key", () => {
     const plain = unseal(programScalar, b64.dec(sealCriteria(programPk, criteria, { buyerPk, listingId: 7 })));
     expect(plain.subarray(0, 32)).toEqual(criteriaBind(buyerPk, 7));
-    expect(new TextDecoder().decode(plain.subarray(32))).toBe(JSON.stringify(criteria));
+    expect(new TextDecoder().decode(plain.subarray(32)).trimEnd()).toBe(JSON.stringify(criteria));
+    expect(JSON.parse(new TextDecoder().decode(plain.subarray(32)))).toEqual(criteria); // trailing spaces are valid JSON
+  });
+
+  it("PRIV-1: every sealed_criteria has the same length, whatever the criteria say", () => {
+    const sig = signatureHex(signature(["a", "b", "c"]));
+    const variants: Criteria[] = [
+      { v: 1, text: "" },
+      criteria,
+      { v: 1, text: "x".repeat(600) },
+      { v: 1, text: "keys", key_column: "token_contract", minhash: sig },
+      { v: 1, text: "keys", key_column: "unlock_date", minhash: sig },
+    ];
+    const lengths = variants.map((c) => sealCriteria(programPk, c, { buyerPk, listingId: 7 }).length);
+    expect(new Set(lengths)).toEqual(new Set([4140]));
   });
 
   it("criteria_too_large_error", () => {
