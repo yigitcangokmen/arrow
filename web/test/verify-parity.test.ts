@@ -89,7 +89,7 @@ describe("verify view helpers", () => {
     const ids = (k: string) => groups.find((g) => g.key === k)?.rows.map((r) => r.id);
     expect(ids("required")).toEqual(["R1", "R2", "R3", "R5", "R8"]);
     expect(ids("notproven")).toEqual(["N1", "N2"]);
-    expect(ids("risky")).toEqual(["K1", "K2", "K3", "K4", "K5", "K6", "K7"]);
+    expect(ids("risky")).toEqual(["K1", "K2", "K3", "K4", "K5", "K6", "K7", "K8"]);
     expect(groups.flatMap((g) => g.rows).length).toBe(web.rows.length);
     expect(groupRows([]).length).toBe(0);
   });

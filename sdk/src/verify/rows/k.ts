@@ -11,7 +11,7 @@ async function codeHash(ctx: VerifyCtx, network: "mainnet" | "testnet", account:
   }
 }
 
-/** K1..K7: known open risks. Always RISKY, never REQUIRED. Wording follows the trust table. */
+/** K1..K8: known open risks. Always RISKY, never REQUIRED. Wording follows the trust table. */
 export async function riskyRows(ctx: VerifyCtx) {
   const outlayer = ctx.cfg.outlayer;
   const intents = NETWORKS.mainnet.intents!;
@@ -23,13 +23,21 @@ export async function riskyRows(ctx: VerifyCtx) {
     ctx.opts.timingBits === undefined
       ? "no measured value yet; a side channel through enclave run time is not ruled out"
       : `measured ${ctx.opts.timingBits} bits in the bench; a side channel through enclave run time is not ruled out`;
+  const steer = "the public instruction count depends on the dataset size and on the buyer's key and date column choice, and is not counted in the leak budget";
   return [
     row("K1", "RISKY", false, `${outlayer} is upgradable (${await codeHash(ctx, ctx.network, outlayer)})`, "an upgrade can change how requests are executed"),
     k2,
     row("K3", "RISKY", false, "OutLayer keystore is run by a DAO", "which code may read the program key and the API key secret is decided there"),
     row("K4", "RISKY", false, "OutLayer master key is shared", "all projects on the same OutLayer deployment sit under one master"),
-    row("K5", "RISKY", false, "timing side channel", timing),
+    row("K5", "RISKY", false, "timing and instruction-count side channels", `${timing}; ${steer}`),
     row("K6", "RISKY", false, "time guard reads the host clock", "a skewed host clock can pass an old request or refuse a fresh one"),
     row("K7", "RISKY", false, "leak budget can be burned", "an eval counts when accepted and never comes back, even when refunded; a buyer can use up a listing's budget with failing evals"),
+    row(
+      "K8",
+      "RISKY",
+      false,
+      "mainnet inference key is the free NEAR Builders hackathon key",
+      "it cannot be topped up and its expiry is not published; if it runs out, evals refund by design",
+    ),
   ];
 }

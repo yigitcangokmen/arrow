@@ -44,8 +44,25 @@ describe("testnet", () => {
     expect(row(r, "N1").title).toContain("current endpoint state only");
     expect(row(r, "N2")).toMatchObject({ label: "NOT PROVEN", required: false });
     const k = r.rows.filter((x) => x.id.startsWith("K"));
-    expect(k.map((x) => x.id)).toEqual(["K1", "K2", "K3", "K4", "K5", "K6", "K7"]);
+    expect(k.map((x) => x.id)).toEqual(["K1", "K2", "K3", "K4", "K5", "K6", "K7", "K8"]);
     expect(k.every((x) => x.label === "RISKY" && !x.required)).toBe(true);
+  });
+
+  it("k8_mainnet_inference_key_is_risky", async () => {
+    for (const network of ["testnet", "mainnet"] as const) {
+      const k8 = row(await run(buildWorld(network)), "K8");
+      expect(k8, network).toMatchObject({ label: "RISKY", required: false });
+      expect(k8.title).toContain("NEAR Builders");
+      expect(k8.detail).toContain("cannot be topped up");
+      expect(k8.detail).toContain("expiry is not published");
+      expect(k8.detail).toContain("refund by design");
+    }
+  });
+
+  it("k5 names the instruction count as a buyer-steerable side channel", async () => {
+    const k5 = row(await run(buildWorld("testnet")), "K5");
+    expect(k5.detail).toContain("instruction count");
+    expect(k5.detail).toContain("key and date column");
   });
 
   it("n1 stays NOT PROVEN when the endpoint is down", async () => {
