@@ -25,6 +25,8 @@ const ERR: &[u8] = br#"{"v":1,"ok":false}"#;
 const THREADS: usize = 8;
 const T_PAD: Duration = Duration::from_secs(45);
 const CRIT: &str = r#"{"v":1,"required_columns":["trade_id","date","side","price"],"min_rows":40,"text":"NEAR trade prints","min_fit":4,"min_novelty":3}"#;
+const SELLER: &str = "seller.arrowhq.testnet";
+const LISTING_ID: u64 = 7;
 
 #[derive(Clone, Copy, PartialEq)]
 enum Wasm {
@@ -73,6 +75,17 @@ fn seal(pk: &[u8; 65], pt: &[u8]) -> String {
 
 fn open(sk: &k256::SecretKey, b64: &str) -> Vec<u8> {
     ecies::decrypt(&sk.to_bytes(), &STANDARD.decode(b64).unwrap()).unwrap()
+}
+
+/// sealed_k plaintext: K ‖ blob_sha256 ‖ sha256(seller).
+fn k_payload(k: &[u8; 32], blob_sha: &[u8; 32], seller: &str) -> Vec<u8> {
+    [k.as_slice(), blob_sha.as_slice(), &sha(seller.as_bytes())].concat()
+}
+
+/// sealed_criteria plaintext: sha256(buyer_pk ‖ listing_id BE) ‖ criteria JSON.
+fn crit_payload(buyer: &k256::SecretKey, listing_id: u64, crit: &[u8]) -> Vec<u8> {
+    let bind = sha(&[pk65(buyer).as_slice(), &listing_id.to_be_bytes()].concat());
+    [bind.as_slice(), crit].concat()
 }
 
 fn xchacha_blob(k: &[u8; 32], label: &str, plain: &[u8]) -> Vec<u8> {
@@ -135,13 +148,17 @@ impl Fx {
         let blob = xchacha_blob(&self.k, name, plain);
         let h = hex::encode(sha(&blob));
         let url = self.put_blob(name, &blob);
-        let sealed_k = seal(&self.ppk, &[self.k.as_slice(), &sha(&blob)].concat());
+        let sealed_k = seal(&self.ppk, &k_payload(&self.k, &sha(&blob), SELLER));
         let input = json!({
             "v": 1, "action": "eval",
-            "listing": {"id": 7, "blob_url": url, "blob_sha256": h, "sealed_k": sealed_k, "mode": "scored", "columns": []},
-            "eval": {"id": 42, "sealed_criteria": seal(&self.ppk, crit.as_bytes()), "buyer_pk": hex::encode(pk65(&self.buyer)), "seed": "11".repeat(32)},
+            "listing": {"id": LISTING_ID, "seller": SELLER, "blob_url": url, "blob_sha256": h, "sealed_k": sealed_k, "mode": "scored", "columns": []},
+            "eval": {"id": 42, "sealed_criteria": self.seal_crit(crit.as_bytes()), "buyer_pk": hex::encode(pk65(&self.buyer)), "seed": "11".repeat(32)},
         });
         (input, h)
+    }
+
+    fn seal_crit(&self, crit: &[u8]) -> String {
+        seal(&self.ppk, &crit_payload(&self.buyer, LISTING_ID, crit))
     }
 }
 
@@ -202,9 +219,18 @@ fn cases(fx: &Fx) -> (Vec<Case>, Vec<Case>) {
     add("sealed_k_not_b64", Wasm::Rel, mutate(&["listing", "sealed_k"], json!("@@not base64@@")), rel(), Some(1), e.clone());
     let other_pk = pk65(&label_sk("arrow:test:other-program:v1"));
     let blob_sha = sha(&xchacha_blob(&fx.k, "base", &ok_plain));
-    add("sealed_k_other_pk", Wasm::Rel, mutate(&["listing", "sealed_k"], json!(seal(&other_pk, &[fx.k.as_slice(), &blob_sha].concat()))), rel(), Some(1), e.clone());
+    add("sealed_k_other_pk", Wasm::Rel, mutate(&["listing", "sealed_k"], json!(seal(&other_pk, &k_payload(&fx.k, &blob_sha, SELLER)))), rel(), Some(1), e.clone());
     add("sealed_k_63_bytes", Wasm::Rel, mutate(&["listing", "sealed_k"], json!(seal(&fx.ppk, &[7u8; 63]))), rel(), Some(1), e.clone());
-    add("bind_hash_mismatch", Wasm::Rel, mutate(&["listing", "sealed_k"], json!(seal(&fx.ppk, &[fx.k.as_slice(), &[9u8; 32]].concat()))), rel(), Some(1), e.clone());
+    add("bind_hash_mismatch", Wasm::Rel, mutate(&["listing", "sealed_k"], json!(seal(&fx.ppk, &k_payload(&fx.k, &[9u8; 32], SELLER)))), rel(), Some(1), e.clone());
+    // ENC-1: a clone carries the original sealed_k under another seller; the old 64-byte form is refused too
+    add("clone_other_seller", Wasm::Rel, mutate(&["listing", "seller"], json!("attacker.testnet")), rel(), Some(1), e.clone());
+    add("release_clone_other_seller", Wasm::Dev, release(&{ let mut l = base["listing"].clone(); l["seller"] = json!("attacker.testnet"); l }), dev("ok_buy"), Some(1), e.clone());
+    add("sealed_k_64_unbound", Wasm::Rel, mutate(&["listing", "sealed_k"], json!(seal(&fx.ppk, &[fx.k.as_slice(), &blob_sha].concat()))), rel(), Some(1), e.clone());
+    // ENC-2: the criteria ciphertext replayed under another buyer key or on another listing
+    let attacker = label_sk("arrow:test:attacker:v1");
+    add("criteria_other_buyer_pk", Wasm::Rel, mutate(&["eval", "buyer_pk"], json!(hex::encode(pk65(&attacker)))), rel(), Some(1), e.clone());
+    add("criteria_other_listing", Wasm::Rel, mutate(&["listing", "id"], json!(LISTING_ID + 1)), rel(), Some(1), e.clone());
+    add("criteria_unbound", Wasm::Rel, mutate(&["eval", "sealed_criteria"], json!(seal(&fx.ppk, CRIT.as_bytes()))), rel(), Some(1), e.clone());
     add("buyer_pk_128_hex", Wasm::Rel, mutate(&["eval", "buyer_pk"], json!(hex::encode(pk65(&fx.buyer))[..128].to_owned())), rel(), Some(1), e.clone());
     let mut off = pk65(&fx.buyer);
     off[64] ^= 1;
@@ -212,9 +238,9 @@ fn cases(fx: &Fx) -> (Vec<Case>, Vec<Case>) {
     let compressed = hex::encode(fx.buyer.public_key().to_encoded_point(true).as_bytes());
     add("buyer_pk_compressed", Wasm::Rel, mutate(&["eval", "buyer_pk"], json!(compressed)), rel(), Some(1), e.clone());
     add("seed_63_hex", Wasm::Rel, mutate(&["eval", "seed"], json!("1".repeat(63))), rel(), Some(1), e.clone());
-    add("criteria_garbage", Wasm::Rel, mutate(&["eval", "sealed_criteria"], json!(seal(&fx.ppk, b"\xff\x00garbage"))), rel(), Some(1), e.clone());
+    add("criteria_garbage", Wasm::Rel, mutate(&["eval", "sealed_criteria"], json!(fx.seal_crit(b"\xff\x00garbage"))), rel(), Some(1), e.clone());
     let crit127 = format!(r#"{{"v":1,"text":"x","key_column":"trade_id","minhash":"{}"}}"#, "0".repeat(127 * 16));
-    add("criteria_127_minhash", Wasm::Rel, mutate(&["eval", "sealed_criteria"], json!(seal(&fx.ppk, crit127.as_bytes()))), rel(), Some(1), e.clone());
+    add("criteria_127_minhash", Wasm::Rel, mutate(&["eval", "sealed_criteria"], json!(fx.seal_crit(crit127.as_bytes()))), rel(), Some(1), e.clone());
     // 25-28: time guard and URL scheme
     add("no_block_timestamp", Wasm::Rel, b.clone(), rel(), None, e.clone());
     add("eval_late_100s", Wasm::Rel, b.clone(), rel(), Some(100), Expect::ErrWithin(0, 10));
@@ -226,14 +252,16 @@ fn cases(fx: &Fx) -> (Vec<Case>, Vec<Case>) {
     let url_of = |p: &str| json!(format!("{}{p}", fx.fake));
     add("blob_404_err", Wasm::Dev, mutate(&["listing", "blob_url"], url_of("/blob-404")), dev("ok_buy"), Some(1), e.clone());
     add("blob_over_5mib_rejected", Wasm::Dev, mutate(&["listing", "blob_url"], url_of("/blob-huge")), dev("ok_buy"), Some(1), e.clone());
-    let other_url = fx.put_blob("other", &xchacha_blob(&fx.k, "other", &csv(0, false, "different")));
+    let other_blob = xchacha_blob(&fx.k, "other", &csv(0, false, "different"));
+    let other_h = hex::encode(sha(&other_blob));
+    let other_url = fx.put_blob("other", &other_blob);
     add("blob_sha_mismatch", Wasm::Dev, mutate(&["listing", "blob_url"], json!(other_url)), dev("ok_buy"), Some(1), e.clone());
     let wrong_k_blob = xchacha_blob(&[3u8; 32], "wrongk", &ok_plain);
     let wk_url = fx.put_blob("wrongk", &wrong_k_blob);
     let mut wk = base.clone();
     wk["listing"]["blob_url"] = json!(wk_url);
     wk["listing"]["blob_sha256"] = json!(hex::encode(sha(&wrong_k_blob)));
-    wk["listing"]["sealed_k"] = json!(seal(&fx.ppk, &[fx.k.as_slice(), &sha(&wrong_k_blob)].concat()));
+    wk["listing"]["sealed_k"] = json!(seal(&fx.ppk, &k_payload(&fx.k, &sha(&wrong_k_blob), SELLER)));
     add("right_hash_wrong_k", Wasm::Dev, wk.to_string().into_bytes(), dev("ok_buy"), Some(1), e.clone());
     let binary: Vec<u8> = (0..4000u32).map(|i| (i.wrapping_mul(2_654_435_761) >> 13) as u8).collect();
     add("decrypted_binary_garbage", Wasm::Dev, fx.eval_input("binary", &binary, CRIT).0.to_string().into_bytes(), dev("ok_buy"), Some(1), e.clone());
@@ -265,7 +293,10 @@ fn cases(fx: &Fx) -> (Vec<Case>, Vec<Case>) {
         Case { name: "P1_rel_derive", wasm: Wasm::Rel, stdin: br#"{"v":1,"action":"derive"}"#.to_vec(), env: rel(), block_age_s: Some(1), expect: Expect::Derive(ppk_hex) },
         Case { name: "post_body_over_4096_ok", wasm: Wasm::Dev, stdin: b.clone(), env: with(dev("ok_buy"), "ARROW_DEV_TPAD_MS", Some("0")), block_age_s: Some(1), expect: Expect::Eval { idx: 47, h: h.clone(), padded: false } },
         Case { name: "P3_ok_inject_idx0", wasm: Wasm::Dev, stdin: b.clone(), env: with(dev("ok_inject"), "ARROW_DEV_TPAD_MS", Some("0")), block_age_s: Some(1), expect: Expect::Eval { idx: 0, h: h.clone(), padded: false } },
-        Case { name: "P4_rel_release", wasm: Wasm::Rel, stdin: release(&base["listing"]), env: rel(), block_age_s: Some(1), expect: Expect::Release { k: fx.k, h: h.clone() } },
+        // release downloads the blob now; the fake host is http, which only the dev wasm accepts
+        Case { name: "P4_dev_release", wasm: Wasm::Dev, stdin: release(&base["listing"]), env: dev("ok_buy"), block_age_s: Some(1), expect: Expect::Release { k: fx.k, h: h.clone() } },
+        // ARW-C1: a swapped blob gives h = its own hash and a zero key (the contract refunds hash_mismatch)
+        Case { name: "P7_dev_release_swapped_blob", wasm: Wasm::Dev, stdin: release(&{ let mut l = base["listing"].clone(); l["blob_url"] = json!(other_url.clone()); l }), env: dev("ok_buy"), block_age_s: Some(1), expect: Expect::Release { k: [0u8; 32], h: other_h.clone() } },
         Case { name: "P5_dev_panic_canary", wasm: Wasm::Dev, stdin: br#"{"action":"__panic"}"#.to_vec(), env: dev("ok_buy"), block_age_s: Some(1), expect: Expect::Panic },
         Case { name: "P6_dev_eval_padded_45s", wasm: Wasm::Dev, stdin: b, env: dev("ok_buy"), block_age_s: Some(1), expect: Expect::Eval { idx: 47, h, padded: true } },
     ];

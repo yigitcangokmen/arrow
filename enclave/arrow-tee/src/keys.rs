@@ -8,7 +8,7 @@ use chacha20poly1305::aead::{Aead, KeyInit};
 use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 use hkdf::Hkdf;
 use k256::elliptic_curve::sec1::ToEncodedPoint;
-use sha2::Sha256;
+use sha2::{Digest, Sha256};
 
 use arrow_core::ArrowErr;
 
@@ -56,6 +56,19 @@ pub fn seal_b64(buyer_pk: &[u8; 65], pt: &[u8]) -> Result<String, ArrowErr> {
     Ok(STANDARD.encode(ct))
 }
 
+/// The seller binding inside `sealed_k` (ENC-1): sha256 of the listing's `seller` account id (UTF-8).
+pub fn seller_tag(seller: &str) -> [u8; 32] {
+    Sha256::digest(seller.as_bytes()).into()
+}
+
+/// The prefix of the `sealed_criteria` plaintext (ENC-2): sha256(buyer_pk 65 bytes ‖ listing_id u64 big-endian).
+pub fn criteria_bind(buyer_pk: &[u8; 65], listing_id: u64) -> [u8; 32] {
+    let mut h = Sha256::new();
+    h.update(buyer_pk);
+    h.update(listing_id.to_be_bytes());
+    h.finalize().into()
+}
+
 pub fn xchacha_open(k: &[u8; 32], blob: &[u8]) -> Result<Vec<u8>, ArrowErr> {
     let nonce: [u8; 24] = blob.get(..24).ok_or(ArrowErr::Decrypt)?.try_into().map_err(|_| ArrowErr::Decrypt)?;
     let ct = blob.get(24..).ok_or(ArrowErr::Decrypt)?;
@@ -67,7 +80,6 @@ pub mod tests {
     use super::*;
     use k256::elliptic_curve::ops::Reduce;
     use serde_json::Value;
-    use sha2::Digest;
 
     pub fn test_master() -> String {
         hex::encode(Sha256::digest(b"arrow/test/master/v1"))
@@ -141,6 +153,26 @@ pub mod tests {
             let b64 = STANDARD.encode(hx(c, "ciphertext_hex"));
             assert_eq!(unseal(&sk, &b64, 1 << 20).unwrap(), hx(c, "plaintext_hex"), "{}", c["id"]);
         }
+    }
+
+    /// TS ↔ Rust parity of the bindings (ENC-1, ENC-2): idx4 and idx7 of the TS vectors are rebuilt
+    /// here from the generator's labels (scripts/src/gen-crypto-vectors.ts) with the enclave's functions.
+    #[test]
+    fn binding_vectors_ts_to_rust() {
+        let f = fixture("ecies-vectors.json");
+        let case = |id: &str| f["cases"].as_array().unwrap().iter().find(|c| c["id"] == id).unwrap().clone();
+        let label = |s: &str| -> [u8; 32] { Sha256::digest(s.as_bytes()).into() };
+        let idx4 = hx(&case("idx4"), "plaintext_hex");
+        let k = label("arrow:vector:ecies:idx4:k");
+        let blob_sha: [u8; 32] = Sha256::digest(label("arrow:vector:ecies:idx4:blob")).into();
+        assert_eq!(idx4, [k.as_slice(), blob_sha.as_slice(), seller_tag("seller.arrowhq.testnet").as_slice()].concat());
+        // idx7 is bound to its own recipient key (pub_hex) and listing 7
+        let c7 = case("idx7");
+        let idx7 = hx(&c7, "plaintext_hex");
+        let buyer_pk = parse_buyer_pk(c7["pub_hex"].as_str().unwrap()).unwrap();
+        assert_eq!(idx7.get(..32).unwrap(), criteria_bind(&buyer_pk, 7).as_slice());
+        assert_ne!(idx7.get(..32).unwrap(), criteria_bind(&buyer_pk, 8).as_slice());
+        assert!(idx7.get(32..).unwrap().starts_with(br#"{"v":1,"text":""#));
     }
 
     #[test]

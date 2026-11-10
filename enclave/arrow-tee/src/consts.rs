@@ -45,5 +45,7 @@ pub const MAX_STDIN: usize = 32 * 1024;
 pub const MASTER_ENV: &str = "PROTECTED_MASTER";
 pub const NEARAI_KEY_ENV: &str = "NEARAI_API_KEY";
 pub const HKDF_INFO: &[u8] = b"arrow/program/v1";
-/// `sealed_k` plaintext: K (32) ‖ blob_sha256 (32) (DEC J-04).
-pub const SEALED_K_LEN: usize = 64;
+/// `sealed_k` plaintext: K (32) ‖ blob_sha256 (32) ‖ sha256(seller account id) (32) (DEC J-04, ENC-1).
+pub const SEALED_K_LEN: usize = 96;
+/// `sealed_criteria` plaintext: sha256(buyer_pk 65 ‖ listing_id u64 BE) (32) ‖ criteria JSON (ENC-2).
+pub const CRITERIA_BIND_LEN: usize = 32;

@@ -9,6 +9,8 @@ pub enum ArrowErr {
     Key,
     Unseal,
     HashBind,
+    SellerBind,
+    CriteriaBind,
     BuyerKey,
     Seed,
     Criteria,

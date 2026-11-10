@@ -13,9 +13,9 @@ use arrow_core::criteria::{parse_criteria, stats_spec};
 use arrow_core::schema::{out_derive, out_eval, out_release, state_index, Mode, ERR_JSON};
 use arrow_core::{exfil, fit, inject, llm, minhash, novelty, parse, prompt, sample, stats, ArrowErr};
 
-use crate::consts::{EVAL_DEADLINE, LLM, MASTER_ENV, NEARAI_KEY_ENV, RELEASE_DEADLINE, SEALED_K_LEN, T_PAD};
+use crate::consts::{CRITERIA_BIND_LEN, EVAL_DEADLINE, LLM, MASTER_ENV, NEARAI_KEY_ENV, RELEASE_DEADLINE, SEALED_K_LEN, T_PAD};
 use crate::guard::{check_env, elapsed_since_block, now_wall_ns, parse_block_ts, EnvSnap};
-use crate::keys::{parse_buyer_pk, pk_hex, program_sk, seal_b64, unseal, xchacha_open};
+use crate::keys::{criteria_bind, parse_buyer_pk, pk_hex, program_sk, seal_b64, seller_tag, unseal, xchacha_open};
 
 /// No `deny_unknown_fields`: the contract may add a field before it is locked, and a frozen wasm
 /// must not refuse every eval because of it.
@@ -35,6 +35,8 @@ struct Input {
 
 #[derive(Deserialize)]
 struct ListingIn {
+    id: u64,
+    seller: String,
     blob_url: String,
     blob_sha256: String,
     sealed_k: String,
@@ -123,7 +125,7 @@ pub fn run(input: &[u8], env: &dyn Env, net: &dyn Net) -> Vec<u8> {
     }
     let out = match action.as_str() {
         "eval" => return eval_padded(input, env, net),
-        "release" => release(input, env),
+        "release" => release(input, env, net),
         "derive" => derive(input, env),
         _ => Err(ArrowErr::Input),
     };
@@ -153,21 +155,47 @@ fn derive(input: &[u8], env: &dyn Env) -> Result<Vec<u8>, ArrowErr> {
     out_derive(&pk_hex(&sk))
 }
 
-/// `sealed_k` → (K, bound); bound must equal the listing's blob_sha256 (lowercase hex).
+/// `sealed_k` → (K, bound). The plaintext is K ‖ blob_sha256 ‖ sha256(seller): bound must equal the
+/// listing's blob_sha256 (lowercase hex) and the seller tag the listing's `seller`, so a sealed_k copied
+/// into another account's listing does not open (ENC-1).
 fn unseal_k(sk: &k256::SecretKey, l: &ListingIn) -> Result<([u8; 32], [u8; 32]), ArrowErr> {
     let pt = unseal(sk, &l.sealed_k, SEALED_K_LEN)?;
     if pt.len() != SEALED_K_LEN {
         return Err(ArrowErr::Unseal);
     }
     let k: [u8; 32] = pt.get(..32).ok_or(ArrowErr::Unseal)?.try_into().map_err(|_| ArrowErr::Unseal)?;
-    let bound: [u8; 32] = pt.get(32..).ok_or(ArrowErr::Unseal)?.try_into().map_err(|_| ArrowErr::Unseal)?;
+    let bound: [u8; 32] = pt.get(32..64).ok_or(ArrowErr::Unseal)?.try_into().map_err(|_| ArrowErr::Unseal)?;
     if hex::encode(bound) != l.blob_sha256 {
         return Err(ArrowErr::HashBind);
+    }
+    if pt.get(64..) != Some(seller_tag(&l.seller).as_slice()) {
+        return Err(ArrowErr::SellerBind);
     }
     Ok((k, bound))
 }
 
-fn release(input: &[u8], env: &dyn Env) -> Result<Vec<u8>, ArrowErr> {
+/// `sealed_criteria` → criteria JSON. The plaintext starts with criteria_bind(buyer_pk, listing id), so
+/// a criteria ciphertext copied from the chain does not open under another buyer key or listing (ENC-2).
+fn unseal_criteria(sk: &k256::SecretKey, e: &EvalIn, buyer: &[u8; 65], listing_id: u64) -> Result<Vec<u8>, ArrowErr> {
+    let pt = unseal(sk, &e.sealed_criteria, CRITERIA_BIND_LEN.saturating_add(MAX_CRITERIA_BYTES))?;
+    let (bind, json) = pt.split_at_checked(CRITERIA_BIND_LEN).ok_or(ArrowErr::CriteriaBind)?;
+    if bind != criteria_bind(buyer, listing_id) {
+        return Err(ArrowErr::CriteriaBind);
+    }
+    Ok(json.to_vec())
+}
+
+/// Downloads the ciphertext (at most MAX_BLOB) and hashes it: the `h` of eval and release (G3).
+fn fetch_blob(net: &dyn Net, url: &str) -> Result<(Vec<u8>, [u8; 32]), ArrowErr> {
+    let blob = net.get_blob(url)?;
+    if blob.len() > MAX_BLOB {
+        return Err(ArrowErr::BlobTooLarge);
+    }
+    let h: [u8; 32] = Sha256::digest(&blob).into();
+    Ok((blob, h))
+}
+
+fn release(input: &[u8], env: &dyn Env, net: &dyn Net) -> Result<Vec<u8>, ArrowErr> {
     let i = parse_input(input, "release")?;
     let (Some(l), Some(r)) = (i.listing, i.release) else {
         return Err(ArrowErr::Input);
@@ -178,7 +206,11 @@ fn release(input: &[u8], env: &dyn Env) -> Result<Vec<u8>, ArrowErr> {
     let sk = program_sk(snap.master.as_deref().ok_or(ArrowErr::Secret)?)?;
     let buyer = parse_buyer_pk(&r.buyer_pk)?;
     let (k, bound) = unseal_k(&sk, &l)?;
-    let out = out_release(&seal_b64(&buyer, &k)?, &hex::encode(bound))?;
+    // G3 on buy (ARW-C1): h is the hash of the ciphertext downloaded now, so a blob swapped after
+    // listing makes the contract refund with hash_mismatch. K leaves only for the bound ciphertext.
+    let (_, h) = fetch_blob(net, &l.blob_url)?;
+    let k_out = if h == bound { k } else { [0u8; 32] };
+    let out = out_release(&seal_b64(&buyer, &k_out)?, &hex::encode(h))?;
     time_guard(env, &snap, RELEASE_DEADLINE)?;
     Ok(out)
 }
@@ -218,14 +250,11 @@ fn eval_body(snap: &EnvSnap, l: &ListingIn, e: &EvalIn, net: &dyn Net) -> Result
     let seed: [u8; 32] = hex::decode(&e.seed).map_err(|_| ArrowErr::Seed)?.try_into().map_err(|_| ArrowErr::Seed)?;
     let mode: Mode = l.mode.parse()?;
     let (k, _) = unseal_k(&sk, l)?;
-    let crit = parse_criteria(&unseal(&sk, &e.sealed_criteria, MAX_CRITERIA_BYTES)?)?;
+    let crit = parse_criteria(&unseal_criteria(&sk, e, &buyer, l.id)?)?;
     let exfil_hit = exfil::scan_criteria(&crit)?;
 
-    let blob = net.get_blob(&l.blob_url)?;
-    if blob.len() > MAX_BLOB {
-        return Err(ArrowErr::BlobTooLarge);
-    }
-    let h = hex::encode(Sha256::digest(&blob));
+    let (blob, h) = fetch_blob(net, &l.blob_url)?;
+    let h = hex::encode(h);
     if h != l.blob_sha256 {
         return Err(ArrowErr::BlobHash);
     }
@@ -348,20 +377,32 @@ mod tests {
         parse_buyer_pk(&pk_hex(&program_sk(&test_master()).unwrap())).unwrap()
     }
 
+    const SELLER: &str = "seller.arrowhq.testnet";
+
+    /// Independent restatement of the bindings: sealed_k = K ‖ blob_sha256 ‖ sha256(seller),
+    /// sealed_criteria = sha256(buyer_pk ‖ listing_id BE) ‖ criteria JSON.
+    fn sealed_k_for(k: &[u8; 32], blob_sha: &[u8; 32], seller: &str) -> String {
+        seal_b64(&program_pk(), &[k.as_slice(), blob_sha.as_slice(), Sha256::digest(seller.as_bytes()).as_slice()].concat()).unwrap()
+    }
+
+    fn sealed_criteria_for(crit: &str, buyer: &k256::SecretKey, listing_id: u64) -> String {
+        let mut bind = Sha256::new();
+        bind.update(parse_buyer_pk(&pk_hex(buyer)).unwrap());
+        bind.update(listing_id.to_be_bytes());
+        seal_b64(&program_pk(), &[bind.finalize().as_slice(), crit.as_bytes()].concat()).unwrap()
+    }
+
     fn case(data: &[u8], crit: &str, mode: &str) -> Case {
         let k: [u8; 32] = Sha256::digest(b"arrow/test/k/v1").into();
         let nonce: [u8; 24] = Sha256::digest(b"arrow/test/nonce/v1")[..24].try_into().unwrap();
         let mut blob = nonce.to_vec();
         blob.extend(XChaCha20Poly1305::new(&k.into()).encrypt(&XNonce::from(nonce), data).unwrap());
         let sha: [u8; 32] = Sha256::digest(&blob).into();
-        let ppk = program_pk();
-        let sealed_k = seal_b64(&ppk, &[k.as_slice(), sha.as_slice()].concat()).unwrap();
-        let sealed_criteria = seal_b64(&ppk, crit.as_bytes()).unwrap();
         let buyer = label_sk("arrow:test:buyer:v1");
         let input = json!({
             "v": 1, "action": "eval",
-            "listing": {"id": 7, "blob_url": "https://blobs.example/x.bin", "blob_sha256": hex::encode(sha), "sealed_k": sealed_k, "mode": mode, "columns": []},
-            "eval": {"id": 42, "sealed_criteria": sealed_criteria, "buyer_pk": pk_hex(&buyer), "seed": "11".repeat(32)},
+            "listing": {"id": 7, "seller": SELLER, "blob_url": "https://blobs.example/x.bin", "blob_sha256": hex::encode(sha), "sealed_k": sealed_k_for(&k, &sha, SELLER), "mode": mode, "columns": []},
+            "eval": {"id": 42, "sealed_criteria": sealed_criteria_for(crit, &buyer, 7), "buyer_pk": pk_hex(&buyer), "seed": "11".repeat(32)},
         });
         Case { input, k, blob, buyer }
     }
@@ -500,25 +541,112 @@ mod tests {
     }
 
     #[test]
-    fn release_returns_k_and_bound_h() {
+    fn release_returns_k_and_downloaded_h() {
         let c = case(&csv(10, "x"), CRIT, "scored");
         let env = env_at(5);
-        let n = net(&env, vec![], vec![]);
+        let n = net(&env, c.blob.clone(), vec![]);
         let out = run_v(&release_input(&c), &env, &n);
         assert_eq!(out.len(), 267);
         let v: Value = serde_json::from_slice(&out).unwrap();
         assert_eq!(unseal(&c.buyer, v["k"].as_str().unwrap(), 32).unwrap(), c.k);
         assert_eq!(v["h"], c.input["listing"]["blob_sha256"]);
-        assert_eq!((n.calls.get(), env.slept.get()), (0, Duration::ZERO), "release downloads nothing and is not padded");
+        assert_eq!((n.calls.get(), env.slept.get()), (1, Duration::ZERO), "release downloads the blob once and is not padded");
+    }
+
+    /// ARW-C1: a blob swapped after listing comes back as h = sha256(downloaded bytes), so the
+    /// contract refunds with hash_mismatch, and K stays inside (the buyer gets 32 zero bytes).
+    #[test]
+    fn release_swapped_blob_returns_downloaded_h_without_k() {
+        let c = case(&csv(10, "x"), CRIT, "scored");
+        let mut swapped = c.blob.clone();
+        swapped[30] ^= 1;
+        let env = env_at(5);
+        let out = run_v(&release_input(&c), &env, &net(&env, swapped.clone(), vec![]));
+        assert_eq!(out.len(), 267, "same size as a real release, <= 900 bytes");
+        let v: Value = serde_json::from_slice(&out).unwrap();
+        assert_eq!(v["ok"], true);
+        assert_eq!(v["h"], hex::encode(Sha256::digest(&swapped)));
+        assert_ne!(v["h"], c.input["listing"]["blob_sha256"]);
+        assert_eq!(unseal(&c.buyer, v["k"].as_str().unwrap(), 32).unwrap(), [0u8; 32]);
+        // a deleted blob (fetch error) and an oversized one are ok:false (refund not_ok)
+        struct Gone;
+        impl Net for Gone {
+            fn get_blob(&self, _url: &str) -> Result<Vec<u8>, ArrowErr> {
+                Err(ArrowErr::BlobFetch)
+            }
+            fn chat(&self, _key: &str, _body: &[u8]) -> Result<Vec<u8>, ArrowErr> {
+                Err(ArrowErr::Llm)
+            }
+        }
+        assert_eq!(run(release_input(&c).to_string().as_bytes(), &env_at(5), &Gone), ERR_JSON);
+        let env = env_at(5);
+        assert_eq!(run_v(&release_input(&c), &env, &net(&env, vec![0u8; MAX_BLOB + 1], vec![])), ERR_JSON);
+    }
+
+    /// ENC-1: a clone copies blob_url, blob_sha256 and sealed_k, but the contract writes the
+    /// cloner's own account as `seller`. Neither eval nor release opens it.
+    #[test]
+    fn clone_with_other_seller_is_err() {
+        let c = case(&csv(60, "routine fill"), CRIT, "scored");
+        for forged in ["attacker.testnet", "seller.arrowhq.testnet ", "SELLER.arrowhq.testnet", ""] {
+            let mut clone = c.input.clone();
+            clone["listing"]["seller"] = json!(forged);
+            let env = env_at(5);
+            let n = net(&env, c.blob.clone(), chat_resp("BUY", 5, false));
+            assert_eq!(run_v(&clone, &env, &n), ERR_JSON, "eval, seller {forged:?}");
+            assert_eq!(n.calls.get(), 0, "no download, no LLM call");
+            let mut rel = release_input(&c);
+            rel["listing"]["seller"] = json!(forged);
+            let env = env_at(5);
+            assert_eq!(run_v(&rel, &env, &net(&env, c.blob.clone(), vec![])), ERR_JSON, "release, seller {forged:?}");
+        }
+        // a listing input without `seller` is refused too
+        let mut rel = release_input(&c);
+        rel["listing"].as_object_mut().unwrap().remove("seller");
+        let env = env_at(5);
+        assert_eq!(run_v(&rel, &env, &net(&env, c.blob.clone(), vec![])), ERR_JSON);
+        // an old-format sealed_k (K ‖ blob_sha256, 64 bytes) is refused
+        let sha: [u8; 32] = Sha256::digest(&c.blob).into();
+        let mut rel = release_input(&c);
+        rel["listing"]["sealed_k"] = json!(seal_b64(&program_pk(), &[c.k.as_slice(), sha.as_slice()].concat()).unwrap());
+        let env = env_at(5);
+        assert_eq!(run_v(&rel, &env, &net(&env, c.blob.clone(), vec![])), ERR_JSON);
+    }
+
+    /// ENC-2: sealed_criteria is public in the eval tx; replayed under another buyer_pk or on
+    /// another listing it does not open.
+    #[test]
+    fn criteria_replay_other_buyer_or_listing_is_err() {
+        let c = case(&csv(60, "routine fill"), CRIT, "scored");
+        let attacker = label_sk("arrow:test:attacker:v1");
+        let mut other_buyer = c.input.clone();
+        other_buyer["eval"]["buyer_pk"] = json!(pk_hex(&attacker));
+        let mut other_listing = c.input.clone();
+        other_listing["listing"]["id"] = json!(8);
+        let mut unbound = c.input.clone();
+        unbound["eval"]["sealed_criteria"] = json!(seal_b64(&program_pk(), CRIT.as_bytes()).unwrap());
+        for (name, i) in [("other buyer_pk", other_buyer), ("other listing", other_listing), ("no bind prefix", unbound)] {
+            let env = env_at(5);
+            let n = net(&env, c.blob.clone(), chat_resp("BUY", 5, false));
+            assert_eq!(run_v(&i, &env, &n), ERR_JSON, "{name}");
+            assert_eq!(n.calls.get(), 0, "{name}: no download, no LLM call");
+        }
+        // the attacker sealing its own criteria for its own key still works (control)
+        let mut own = c.input.clone();
+        own["eval"]["buyer_pk"] = json!(pk_hex(&attacker));
+        own["eval"]["sealed_criteria"] = json!(sealed_criteria_for(CRIT, &attacker, 7));
+        let env = env_at(5);
+        let out = run_v(&own, &env, &net(&env, c.blob.clone(), chat_resp("BUY", 5, false)));
+        assert_eq!(open_r(&out, &attacker).0, 47);
     }
 
     #[test]
     fn release_late_err() {
         let c = case(&csv(10, "x"), CRIT, "scored");
         let env = env_at(61);
-        assert_eq!(run_v(&release_input(&c), &env, &net(&env, vec![], vec![])), ERR_JSON);
+        assert_eq!(run_v(&release_input(&c), &env, &net(&env, c.blob.clone(), vec![])), ERR_JSON);
         let env = env_at(59);
-        assert_eq!(run_v(&release_input(&c), &env, &net(&env, vec![], vec![])).len(), 267);
+        assert_eq!(run_v(&release_input(&c), &env, &net(&env, c.blob.clone(), vec![])).len(), 267);
     }
 
     #[test]
@@ -587,7 +715,7 @@ mod tests {
     #[test]
     fn sealed_k_wrong_length_is_err() {
         let mut c = case(&csv(60, "x"), CRIT, "scored");
-        let short = seal_b64(&program_pk(), &[1u8; 63]).unwrap();
+        let short = seal_b64(&program_pk(), &[1u8; 95]).unwrap();
         c.input["listing"]["sealed_k"] = json!(short);
         let env = env_at(5);
         assert_eq!(run_v(&c.input, &env, &net(&env, c.blob.clone(), vec![])), ERR_JSON);

@@ -122,7 +122,7 @@ seller browser                         buyer (any chain)
 - **NEAR Intents**: transfer intent with a `msg` that triggers `mt_on_transfer`, `mt_resolve_transfer` refund, ERC-191 signer, and **1Click** for cross-chain inbound and outbound.
 - NEP-245, NEP-141 (testnet token), NEP-297 events, NEP-330 reproducible build, `0x…` implicit accounts: buyer and seller need no NEAR account.
 - The decision is not the LLM's alone: `novelty` is deterministic, `fit = min(fit_llm, fit_rule)`, and BUY needs every structural gate. A guard trip maps to `PASS · 1 · 1`, never to a new output state.
-- Every eval and release output carries `h`, the sha256 of the ciphertext the enclave downloaded; the contract refunds with `arrow_refund{reason:"hash_mismatch"}` when it differs from the listing's `blob_sha256`.
+- Every eval and release output carries `h`, the sha256 of the ciphertext the enclave downloaded. On buy the enclave downloads the blob again: if it was swapped, `h` differs from the listing's `blob_sha256`, the key stays inside and the contract refunds with `arrow_refund{reason:"hash_mismatch"}`; if it is gone, the refund reason is `not_ok`. On eval a swapped blob ends as `not_ok` (the enclave stops before scoring). After a release nothing stops the seller from changing the hosted file.
 - Security-track pieces: TEE attestation (`TODO(web)` `/verify`), a bit-capped output and an injection-refusal room (24 attacks), and a relayer key limited to `intents.near` function calls (`TODO(mainnet)`).
 
 ## For agents: CLI and MCP
