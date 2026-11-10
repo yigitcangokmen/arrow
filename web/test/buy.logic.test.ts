@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { b64, publicKeyHex, scalarFromLabel, seal } from "@arrow/sdk/crypto";
+import { b64, publicKeyHex, scalarFromLabel, seal, sha256Hex } from "@arrow/sdk/crypto";
 import { decodeEvalResult } from "@arrow/sdk/flows";
 import { signature, signatureHex } from "@arrow/sdk/minhash";
 import { Criteria, EvalMsg } from "@arrow/sdk/schemas";
 import { decodeState } from "@arrow/sdk/state";
-import { buildEvalMsg, BuyInputError, criteriaFromForm, downloadName, EMPTY_CRITERIA, keysFromText, type CriteriaFormState } from "../lib/buy.ts";
+import { buildEvalMsg, BuyInputError, criteriaFromForm, downloadCiphertext, downloadName, EMPTY_CRITERIA, keysFromText, ownListSignature, type CriteriaFormState } from "../lib/buy.ts";
 import { hashCheck } from "../lib/hashes.ts";
 
 const COLUMNS = ["token_contract", "unlock_date", "unlock_amount", "pct_of_supply"];
@@ -72,7 +72,49 @@ describe("keysFromText", () => {
   it("reads a named CSV column or one key per line", () => {
     expect(keysFromText("addr,x\n0xA,1\n0xB,2\n", "addr")).toEqual(["0xA", "0xB"]);
     expect(keysFromText("0xA\r\n\r\n 0xB \n")).toEqual(["0xA", "0xB"]);
-    expect(keysFromText("addr,x\n0xA,1\n", "missing")).toEqual(["addr,x", "0xA,1"]);
+  });
+  it("X12-U4: matches the column the way the enclave does (case, NFKC, spaces)", () => {
+    expect(keysFromText("customer_id,name\nC-1,A\nC-2,B\n", "Customer_ID")).toEqual(["C-1", "C-2"]);
+    expect(keysFromText("Mu\u0308s\u0327teri No,x\nA,1\n", "M\u00fc\u015fteri  no")).toEqual(["A"]); // NFD header, NFC selection, two spaces
+  });
+  it("QA-05 / X12-U4: a multi-field list without the chosen column is an error, not whole lines", () => {
+    expect(() => keysFromText("addr,x\n0xA,1\n", "missing")).toThrow(BuyInputError);
+    expect(() => keysFromText("addr,x\n0xA,1\n", "missing")).toThrow(/no column "missing"/);
+  });
+  it("a one-column list is still read line by line", () => {
+    expect(keysFromText("0xA\n0xB\n", "addr")).toEqual(["0xA", "0xB"]);
+  });
+});
+
+describe("ownListSignature", () => {
+  it("is recomputed from the key column: whole-line hashing (no column) differs from the chosen column", () => {
+    const csv = "wallet,label\na,b\nc,d\n";
+    expect(ownListSignature(csv, "wallet")?.hex).not.toEqual(ownListSignature(csv, "label")?.hex);
+    expect(() => ownListSignature(csv, "account_id")).toThrow(BuyInputError);
+    expect(ownListSignature(csv, "wallet")?.keys).toBe(2);
+    expect(ownListSignature("\n\n", "wallet")).toBeNull();
+  });
+});
+
+describe("downloadCiphertext (WEB-5)", () => {
+  it("stops reading an endless body after the cap and reports it, instead of buffering", async () => {
+    let chunks = 0;
+    const endless = new ReadableStream<Uint8Array>({
+      pull(c) {
+        chunks++;
+        c.enqueue(new Uint8Array(65_536));
+      },
+    });
+    const res = await downloadCiphertext("https://host.example/x.bin", "ab".repeat(32), (async () => new Response(endless, { status: 200 })) as never);
+    expect(res).toEqual({ kind: "too-large" });
+    expect(chunks).toBeLessThanOrEqual(5 * 16 + 4); // 5 MiB in 64 KiB chunks, plus what the stream pre-pulled
+  });
+  it("a wrong body gives the hash we got; a network failure means choose the file yourself", async () => {
+    const bytes = new Uint8Array([1, 2, 3]);
+    const mismatch = await downloadCiphertext("https://h/x", "ab".repeat(32), (async () => new Response(bytes)) as never);
+    expect(mismatch).toMatchObject({ kind: "mismatch", actual: sha256Hex(bytes) });
+    expect(await downloadCiphertext("https://h/x", "ab".repeat(32), (async () => { throw new TypeError("blocked by CORS"); }) as never)).toEqual({ kind: "manual" });
+    expect(await downloadCiphertext("https://h/x", sha256Hex(bytes), (async () => new Response(bytes)) as never)).toMatchObject({ kind: "ok" });
   });
 });
 

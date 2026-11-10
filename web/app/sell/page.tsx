@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { ArrowViews } from "@arrow/sdk/contract";
+import type { Metadata } from "next";
 import { ErrorBox } from "../../components/ErrorBox.tsx";
+import { teamAccounts } from "../../generated/data.ts";
 import { CONTRACTS, parseNetwork } from "../../lib/config.ts";
+import { formatUsdc } from "../../lib/format.ts";
 import { sellerConfig } from "../../lib/server/config.ts";
 import { SellForm } from "./SellForm.tsx";
 import styles from "./sell.module.css";
 import form from "../../components/form.module.css";
+
+export const metadata: Metadata = { title: "Sell data" };
 
 export default async function Sell({ searchParams }: { searchParams: Promise<{ network?: string }> }) {
   const net = parseNetwork((await searchParams).network);
@@ -21,7 +26,7 @@ export default async function Sell({ searchParams }: { searchParams: Promise<{ n
       <h1>Sell data</h1>
       <p className={styles.lead}>
         Your file is encrypted in this browser. Only the ciphertext is uploaded, and the key is sealed to the enclave&apos;s program
-        key. You need an EVM wallet and 0.10 USDC on NEAR Intents for the listing bond; no NEAR account.
+        key. You need an EVM wallet and {cfg ? formatUsdc(BigInt(cfg.bond)) : "the listing bond in"} USDC on NEAR Intents for the listing bond; no NEAR account.
       </p>
       {net === "testnet" ? (
         <div className={form.band} role="note">
@@ -40,6 +45,7 @@ export default async function Sell({ searchParams }: { searchParams: Promise<{ n
           limits={cfg.limits}
           maxEvalsCap={cfg.maxEvalsCap}
           readOnly={net !== "mainnet"}
+          teamAccounts={teamAccounts}
         />
       )}
     </div>

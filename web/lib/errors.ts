@@ -23,6 +23,10 @@ export function describeError(e: unknown): Described {
     const s = (e as unknown as { retryAfter: number | null }).retryAfter;
     return { message: `Too many requests from this network. Try again${s ? ` in ${s} s` : " in a minute"}.` };
   }
+  if (hasName(e, "PaymentPending") || hasName(e, "PaymentUnclear")) return { message: text };
+  if (hasName(e, "RelayUnavailable") && (e as unknown as { code?: string }).code === "RELAYER_BUSY") {
+    return { message: text.slice(0, 240), fallback: (e as unknown as { fallback?: string }).fallback };
+  }
   if (hasName(e, "RelayUnavailable")) {
     return { message: "The hosted relayer is not available right now.", fallback: (e as unknown as { fallback?: string }).fallback ?? "Try again in a few minutes." };
   }
@@ -32,8 +36,15 @@ export function describeError(e: unknown): Described {
       ? { message: "Your NEAR Intents balance is too low for this payment.", fallback: "Add USDC from Base, then try again." }
       : { message: `NEAR Intents rejected the signed intent${detail ? `: ${detail.slice(0, 200)}` : "."}` };
   }
-  if (hasName(e, "RelayRejected")) return { message: text.slice(0, 240) };
+  if (hasName(e, "RelayRejected")) {
+    const code = (e as unknown as { code?: string }).code;
+    if (code === "RELAY_UNCLEAR") return { message: "Your payment may or may not have gone through. Do not pay again: use Check payment." };
+    if (code === "ALREADY_RELAYED") return { message: "This exact payment was already submitted. Do not pay again: use Check payment." };
+    return { message: text.slice(0, 240) };
+  }
   if (hasName(e, "PaymentRefused")) return { message: `The market contract refused the payment: ${text.slice(0, 240)}` };
+  if (hasName(e, "NotEoaError")) return { message: text };
+  if (hasName(e, "WithdrawPayloadError")) return { message: text };
   if (hasName(e, "SettleTimeout")) return { message: `${text}. It may still finish; check the transaction link.` };
   if (hasName(e, "SellInputError") || hasName(e, "BuyInputError")) return { message: text };
   if (hasName(e, "AbortError")) return { message: "Cancelled." };

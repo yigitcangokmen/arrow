@@ -50,3 +50,13 @@ describe("REFUND_LINE", () => {
     expect(REFUND_LINE).toBe("Refunded to your NEAR Intents balance.");
   });
 });
+
+describe("SCAM-4: novelty is shown only when it was measured", () => {
+  const s = { verdict: "BUY", fit: 5, novelty: 3 } as const;
+  it("prints n/a when the buyer gave no list, the number when they did", () => {
+    expect(stateLine(s, "scored", { hadList: false })).toBe("BUY · fit 5 · novelty n/a");
+    expect(stateLine(s, "scored", { hadList: true })).toBe("BUY · fit 5 · novelty 3");
+    expect(stateLine(s, "scored")).toBe("BUY · fit 5 · novelty 3");
+    expect(stateLine({ verdict: "PASS" }, "verdict", { hadList: false })).toBe("PASS");
+  });
+});

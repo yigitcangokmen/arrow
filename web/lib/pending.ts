@@ -41,6 +41,13 @@ export interface PendingPayment {
   deadlineMs: number;
   nonce: string;
   createdAt: number;
+  meta?: PayMeta;
+}
+
+/** What the page needs again to show the result after a reload. */
+export interface PayMeta {
+  /** The buyer gave a list of their own, so novelty was measured. */
+  hadList?: boolean;
 }
 
 const pendingKey = (n: Network, signer: string) => `arrow:pending-pay:v1:${n}:${signer.toLowerCase()}`;
@@ -91,6 +98,7 @@ export interface PaidRecord {
   /** The id the contract assigned, once known (eval_id, purchase_id or listing_id). */
   resultId: number | null;
   at: number;
+  meta?: PayMeta;
 }
 
 const historyKey = (n: Network, signer: string) => `arrow:paid:v1:${n}:${signer.toLowerCase()}`;

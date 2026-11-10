@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { BASE_USDC_ASSET, NETWORKS, SOL_USDC_ASSET } from "@arrow/sdk/config";
 import { outboundQuoteRequest, type StatusResponse } from "@arrow/sdk/oneclick";
 import { fetchListings } from "../lib/listingsClient.ts";
-import { isSolanaAddress, listingsOf, looksLikeMissingTokenAccount, parseWithdrawal, WithdrawInputError } from "../lib/seller.ts";
-import { destinationTxHash, erc191Payload, watchSwap } from "../lib/swap.ts";
+import { isSolanaAddress, isSolanaWallet, listingsOf, looksLikeMissingTokenAccount, parseWithdrawal, WithdrawInputError } from "../lib/seller.ts";
+import { assertWithdrawPayload, destinationTxHash, erc191Payload, watchSwap, WithdrawPayloadError } from "../lib/swap.ts";
 import type { ListingView } from "../lib/server/listingsCache.ts";
 
 const SOL = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
@@ -111,5 +111,66 @@ describe("misc", () => {
     expect(ok).toHaveBeenCalledWith("/api/listings?network=testnet&from=0&limit=50");
     const bad = vi.fn(async () => new Response(JSON.stringify({ error: "Could not read", code: "RPC_ERROR" }), { status: 502 }));
     await expect(fetchListings("mainnet", bad as never)).rejects.toThrow("Could not read");
+  });
+});
+
+
+describe("X12-accounts-4: a token account is not a wallet", () => {
+  const ATA = "FGETo8T8wMcN2wCjav8VK6eh3dLk63evNDPxzLSJra8B"; // the USDC token account of SOL (off the curve)
+  it("isSolanaWallet is true for wallet keys and false for the token account", () => {
+    expect(isSolanaWallet(SOL)).toBe(true);
+    expect(isSolanaWallet(ATA)).toBe(false);
+    expect(isSolanaWallet("short")).toBe(false);
+    expect(isSolanaWallet("1".repeat(33))).toBe(false); // 33 bytes of zeros after decoding
+  });
+  it("parseWithdrawal refuses the ATA and still takes the owner", () => {
+    expect(() => parseWithdrawal({ solana: ATA, amount: "1", balance: 3_000_000n })).toThrow(/token account/);
+    expect(parseWithdrawal({ solana: SOL, amount: "1", balance: 3_000_000n }).solana).toBe(SOL);
+  });
+});
+
+describe("CRY-1 / QA-08 / WEB-6: assertWithdrawPayload", () => {
+  const USDC = NETWORKS.mainnet.usdcToken;
+  const signerId = "0xb5ef360e42056049f584fd03bf0fb9b208e28387";
+  const deposit = "2e821a255a4b2ca1b1cf745d3f959d9d8d009538871d2e20c3fb5fe4704b35e0";
+  const now = Date.parse("2026-11-11T04:00:00Z");
+  // The shape 1Click answered on mainnet (generate-intent, swap_transfer, erc191), read on 2026-11-11 without signing it.
+  const recorded = () => ({
+    verifying_contract: "intents.near",
+    signer_id: signerId,
+    deadline: "2026-11-13T21:17:31.399Z",
+    nonce: "Vij2xgAlKBKzwK/mFmy35xhWd/VZtecZlZcl9II9S8o=",
+    intents: [{ intent: "transfer", receiver_id: deposit, tokens: { [USDC]: "500000" } }],
+  });
+  const want = { signerId, depositAddress: deposit, usdcToken: USDC, units: 500_000n, now };
+  const bad = (mutate: (p: any) => void, re: RegExp) => {
+    const p = recorded();
+    mutate(p);
+    expect(() => assertWithdrawPayload(JSON.stringify(p), want)).toThrow(WithdrawPayloadError);
+    expect(() => assertWithdrawPayload(JSON.stringify(p), want)).toThrow(re);
+  };
+  it("accepts the recorded 1Click shape", () => {
+    expect(() => assertWithdrawPayload(JSON.stringify(recorded()), want)).not.toThrow();
+  });
+  it("refuses an add_public_key intent (the account takeover)", () => {
+    bad((p) => (p.intents = [{ intent: "add_public_key", public_key: "ed25519:attacker" }]), /intent kind add_public_key/);
+  });
+  it("refuses a second intent, another receiver, another amount, another token, another signer, another contract", () => {
+    bad((p) => p.intents.push({ intent: "transfer", receiver_id: "evil.near", tokens: { [USDC]: "1" } }), /not exactly one intent/);
+    bad((p) => (p.intents[0].receiver_id = "evil.near"), /another receiver/);
+    bad((p) => (p.intents[0].tokens[USDC] = "3000000"), /another amount/);
+    bad((p) => (p.intents[0].tokens = { "nep141:other.near": "500000" }), /another token/);
+    bad((p) => (p.intents[0].tokens = { [USDC]: "500000", "nep141:other.near": "1" }), /another token/);
+    bad((p) => (p.signer_id = "0x" + "1".repeat(40)), /another signer_id/);
+    bad((p) => (p.verifying_contract = "evil.near"), /verifying contract/);
+  });
+  it("refuses a msg that would call a contract, an expired deadline and one far in the future", () => {
+    bad((p) => (p.intents[0].msg = "{}"), /unexpected intent field msg/);
+    bad((p) => (p.deadline = "2026-11-10T00:00:00Z"), /deadline/);
+    bad((p) => (p.deadline = "2027-11-10T00:00:00Z"), /deadline/);
+    bad((p) => (p.extra = 1), /unexpected field extra/);
+  });
+  it("refuses text that is not JSON", () => {
+    expect(() => assertWithdrawPayload("nope", want)).toThrow(WithdrawPayloadError);
   });
 });

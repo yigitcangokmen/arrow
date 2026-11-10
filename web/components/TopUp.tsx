@@ -5,6 +5,7 @@ import { base } from "viem/chains";
 import { inboundQuoteRequest, quote, submitDeposit, TERMINAL_STATUSES, type OneClickStatus } from "@arrow/sdk/oneclick";
 import { formatUsdc, REFUND_LINE } from "../lib/format.ts";
 import { parseUsdc } from "@arrow/sdk/usdc";
+import { topUpErrorMessage } from "../lib/topup.ts";
 import { watchSwap } from "../lib/swap.ts";
 import { BASE_USDC_ADDRESS, type Eoa, ensureBase } from "../lib/wallet.ts";
 import { Countdown } from "./Countdown.tsx";
@@ -26,6 +27,10 @@ export function TopUp({ eoa, defaultAmount, onSuccess }: { eoa: Eoa; defaultAmou
   const [error, setError] = useState<string | null>(null);
   const alive = useRef(true);
   const abort = useRef(new AbortController());
+  const sendingRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (phase.k === "sending") sendingRef.current?.focus(); // the Pay button that had focus is gone
+  }, [phase.k]);
   useEffect(() => {
     alive.current = true;
     const ac = (abort.current = new AbortController()); // a fresh one per mount: strict mode runs effects twice in dev
@@ -37,8 +42,7 @@ export function TopUp({ eoa, defaultAmount, onSuccess }: { eoa: Eoa; defaultAmou
 
   const fail = (e: unknown, fallback: string) => {
     if (!alive.current || (e instanceof Error && e.name === "AbortError")) return;
-    const msg = e instanceof Error ? e.message : "";
-    setError(/rejected|denied/i.test(msg) ? "You rejected the request in your wallet." : msg ? `${fallback} (${msg.slice(0, 160)})` : fallback);
+    setError(topUpErrorMessage(e, fallback));
     setPhase({ k: "idle" });
   };
 
@@ -96,8 +100,8 @@ export function TopUp({ eoa, defaultAmount, onSuccess }: { eoa: Eoa; defaultAmou
     <section className={styles.panel} aria-labelledby="topup-title">
       <h3 id="topup-title">Add USDC from Base</h3>
       <p className={styles.hint}>
-        1Click moves USDC from your Base wallet to your NEAR Intents balance. You sign one USDC transfer on Base. Funds that 1Click
-        cannot deliver go back to your Base address.
+        1Click moves USDC from your Base wallet to your NEAR Intents balance. You sign one USDC transfer on Base and pay its network
+        fee in ETH on Base, so the wallet needs a little ETH there as well. Funds that 1Click cannot deliver go back to your Base address.
       </p>
       {phase.k === "idle" || phase.k === "quoting" || phase.k === "preview" ? (
         <>
@@ -119,7 +123,7 @@ export function TopUp({ eoa, defaultAmount, onSuccess }: { eoa: Eoa; defaultAmou
           </div>
         </>
       ) : null}
-      {phase.k === "sending" ? <p role="status">Waiting for your wallet: confirm the USDC transfer on Base.</p> : null}
+      {phase.k === "sending" ? <p role="status" tabIndex={-1} ref={sendingRef}>Waiting for your wallet: confirm the USDC transfer on Base.</p> : null}
       {phase.k === "waiting" ? (
         <p role="status">
           1Click status <strong>{phase.status}</strong> · <Countdown startedAt={phase.startedAt} label="elapsed" /> · deposit{" "}

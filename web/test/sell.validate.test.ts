@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { b64, decryptFile, encryptFile, publicKeyHex, scalarFromLabel, sha256Hex, unseal } from "@arrow/sdk/crypto";
 import { ListMsg } from "@arrow/sdk/schemas";
 import {
-  budgetPreview, buildListMsg, checkBlobUrl, columnsFromHeader, csvRecords, fileKind, fullTitle, inspectFile, MAX_PLAINTEXT_BYTES,
+  budgetPreview, buildListMsg, checkBlobUrl, columnsFromHeader, csvRecords, fileKind, fullTitle, inspectFile, MAX_PLAINTEXT_BYTES, prefixesFor,
   SellInputError, validateFields, type SellFields,
 } from "../lib/sell.ts";
 
@@ -84,8 +84,35 @@ describe("validateFields", () => {
 
 describe("budgetPreview", () => {
   it("multiplies the per-eval bits of the mode", () => {
-    expect(budgetPreview(50, "scored")).toBe("50 inspections × 5.67 bits = 283.65 bits");
-    expect(budgetPreview(10, "verdict")).toBe("10 inspections × 1.59 bits = 15.85 bits");
+    expect(budgetPreview(50, "scored")).toBe("50 inspections × 5.673 bits = 283.65 bits");
+    expect(budgetPreview(10, "verdict")).toBe("10 inspections × 1.585 bits = 15.85 bits");
+  });
+  it("NUM-1: the printed factor times the count is the printed total, for every count and both modes", () => {
+    for (const mode of ["scored", "verdict"] as const) {
+      for (let n = 1; n <= 500; n++) {
+        const m = /^(\d+) inspections × ([\d.]+) bits = ([\d.]+) bits$/.exec(budgetPreview(n, mode))!;
+        const totalMilli = BigInt(m[1]!) * BigInt(Math.round(Number(m[2]) * 1000)); // exact: the factor has three decimals
+        expect(Number((totalMilli + 5n) / 10n) / 100, `${n} ${mode}`).toBe(Number(m[3]));
+      }
+    }
+  });
+  it("QA / A11Y-5: a rejected field is named, so the form can mark and focus it", () => {
+    const bad = (o: Partial<SellFields>) => {
+      try {
+        validateFields(fields(o));
+      } catch (e) {
+        return (e as SellInputError).field;
+      }
+    };
+    expect(bad({ price: "0.05" })).toBe("price");
+    expect(bad({ evalFee: "0.01" })).toBe("fee");
+    expect(bad({ title: "  " })).toBe("title");
+    expect(bad({ publicDesc: "x".repeat(281) })).toBe("desc");
+    expect(bad({ maxEvals: 0 })).toBe("max");
+  });
+  it("SCAM-2: only a team account is offered the [team-made] label", () => {
+    expect(prefixesFor(false)).toEqual(["", "[synthetic]"]);
+    expect(prefixesFor(true)).toContain("[team-made]");
   });
 });
 

@@ -1,7 +1,6 @@
 "use client";
-import { useState } from "react";
-import { signature, signatureHex } from "@arrow/sdk/minhash";
-import { keysFromText, type CriteriaFormState } from "../../../lib/buy.ts";
+import { useEffect, useRef, useState } from "react";
+import { BuyInputError, ownListSignature, type CriteriaFormState } from "../../../lib/buy.ts";
 import form from "../../../components/form.module.css";
 
 const yield_ = () => new Promise<void>((r) => setTimeout(r, 0));
@@ -10,25 +9,41 @@ const yield_ = () => new Promise<void>((r) => setTimeout(r, 0));
 export function CriteriaForm({ columns, value, onChange }: { columns: readonly string[]; value: CriteriaFormState; onChange(v: CriteriaFormState): void }) {
   const [listInfo, setListInfo] = useState<string | null>(null);
   const [pasted, setPasted] = useState("");
+  /** The list as typed or loaded, kept in this tab only so it can be hashed again when the key column changes. */
+  const [rawList, setRawList] = useState("");
+  const latest = useRef(value);
+  latest.current = value;
   const set = <K extends keyof CriteriaFormState>(k: K, v: CriteriaFormState[K]) => onChange({ ...value, [k]: v });
 
-  async function hashList(text: string) {
-    if (text.trim() === "") {
-      setListInfo(null);
-      set("minhash", "");
-      return;
+  // The signature depends on the key column. It is recomputed whenever either changes, so it never hashes whole CSV lines
+  // because the column was picked after the file (QA-05).
+  useEffect(() => {
+    let alive = true;
+    const apply = (minhash: string, info: string | null) => {
+      if (!alive) return;
+      setListInfo(info);
+      if (latest.current.minhash !== minhash) onChange({ ...latest.current, minhash });
+    };
+    if (rawList.trim() === "") {
+      apply("", null);
+      return () => void (alive = false);
+    }
+    if (!value.keyColumn) {
+      apply("", "Pick the key column above, then your list is compared on it.");
+      return () => void (alive = false);
     }
     setListInfo("Computing…");
-    await yield_();
-    const keys = keysFromText(text, value.keyColumn || undefined);
-    if (keys.length === 0) {
-      setListInfo("No keys found in that list.");
-      set("minhash", "");
-      return;
-    }
-    onChange({ ...value, minhash: signatureHex(signature(keys)) });
-    setListInfo(`${keys.length} keys turned into 128 numbers in this browser.`);
-  }
+    yield_().then(() => {
+      try {
+        const sig = ownListSignature(rawList, value.keyColumn);
+        apply(sig ? sig.hex : "", sig ? `${sig.keys} keys turned into 128 numbers in this browser.` : "No keys found in that list.");
+      } catch (e) {
+        apply("", e instanceof BuyInputError ? e.message : "Could not read that list.");
+      }
+    });
+    return () => void (alive = false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawList, value.keyColumn]);
 
   const selectColumn = (id: string, label: string, v: string, key: "dateColumn" | "keyColumn") => (
     <div className={form.field}>
@@ -93,25 +108,28 @@ export function CriteriaForm({ columns, value, onChange }: { columns: readonly s
       </div>
       <div className={form.field}>
         <label htmlFor="crit-text">What you need, in your words (up to 600 characters)</label>
-        <textarea id="crit-text" maxLength={600} value={value.text} onChange={(e) => set("text", e.target.value)} />
-        <p className={form.hint}>Your criteria are sealed to the enclave key; the seller never sees them.</p>
+        <textarea id="crit-text" maxLength={600} required aria-required="true" aria-describedby="crit-hint" value={value.text} onChange={(e) => set("text", e.target.value)} />
+        <p id="crit-hint" className={form.hint}>
+          Required. Your criteria are sealed to the enclave key; the seller cannot read them. The key and date columns you pick move the public
+          instruction count of the run (see the trust table).
+        </p>
       </div>
       <details>
         <summary>Compare with my own list (optional, for the novelty score)</summary>
-        <p className={form.hint}>
+        <p className={form.hint} id="own-hint">
           Your list never leaves this browser. Only 128 numbers are sealed into the request. Without a list, novelty reads n/a. Pick the
-          key column above, then paste one key per line, or choose a CSV with that column.
+          key column above first, then paste one key per line, or choose a CSV with that column.
         </p>
         <div className={form.field}>
           <label htmlFor="own-file">CSV or text file</label>
-          <input id="own-file" type="file" onChange={async (e) => { const f = e.target.files?.[0]; if (f) await hashList(await f.text()); }} />
+          <input id="own-file" type="file" disabled={!value.keyColumn} aria-describedby="own-hint" onChange={async (e) => { const f = e.target.files?.[0]; if (f) setRawList(await f.text()); }} />
         </div>
         <div className={form.field}>
           <label htmlFor="own-paste">Or paste keys</label>
-          <textarea id="own-paste" value={pasted} onChange={(e) => setPasted(e.target.value)} onBlur={() => void hashList(pasted)} />
+          <textarea id="own-paste" disabled={!value.keyColumn} aria-describedby="own-hint" value={pasted} onChange={(e) => setPasted(e.target.value)} onBlur={() => setRawList(pasted)} />
         </div>
         {listInfo ? <p className={form.hint} role="status">{listInfo}</p> : null}
-        {value.minhash ? <button type="button" onClick={() => { setPasted(""); setListInfo(null); set("minhash", ""); }}>Remove my list</button> : null}
+        {rawList ? <button type="button" onClick={() => { setPasted(""); setRawList(""); }}>Remove my list</button> : null}
       </details>
     </div>
   );

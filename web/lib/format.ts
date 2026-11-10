@@ -15,8 +15,12 @@ export function formatUsdc(base: string | bigint): string {
   return sdkFormatUsdc(BigInt(base));
 }
 
-/** "PASS · fit 4 · novelty 1"; verdict mode has no scores; a missing novelty reads "n/a" (DEC I-16). */
-export function stateLine(s: State, mode: Mode): string {
+/**
+ * "PASS · fit 4 · novelty 1"; verdict mode has no scores; a missing novelty reads "n/a" (DEC I-16). Without a list of the buyer's
+ * own the enclave fixes novelty at 3 and decodes like any other value, so `hadList: false` prints n/a, as the form promised.
+ */
+export function stateLine(s: State, mode: Mode, o: { hadList?: boolean } = {}): string {
   if (mode === "verdict") return s.verdict;
-  return `${s.verdict} · fit ${s.fit ?? "n/a"} · novelty ${s.novelty ?? "n/a"}`;
+  const novelty = o.hadList === false ? "n/a" : (s.novelty ?? "n/a");
+  return `${s.verdict} · fit ${s.fit ?? "n/a"} · novelty ${novelty}`;
 }

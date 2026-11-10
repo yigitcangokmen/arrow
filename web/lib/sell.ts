@@ -9,8 +9,12 @@ export const MAX_PLAINTEXT_BYTES = MAX_BLOB_BYTES - 40; // nonce 24 + tag 16
 export const TITLE_PREFIXES = ["", "[synthetic]", "[team-made]"] as const;
 export type TitlePrefix = (typeof TITLE_PREFIXES)[number];
 
+/** The label choices of the /sell dropdown. [team-made] is believed only from a team account (labels.ts), so only they are offered it. */
+export const prefixesFor = (isTeam: boolean): TitlePrefix[] => TITLE_PREFIXES.filter((p) => p !== "[team-made]" || isTeam);
+
 export class SellInputError extends Error {
-  constructor(message: string) {
+  /** The id of the form control the message is about, so the page can mark it invalid and focus it. */
+  constructor(message: string, public readonly field?: string) {
     super(message);
     this.name = "SellInputError";
   }
@@ -119,28 +123,28 @@ export const fullTitle = (f: Pick<SellFields, "prefix" | "title">): string => (f
 /** Throws SellInputError with a sentence the user can act on. */
 export function validateFields(f: SellFields, limits: SellLimits = DEFAULT_LIMITS): void {
   const title = fullTitle(f);
-  if (cp(f.title.trim()) < 1) throw new SellInputError("Add a title.");
-  if (cp(title) > 80) throw new SellInputError(`The title (with its prefix) is ${cp(title)} characters; the limit is 80.`);
-  if (cp(f.publicDesc) > 280) throw new SellInputError(`The description is ${cp(f.publicDesc)} characters; the limit is 280.`);
+  if (cp(f.title.trim()) < 1) throw new SellInputError("Add a title.", "title");
+  if (cp(title) > 80) throw new SellInputError(`The title (with its prefix) is ${cp(title)} characters; the limit is 80.`, "title");
+  if (cp(f.publicDesc) > 280) throw new SellInputError(`The description is ${cp(f.publicDesc)} characters; the limit is 280.`, "desc");
   validateColumns(f.columns);
-  if (!Number.isInteger(f.rowsClaimed) || f.rowsClaimed < 0) throw new SellInputError("Rows claimed must be a whole number.");
-  if (!Number.isInteger(f.maxEvals) || f.maxEvals < 1 || f.maxEvals > 500) throw new SellInputError("Max inspections must be between 1 and 500.");
+  if (!Number.isInteger(f.rowsClaimed) || f.rowsClaimed < 0) throw new SellInputError("Rows claimed must be a whole number.", "rows");
+  if (!Number.isInteger(f.maxEvals) || f.maxEvals < 1 || f.maxEvals > 500) throw new SellInputError("Max inspections must be between 1 and 500.", "max");
   let price: bigint;
   let fee: bigint;
   try {
     price = parseUsdc(f.price);
     fee = parseUsdc(f.evalFee);
   } catch {
-    throw new SellInputError("Prices are USDC amounts with up to 6 decimals, for example 0.25.");
+    throw new SellInputError("Prices are USDC amounts with up to 6 decimals, for example 0.25.", "price");
   }
-  if (price < limits.minPrice) throw new SellInputError(`The price must be at least ${Number(limits.minPrice) / 1e6} USDC.`);
-  if (fee < limits.minEvalFee) throw new SellInputError(`The inspection fee must be at least ${Number(limits.minEvalFee) / 1e6} USDC.`);
+  if (price < limits.minPrice) throw new SellInputError(`The price must be at least ${Number(limits.minPrice) / 1e6} USDC.`, "price");
+  if (fee < limits.minEvalFee) throw new SellInputError(`The inspection fee must be at least ${Number(limits.minEvalFee) / 1e6} USDC.`, "fee");
 }
 
-/** "50 inspections x 5.67 bits = 283.65 bits": the most the chain will ever let out for this listing. */
+/** "50 inspections × 5.673 bits = 283.65 bits": the most the chain will ever let out for this listing. The factor is shown at milli precision so the product is the number printed. */
 export function budgetPreview(maxEvals: number, mode: Mode): string {
   const per = BITS_PER_EVAL_MILLI[mode];
-  return `${maxEvals} inspections × ${formatBits(per)} bits = ${formatBits(maxEvals * per)} bits`;
+  return `${maxEvals} inspections × ${(per / 1000).toFixed(3)} bits = ${formatBits(maxEvals * per)} bits`;
 }
 
 /**

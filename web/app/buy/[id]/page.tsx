@@ -2,12 +2,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowViews } from "@arrow/sdk/contract";
 import type { Listing } from "@arrow/sdk/schemas";
+import type { Metadata } from "next";
 import { ErrorBox } from "../../../components/ErrorBox.tsx";
 import { teamAccounts } from "../../../generated/data.ts";
+import { blockersFor, marketStateFrom } from "../../../lib/blockers.ts";
 import { CONTRACTS, parseNetwork } from "../../../lib/config.ts";
 import { toListingView } from "../../../lib/server/listingsCache.ts";
 import form from "../../../components/form.module.css";
 import { BuyFlow } from "./BuyFlow.tsx";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  return { title: `Listing ${id}` };
+}
 
 export default async function BuyPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ network?: string }> }) {
   const { id } = await params;
@@ -17,9 +24,10 @@ export default async function BuyPage({ params, searchParams }: { params: Promis
 
   let listing: Listing | null = null;
   let programPk: string | null = null;
+  let config: Awaited<ReturnType<ArrowViews["config"]>> | null = null;
   let failure: string | null = null;
   try {
-    [listing, programPk] = await Promise.all([views.listing(id), views.programPubkey()]);
+    [listing, programPk, config] = await Promise.all([views.listing(id), views.programPubkey(), views.config()]);
   } catch (e) {
     failure = e instanceof Error ? e.message.slice(0, 300) : "unknown error";
   }
@@ -37,7 +45,16 @@ export default async function BuyPage({ params, searchParams }: { params: Promis
           <p className="mono">{failure}</p>
         </ErrorBox>
       ) : (
-        <BuyFlow network={net} listing={toListingView(listing, teamAccounts)} programPk={programPk} readOnly={net !== "mainnet"} />
+        <BuyFlow
+          network={net}
+          listing={toListingView(listing, teamAccounts)}
+          programPk={programPk}
+          readOnly={net !== "mainnet"}
+          blockers={{
+            inspect: blockersFor("eval", marketStateFrom(config!, programPk), listing).map((b) => b.message),
+            buy: blockersFor("buy", marketStateFrom(config!, programPk), listing).map((b) => b.message),
+          }}
+        />
       )}
     </div>
   );

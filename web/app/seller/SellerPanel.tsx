@@ -1,8 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { NETWORKS } from "@arrow/sdk/config";
 import { generateIntent, outboundQuoteRequest, quote, submitIntent, TERMINAL_STATUSES, type OneClickStatus } from "@arrow/sdk/oneclick";
 import { signRawErc191 } from "@arrow/sdk/intent";
+import { Announcer } from "../../components/Announcer.tsx";
 import { BitCounter } from "../../components/BitCounter.tsx";
 import { CopyEvidence } from "../../components/CopyEvidence.tsx";
 import { EmptyState } from "../../components/EmptyState.tsx";
@@ -19,7 +21,7 @@ import { listingLinks } from "../../lib/links.ts";
 import { fetchListings } from "../../lib/listingsClient.ts";
 import { isSolanaAddress, listingsOf, looksLikeMissingTokenAccount, parseWithdrawal } from "../../lib/seller.ts";
 import type { ListingView } from "../../lib/server/listingsCache.ts";
-import { destinationTxHash, erc191Payload, watchSwap } from "../../lib/swap.ts";
+import { assertWithdrawPayload, destinationTxHash, erc191Payload, watchSwap } from "../../lib/swap.ts";
 import { type Eoa, intentSigner } from "../../lib/wallet.ts";
 import styles from "./seller.module.css";
 
@@ -34,6 +36,7 @@ type Phase =
 export function SellerPanel({ network, readOnly }: { network: Network; readOnly: boolean }) {
   const [eoa, setEoa] = useState<Eoa | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
+  const [balanceKey, setBalanceKey] = useState(0);
   const [listings, setListings] = useState<ListingView[] | null>(null);
   const [listError, setListError] = useState<string | null>(null);
   const [solana, setSolana] = useState("");
@@ -61,6 +64,12 @@ export function SellerPanel({ network, readOnly }: { network: Network; readOnly:
       (e: unknown) => alive.current && setListError(e instanceof Error ? e.message : "could not load the listings"),
     );
   }, [network]);
+
+  const resetWallet = useCallback(() => {
+    setEoa(null);
+    setBalance(null);
+    setPhase({ k: "idle" });
+  }, []);
 
   const mine = eoa && listings ? listingsOf(listings, eoa.intentsId) : null;
 
@@ -96,7 +105,11 @@ export function SellerPanel({ network, readOnly }: { network: Network; readOnly:
       const deposit = real.quote.depositAddress;
       if (!deposit) throw new Error("1Click returned no deposit address");
       const { intent } = await generateIntent({ signerId: eoa.intentsId, depositAddress: deposit });
-      const signed = await signRawErc191(erc191Payload(intent), intentSigner(eoa));
+      // The payload is signed byte for byte, and intents.near also accepts add_public_key and withdraw intents: it must be exactly
+      // one transfer of the chosen USDC from this account to this quote's deposit address, or nothing is signed.
+      const payload = erc191Payload(intent);
+      assertWithdrawPayload(payload, { signerId: eoa.intentsId, depositAddress: deposit, usdcToken: NETWORKS.mainnet.usdcToken, units: p.units });
+      const signed = await signRawErc191(payload, intentSigner(eoa));
       await submitIntent(signed);
       const startedAt = Date.now();
       setPhase({ k: "waiting", startedAt, status: "PENDING_DEPOSIT" });
@@ -106,20 +119,27 @@ export function SellerPanel({ network, readOnly }: { network: Network; readOnly:
       });
       if (!alive.current) return;
       setPhase({ k: "done", status: last?.status ?? "PROCESSING", deposit, solTx: destinationTxHash(last), amount: p.units });
-      if (last?.status === "SUCCESS") setBalance(null);
+      if (last?.status === "SUCCESS") setBalanceKey((k) => k + 1);
     } catch (e) {
       fail(e, "The withdrawal did not complete.");
     }
   }
 
+  const announce =
+    phase.k === "signing" ? "Waiting for your wallet: sign the withdrawal."
+    : phase.k === "waiting" ? `1Click status ${phase.status}.`
+    : phase.k === "done" ? (phase.status === "SUCCESS" ? "The withdrawal is done." : `The withdrawal ended with status ${phase.status}.`)
+    : error ? `That did not work: ${error.message}`
+    : "";
   const quoting = phase.k === "quoting";
   const showForm = phase.k === "idle" || phase.k === "quoting" || phase.k === "preview";
 
   return (
     <fieldset disabled={readOnly} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+      <Announcer text={announce} />
       <section className={form.panel} aria-labelledby="p1">
         <h2 id="p1">Wallet</h2>
-        <WalletButton eoa={eoa} balance={balance} onConnect={setEoa} onBalance={setBalance} />
+        <WalletButton eoa={eoa} balance={balance} onConnect={setEoa} onBalance={setBalance} onReset={resetWallet} refreshKey={balanceKey} />
       </section>
 
       <section className={form.panel} aria-labelledby="p2">
@@ -162,7 +182,7 @@ export function SellerPanel({ network, readOnly }: { network: Network; readOnly:
               <input id="sol" value={solana} onChange={(e) => { setSolana(e.target.value); if (phase.k === "preview") setPhase({ k: "idle" }); }} autoComplete="off" spellCheck={false} />
               <p className={form.hint}>
                 {solana && !isSolanaAddress(solana.trim()) ? "That is not a Solana address yet. " : ""}
-                The address needs a USDC token account: if you never held USDC there, receive any USDC once (send 0.01 SOL for the account rent).
+                Use the address of a wallet, not a token account. If it never held USDC, 1Click creates its USDC account and charges for it in the quote.
               </p>
             </div>
             <div className={form.field}>
@@ -209,7 +229,7 @@ export function SellerPanel({ network, readOnly }: { network: Network; readOnly:
             <button type="button" onClick={() => { setPhase({ k: "idle" }); setAmount(""); }}>Withdraw again</button>
           </div>
         ) : null}
-        {ataHint ? <p className={form.band}>Your Solana address has no USDC account yet; send 0.01 SOL and receive any USDC once, then try again.</p> : null}
+        {ataHint ? <p className={form.band}>1Click reported a problem with the USDC account of this address. Check that you pasted a wallet address, not a token account, and try the preview again.</p> : null}
         {error ? <ErrorBox title="That did not work" fallback={error.fallback}><p>{error.message}</p></ErrorBox> : null}
       </section>
     </fieldset>

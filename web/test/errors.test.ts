@@ -31,6 +31,20 @@ describe("describeError", () => {
   });
 });
 
+describe("RELAY-3 messages", () => {
+  it("an unclear relay answer says do not pay again and points at Check payment, never at a pay button", () => {
+    const d = describeError(new RelayRejected("long server text", 502, "RELAY_UNCLEAR"));
+    expect(d.message).toMatch(/Do not pay again/);
+    expect(d.message).toMatch(/Check payment/);
+    expect(describeError(new RelayRejected("x", 409, "ALREADY_RELAYED")).message).toMatch(/Check payment/);
+  });
+  it("a busy relayer keeps its own retry text and fallback", () => {
+    const d = describeError(new RelayUnavailable("The relayer is carrying another payment right now.", "self relay", "RELAYER_BUSY"));
+    expect(d.message).toMatch(/carrying another payment/);
+    expect(d.fallback).toBe("self relay");
+  });
+});
+
 describe("suggestTopUp", () => {
   it("rounds the missing amount up to 0.50 and never goes below 0.50", () => {
     expect(suggestTopUp(100_000n, 0n)).toBe(500_000n);

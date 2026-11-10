@@ -1,5 +1,6 @@
 // Pure logic of /buy: the criteria form to a Criteria object, keys for the MinHash, the eval msg.
-import { CriteriaTooLarge, prepareEval } from "@arrow/sdk/flows";
+import { BlobHashMismatch, CriteriaTooLarge, fetchAndCheckBlob, prepareEval } from "@arrow/sdk/flows";
+import { normalizeKey, signature, signatureHex } from "@arrow/sdk/minhash";
 import { Criteria } from "@arrow/sdk/schemas";
 import { csvRecords } from "./sell.ts";
 
@@ -71,14 +72,47 @@ export function criteriaFromForm(f: CriteriaFormState, listingColumns: readonly 
   return parsed.data;
 }
 
-/** Keys of the buyer's own list: the named column of a CSV with a header, else one key per non-empty line. */
+/**
+ * Keys of the buyer's own list: the named column of a CSV with a header, else one key per non-empty line. The column is
+ * matched the way the enclave matches it (NFKC, lower case, collapsed spaces). A list with several fields per row that has no
+ * such column is an error: falling back to whole lines would hash "id,name" rows and make every list look new.
+ */
 export function keysFromText(text: string, keyColumn?: string): string[] {
   if (keyColumn) {
     const rows = csvRecords(text);
-    const idx = rows[0]?.map((c) => c.trim()).indexOf(keyColumn) ?? -1;
+    const head = rows[0] ?? [];
+    const idx = head.map(normalizeKey).indexOf(normalizeKey(keyColumn));
     if (idx >= 0) return rows.slice(1).map((r) => (r[idx] ?? "").trim()).filter(Boolean);
+    if (head.length > 1) throw new BuyInputError(`Your list has no column "${keyColumn}". Its columns are: ${head.map((c) => c.trim()).join(", ").slice(0, 120)}.`);
   }
-  return text.replace(/^﻿/, "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  return text.replace(/^\uFEFF/, "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+}
+
+/** The 128 numbers of the buyer's own list for `keyColumn`, as sealed into the request; null when the list is empty. */
+export function ownListSignature(text: string, keyColumn: string): { hex: string; keys: number } | null {
+  const keys = keysFromText(text, keyColumn);
+  return keys.length === 0 ? null : { hex: signatureHex(signature(keys)), keys: keys.length };
+}
+
+export type CiphertextDownload =
+  | { kind: "ok"; bytes: Uint8Array }
+  | { kind: "mismatch"; actual: string }
+  | { kind: "too-large" }
+  | { kind: "manual" };
+
+/**
+ * The seller-hosted ciphertext, read with the SDK's capped reader (5 MiB, 60 s): a host that streams forever cannot make the
+ * tab buffer without end after the buyer has paid. A wrong hash is reported with the hash we got; any other failure
+ * means "choose the file yourself".
+ */
+export async function downloadCiphertext(url: string, expectedSha: string, fetchImpl: typeof fetch = fetch): Promise<CiphertextDownload> {
+  try {
+    return { kind: "ok", bytes: await fetchAndCheckBlob(url, expectedSha, fetchImpl) };
+  } catch (e) {
+    if (e instanceof BlobHashMismatch || (e instanceof Error && e.name === "BlobHashMismatch")) return { kind: "mismatch", actual: (e as BlobHashMismatch).actual };
+    if (e instanceof Error && /^blob too large/.test(e.message)) return { kind: "too-large" };
+    return { kind: "manual" };
+  }
 }
 
 /** The eval msg; a criteria blob that does not fit is reported as advice, not as a zod error. */

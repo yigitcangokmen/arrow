@@ -4,7 +4,7 @@
 import { RelayError } from "@arrow/sdk/relay";
 import type { MultiPayload } from "@arrow/sdk/schemas";
 import type { Network } from "./config.ts";
-import type { HistoryStore, PayKind, PendingPayment, PendingStore } from "./pending.ts";
+import type { HistoryStore, PayKind, PayMeta, PendingPayment, PendingStore } from "./pending.ts";
 
 export interface PaidTx {
   txHash: string;
@@ -57,6 +57,7 @@ export interface PayRequest {
   signerId: string;
   amount: bigint;
   msg: string;
+  meta?: PayMeta;
 }
 
 /** `at` names the payment in the paid history (setResultId). */
@@ -69,12 +70,13 @@ export async function payOnce(d: PayDeps, a: PayRequest): Promise<PaidTx & { at:
   const { deadlineMs, nonce } = readPayload(mp);
   const pending: PendingPayment = {
     v: 1, kind: a.kind, listingId: a.listingId, signerId: signer, amount: a.amount.toString(), multipayload: mp, deadlineMs, nonce, createdAt: d.now(),
+    ...(a.meta ? { meta: a.meta } : {}),
   };
   d.store.put(d.network, pending);
   try {
     const paid = await d.relay(mp);
     d.store.clear(d.network, signer);
-    d.history.add(d.network, signer, { v: 1, kind: a.kind, listingId: a.listingId ?? 0, tx: paid, resultId: null, at: pending.createdAt });
+    d.history.add(d.network, signer, { v: 1, kind: a.kind, listingId: a.listingId ?? 0, tx: paid, resultId: null, at: pending.createdAt, ...(a.meta ? { meta: a.meta } : {}) });
     return { txHash: paid.txHash, signerId: paid.signerId, at: pending.createdAt };
   } catch (e) {
     if (provablyNotSent(e)) {
@@ -103,7 +105,7 @@ export async function resumePending(d: PayDeps, signerId: string): Promise<Resum
   if (!pending) return { state: "none" };
   const settle = (extra: { tx: PaidTx | null }) => {
     d.store.clear(d.network, signer);
-    d.history.add(d.network, signer, { v: 1, kind: pending.kind, listingId: pending.listingId ?? 0, tx: extra.tx, resultId: null, at: pending.createdAt });
+    d.history.add(d.network, signer, { v: 1, kind: pending.kind, listingId: pending.listingId ?? 0, tx: extra.tx, resultId: null, at: pending.createdAt, ...(pending.meta ? { meta: pending.meta } : {}) });
     return pending.createdAt;
   };
   try {
