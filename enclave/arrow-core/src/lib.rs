@@ -10,6 +10,8 @@
 pub mod consts;
 pub mod err;
 pub mod llm;
+pub mod minhash;
+pub mod normalize;
 pub mod parse;
 pub mod prompt;
 pub mod sample;

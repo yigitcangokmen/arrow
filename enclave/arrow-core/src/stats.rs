@@ -7,11 +7,13 @@ use std::ops::ControlFlow;
 use sha2::{Digest, Sha256};
 
 use crate::err::ArrowErr;
+use crate::minhash::key_hash;
 use crate::parse::{header, walk, Format};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct StatsSpec {
     pub date_col: Option<usize>,
+    pub key_col: Option<usize>,
 }
 
 pub type Date = (u16, u8, u8);
@@ -24,6 +26,9 @@ pub struct Stats {
     pub dup_rows: u32,
     pub date_min: Option<Date>,
     pub date_max: Option<Date>,
+    /// Distinct, sorted MinHash base hashes of the key column (normalized, empty keys skipped);
+    /// empty if `key_col` is None.
+    pub key_base_hashes: Vec<u64>,
 }
 
 /// Trimmed empty, or `null|none|nan|n/a` in any case, or a missing/JSON-null cell.
@@ -77,7 +82,7 @@ fn row_hash(cells: &[Option<&str>]) -> [u8; 8] {
     out
 }
 
-/// Pass 1: row count, per-column null count, duplicate rows, date range.
+/// Pass 1: row count, per-column null count, duplicate rows, date range, key hashes.
 pub fn compute(body: &[u8], f: Format, spec: &StatsSpec) -> Result<Stats, ArrowErr> {
     let columns = header(body, f)?;
     let mut nulls = vec![0u32; columns.len()];
@@ -85,6 +90,7 @@ pub fn compute(body: &[u8], f: Format, spec: &StatsSpec) -> Result<Stats, ArrowE
     let mut dup_rows: u32 = 0;
     let mut date_min: Option<Date> = None;
     let mut date_max: Option<Date> = None;
+    let mut keys: HashSet<u64> = HashSet::new();
     let rows = walk(body, f, &columns, |_, cells| {
         for (n, c) in nulls.iter_mut().zip(cells.iter()) {
             if is_null(*c) {
@@ -100,9 +106,16 @@ pub fn compute(body: &[u8], f: Format, spec: &StatsSpec) -> Result<Stats, ArrowE
                 date_max = Some(date_max.map_or(d, |m| m.max(d)));
             }
         }
+        if let Some(kc) = spec.key_col {
+            if let Some(h) = cells.get(kc).copied().flatten().and_then(key_hash) {
+                keys.insert(h);
+            }
+        }
         Ok(ControlFlow::Continue(()))
     })?;
-    Ok(Stats { rows, columns, nulls, dup_rows, date_min, date_max })
+    let mut key_base_hashes: Vec<u64> = keys.into_iter().collect();
+    key_base_hashes.sort_unstable();
+    Ok(Stats { rows, columns, nulls, dup_rows, date_min, date_max, key_base_hashes })
 }
 
 /// Pass 2: the cells of the rows at `idx_sorted` (ascending), stopping after the last one.
@@ -135,7 +148,7 @@ mod tests {
 
     fn stats(input: &[u8], date_col: Option<usize>) -> Result<Stats, ArrowErr> {
         let (f, body) = detect(input)?;
-        compute(body, f, &StatsSpec { date_col })
+        compute(body, f, &StatsSpec { date_col, key_col: None })
     }
 
     #[test]
@@ -173,6 +186,17 @@ mod tests {
     }
 
     #[test]
+    fn key_hashes_distinct_sorted() {
+        let (f, body) = detect(b"k,v\nA,1\n a ,2\nb,3\n,4\nB,5\n\xEF\xBC\xA1,6\n").unwrap();
+        let s = compute(body, f, &StatsSpec { date_col: None, key_col: Some(0) }).unwrap();
+        let mut want = vec![key_hash("a").unwrap(), key_hash("b").unwrap()];
+        want.sort_unstable();
+        assert_eq!(s.key_base_hashes, want);
+        let s = compute(body, f, &StatsSpec::default()).unwrap();
+        assert!(s.key_base_hashes.is_empty());
+    }
+
+    #[test]
     fn collect_rows_returns_exact_indices() {
         let mut csv = String::from("i,sq\n");
         for i in 0..100 {
@@ -193,7 +217,7 @@ mod tests {
 
     fn pipeline(input: &[u8]) {
         let Ok((f, body)) = detect(input) else { return };
-        let Ok(s) = compute(body, f, &StatsSpec { date_col: Some(0) }) else { return };
+        let Ok(s) = compute(body, f, &StatsSpec { date_col: Some(0), key_col: Some(1) }) else { return };
         let idx: Vec<u32> = (0..s.rows).step_by(3).collect();
         let _ = collect_rows(body, f, &s.columns, &idx);
     }

@@ -136,6 +136,7 @@ mod tests {
             dup_rows: 0,
             date_min: None,
             date_max: None,
+            key_base_hashes: vec![],
         }
     }
 

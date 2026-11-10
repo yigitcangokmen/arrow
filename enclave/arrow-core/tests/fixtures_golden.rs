@@ -94,7 +94,7 @@ fn llm_request_matches_fixture() {
     let (f, body) = parse::detect(&data).unwrap();
     let cols = parse::header(body, f).unwrap();
     let date_col = cols.iter().position(|c| c == crit["date_column"].as_str().unwrap());
-    let st = stats::compute(body, f, &stats::StatsSpec { date_col }).unwrap();
+    let st = stats::compute(body, f, &stats::StatsSpec { date_col, key_col: None }).unwrap();
     let idx = sample::sample_indices(&seed, st.rows, consts::SAMPLE_ROWS);
     let rows = stats::collect_rows(body, f, &st.columns, &idx).unwrap();
     let token = prompt::spotlight_token(&seed);
@@ -111,4 +111,84 @@ fn llm_request_matches_fixture() {
     assert!(s.contains("\\\\u003cdiff\\\\u003e"));
     assert_eq!(s.matches(&format!("</data-{token}>")).count(), 1);
     assert_eq!(s.matches("</data-").count(), 2); // SYSTEM names the generic </data-TOKEN> once
+}
+
+/// Rust-side MinHash vectors in the WS4-T03 case schema. `ARROW_UPDATE_FIXTURES=1` regenerates.
+fn minhash_cases() -> Vec<(&'static str, Vec<String>)> {
+    use sha2::{Digest, Sha256};
+    let h = |s: String| hex::encode(Sha256::digest(s.as_bytes()));
+    let wallets = (0..20)
+        .map(|i| {
+            let a = format!("0x{}", &h(format!("arrow:wallet:{i}"))[..40]);
+            if i % 2 == 0 { a } else { a.to_uppercase().replacen("0X", "0x", 1) }
+        })
+        .collect();
+    let s = |v: &[&str]| v.iter().map(|x| x.to_string()).collect::<Vec<_>>();
+    vec![
+        ("ascii_wallets", wallets),
+        ("turkish", s(&["İstanbul", "ISTANBUL", "ıi"])),
+        ("greek_final_sigma", s(&["ΟΔΟΣ"])),
+        ("fullwidth_nfkc", s(&["ＡＢＣ１２３", "e\u{301}cole", "ﬁle"])),
+        ("whitespace", s(&["\u{A0} a\tb  c\u{3000}", "\u{FEFF}x\u{85}y", " a\u{2003}\u{2003}b "])),
+        ("duplicates", s(&["k1", "k1", "K1", " k1 "])),
+        ("empty_and_blank", s(&["", "   ", "\u{3000}"])),
+        ("random_1000", (0..1000).map(|i| h(format!("arrow:mh:{i}"))).collect()),
+    ]
+}
+
+fn minhash_vectors_json() -> String {
+    use arrow_core::{minhash, normalize};
+    let cases: Vec<Value> = minhash_cases()
+        .into_iter()
+        .map(|(id, keys)| {
+            let normalized: Vec<String> = keys.iter().map(|k| normalize::normalize_key(k)).collect();
+            let u64_hex: Vec<String> = normalized.iter().map(|n| format!("{:016x}", minhash::base_hash(n))).collect();
+            let sig = minhash::signature(keys.iter().map(String::as_str)).unwrap();
+            serde_json::json!({"id": id, "keys": keys, "normalized": normalized, "u64_hex": u64_hex, "signature_hex": minhash::signature_hex(&sig)})
+        })
+        .collect();
+    let doc = serde_json::json!({
+        "version": 1,
+        "generator": "arrow-core (Rust), tests/fixtures_golden.rs minhash_rs_vectors_golden",
+        "note": "u64_hex is base_hash(normalized) for every key, including empty ones; the signature skips keys whose normalized form is empty; no keys left => ffffffffffffffff x 128.",
+        "cases": cases,
+    });
+    serde_json::to_string_pretty(&doc).unwrap() + "\n"
+}
+
+fn check_minhash_vectors(name: &str) {
+    use arrow_core::{minhash, normalize};
+    let f = fixture(name);
+    let cases = f["cases"].as_array().unwrap();
+    assert!(!cases.is_empty());
+    for c in cases {
+        let keys: Vec<String> = c["keys"].as_array().unwrap().iter().map(|k| k.as_str().unwrap().to_owned()).collect();
+        let norm: Vec<&str> = c["normalized"].as_array().unwrap().iter().map(|k| k.as_str().unwrap()).collect();
+        let u64_hex: Vec<&str> = c["u64_hex"].as_array().unwrap().iter().map(|k| k.as_str().unwrap()).collect();
+        for ((k, n), x) in keys.iter().zip(&norm).zip(&u64_hex) {
+            assert_eq!(normalize::normalize_key(k), *n, "{} normalize {k:?}", c["id"]);
+            assert_eq!(format!("{:016x}", minhash::base_hash(n)), *x, "{} base {k:?}", c["id"]);
+        }
+        let sig = minhash::signature(keys.iter().map(String::as_str)).unwrap();
+        assert_eq!(minhash::signature_hex(&sig), c["signature_hex"].as_str().unwrap(), "{} signature", c["id"]);
+    }
+}
+
+#[test]
+fn minhash_rs_vectors_golden() {
+    let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../fixtures/minhash-vectors-rs.json");
+    let doc = minhash_vectors_json();
+    if std::env::var("ARROW_UPDATE_FIXTURES").as_deref() == Ok("1") {
+        std::fs::write(path, &doc).unwrap();
+    }
+    assert_eq!(doc, std::fs::read_to_string(path).unwrap());
+    check_minhash_vectors("minhash-vectors-rs.json");
+}
+
+/// The TS vectors (WS4-T03, `fixtures/minhash-vectors.json`) are not on main yet. This test is
+/// ignored, i.e. NOT passed, until they land; then drop the ignore attribute.
+#[test]
+#[ignore = "pending fixtures/minhash-vectors.json from WS4-T03"]
+fn minhash_matches_ts_vectors() {
+    check_minhash_vectors("minhash-vectors.json");
 }
