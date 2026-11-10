@@ -5,7 +5,7 @@ use near_sdk::serde::Serialize;
 use near_sdk::serde_json::{self, Value};
 use near_sdk::{env, near, AccountId, Gas, NearToken, Promise};
 
-use crate::types::{Config, Eval, Limits, Listing, Mode};
+use crate::types::{Config, Eval, Limits, Listing, Mode, Purchase};
 
 const REQUEST_GAS: Gas = Gas::from_tgas(150); // [DEC H-11]
 const BUILD_TARGET: &str = "wasm32-wasip2";
@@ -126,6 +126,35 @@ pub fn eval_input(listing: &Listing, eval: &Eval, sealed_criteria: &str) -> Stri
         action: "eval",
         listing: listing.into(),
         eval: InputEval { id: eval.id, sealed_criteria, buyer_pk: &eval.buyer_pk, seed: &eval.seed },
+    };
+    match serde_json::to_string(&input) {
+        Ok(s) => s,
+        Err(_) => env::panic_str("Arrow: input serialization failed"),
+    }
+}
+
+#[derive(Serialize)]
+#[serde(crate = "near_sdk::serde")]
+struct InputRelease<'a> {
+    id: u64,
+    buyer_pk: &'a str,
+}
+
+#[derive(Serialize)]
+#[serde(crate = "near_sdk::serde")]
+struct ReleaseInput<'a> {
+    v: u8,
+    action: &'static str,
+    listing: InputListing<'a>,
+    release: InputRelease<'a>,
+}
+
+pub fn release_input(listing: &Listing, purchase: &Purchase) -> String {
+    let input = ReleaseInput {
+        v: 1,
+        action: "release",
+        listing: listing.into(),
+        release: InputRelease { id: purchase.id, buyer_pk: &purchase.buyer_pk },
     };
     match serde_json::to_string(&input) {
         Ok(s) => s,

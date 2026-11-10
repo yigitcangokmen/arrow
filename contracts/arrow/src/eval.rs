@@ -223,14 +223,10 @@ mod tests {
     use crate::testkit::*;
     use near_sdk::serde_json::json;
     use near_sdk::test_utils::get_logs;
-    use near_sdk::{testing_env, PromiseResult, RuntimeFeesConfig};
+    use near_sdk::PromiseResult;
 
     const VECTORS_OUT: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../fixtures/output-vectors.json"));
     const VECTORS_IN: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../fixtures/input-vectors.json"));
-
-    fn buyer() -> AccountId {
-        acc("0x1111111111111111111111111111111111111111")
-    }
 
     fn eval_msg(listing_id: u64) -> EvalMsg {
         EvalMsg {
@@ -254,14 +250,6 @@ mod tests {
 
     fn eval(c: &mut crate::Contract, amount: u128) -> PromiseOrValue<Value> {
         mt_call(c, buyer(), amount, msg_json(Msg::Eval(eval_msg(1))))
-    }
-
-    fn callback_env(result: PromiseResult) {
-        let mut b = near_sdk::test_utils::VMContextBuilder::new();
-        b.current_account_id(self_id())
-            .predecessor_account_id(self_id())
-            .account_balance(near_sdk::NearToken::from_yoctonear(10 * NEAR));
-        testing_env!(b.build(), near_sdk::test_vm_config(), RuntimeFeesConfig::test(), Default::default(), vec![result]);
     }
 
     fn auto_eval_output(h: &str, r_len: usize) -> Vec<u8> {
@@ -527,7 +515,7 @@ mod tests {
                 .predecessor_account_id(intents())
                 .account_balance(near_sdk::NearToken::from_yoctonear(10 * NEAR))
                 .block_timestamp(ts);
-            testing_env!(b.build());
+            near_sdk::testing_env!(b.build());
             let who = acc(who);
             std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| mt_call(c, who, 50_000, msg_json(Msg::Eval(eval_msg(1))))))
         }

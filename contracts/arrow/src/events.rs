@@ -36,6 +36,17 @@ pub enum ArrowEvent {
         #[serde(skip_serializing_if = "Option::is_none")]
         h: Option<String>,
     },
+    /// `phase:"accepted"` in the transfer notification, `phase:"done"` once the key is released.
+    #[event_version("1.0.0")]
+    ArrowPurchase {
+        phase: String,
+        listing_id: u64,
+        purchase_id: u64,
+        buyer: AccountId,
+        price: U128,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        h: Option<String>,
+    },
     #[event_version("1.0.0")]
     ArrowRefund {
         kind: String,

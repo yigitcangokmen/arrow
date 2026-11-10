@@ -2,6 +2,7 @@
 //! Panic messages are `Arrow: Exx <text>` (tasks card §2.5); checks always run before any state change,
 //! because a panic in a transfer-notification refunds the whole amount and rolls state back.
 
+pub mod buy;
 pub mod caps;
 pub mod eval;
 pub mod events;
@@ -140,7 +141,7 @@ impl Contract {
                 PromiseOrValue::Value(rail::refund_value(rail, refund))
             }
             Msg::Eval(m) => self.handle_eval(sender, amount, m, rail),
-            Msg::Buy(_) => env::panic_str("Arrow: E04 bad msg: op not implemented"),
+            Msg::Buy(m) => self.handle_buy(sender, amount, m, rail),
         }
     }
 

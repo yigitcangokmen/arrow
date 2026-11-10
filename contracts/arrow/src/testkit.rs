@@ -122,3 +122,22 @@ pub fn calls() -> Vec<(String, String, near_sdk::serde_json::Value, u128)> {
     }
     out
 }
+
+pub fn buyer() -> AccountId {
+    acc("0x1111111111111111111111111111111111111111")
+}
+
+/// Context of an `on_*` callback with one promise result.
+pub fn callback_env(result: near_sdk::PromiseResult) {
+    let mut b = near_sdk::test_utils::VMContextBuilder::new();
+    b.current_account_id(self_id())
+        .predecessor_account_id(self_id())
+        .account_balance(near_sdk::NearToken::from_yoctonear(10 * NEAR));
+    near_sdk::testing_env!(
+        b.build(),
+        near_sdk::test_vm_config(),
+        near_sdk::RuntimeFeesConfig::test(),
+        Default::default(),
+        vec![result]
+    );
+}
