@@ -108,6 +108,10 @@ H-08d step 5 on mainnet.
 Expected: the tx succeeds; the key arrives through OutLayer's yield/resume, usually within a minute
 (log `arrow: program key set` on the callback receipt).
 
+After any `set_program`, run this step again and wait for `program_pubkey` to be non-null before listing.
+A derive that was still in flight when `set_program` ran is ignored (log
+`arrow: program key derive failed: stale_program`), so its key never becomes the new program's key.
+
 Twin: OK `DD4Q6MX8REqG1BgfzjqDgghEek7b6x4ChKpLhM7zEXEm`: the self-signed call passed `E14`; its callback logged
 `arrow: program key derive failed: null`, as expected, because the mainnet config points at `outlayer.near`,
 which does not exist on testnet. The full derive path is proven on testnet by `arrow.arrowhq.testnet`
