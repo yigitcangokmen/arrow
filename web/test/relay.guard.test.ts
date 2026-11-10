@@ -132,6 +132,47 @@ describe("X12-OPS-1: one execute_intents locks 0.6 NEAR until its receipts finis
   });
 });
 
+describe("W2-3 / W2-8: the eval quotas are spent only on payments that can be sent", () => {
+  it("a signer past its daily cap re-posting one payload does not drain the global bucket", async () => {
+    const r = relayer();
+    const d = deps({ relayer: () => r.port, evalLimiter: tokenBucket({ capacity: 20, refillEveryMs: 3 * 60_000, now: () => NOW }), evalDaily: keyedDaily({ max: 10, now: () => NOW }) });
+    for (let i = 0; i < 10; i++) expect((await send(d, nonce(`A${i}`))).status).toBe(200);
+    for (let i = 0; i < 12; i++) expect((await (await send(d, nonce("OVER"))).json()).code).toBe("EVAL_DAILY_CAP");
+    expect((await send(d, nonce("H1", signerN(2)))).status).toBe(200); // an honest signer still gets through
+  });
+  it("RELAYER_BUSY (node NotEnoughBalance) and a missing escrow key give the daily eval back", async () => {
+    const poor = relayer({ caller: () => ({ callFunction: async () => { throw new Error("does not have enough balance (NotEnoughBalance)"); } }) });
+    const d = deps({ relayer: () => poor.port, evalDaily: keyedDaily({ max: 1, now: () => NOW }) });
+    for (let i = 0; i < 3; i++) expect((await (await send(d, nonce(`P${i}`))).json()).code).toBe("RELAYER_BUSY");
+    const noEscrow = deps({ evalDaily: d.evalDaily, paymentPath: async () => "escrow", escrowCaller: () => null });
+    for (let i = 0; i < 3; i++) expect((await (await send(noEscrow, nonce(`E${i}`))).json()).code).toBe("RELAYER_UNAVAILABLE");
+    expect((await send(deps({ evalDaily: d.evalDaily }), nonce("OK"))).status).toBe(200); // the one daily eval is still there
+  });
+});
+
+describe("W2-7: a relayer that stays below one payment's gas says it is out of funds, not busy", () => {
+  it("BUSY while a payment may be in flight, RELAYER_UNAVAILABLE once the balance stays low past the receipt window, and back to normal after a top-up", async () => {
+    let t = NOW;
+    let balance = (4n * NEAR) / 10n;
+    const r = relayer({ balance: async () => balance });
+    const d = deps({ relayer: () => r.port, now: () => t, lowBalance: { since: null } });
+    expect((await (await send(d, nonce("B1"))).json()).code).toBe("RELAYER_BUSY");
+    t += 2 * 60_000;
+    expect((await (await send(d, nonce("B2"))).json()).code).toBe("RELAYER_BUSY");
+    t += 4 * 60_000;
+    const out = await send(d, nonce("B3"));
+    expect(out.status).toBe(503);
+    const body = await out.json();
+    expect(body.code).toBe("RELAYER_UNAVAILABLE");
+    expect(body.error).toMatch(/out of gas funds/);
+    expect(r.calls).toHaveLength(0);
+    balance = 2n * NEAR;
+    expect((await send(d, nonce("B4"))).status).toBe(200);
+    balance = (4n * NEAR) / 10n;
+    expect((await (await send(d, nonce("B5"))).json()).code).toBe("RELAYER_BUSY"); // the low window starts again
+  });
+});
+
 describe("R2-4: a seller can rehost a listing through the hosted relay", () => {
   it("the listing's seller gets 200; anyone else, a paused market or an unknown listing is refused before any gas", async () => {
     const r = relayer();

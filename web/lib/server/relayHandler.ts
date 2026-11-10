@@ -17,6 +17,9 @@ import { NETWORKS } from "@arrow/sdk/config";
 // One execute_intents prepays 600 TGas = 0.60 NEAR, locked until every follow-up receipt has run (about 40-60 s, measured on
 // mainnet). Below this a second payment passes the balance check and then fails inside the node.
 const MIN_RELAYER_BALANCE = nearToYocto("0.65");
+/** Longer than any execute_intents receipt tree (the OutLayer round trip is about 40-60 s): a balance that stays under the
+ *  minimum this long is not a payment in flight but a relayer out of gas funds (W2-7). */
+const IN_FLIGHT_MAX_MS = 5 * 60_000;
 /** Evals are the one op a funded signer can repeat for free (a failed eval refunds); keep this much tank for lists and buys. */
 const EVAL_TANK_RESERVE = 10n;
 const NOT_ENOUGH_BALANCE = /NotEnoughBalance|does not have enough balance/i;
@@ -55,6 +58,9 @@ export interface RelayDeps {
   escrowCaller(): NearCaller | null;
   paymentPath(): Promise<"notify" | "escrow">;
   simulate(multipayload: object): Promise<unknown>;
+  /** Since when this instance has seen the relayer below MIN_RELAYER_BALANCE (W2-7). Default: one record per process. */
+  lowBalance?: { since: number | null };
+  now?: () => number;
 }
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -112,6 +118,19 @@ export const realRelayDeps: RelayDeps = {
   },
   simulate: (mp) => simulateIntents([mp], "mainnet"),
 };
+
+const processLowBalance = { since: null as number | null };
+
+/** BUSY while the low balance can still be one payment in flight; UNAVAILABLE once it has stayed low past the receipt window. */
+function lowBalance(d: RelayDeps): Response {
+  const low = d.lowBalance ?? processLowBalance;
+  const now = (d.now ?? Date.now)();
+  low.since ??= now;
+  if (now - low.since > IN_FLIGHT_MAX_MS) {
+    return unavailable("The relayer is out of gas funds, so hosted payments are off until it is topped up. Nothing was sent.");
+  }
+  return apiError(503, "RELAYER_BUSY", "The relayer is carrying another payment right now. Nothing was sent; try again in a minute.", { fallback: SELF_RELAY, retryAfterSec: 60 });
+}
 
 const unavailable = (error: string, fallback = SELF_RELAY) => apiError(503, "RELAYER_UNAVAILABLE", error, { fallback });
 
@@ -206,9 +225,8 @@ async function relay(mp: Parameters<typeof relayDirect>[1], v: Extract<ReturnTyp
   if (!relayer) return before(unavailable("The relayer is not configured on this deployment."));
   try {
     if (!(await relayer.keyIsFunctionCall())) return before(unavailable("The relayer key is not restricted to execute_intents, so this deployment refuses to use it."));
-    if ((await relayer.balance()) < MIN_RELAYER_BALANCE) {
-      return before(apiError(503, "RELAYER_BUSY", "The relayer is carrying another payment right now. Nothing was sent; try again in a minute.", { fallback: SELF_RELAY, retryAfterSec: 60 }));
-    }
+    if ((await relayer.balance()) < MIN_RELAYER_BALANCE) return before(lowBalance(d));
+    (d.lowBalance ?? processLowBalance).since = null;
   } catch (e) {
     return before(apiError(502, "RPC_ERROR", "Could not read the relayer balance.", { detail: nearErrorMessage(e).slice(0, 300) }));
   }
@@ -224,15 +242,19 @@ async function relay(mp: Parameters<typeof relayDirect>[1], v: Extract<ReturnTyp
     return before(apiError(422, "SIMULATE_FAILED", "intents.near rejected the signed intent in simulation.", { detail: msg }));
   }
 
-  if (v.op === "eval") {
-    const g = d.evalLimiter.take("all");
-    if (!g.ok) return before(rateLimited(g.retryAfterSec, "EVAL_RATE_LIMITED"));
-    if (!d.evalDaily.take(v.signerId)) return before(apiError(429, "EVAL_DAILY_CAP", "This wallet used its inspections for today through the hosted relay. Try again tomorrow, or relay it yourself.", { fallback: SELF_RELAY, retryAfterSec: 3600 }));
-  }
-
-  const escrow = v.op !== "list" && (await d.paymentPath()) === "escrow";
+  const escrow = v.op !== "list" && v.op !== "rehost" && (await d.paymentPath()) === "escrow";
   const escrowCaller = escrow ? d.escrowCaller() : null;
   if (escrow && !escrowCaller) return before(unavailable("The relayer cannot request the evaluation.", "escrow request key not configured"));
+
+  // W2-3: the signer's daily cap first, so a signer past it cannot burn the shared bucket by re-posting a refused payload.
+  if (v.op === "eval") {
+    if (!d.evalDaily.take(v.signerId)) return before(apiError(429, "EVAL_DAILY_CAP", "This wallet used its inspections for today through the hosted relay. Try again tomorrow, or relay it yourself.", { fallback: SELF_RELAY, retryAfterSec: 3600 }));
+    const g = d.evalLimiter.take("all");
+    if (!g.ok) {
+      d.evalDaily.giveBack(v.signerId);
+      return before(rateLimited(g.retryAfterSec, "EVAL_RATE_LIMITED"));
+    }
+  }
 
   try {
     const r = await relayDirect(
@@ -244,7 +266,8 @@ async function relay(mp: Parameters<typeof relayDirect>[1], v: Extract<ReturnTyp
   } catch (e) {
     // The account was too poor to prepay the gas: the node refused it, nothing is on chain.
     if (NOT_ENOUGH_BALANCE.test(nearErrorMessage(e))) {
-      return before(apiError(503, "RELAYER_BUSY", "The relayer is carrying another payment right now. Nothing was sent; try again in a minute.", { fallback: SELF_RELAY, retryAfterSec: 60 }));
+      if (v.op === "eval") d.evalDaily.giveBack(v.signerId); // W2-8: nothing was sent
+      return before(lowBalance(d));
     }
     // From here the transaction may be on chain (a timeout says nothing), so this is not reported as a failed payment.
     return { res: respond(await unclear(nearErrorMessage(e).slice(0, 300))), broadcast: true };

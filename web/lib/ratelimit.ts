@@ -60,6 +60,8 @@ export function dailyCounter(opts: { max: number; now?: () => number }): { take(
 
 export interface KeyedDaily {
   take(key: string): boolean;
+  /** Returns one take of today, for a request that ended before anything was sent. */
+  giveBack(key: string): void;
 }
 
 /** At most `max` takes per key per UTC day. Beyond `maxKeys` the oldest key is dropped. */
@@ -81,6 +83,10 @@ export function keyedDaily(opts: { max: number; now?: () => number; maxKeys?: nu
       counts.set(key, n + 1);
       if (counts.size > maxKeys) counts.delete(counts.keys().next().value as string);
       return true;
+    },
+    giveBack(key) {
+      const n = counts.get(key) ?? 0;
+      if (n > 0 && utcDay(now()) === day) counts.set(key, n - 1);
     },
   };
 }
