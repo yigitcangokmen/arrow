@@ -7,21 +7,27 @@ jobs:
   ts:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: { fetch-depth: 0 }          # secret-scan reads the whole history
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with: { node-version-file: .nvmrc, cache: npm }
       - run: npm ci
+      - run: npm audit --omit=dev --audit-level=critical   # the 28 highs are transitive with no forward fix; a critical fails CI
       - run: npm test
       - run: bash scripts/secret-scan.sh --ci
   rust:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: rustup toolchain install 1.97.1 --profile minimal --component clippy --target wasm32-unknown-unknown --target wasm32-wasip2
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
       - run: cargo test -p arrow-core
       - run: cargo test -p arrow --lib
+        env:
+          # The lib tests never start a sandbox. With this set, near-workspaces' build script skips its
+          # near-sandbox download, so the step does not depend on the network. The sandbox suite is run
+          # locally by scripts/check-all.sh.
+          NEAR_SANDBOX_BIN_PATH: /nonexistent
   web:
     runs-on: ubuntu-24.04
     steps:
