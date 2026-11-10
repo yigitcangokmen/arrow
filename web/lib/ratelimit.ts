@@ -58,6 +58,33 @@ export function dailyCounter(opts: { max: number; now?: () => number }): { take(
   };
 }
 
+export interface KeyedDaily {
+  take(key: string): boolean;
+}
+
+/** At most `max` takes per key per UTC day. Beyond `maxKeys` the oldest key is dropped. */
+export function keyedDaily(opts: { max: number; now?: () => number; maxKeys?: number }): KeyedDaily {
+  const now = opts.now ?? Date.now;
+  const maxKeys = opts.maxKeys ?? 10_000;
+  let day = utcDay(now());
+  const counts = new Map<string, number>();
+  return {
+    take(key) {
+      const d = utcDay(now());
+      if (d !== day) {
+        day = d;
+        counts.clear();
+      }
+      const n = counts.get(key) ?? 0;
+      if (n >= opts.max) return false;
+      counts.delete(key);
+      counts.set(key, n + 1);
+      if (counts.size > maxKeys) counts.delete(counts.keys().next().value as string);
+      return true;
+    },
+  };
+}
+
 export const limits = {
   relay: tokenBucket({ capacity: 10, refillEveryMs: 60_000 / 10 }),
   blob: tokenBucket({ capacity: 10, refillEveryMs: 3_600_000 / 10 }),

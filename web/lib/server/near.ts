@@ -1,6 +1,7 @@
 // near-api-js 7.4.0 factories. Server routes only (DEC L-06): never import this from a client component.
-import { Account, FailoverRpcError, FailoverRpcProvider, JsonRpcProvider, actions, nearToYocto, type KeyPairString, type Provider } from "near-api-js";
+import { Account, FailoverRpcError, KeyPair, FailoverRpcProvider, JsonRpcProvider, actions, nearToYocto, type KeyPairString, type Provider } from "near-api-js";
 import { resolveNetwork } from "@arrow/sdk/config";
+import { viewAccessKey } from "@arrow/sdk/rpc";
 import type { NearCaller } from "@arrow/sdk/relay";
 import type { Network } from "../config.ts";
 
@@ -37,6 +38,19 @@ export const sponsorAccount = (): Account | null => accountFromEnv("TESTNET_SPON
 
 /** Second key of the relayer account: it may only call request_eval / request_release on the market contract (escrow path, DEC H-15). */
 export const escrowAccount = (): Account | null => accountFromEnv("RELAYER_ACCOUNT_ID", "RELAYER_ESCROW_PRIVATE_KEY", "mainnet");
+
+/** True when the key in `keyEnv` is a FunctionCall key restricted to execute_intents on intents.near. Cached for ten minutes once true. */
+const keyOkAt = new Map<string, number>();
+export async function isFunctionCallKey(a: Account, keyEnv = "RELAYER_PRIVATE_KEY"): Promise<boolean> {
+  const last = keyOkAt.get(a.accountId);
+  if (last !== undefined && Date.now() - last < 600_000) return true;
+  const pk = KeyPair.fromString(process.env[keyEnv] as KeyPairString).getPublicKey().toString();
+  const k = await viewAccessKey("mainnet", a.accountId, pk);
+  const fc = typeof k.permission === "object" ? k.permission.FunctionCall : undefined;
+  const ok = !!fc && fc.receiver_id === "intents.near" && fc.method_names.length === 1 && fc.method_names[0] === "execute_intents";
+  if (ok) keyOkAt.set(a.accountId, Date.now());
+  return ok;
+}
 
 export async function availableBalance(a: Account): Promise<bigint> {
   return (await a.getState()).balance.available;

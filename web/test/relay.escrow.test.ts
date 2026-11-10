@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { handleRelay, type RelayDeps } from "../lib/server/relayHandler.ts";
 import { RelayRuns } from "../lib/server/relayRuns.ts";
-import { tokenBucket } from "../lib/ratelimit.ts";
-import { NOW, USDC, listingFixture, makeMp, post } from "./helpers.ts";
+import { keyedDaily, tokenBucket } from "../lib/ratelimit.ts";
+import { NOW, USDC, healthyMarket, listingFixture, makeMp, post } from "./helpers.ts";
 
 const event = (name: string, data: object) => `EVENT_JSON:${JSON.stringify({ standard: "arrow", version: "1.0.0", event: name, data: [data] })}`;
 const outcomeWith = (logs: string[]) => ({
@@ -17,13 +17,16 @@ function setup(path: "notify" | "escrow", logs: string[], escrow: boolean) {
   const d: RelayDeps = {
     limiter: tokenBucket({ capacity: 10, refillEveryMs: 6_000 }),
     signerLimiter: tokenBucket({ capacity: 10, refillEveryMs: 6_000 }),
+    evalLimiter: tokenBucket({ capacity: 1000, refillEveryMs: 1 }),
+    evalDaily: keyedDaily({ max: 1000 }),
     store: new RelayRuns(),
-    chain: { listing: async () => listingFixture(), listingBond: async () => 100_000n },
+    chain: { listing: async () => listingFixture(), listingBond: async () => 100_000n, market: async () => healthyMarket },
     waitMs: 1_000,
     cfg: { contract: "arrow-market.near", usdcToken: USDC, now: NOW },
     relayer: () => ({
       accountId: "arrow-relayer.arrowhq.near",
       balance: async () => 10n ** 24n,
+      keyIsFunctionCall: async () => true,
       caller: (wait) => ({ callFunction: async (a) => (execCalls.push({ ...a, wait }), outcomeWith(logs)) }),
     }),
     escrowCaller: () => (escrow ? { callFunction: async (a) => (reqCalls.push(a), { transaction: { hash: "REQ1", signer_id: "arrow-relayer.arrowhq.near" } }) } : null),

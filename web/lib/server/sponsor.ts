@@ -2,7 +2,8 @@
 import { SponsorRequest } from "@arrow/sdk/schemas";
 import { clientIp } from "../ip.ts";
 import { type Limiter, limits } from "../ratelimit.ts";
-import { apiError, json, rateLimited } from "./http.ts";
+import { apiError, json, rateLimited, readJsonCapped } from "./http.ts";
+import { sameSiteJson } from "./origin.ts";
 import { availableBalance, nearErrorMessage, nearToYocto, sponsorAccount } from "./near.ts";
 
 const MIN_SPONSOR_BALANCE = nearToYocto("2");
@@ -57,7 +58,11 @@ export async function handleSponsor(req: Request, d: SponsorDeps = realSponsorDe
   const rl = d.limiter.take(clientIp(req));
   if (!rl.ok) return rateLimited(rl.retryAfterSec);
 
-  const body = SponsorRequest.safeParse(await req.json().catch(() => null));
+  const foreign = sameSiteJson(req);
+  if (foreign) return foreign;
+  const read = await readJsonCapped(req, 4 * 1024);
+  if (read.tooLarge) return apiError(413, "TOO_LARGE", "The request body is too large.");
+  const body = SponsorRequest.safeParse(read.value);
   if (!body.success) return apiError(400, "BAD_KEY", "publicKey must be \"ed25519:<base58 public key>\"");
 
   const sponsor = d.sponsor();

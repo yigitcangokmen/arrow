@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RpcError } from "@arrow/sdk/rpc";
 import { handleRelay, realRelayDeps, type ChainPort, type RelayDeps, type RelayerPort } from "../lib/server/relayHandler.ts";
 import { RelayRuns } from "../lib/server/relayRuns.ts";
-import { tokenBucket } from "../lib/ratelimit.ts";
-import { NOW, USDC, listingFixture, makeMp, post } from "./helpers.ts";
+import { keyedDaily, tokenBucket } from "../lib/ratelimit.ts";
+import { NOW, USDC, healthyMarket, listingFixture, makeMp, post } from "./helpers.ts";
 
 const URL_ = "http://localhost/api/relay";
 const outcome = { transaction: { hash: "TXHASH1", signer_id: "arrow-relayer.arrowhq.near" }, transaction_outcome: { outcome: { logs: [] } }, receipts_outcome: [] };
@@ -13,6 +13,7 @@ function relayer(over: Partial<RelayerPort> = {}) {
   const port: RelayerPort = {
     accountId: "arrow-relayer.arrowhq.near",
     balance: async () => 10n ** 24n,
+    keyIsFunctionCall: async () => true,
     caller: (wait) => ({ callFunction: async (a) => (calls.push({ ...a, wait }), outcome) }),
     ...over,
   };
@@ -22,12 +23,15 @@ function relayer(over: Partial<RelayerPort> = {}) {
 const chain = (over: Partial<ChainPort> = {}): ChainPort => ({
   listing: async () => listingFixture(), // eval_fee 250000, price 2000000, 3 of 50 evals used
   listingBond: async () => 100_000n,
+  market: async () => healthyMarket,
   ...over,
 });
 
 const deps = (over: Partial<RelayDeps> = {}): RelayDeps => ({
   limiter: tokenBucket({ capacity: 10, refillEveryMs: 6_000 }),
   signerLimiter: tokenBucket({ capacity: 10, refillEveryMs: 6_000 }),
+  evalLimiter: tokenBucket({ capacity: 1000, refillEveryMs: 1 }),
+  evalDaily: keyedDaily({ max: 1000 }),
   store: new RelayRuns(),
   chain: chain(),
   waitMs: 1_000,
@@ -45,8 +49,12 @@ let fetchMock: ReturnType<typeof vi.fn>;
 beforeEach(() => {
   fetchMock = vi.fn();
   vi.stubGlobal("fetch", fetchMock);
+  vi.stubEnv("VERCEL", "1"); // the client address is read from x-forwarded-for only where a trusted proxy sets it
 });
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
+});
 
 describe("POST /api/relay", () => {
   it("returns 200 {txHash, signerId} and sends execute_intents with 600 TGas, INCLUDED_FINAL", async () => {
@@ -83,7 +91,7 @@ describe("POST /api/relay", () => {
     expect(b.fallback).toContain("execute_intents");
   });
 
-  it("503 when the relayer balance is under 0.05 NEAR", async () => {
+  it("503 when the relayer balance is under 0.65 NEAR", async () => {
     const r = relayer({ balance: async () => 10n ** 22n });
     const res = await handleRelay(post(URL_, { multipayload: makeMp("eval") }), deps({ relayer: () => r.port }));
     expect(res.status).toBe(503);

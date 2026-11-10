@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import type { MultiPayload } from "@arrow/sdk/schemas";
 import { NETWORKS } from "@arrow/sdk/config";
+import { marketStateFrom } from "../lib/blockers.ts";
 import type { Listing } from "@arrow/sdk/schemas";
 
 export const NOW = Date.UTC(2026, 10, 11, 12, 0, 0);
@@ -60,6 +61,20 @@ export const listingFixture = (over: Partial<Listing> = {}): Listing =>
     evals_used: 3,
     bits_per_eval_milli: 5673,
     mode: "scored",
+    program_hash_at_list: "aa",
     created_at_ns: 1,
     ...over,
   }) as Listing;
+
+/** A market that accepts everything: not paused, key set, plenty of tank, program hash "aa" (the listing fixture's). */
+export const healthyMarket = marketStateFrom(
+  {
+    paused: false,
+    tank_available: "500000000000000000000000",
+    payment_path: "notify",
+    result_path: "chain",
+    build: "mainnet",
+    config: { tank_min: "50000000000000000000000", outlayer_deposit_eval: "20000000000000000000000", outlayer_deposit_release: "10000000000000000000000", program_wasm_hash: "aa" },
+  } as never,
+  "04ab",
+);

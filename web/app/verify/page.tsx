@@ -17,7 +17,8 @@ import styles from "./verify.module.css";
 export const maxDuration = 300;
 
 // One engine run is dozens of public-RPC calls; a reloaded page should not repeat them within five minutes.
-const reports = ttlCache<Awaited<ReturnType<typeof loadReport>>>(300_000);
+// Concurrent visitors share one run, and a failed run is not retried for a minute (WEB-3): 50 parallel requests used to start 50 runs.
+const reports = ttlCache<Awaited<ReturnType<typeof loadReport>>>(300_000, Date.now, 4, { failTtlMs: 60_000, maxWaiters: 12 });
 
 const NEAR_AI_URL = `${NEAR_AI_API}/v1/attestation/report?model=${encodeURIComponent(NEAR_AI_MODEL)}&provider=near&signing_algo=ecdsa`;
 

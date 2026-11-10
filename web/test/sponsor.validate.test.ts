@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SponsorRequest } from "@arrow/sdk/schemas";
 import { handleSponsor, subAccountPrefix, type SponsorDeps, type SponsorPort } from "../lib/server/sponsor.ts";
 import { dailyCounter, tokenBucket } from "../lib/ratelimit.ts";
@@ -84,5 +84,24 @@ describe("POST /api/testnet-sponsor", () => {
       expect(b.code).toBe("SPONSOR_UNAVAILABLE");
       expect(b.fallback).toContain("faucet");
     }
+  });
+});
+
+describe("WEB-9: no cross-site or form-encoded request spends the daily sponsor cap", () => {
+  it("text/plain is 415 and a foreign Origin is 403; neither touches the sponsor or the daily counter", async () => {
+    const take = vi.fn(() => true);
+    const sponsor = vi.fn(() => null);
+    const { d } = setup({ daily: { take }, sponsor });
+    const plain = new Request(URL_, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ publicKey: KEY }) });
+    expect((await handleSponsor(plain, d)).status).toBe(415);
+    const foreign = post(URL_, { publicKey: KEY }, { origin: "https://evil.example", host: "arrow.example" });
+    expect((await handleSponsor(foreign, d)).status).toBe(403);
+    expect(sponsor).not.toHaveBeenCalled();
+    expect(take).not.toHaveBeenCalled();
+  });
+  it("the page's own origin still works", async () => {
+    const s = setup();
+    const res = await handleSponsor(post(URL_, { publicKey: KEY }, { origin: "https://arrow.example", host: "arrow.example" }), s.d);
+    expect(res.status).toBe(200);
   });
 });

@@ -1,8 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toListingView, ttlCache } from "../lib/server/listingsCache.ts";
 import { handleListings, type ListingsDeps } from "../lib/server/listingsHandler.ts";
 import { tokenBucket } from "../lib/ratelimit.ts";
 import { listingFixture } from "./helpers.ts";
+
+beforeEach(() => vi.stubEnv("VERCEL", "1")); // x-forwarded-for is read only where a trusted proxy sets it
+afterEach(() => vi.unstubAllEnvs());
 
 describe("toListingView", () => {
   it("budget.spentBits === evalsUsed * bitsPerEvalMilli / 1000", () => {
@@ -100,5 +103,48 @@ describe("GET /api/listings", () => {
     expect((await res.json()).code).toBe("RATE_LIMITED");
     expect((await handleListings(ip("8.8.8.8"), d)).status).toBe(200);
     expect(views.listing).toHaveBeenCalledTimes(1); // the 30 s cache served the rest
+  });
+});
+
+describe("ttlCache: single flight and a negative cache (WEB-3)", () => {
+  it("25 concurrent callers of a cold key run the loader once", async () => {
+    let calls = 0;
+    let release!: (v: number) => void;
+    const gate = new Promise<number>((r) => (release = r));
+    const get = ttlCache<number>(60_000, Date.now, 200, { maxWaiters: 100 });
+    const all = Array.from({ length: 25 }, () => get("k", () => (calls++, gate)));
+    release(7);
+    expect(await Promise.all(all)).toEqual(Array(25).fill(7));
+    expect(calls).toBe(1);
+  });
+  it("concurrent waiters share one rejection, and a failure is not reloaded inside the negative TTL", async () => {
+    let t = 0;
+    let calls = 0;
+    const get = ttlCache<number>(60_000, () => t, 200, { failTtlMs: 60_000, maxWaiters: 100 });
+    const load = async () => (calls++, Promise.reject(new Error("429 from the public RPC")));
+    const settled = await Promise.allSettled(Array.from({ length: 5 }, () => get("k", load)));
+    expect(settled.every((s) => s.status === "rejected")).toBe(true);
+    expect(calls).toBe(1);
+    t += 59_000;
+    await expect(get("k", load)).rejects.toThrow(/429/);
+    expect(calls).toBe(1);
+    t += 2_000;
+    await expect(get("k", load)).rejects.toThrow(/429/);
+    expect(calls).toBe(2);
+  });
+  it("without a negative TTL a failure is retried at once (the listings behaviour)", async () => {
+    let calls = 0;
+    const get = ttlCache<number>(60_000);
+    const load = async () => (calls++, Promise.reject(new Error("x")));
+    await get("k", load).catch(() => undefined);
+    await get("k", load).catch(() => undefined);
+    expect(calls).toBe(2);
+  });
+  it("refuses callers beyond maxWaiters instead of holding every function open", async () => {
+    const get = ttlCache<number>(60_000, Date.now, 200, { maxWaiters: 3 });
+    const gate = new Promise<number>(() => undefined);
+    const first = [get("k", () => gate), get("k", () => gate), get("k", () => gate)];
+    await expect(get("k", () => gate)).rejects.toThrow(/Too many requests are waiting/);
+    expect(first).toHaveLength(3);
   });
 });
