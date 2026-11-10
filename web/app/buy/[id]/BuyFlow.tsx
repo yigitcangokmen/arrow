@@ -426,21 +426,21 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
       <Announcer text={announce} />
       <section className={form.panel} aria-labelledby="listing-title">
         <div className={styles.head}>
-          <h1 id="listing-title" style={{ margin: 0 }}>{listing.displayTitle}</h1>
+          <h1 id="listing-title" style={{ margin: 0 }}><bdi>{listing.displayTitle}</bdi></h1>
           <Badge kind={listing.label} />
         </div>
         <p className={form.hint}>
           Seller <a href={addressUrl(listing.seller, network)} target="_blank" rel="noopener noreferrer" className="mono" title={listing.seller}>{short(listing.seller)}</a>
         </p>
-        {listing.public_desc ? <p>{listing.public_desc}</p> : null}
+        {listing.public_desc ? <p><bdi>{listing.public_desc}</bdi></p> : null}
         <p className={styles.facts}>
-          {listing.columns.length} columns: <span className="mono">{listing.columns.join(", ")}</span>
+          {listing.columns.length} columns: <bdi className="mono">{listing.columns.join(", ")}</bdi>
           <br />~{String(listing.rows_claimed)} rows claimed by the seller · {listing.mode} mode · Inspect ${formatUsdc(evalFee)} · Buy ${formatUsdc(price)}
         </p>
         <div title="Counts every eval, including refunded ones.">
           <BitCounter spentBits={spentMilli / 1000} budgetBits={budgetMilli / 1000} />
         </div>
-        {exhausted ? <p className={form.error}>Inspection budget used up: buy-only.</p> : null}
+        {exhausted ? <p className={form.error}>No inspection is possible any more: you would be buying blind.</p> : null}
         {programPk === null && !readOnly ? <p className={form.error}>The enclave key is not published yet, so inspections are closed.</p> : null}
         {[...new Set([...blockers.inspect, ...blockers.buy])].map((b) => (
           <p key={b} className={form.error}>{b}</p>
@@ -650,6 +650,11 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
           {delivery ? (
             <>
               <HashTriple onChain={listing.blob_sha256} enclave={hasEvalH ? evalH : undefined} release={delivery.releaseH} downloaded={delivery.downloaded} />
+              {delivery.saveUrl ? (
+                <p className={form.hint}>
+                  Open this file in a text editor first. A spreadsheet runs formulas (cells starting with =, +, - or @), and this file comes from the seller.
+                </p>
+              ) : null}
               {delivery.saveUrl ? (
                 <p>
                   <a className={form.primary} style={{ display: "inline-block", padding: "8px 14px", borderRadius: 8, textDecoration: "none" }} href={delivery.saveUrl} download={delivery.saveName}>Save {delivery.saveName}</a>

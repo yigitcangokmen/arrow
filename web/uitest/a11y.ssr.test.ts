@@ -13,7 +13,7 @@ import { listingFixture } from "../test/helpers.ts";
 const listing = toListingView(listingFixture({ id: 7, columns: ["a", "b"] }), []);
 const buy = () => renderToStaticMarkup(h(BuyFlow, { network: "mainnet", listing, programPk: "04ab", readOnly: false, blockers: { inspect: [], buy: [] } }));
 const sell = () =>
-  renderToStaticMarkup(h(SellForm, { network: "mainnet", programPk: "04ab", bond: "100000", limits: { minPrice: "100000", minEvalFee: "50000" }, maxEvalsCap: 500, readOnly: false, teamAccounts: [] }));
+  renderToStaticMarkup(h(SellForm, { network: "mainnet", programPk: "04ab", bond: "100000", limits: { minPrice: "100000", minEvalFee: "50000" }, maxEvalsCap: 500, readOnly: false, teamAccounts: [], feeBps: { eval: 1000, sale: 200 } }));
 
 describe("A11Y-2 / QA-15: the elapsed-time counter is not a live region", () => {
   it("renders without role or aria-live, hidden from assistive technology", () => {

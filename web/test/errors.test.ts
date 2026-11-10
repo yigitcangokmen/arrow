@@ -45,6 +45,16 @@ describe("RELAY-3 messages", () => {
   });
 });
 
+describe("contract refusals added by the audit fixes (E21 to E24)", () => {
+  it("E21 tells the buyer they were refunded and to retry; E22 points at the existing purchase", () => {
+    expect(describeError(new PaymentRefused("Arrow: E21 too many evals in flight")).message).toMatch(/refunded.*try again in a minute/);
+    expect(describeError(new PaymentRefused("Arrow: E22 already bought")).message).toMatch(/Your earlier payments/);
+    expect(describeError(new PaymentRefused("Arrow: E23 not the seller")).message).toMatch(/Only the seller/);
+    expect(describeError(new PaymentRefused("Arrow: E24 nothing owed")).message).toMatch(/Nothing is owed/);
+    expect(describeError(new PaymentRefused("Arrow: E13 old program")).message).toMatch(/refused the payment: Arrow: E13/);
+  });
+});
+
 describe("suggestTopUp", () => {
   it("rounds the missing amount up to 0.50 and never goes below 0.50", () => {
     expect(suggestTopUp(100_000n, 0n)).toBe(500_000n);

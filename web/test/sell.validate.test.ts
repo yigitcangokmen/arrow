@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { b64, decryptFile, encryptFile, publicKeyHex, scalarFromLabel, sha256Hex, unseal } from "@arrow/sdk/crypto";
 import { ListMsg } from "@arrow/sdk/schemas";
 import {
-  budgetPreview, buildListMsg, checkBlobUrl, columnsFromHeader, csvRecords, fileKind, fullTitle, inspectFile, MAX_PLAINTEXT_BYTES, prefixesFor,
+  budgetPreview, buildListMsg, checkBlobUrl, columnsBytes, columnsFromHeader, csvRecords, fileKind, fullTitle, inspectFile, MAX_PLAINTEXT_BYTES, normalizePayout, prefixesFor,
   SellInputError, validateFields, type SellFields,
 } from "../lib/sell.ts";
 
@@ -169,5 +169,49 @@ describe("checkBlobUrl", () => {
     fails(() => checkBlobUrl("https://example.com/a b.bin"), /https/);
     fails(() => checkBlobUrl("https://e.com/" + "a".repeat(190)), /limit is 200/);
     expect(SellInputError.name).toBe("SellInputError");
+  });
+});
+
+describe("web halves of the contract's list rules (SCAM-6, X12-U3, X12-U7, X12-2)", () => {
+  const bad = (o: Partial<SellFields>) => {
+    try {
+      validateFields(fields(o));
+    } catch (e) {
+      return e as SellInputError;
+    }
+    return null;
+  };
+  it("SCAM-6: the inspection fee cannot be higher than the price", () => {
+    expect(bad({ price: "0.25", evalFee: "0.26" })?.field).toBe("fee");
+    expect(bad({ price: "0.25", evalFee: "0.25" })).toBeNull();
+  });
+  it("X12-U3: a line break or tab in the title, description or a column is named before the bond is paid", () => {
+    expect(bad({ publicDesc: "a\nb" })).toMatchObject({ field: "desc", message: expect.stringMatching(/line break/) });
+    expect(bad({ title: "a\tb" })?.field).toBe("title");
+    expect(bad({ columns: ["ok", "a\tb"] })?.field).toBe("file");
+  });
+  it("X12-U7: invisible and text-direction characters are refused, a zero-width joiner is not", () => {
+    for (const c of ["‮", "⁦", "​", "‏", "؜", "﻿", "\u{E0041}"]) expect(bad({ title: `a${c}b` })?.field, JSON.stringify(c)).toBe("title");
+    expect(bad({ title: "family \u{1F468}‍\u{1F469}" })).toBeNull();
+  });
+  it("byte limits: title 240, description 840, columns 2560 counted as JSON-escaped strings", () => {
+    expect(bad({ prefix: "", title: "\u{1F600}".repeat(61) })?.message).toMatch(/title/); // 61 chars is fine, 244 bytes is not
+    expect(bad({ publicDesc: "\u{1F600}".repeat(211) })?.message).toMatch(/840/);
+    expect(columnsBytes(['a"b', "c\\d"])).toBe(3 + 1 + 3 + 1);
+    expect(columnsBytes(Array(64).fill("\u{1F600}".repeat(10)))).toBe(64 * 40);
+    expect(bad({ columns: Array(64).fill("\u{1F600}".repeat(10)) })).toBeNull(); // exactly 2560 bytes is allowed
+    expect(bad({ columns: [...Array(63).fill("\u{1F600}".repeat(10)), "\u{1F600}".repeat(10) + "\""] })?.field).toBe("file"); // one escaped quote more
+  });
+  it("X12-2: a Solana address is not a payout; NEAR ids are not lowercased; EIP-55 is enforced on mixed case", () => {
+    expect(() => normalizePayout("9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM")).toThrow(SellInputError);
+    expect(normalizePayout("Alice.near".toLowerCase())).toBe("alice.near");
+    expect(() => normalizePayout("Alice.near")).toThrow(SellInputError); // uppercase is not a NEAR id; it is not silently changed
+    expect(normalizePayout("0xb5ef360e42056049f584fd03bf0fb9b208e28387")).toBe("0xb5ef360e42056049f584fd03bf0fb9b208e28387");
+    const checksummed = "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed";
+    expect(normalizePayout(checksummed)).toBe(checksummed.toLowerCase());
+    expect(() => normalizePayout("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeD")).toThrow(/checksum/);
+    expect(normalizePayout("ab".repeat(32))).toBe("ab".repeat(32));
+    expect(() => normalizePayout("arrow-market.near", "arrow-market.near")).toThrow(/market/);
+    expect(bad({ payout: "9wzdxwbbmkg8ztbnmquxvqrayrzzdsgydlvl9zytawwm" })?.field).toBe("payout");
   });
 });

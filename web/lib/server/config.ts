@@ -11,6 +11,8 @@ export interface SellerConfig {
   limits: { minPrice: string; minEvalFee: string };
   maxEvalsCap: number;
   programWasmHash: string | null;
+  /** Arrow's share in basis points of an inspection fee and of a sale. */
+  feeBps: { eval: number; sale: number };
 }
 
 export async function sellerConfig(views: Pick<ArrowViews, "config" | "programPubkey">): Promise<SellerConfig> {
@@ -22,5 +24,6 @@ export async function sellerConfig(views: Pick<ArrowViews, "config" | "programPu
     limits: { minPrice: str(c.min_price, "100000"), minEvalFee: str(c.min_eval_fee, "50000") },
     maxEvalsCap: num(c.max_evals_cap, 500),
     programWasmHash: typeof c.program_wasm_hash === "string" ? c.program_wasm_hash : null,
+    feeBps: { eval: num(c.fee_bps_eval, 1000), sale: num(c.fee_bps_sale, 200) },
   };
 }

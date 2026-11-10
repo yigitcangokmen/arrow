@@ -42,7 +42,13 @@ export function describeError(e: unknown): Described {
     if (code === "ALREADY_RELAYED") return { message: "This exact payment was already submitted. Do not pay again: use Check payment." };
     return { message: text.slice(0, 240) };
   }
-  if (hasName(e, "PaymentRefused")) return { message: `The market contract refused the payment: ${text.slice(0, 240)}` };
+  if (hasName(e, "PaymentRefused")) {
+    if (/E21\b/.test(text)) return { message: "Five inspections are already running on this listing. Your payment was refunded to your NEAR Intents balance; try again in a minute." };
+    if (/E22\b/.test(text)) return { message: "You already bought this listing with this viewing key. Open it under \"Your earlier payments on this listing\"." };
+    if (/E23\b/.test(text)) return { message: "Only the seller of this listing can change where its file is hosted." };
+    if (/E24\b/.test(text)) return { message: "Nothing is owed to that account." };
+    return { message: `The market contract refused the payment: ${text.slice(0, 240)}` };
+  }
   if (hasName(e, "NotEoaError")) return { message: text };
   if (hasName(e, "WithdrawPayloadError")) return { message: text };
   if (hasName(e, "SettleTimeout")) return { message: `${text}. It may still finish; check the transaction link.` };

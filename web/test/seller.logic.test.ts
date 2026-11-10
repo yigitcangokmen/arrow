@@ -108,7 +108,7 @@ describe("misc", () => {
   it("fetchListings returns the listings array and surfaces the API error text", async () => {
     const ok = vi.fn(async () => new Response(JSON.stringify({ listings: [{ id: 1 }] }), { status: 200 }));
     expect(await fetchListings("testnet", ok as never)).toEqual([{ id: 1 }]);
-    expect(ok).toHaveBeenCalledWith("/api/listings?network=testnet&from=0&limit=50");
+    expect(ok).toHaveBeenCalledWith("/api/listings?network=testnet"); // no from/limit: the route answers with every listing (QA-06)
     const bad = vi.fn(async () => new Response(JSON.stringify({ error: "Could not read", code: "RPC_ERROR" }), { status: 502 }));
     await expect(fetchListings("mainnet", bad as never)).rejects.toThrow("Could not read");
   });

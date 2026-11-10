@@ -6,6 +6,7 @@ import { clientIp } from "../ip.ts";
 import { type Limiter, tokenBucket } from "../ratelimit.ts";
 import { apiError, json, rateLimited } from "./http.ts";
 import { toListingView, ttlCache, type ListingView } from "./listingsCache.ts";
+import { pageAllListings } from "./pageAll.ts";
 
 export interface ListingsDeps {
   views(net: Network): Pick<ArrowViews, "listing" | "listings">;
@@ -38,6 +39,7 @@ export async function handleListings(req: Request, d: ListingsDeps): Promise<Res
   const net: Network = (netParam as Network | null) ?? DEFAULT_NETWORK;
 
   const id = q.get("id");
+  const paged = q.has("from") || q.has("limit"); // without them the answer is every listing, not the first 50 ids
   const from = int(q.get("from"), 0, 0, 999_999_999);
   const limit = int(q.get("limit"), 50, 1, 50);
   if (id !== null && !/^\d{1,9}$/.test(id)) return apiError(400, "BAD_REQUEST", "id must be a listing number");
@@ -46,8 +48,8 @@ export async function handleListings(req: Request, d: ListingsDeps): Promise<Res
   const views = d.views(net);
   let listings: Listing[];
   try {
-    listings = await d.cached(id !== null ? `${net}:id:${id}` : `${net}:${from}:${limit}`, async () =>
-      id !== null ? [await views.listing(id)].filter((l): l is Listing => l !== null) : views.listings({ from, limit }),
+    listings = await d.cached(id !== null ? `${net}:id:${id}` : paged ? `${net}:${from}:${limit}` : `${net}:all`, async () =>
+      id !== null ? [await views.listing(id)].filter((l): l is Listing => l !== null) : paged ? views.listings({ from: from!, limit: limit! }) : pageAllListings(views),
     );
   } catch (e) {
     const detail = e instanceof RpcError ? e.message.slice(0, 300) : undefined;

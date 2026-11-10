@@ -6,7 +6,8 @@ import { ArrowViews } from "@arrow/sdk/contract";
 import { encryptFile } from "@arrow/sdk/crypto";
 import { fetchAndCheckBlob } from "@arrow/sdk/flows";
 import { isTeamAccount } from "@arrow/sdk/team";
-import { formatUsdc } from "../../lib/format.ts";
+import { formatUsdc, net } from "../../lib/format.ts";
+import { parseUsdc } from "@arrow/sdk/usdc";
 import { CONTRACTS, type Network } from "../../lib/config.ts";
 import { describeError } from "../../lib/errors.ts";
 import { listingLinks } from "../../lib/links.ts";
@@ -14,7 +15,7 @@ import { locateLatest } from "../../lib/locate.ts";
 import { checkPayment, pendingPayment, payWithIntent, PaymentPending, PaymentUnclear, type PaidTx } from "../../lib/pay.ts";
 import type { PendingPayment } from "../../lib/pending.ts";
 import {
-  budgetPreview, buildListMsg, checkBlobUrl, fileKind, inspectFile, MAX_PLAINTEXT_BYTES, prefixesFor, SellInputError, validateFields,
+  budgetPreview, buildListMsg, checkBlobUrl, fileKind, inspectFile, MAX_PLAINTEXT_BYTES, normalizePayout, prefixesFor, SellInputError, validateFields,
   type SellFields, type TitlePrefix,
 } from "../../lib/sell.ts";
 import { findEventId } from "../../lib/settle.ts";
@@ -39,6 +40,8 @@ interface Props {
   readOnly: boolean;
   /** Accounts the team listed in evidence/team-accounts.json: only they may use the [team-made] label. */
   teamAccounts: string[];
+  /** Arrow's share in basis points of an inspection fee and of a sale. */
+  feeBps: { eval: number; sale: number };
 }
 
 interface Picked {
@@ -57,12 +60,25 @@ interface Sealed {
 
 const STEPS = ["Encrypt in this browser", "Upload the ciphertext", "Seal the key to the enclave", "Sign the list intent", "Relay and wait for the listing"] as const;
 
+/** The seller's take, from the contract's own rounding (NUM-4). */
+function takeRate(price: string, evalFee: string, bps: { eval: number; sale: number }, bond: bigint): string {
+  let fee = "";
+  try {
+    const f = parseUsdc(evalFee);
+    const p = parseUsdc(price);
+    fee = ` You receive ${formatUsdc(net(f, bps.eval))} of each ${formatUsdc(f)} inspection fee and ${formatUsdc(net(p, bps.sale))} of each ${formatUsdc(p)} sale.`;
+  } catch {
+    // the fields are being typed
+  }
+  return `Arrow keeps ${bps.eval / 100}% of each inspection fee and ${bps.sale / 100}% of each sale.${fee} The ${formatUsdc(bond)} USDC listing bond is a listing fee paid to Arrow; it is not given back.`;
+}
+
 const wipe = (s: Sealed | null) => {
   s?.plain.fill(0);
   s?.key.fill(0);
 };
 
-export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOnly, teamAccounts }: Props) {
+export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOnly, teamAccounts, feeBps }: Props) {
   const [eoa, setEoa] = useState<Eoa | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [balanceKey, setBalanceKey] = useState(0);
@@ -94,6 +110,8 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
   const [pending, setPending] = useState<PendingPayment | null>(null);
   const [payNote, setPayNote] = useState<string | null>(null);
   const [errorField, setErrorField] = useState<string | null>(null);
+  /** A download of the ciphertext for the seller to keep: the hosted copy is not kept for ever and blob_url is fixed on chain (X12-3). */
+  const [copyOfBlob, setCopyOfBlob] = useState<{ href: string; name: string } | null>(null);
   const sealed = useRef<Sealed | null>(null);
   const fieldsRef = useRef<SellFields | null>(null);
   const successHeading = useRef<HTMLHeadingElement>(null);
@@ -159,7 +177,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
   function collect(): SellFields {
     const fields: SellFields = {
       prefix, title, publicDesc: desc, columns, rowsClaimed: Number(rows), price, evalFee, maxEvals: Number(maxEvals), mode,
-      ...(payout.trim() ? { payout: payout.trim().toLowerCase() } : {}),
+      ...(payout.trim() ? { payout: normalizePayout(payout, CONTRACTS[network]) } : {}),
     };
     validateFields(fields, { minPrice: BigInt(limits.minPrice), minEvalFee: BigInt(limits.minEvalFee) });
     if (fields.maxEvals > maxEvalsCap) throw new SellInputError(`This market allows at most ${maxEvalsCap} inspections per listing.`, "max");
@@ -191,6 +209,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
       const enc = encryptFile(plain);
       sealed.current = { plain, key: enc.key, blob: enc.blob, sha: enc.blobSha256 };
       mark(0, "done", `${enc.blob.length} bytes, sha256 ${enc.blobSha256.slice(0, 12)}…`);
+      keepCopy(enc.blob, enc.blobSha256);
 
       mark(1, "doing");
       if (selfHost) {
@@ -224,6 +243,9 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
 
   function offerDownload(blob: Uint8Array, sha: string) {
     setNeedUrl({ href: URL.createObjectURL(new Blob([blob as BlobPart], { type: "application/octet-stream" })), name: `${sha}.bin` });
+  }
+  function keepCopy(blob: Uint8Array, sha: string) {
+    setCopyOfBlob({ href: URL.createObjectURL(new Blob([blob as BlobPart], { type: "application/octet-stream" })), name: `${sha}.bin` });
   }
 
   async function useOwnUrl() {
@@ -435,7 +457,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
           </div>
           <div className={form.field}>
             <label htmlFor="desc">Public description (up to 280 characters)</label>
-            <textarea id="desc" value={desc} onChange={(e) => setDesc(e.target.value)} maxLength={280} aria-describedby="desc-hint" {...invalid("desc")} />
+            <textarea id="desc" value={desc} onChange={(e) => setDesc(e.target.value.replace(/[\r\n]+/g, " "))} maxLength={280} aria-describedby="desc-hint" {...invalid("desc")} />
             <p id="desc-hint" className={form.hint}>Everyone can read this and the column names. Do not put data rows here.</p>
           </div>
           <div className={form.grid2}>
@@ -464,12 +486,13 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
             </div>
             <div className={form.field}>
               <label htmlFor="payout">Payout address (optional)</label>
-              <input id="payout" value={payout} onChange={(e) => setPayout(e.target.value)} placeholder="0x… or a NEAR account; default: this wallet" />
+              <input id="payout" value={payout} onChange={(e) => setPayout(e.target.value)} placeholder="0x… or a NEAR account; default: this wallet" {...invalid("payout")} />
             </div>
           </div>
           <p className={form.hint}>
             The most the verdicts let out for this listing (run time and instruction count are public too): {budgetPreview(Number.isInteger(Number(maxEvals)) && Number(maxEvals) > 0 ? Number(maxEvals) : 0, mode)}.
           </p>
+          <p className={form.hint} id="take-rate">{takeRate(price, evalFee, feeBps, bondUnits)}</p>
           <div className={form.field}>
             <label>
               <input type="checkbox" checked={selfHost} onChange={(e) => setSelfHost(e.target.checked)} /> I host the encrypted file myself (an https URL I paste)
@@ -551,6 +574,12 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
             <Link href={links.buy}>Open the listing</Link> · <a href={links.x402}>x402 link</a>{done.txHash ? <> · transaction <TxLink chain="near" network={network} hash={done.txHash} /></> : null}
           </p>
           <p className={form.hint}>The key and your file are cleared from this page. Reloading leaves nothing behind.</p>
+          {copyOfBlob ? (
+            <p>
+              Keep a copy of the encrypted file: <a href={copyOfBlob.href} download={copyOfBlob.name}>download {copyOfBlob.name}</a>. The hosted copy is not kept for
+              ever and the address stored on chain does not change by itself; with this file you can host it again.
+            </p>
+          ) : null}
           {done.txHash ? (
             <CopyEvidence
               run={{

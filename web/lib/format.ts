@@ -24,3 +24,6 @@ export function stateLine(s: State, mode: Mode, o: { hadList?: boolean } = {}): 
   const novelty = o.hadList === false ? "n/a" : (s.novelty ?? "n/a");
   return `${s.verdict} · fit ${s.fit ?? "n/a"} · novelty ${novelty}`;
 }
+
+/** What is left of `amount` after the take rate, rounded the way the contract rounds (its share rounds down): net(50000, 1000) = 45000. */
+export const net = (amount: bigint, bps: number): bigint => amount - (amount * BigInt(bps)) / 10_000n;

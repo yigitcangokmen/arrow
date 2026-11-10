@@ -159,7 +159,7 @@ export function SellerPanel({ network, readOnly }: { network: Network; readOnly:
             {mine.map((l) => (
               <li key={String(l.id)} className={styles.item}>
                 <div className={styles.itemHead}>
-                  <strong>{l.displayTitle}</strong>
+                  <strong><bdi>{l.displayTitle}</bdi></strong>
                   <span>{l.evals_used} / {l.max_evals} inspections used</span>
                   <Link href={listingLinks(l.id, network).buy}>Open #{String(l.id)}</Link>
                 </div>

@@ -46,6 +46,7 @@ export default async function Sell({ searchParams }: { searchParams: Promise<{ n
           maxEvalsCap={cfg.maxEvalsCap}
           readOnly={net !== "mainnet"}
           teamAccounts={teamAccounts}
+          feeBps={cfg.feeBps}
         />
       )}
     </div>

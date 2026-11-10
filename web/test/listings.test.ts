@@ -148,3 +148,27 @@ describe("ttlCache: single flight and a negative cache (WEB-3)", () => {
     expect(first).toHaveLength(3);
   });
 });
+
+describe("QA-06 / STATE-8: listings past #50 are shown", () => {
+  /** The contract's own paging: ids >= from_index, ids start at 1, at most 50. */
+  const chain = (n: number) => ({
+    listings: vi.fn(async ({ from = 0, limit = 50 }: { from?: number; limit?: number } = {}) =>
+      Array.from({ length: n }, (_, i) => listingFixture({ id: i + 1 })).filter((l) => Number(l.id) >= Math.max(from, 1)).slice(0, Math.min(limit, 50))),
+  });
+  it("pageAllListings returns every id once for 55 and 120 listings", async () => {
+    const { pageAllListings } = await import("../lib/server/pageAll.ts");
+    for (const n of [0, 1, 50, 55, 120]) {
+      const ids = (await pageAllListings(chain(n) as never)).map((l) => Number(l.id));
+      expect(ids).toEqual(Array.from({ length: n }, (_, i) => i + 1));
+    }
+  });
+  it("GET /api/listings without from/limit answers with all 55, with them it stays one page", async () => {
+    const views = { ...chain(55), listing: vi.fn() };
+    const d: ListingsDeps = { views: () => views as never, teamAccounts: [], cached: ttlCache(30_000), limiter: tokenBucket({ capacity: 100, refillEveryMs: 60_000 }) };
+    const all = await (await handleListings(new Request("http://localhost/api/listings?network=testnet"), d)).json();
+    expect(all.listings).toHaveLength(55);
+    expect(all.listings.map((l: { id: number }) => l.id)).toContain(55);
+    const page = await (await handleListings(new Request("http://localhost/api/listings?network=testnet&from=0&limit=50"), d)).json();
+    expect(page.listings).toHaveLength(50);
+  });
+});

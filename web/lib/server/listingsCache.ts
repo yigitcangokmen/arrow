@@ -5,6 +5,8 @@ import { displayTitle, labelOf, type ListingLabel } from "../labels.ts";
 export interface ListingView extends Listing {
   label: ListingLabel;
   displayTitle: string;
+  /** Sealed to an enclave program other than the one the market runs now: the contract refuses it (E13). Set by the page that knows the hash. */
+  stale?: boolean;
   budget: { bitsPerEval: number; maxEvals: number; evalsUsed: number; spentBits: number; budgetBits: number; leftBits: number };
 }
 

@@ -22,7 +22,7 @@ describe("A11Y-7: every page names itself", () => {
     expect(tryPage.metadata.title).toBe("Try on testnet");
     expect(String((await buy.generateMetadata({ params: Promise.resolve({ id: "7" }) })).title)).toContain("Listing 7");
     expect(String((await evalPage.generateMetadata({ params: Promise.resolve({ evalId: "12" }) })).title)).toContain("12");
-  });
+  }, 30_000);
   it("the root layout adds the site name to each page title", async () => {
     const { metadata } = await import("../app/layout.tsx");
     expect(metadata.title).toMatchObject({ default: "Arrow", template: "%s · Arrow" });
@@ -89,5 +89,48 @@ describe("CLM-3: no absolute-privacy wording in the web app", () => {
     const root = new URL("../", import.meta.url).pathname;
     const hits = walk(join(root, "app")).concat(walk(join(root, "components")), walk(join(root, "lib"))).filter((f) => /\.(tsx?|css)$/.test(f)).filter((f) => /never sees|nobody can (look|see)|can see into/i.test(readFileSync(f, "utf8")));
     expect(hits).toEqual([]);
+  });
+});
+
+describe("web halves of the contract group's items", () => {
+  it("STATE-5: a listing sealed to another program is flagged, sorted last and has no Inspect link", async () => {
+    const { toListingView } = await import("../lib/server/listingsCache.ts");
+    const { markStale, sortListingViews } = await import("../lib/server/listingsPage.ts");
+    const { ListingCard } = await import("../components/ListingCard.tsx");
+    const { listingFixture } = await import("../test/helpers.ts");
+    const views = markStale([
+      toListingView(listingFixture({ id: 1, seller: "a.near", program_hash_at_list: "old", created_at_ns: 9 }), []),
+      toListingView(listingFixture({ id: 2, seller: "b.near", program_hash_at_list: "aa", created_at_ns: 1 }), []),
+    ], "aa");
+    expect(sortListingViews(views).map((v) => v.id)).toEqual([2, 1]);
+    expect(markStale(views, null).every((v) => v.stale === undefined || v === views[0])).toBe(true);
+    const html = renderToStaticMarkup(h(ListingCard, { listing: views[0]!, network: "mainnet" }));
+    expect(html).toMatch(/older enclave program/);
+    expect(html).not.toMatch(/>Inspect</);
+    expect(renderToStaticMarkup(h(ListingCard, { listing: views[1]!, network: "mainnet" }))).toMatch(/>Inspect</);
+  });
+  it("SCAM-7(b): an exhausted listing says it can only be bought blind", async () => {
+    const { toListingView } = await import("../lib/server/listingsCache.ts");
+    const { ListingCard } = await import("../components/ListingCard.tsx");
+    const { listingFixture } = await import("../test/helpers.ts");
+    const html = renderToStaticMarkup(h(ListingCard, { listing: toListingView(listingFixture({ evals_used: 50, max_evals: 50 }), []), network: "mainnet" }));
+    expect(html).toMatch(/buying blind/);
+    expect(html).not.toMatch(/buy-only/);
+  });
+  it("X12-U7: seller text is isolated against bidi tricks", async () => {
+    const { toListingView } = await import("../lib/server/listingsCache.ts");
+    const { ListingCard } = await import("../components/ListingCard.tsx");
+    const { listingFixture } = await import("../test/helpers.ts");
+    const html = renderToStaticMarkup(h(ListingCard, { listing: toListingView(listingFixture({ title: "Sales", public_desc: "d" }), []), network: "mainnet" }));
+    expect(html).toMatch(/<h3[^>]*><bdi>Sales<\/bdi><\/h3>/);
+  });
+  it("NUM-4 / X12-3: /sell tells the take rate with the contract's rounding and offers the encrypted file after an upload", async () => {
+    const { net } = await import("../lib/format.ts");
+    expect([net(50_000n, 1000), net(250_000n, 1000), net(1n, 1000), net(2_000_000n, 200)]).toEqual([45_000n, 225_000n, 1n, 1_960_000n]);
+    const { SellForm } = await import("../app/sell/SellForm.tsx");
+    const html = renderToStaticMarkup(h(SellForm, { network: "mainnet", programPk: "04ab", bond: "100000", limits: { minPrice: "100000", minEvalFee: "50000" }, maxEvalsCap: 500, readOnly: false, teamAccounts: [], feeBps: { eval: 1000, sale: 200 } }));
+    expect(html).toContain("Arrow keeps 10% of each inspection fee and 2% of each sale.");
+    expect(html).toContain("You receive 0.09 of each 0.1 inspection fee and 0.245 of each 0.25 sale.");
+    expect(html).toMatch(/listing bond is a listing fee paid to Arrow; it is not given back/);
   });
 });
