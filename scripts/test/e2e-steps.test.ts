@@ -102,6 +102,14 @@ describe("e2e-testnet steps", () => {
     expect(onlyFt.exit).toBe(1);
   });
 
+  it("the refund step expects the eval fee less the treasury share (a failed eval is not free)", async () => {
+    const r = await setup().run();
+    const s7 = r.results.find((x) => x.n === 7)!;
+    expect(s7.status).toBe("PASS");
+    expect(s7.summary).toContain("ft_transfer memo refund 0.225 aUSD");
+    expect(s7.summary).toContain("the treasury kept 0.025");
+  });
+
   it("the refund step fails when the buyer balance does not come back", async () => {
     const r = await setup({ keepFee: true }).run();
     const s7 = r.results.find((x) => x.n === 7)!;

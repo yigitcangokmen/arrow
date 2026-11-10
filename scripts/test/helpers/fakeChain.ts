@@ -75,12 +75,14 @@ export function world(q: Quirks = {}) {
         const broken = l.blob_url.includes(".invalid");
         const rec: any = { id, listing_id: l.id, buyer: actor.id, buyer_pk: m.buyer_pk, fee: l.eval_fee, status: "done", sealed_result: null, h: l.blob_sha256, refund_reason: null };
         if (broken) {
+          // the contract keeps the treasury's 10 % (fee_bps_eval 1000) of a failed eval's fee and refunds the rest
+          const back = amount - BigInt(l.eval_fee) / 10n;
           Object.assign(rec, { status: "refunded", h: null, refund_reason: "not_ok" });
           const parts = [accepted];
-          if (q.omit !== "arrow_refund") parts.push(eventTx(CONTRACT, "arrow", "arrow_refund", { kind: "eval", listing_id: l.id, id, reason: "not_ok", amount: l.eval_fee }));
-          if (q.omit !== "ft_transfer") parts.push(eventTx(USDC, "nep141", "ft_transfer", [{ old_owner_id: CONTRACT, new_owner_id: actor.id, amount: l.eval_fee, memo: "refund" }]));
+          if (q.omit !== "arrow_refund") parts.push(eventTx(CONTRACT, "arrow", "arrow_refund", { kind: "eval", listing_id: l.id, id, reason: "not_ok", amount: String(back) }));
+          if (q.omit !== "ft_transfer") parts.push(eventTx(USDC, "nep141", "ft_transfer", [{ old_owner_id: CONTRACT, new_owner_id: actor.id, amount: String(back), memo: "refund" }]));
           txs.set(hash, merge(...parts));
-          if (!q.keepFee) balances.set(actor.id, (balances.get(actor.id) ?? 0n) + amount);
+          if (!q.keepFee) balances.set(actor.id, (balances.get(actor.id) ?? 0n) + back);
         } else {
           const verdict = (l.title.includes("unlock") ? q.l1Verdict ?? "PASS" : q.l2Verdict ?? "BUY") as "BUY" | "PASS";
           rec.sealed_result = b64.enc(seal(m.buyer_pk, Uint8Array.of(encodeState({ verdict, fit: 4, novelty: verdict === "PASS" ? 1 : 4 }, "scored"))));

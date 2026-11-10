@@ -75,6 +75,8 @@ const big = (v: unknown) => BigInt(String(v));
 const items = (e: NearEvent): any[] => (Array.isArray(e.data) ? e.data : [e.data]);
 const isRefundMemo = (m: unknown) => m === "refund" || (typeof m === "string" && m.startsWith("arrow:refund:"));
 const sellerShare = (amount: bigint, treasuryBps: number) => (amount * BigInt(10_000 - treasuryBps)) / 10_000n;
+/** a failed eval keeps the treasury's share of the fee; the rest is refunded */
+const failRefund = (fee: bigint, treasuryBps: number) => sellerShare(fee, treasuryBps);
 
 // ---------------------------------------------------------------------- spend plan
 
@@ -143,8 +145,8 @@ export function spendPlan(i: PlanInput): Plan {
   if (has(8)) {
     buyer -= AMOUNTS.evalFee;
     check(8);
-    buyer += AMOUNTS.evalFee;
-    lines.push(`step 8  eval L3: ${f(AMOUNTS.evalFee)} USDC from the buyer, refunded in full to the buyer's NEAR Intents balance (not to Base)`);
+    buyer += failRefund(AMOUNTS.evalFee, i.feeBpsEval);
+    lines.push(`step 8  eval L3: ${f(AMOUNTS.evalFee)} USDC from the buyer, ${f(failRefund(AMOUNTS.evalFee, i.feeBpsEval))} refunded to the buyer's NEAR Intents balance (not to Base); a failed eval keeps the ${i.feeBpsEval / 100}% treasury share`);
   }
   if (has(9)) {
     seller -= AMOUNTS.outbound;
@@ -585,15 +587,18 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
     const what = mainnet ? `mt_transfer{memo:"refund", old_owner_id:${deps.contract}, new_owner_id:${deps.buyerId}}` : `ft_transfer memo refund to ${deps.buyerId}`;
     if (!found.refund) return { n: 8, status: "FAIL", summary: "no arrow_refund event in the payment transaction", link: r.tx_url };
     if (!found.transfer) return { n: 8, status: "FAIL", summary: `arrow_refund seen but no ${what}`, link: r.tx_url };
-    if (String(found.refund.amount) !== EVAL_FEE || found.amount !== EVAL_FEE) return { n: 8, status: "FAIL", summary: `refund amounts: arrow_refund ${found.refund.amount}, transfer ${found.amount}, eval fee ${EVAL_FEE}`, link: r.tx_url };
+    const bps = ((await ctx.views.config()).config as { fee_bps_eval?: number }).fee_bps_eval ?? 1000;
+    const back = failRefund(big(EVAL_FEE), bps);
+    const kept = big(EVAL_FEE) - back;
+    if (String(found.refund.amount) !== String(back) || found.amount !== String(back)) return { n: 8, status: "FAIL", summary: `refund amounts: arrow_refund ${found.refund.amount}, transfer ${found.amount}, expected ${back} (eval fee ${EVAL_FEE} less the ${kept} treasury share)`, link: r.tx_url };
     if (mainnet && found.token !== usdc) return { n: 8, status: "FAIL", summary: `refund token ${found.token} is not USDC`, link: r.tx_url };
     let after = await deps.balanceOf(deps.buyerId);
-    for (let i = 0; i < 10 && after !== before; i++) {
+    for (let i = 0; i < 10 && after !== before - kept; i++) {
       await deps.sleep(3000);
       after = await deps.balanceOf(deps.buyerId);
     }
-    if (after !== before) return { n: 8, status: "FAIL", summary: `buyer balance ${f(before)} before, ${f(after)} after the refund`, link: r.tx_url };
-    return { n: 8, status: "PASS", summary: `arrow_refund{reason:"not_ok"} + ${what} ${f(AMOUNTS.evalFee)} USDC + buyer ${mainnet ? "Intents " : ""}balance ${f(after)} unchanged`, link: r.tx_url };
+    if (after !== before - kept) return { n: 8, status: "FAIL", summary: `buyer balance ${f(before)} before, ${f(after)} after the refund (expected ${fs(before - kept)})`, link: r.tx_url };
+    return { n: 8, status: "PASS", summary: `arrow_refund{reason:"not_ok"} + ${what} ${f(back)} USDC + buyer ${mainnet ? "Intents " : ""}balance ${f(after)} (the treasury kept ${f(kept)})`, link: r.tx_url };
   }
 
   async function outbound(): Promise<StepResult> {

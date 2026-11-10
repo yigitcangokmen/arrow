@@ -290,14 +290,18 @@ export async function runE2e(deps: E2eDeps, opts: E2eOpts): Promise<E2eReport> {
     }
     if (!refund) return { n: 7, status: "FAIL", summary: "no arrow_refund event in the payment transaction", link: r.tx_url };
     if (!transfer) return { n: 7, status: "FAIL", summary: "arrow_refund seen but no NEP-141 ft_transfer with memo refund back to the buyer", link: r.tx_url };
-    if (String(refund.amount) !== EVAL_FEE || String(transfer.amount) !== EVAL_FEE) return { n: 7, status: "FAIL", summary: `refund amounts: arrow_refund ${refund.amount}, ft_transfer ${transfer.amount}, eval fee ${EVAL_FEE}`, link: r.tx_url };
+    // A failed eval keeps the treasury's fee_bps_eval share of the fee; the rest comes back.
+    const bps = (await ctx.views.config()).config as { fee_bps_eval?: number };
+    const kept = (BigInt(EVAL_FEE) * BigInt(bps.fee_bps_eval ?? 1000)) / 10_000n;
+    const back = String(BigInt(EVAL_FEE) - kept);
+    if (String(refund.amount) !== back || String(transfer.amount) !== back) return { n: 7, status: "FAIL", summary: `refund amounts: arrow_refund ${refund.amount}, ft_transfer ${transfer.amount}, expected ${back} (eval fee ${EVAL_FEE} less the ${kept} treasury share)`, link: r.tx_url };
     let after = await deps.balanceOf(buyerId);
-    for (let i = 0; i < 10 && after !== before; i++) {
+    for (let i = 0; i < 10 && after !== before - kept; i++) {
       await deps.sleep(3000);
       after = await deps.balanceOf(buyerId);
     }
-    if (after !== before) return { n: 7, status: "FAIL", summary: `buyer balance ${formatUsdc(before)} before, ${formatUsdc(after)} after the refund`, link: r.tx_url };
-    const base = `arrow_refund{reason:"not_ok"} + ft_transfer memo refund ${formatUsdc(BigInt(EVAL_FEE))} aUSD + buyer balance ${formatUsdc(after)} unchanged`;
+    if (after !== before - kept) return { n: 7, status: "FAIL", summary: `buyer balance ${formatUsdc(before)} before, ${formatUsdc(after)} after the refund (expected ${formatUsdc(before - kept)})`, link: r.tx_url };
+    const base = `arrow_refund{reason:"not_ok"} + ft_transfer memo refund ${formatUsdc(BigInt(back))} aUSD + buyer balance ${formatUsdc(after)} (the treasury kept ${formatUsdc(kept)})`;
     return deps.hasAi
       ? { n: 7, status: "PASS", summary: base, link: r.tx_url }
       : { n: 7, status: "WARN", summary: `${base}; the refund mechanics are proven, the cause is not isolated: with no NEAR AI key in the secret every eval refunds before the blob is fetched (H-01a)`, link: r.tx_url };

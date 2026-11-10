@@ -137,7 +137,7 @@ export async function evalCommand(
 }
 
 export function formatEval(r: EvalResult): string {
-  if (r.status === "refunded") return `REFUNDED (${r.refund_reason}) · eval fee returned to your ${refundTarget(r.tx_url)} · eval #${r.eval_id} · tx ${r.tx_url}`;
+  if (r.status === "refunded") return `REFUNDED (${r.refund_reason}) · eval fee less the treasury share returned to your ${refundTarget(r.tx_url)} · eval #${r.eval_id} · tx ${r.tx_url}`;
   const parts: string[] = [r.verdict!];
   if (r.fit !== undefined) parts.push(`fit ${r.fit}/5`, `novelty ${r.novelty !== undefined ? `${r.novelty}/5` : "n/a"}`);
   parts.push(`out ${r.bits_out} bits`, `budget left ${r.budget_left_bits}/${r.budget_total_bits} bits`, `eval #${r.eval_id}`, `tx ${r.tx_url}`);

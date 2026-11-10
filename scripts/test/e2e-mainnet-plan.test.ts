@@ -23,15 +23,16 @@ const BASE_PLAN = { bond: 100_000n, inboundOut: 4_998_000n, feeBpsEval: 1000, fe
 describe("spend plan", () => {
   it("spend_plan_totals", () => {
     const p = spendPlan({ ...BASE_PLAN, steps: ALL });
-    // buyer: +4.998 inbound -0.5 funding -2 x 0.25 evals -2.00 buy; the refunded L3 eval nets 0
-    expect(p.buyerAfter).toBe(1_999_596n + 4_998_000n - 500_000n - 500_000n - 2_000_000n);
+    // buyer: +4.998 inbound -0.5 funding -2 x 0.25 evals -2.00 buy; the refunded L3 eval costs the 10 % treasury share
+    expect(p.buyerAfter).toBe(1_999_596n + 4_998_000n - 500_000n - 500_000n - 2_000_000n - 25_000n);
     // seller: +0.5 funding -0.3 bonds +90% of 2 evals +98% of the price -1.00 outbound
     expect(p.sellerAfter).toBe(500_000n - 300_000n + 450_000n + 1_960_000n - 1_000_000n);
     expect(p.h15Inbound).toBe(8_000_000n - p.buyerAfter);
     expect(p.shortfalls).toEqual([]);
     expect(p.spendsValue).toBe(true);
     const text = p.lines.join("\n");
-    expect(text).toContain("after this run, buyer Intents will hold ≈3.997596 USDC; H-15 needs ≥ 8.0 → H-15 inbound = max(3, 8.0 − 3.997596) = 4.002404 USDC");
+    expect(text).toContain("after this run, buyer Intents will hold ≈3.972596 USDC; H-15 needs ≥ 8.0 → H-15 inbound = max(3, 8.0 − 3.972596) = 4.027404 USDC");
+    expect(text).toContain("step 8  eval L3: 0.25 USDC from the buyer, 0.225 refunded to the buyer's NEAR Intents balance (not to Base); a failed eval keeps the 10% treasury share");
     expect(text).toContain("seller will hold ≈1.61 USDC; H-15 needs ≥ 3.5");
     expect(text).toContain("total leaving Base: 5 USDC + gas");
     expect(text).toContain("3 x 0.1 USDC listing bond");
