@@ -126,6 +126,33 @@ describe("fetchAndCheckBlob", () => {
     await expect(fetchAndCheckBlob("u", "x", resp(bytes, { headers: { "content-length": String(MAX_BLOB_BYTES + 1) } }))).rejects.toThrow("too large");
     await expect(fetchAndCheckBlob("u", "x", vi.fn().mockResolvedValue(new Response("no", { status: 404 })))).rejects.toThrow("HTTP 404");
   });
+
+  it("SDK-1: without content-length the body is read through a byte cap, not buffered whole", async () => {
+    const chunk = new Uint8Array(1024 * 1024);
+    let pulls = 0;
+    let cancelled = false;
+    const body = new ReadableStream<Uint8Array>({
+      pull(c) {
+        pulls += 1;
+        if (pulls > 40) return c.close(); // a hostile host would keep going; the test stream is finite
+        c.enqueue(chunk);
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const res = new Response(body, { status: 200 });
+    expect(res.headers.get("content-length")).toBeNull();
+    await expect(fetchAndCheckBlob("u", "x", vi.fn().mockResolvedValue(res))).rejects.toThrow("too large");
+    expect(pulls).toBeLessThanOrEqual(MAX_BLOB_BYTES / chunk.length + 3); // 5 MB plus the read-ahead the stream queue allows
+    expect(cancelled).toBe(true);
+  });
+
+  it("SDK-1: passes an abort signal to fetch so a stalled host cannot hang the buyer", async () => {
+    const f = resp(bytes);
+    await fetchAndCheckBlob("https://x/b.bin", sha256Hex(bytes), f);
+    expect(f.mock.calls[0][1]?.signal).toBeInstanceOf(AbortSignal);
+  });
 });
 
 describe("ArrowViews", () => {

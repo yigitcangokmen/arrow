@@ -103,14 +103,40 @@ export function openRelease(kB64: string, scalarHex: string): Uint8Array {
   return k;
 }
 
-/** Downloads the ciphertext (at most 5 MB) and checks its sha256 against the on-chain value. */
+const BLOB_FETCH_TIMEOUT_MS = 60_000;
+
+/** Reads the body in chunks and stops at MAX_BLOB_BYTES: a host that sends no content-length cannot make us buffer more. */
+async function readCapped(res: Response): Promise<Uint8Array> {
+  if (!res.body) return new Uint8Array(await res.arrayBuffer());
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.length;
+    if (total > MAX_BLOB_BYTES) {
+      await reader.cancel().catch(() => {});
+      throw new Error(`blob too large: more than ${MAX_BLOB_BYTES} bytes (limit ${MAX_BLOB_BYTES})`);
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(total);
+  let at = 0;
+  for (const c of chunks) {
+    bytes.set(c, at);
+    at += c.length;
+  }
+  return bytes;
+}
+
+/** Downloads the ciphertext (at most 5 MB, 60 s) and checks its sha256 against the on-chain value. */
 export async function fetchAndCheckBlob(url: string, expectedSha: string, fetchImpl: typeof fetch = fetch): Promise<Uint8Array> {
-  const res = await fetchImpl(url);
+  const res = await fetchImpl(url, { signal: AbortSignal.timeout(BLOB_FETCH_TIMEOUT_MS) });
   if (!res.ok) throw new Error(`blob download failed: HTTP ${res.status}`);
   const declared = Number(res.headers.get("content-length"));
   if (declared > MAX_BLOB_BYTES) throw new Error(`blob too large: ${declared} bytes (limit ${MAX_BLOB_BYTES})`);
-  const bytes = new Uint8Array(await res.arrayBuffer());
-  if (bytes.length > MAX_BLOB_BYTES) throw new Error(`blob too large: ${bytes.length} bytes (limit ${MAX_BLOB_BYTES})`);
+  const bytes = await readCapped(res);
   const actual = sha256Hex(bytes);
   if (actual !== expectedSha) throw new BlobHashMismatch(expectedSha, actual);
   return bytes;
