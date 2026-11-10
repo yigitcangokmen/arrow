@@ -76,6 +76,15 @@ EVENT_JSON:{"standard":"arrow","version":"1.0.0","event":"arrow_refund","data":{
 - Mainnet: the transfer intent carries `min_gas` **300 TGas**.
 - Inside: OutLayer `request_execution` 150 TGas, `on_eval` / `on_release` 60 TGas plus the rest, payouts 15 TGas each.
 
+Gas burnt by the contract's own receipts, measured in the sandbox (`cargo test -p arrow --test sandbox gas_profile -- --nocapture`, 2026-11-10; the suite fails above 40 TGas):
+
+| Flow | Notification (`mt_on_transfer` / `ft_on_transfer`) | Callback (`on_eval` / `on_release`) |
+|---|---|---|
+| eval, mainnet build | 3.29 TGas | 2.71 TGas |
+| eval, testnet build | 3.42 TGas | 2.66 TGas |
+| buy, mainnet build | 2.84 TGas | 2.69 TGas |
+| buy, testnet build | 2.82 TGas | 2.65 TGas |
+
 ### Build
 ```bash
 cargo near build non-reproducible-wasm --manifest-path contracts/arrow/Cargo.toml --no-abi --locked                      # mainnet
