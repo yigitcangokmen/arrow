@@ -104,6 +104,20 @@ describe("/sell in a DOM", () => {
     expect(host.querySelector("#listed")!.textContent).toBe("Listed as #42");
   });
 
+  it("A11Y-5: a rejected field is marked invalid and receives focus, and the hint stays linked to its field", async () => {
+    await connectAndPick();
+    const price = host.querySelector("#price") as HTMLInputElement;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(price, "0.05");
+      price.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await click(button("Encrypt, upload and list"));
+    expect(world.pays).toHaveLength(0);
+    expect(price.getAttribute("aria-invalid")).toBe("true");
+    expect(document.activeElement?.id).toBe("price");
+    expect(host.querySelector("#desc")!.getAttribute("aria-describedby")).toBe("desc-hint");
+  });
+
   it("SCAM-2: an outside wallet is not offered the [team-made] label", async () => {
     await click(button("Connect wallet"));
     const labels = [...host.querySelectorAll("#prefix option")].map((o) => o.textContent);
