@@ -1,0 +1,7 @@
+.head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.facts { color: var(--muted); overflow-wrap: anywhere; }
+.verdict { font-size: clamp(1.4rem, 5vw, 2rem); font-weight: 700; margin: 8px 0; overflow-wrap: anywhere; }
+.buy { color: var(--proven); }
+.pass { color: var(--notproven); }
+.steps { margin: 0 0 16px; }
+.sign { font-size: 0.9rem; color: var(--muted); margin: 0 0 8px; }

@@ -39,14 +39,13 @@ export function explainRejection(tx: unknown): string {
   return /Arrow: E\d\d[^"\\]*/.exec(text)?.[0] ?? "the contract did not accept the payment";
 }
 
-/** Polls the tx until the event `eventName` (optionally of `phase`) shows up, and returns `data[idField]` as a number. */
-export async function findEventId(
+/** Polls the tx until the event `eventName` (optionally of `phase`) shows up and returns its data object. */
+export async function findEvent(
   network: Network,
   tx: { txHash: string; signerId: string },
   eventName: string,
-  idField: string,
-  d: PollDeps & { phase?: string } = {},
-): Promise<number> {
+  d: PollDeps & { phase?: string; idField: string },
+): Promise<Record<string, unknown>> {
   const sleep = d.sleep ?? realSleep;
   const now = d.now ?? Date.now;
   const status = d.txStatusImpl ?? txStatus;
@@ -59,7 +58,7 @@ export async function findEventId(
         if (e.event !== eventName) continue;
         const data = Array.isArray(e.data) ? e.data[0] : e.data;
         if (d.phase && data?.phase !== d.phase) continue;
-        if (data?.[idField] !== undefined) return Number(data[idField]);
+        if (data?.[d.idField] !== undefined) return data;
       }
       if (out?.final_execution_status === "FINAL") throw new PaymentRefused(explainRejection(out));
     } catch (e) {
@@ -69,6 +68,17 @@ export async function findEventId(
     if (now() >= deadline) throw new SettleTimeout(`${eventName} event`);
     await sleep(d.everyMs ?? POLL_MS);
   }
+}
+
+/** Same as findEvent, returning `data[idField]` as a number. */
+export async function findEventId(
+  network: Network,
+  tx: { txHash: string; signerId: string },
+  eventName: string,
+  idField: string,
+  d: PollDeps & { phase?: string } = {},
+): Promise<number> {
+  return Number((await findEvent(network, tx, eventName, { ...d, idField }))[idField]);
 }
 
 /** Polls a record view until its status is "done" or "refunded". */
