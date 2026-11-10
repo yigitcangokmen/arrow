@@ -1,45 +1,14 @@
 // Append-only evidence writer (WS4-T08, DEC D4-08, PLAN 7.6 / A.3). The only code that writes evidence/<net>.json.
-// Always targets the main checkout's evidence/ (never a worktree copy). The schema moves to @arrow/sdk with WS4-T01.
+// Always targets the main checkout's evidence/ (never a worktree copy). Schemas live in sdk/src/schemas.ts.
 import { execFileSync } from "node:child_process";
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { z } from "zod";
+import { EvidenceFile, EvidenceRun } from "@arrow/sdk";
 import { mainCheckout, repoRoot } from "./env.ts";
 
 export type EvidenceNetwork = "testnet" | "mainnet";
 
-const hex64OrNull = z.string().regex(/^[0-9a-f]{64}$/).nullable();
-
-export const EvidenceRun = z.object({
-  id: z.string().min(1),
-  kind: z.enum(["list", "eval", "buy", "refund", "inbound", "outbound", "attack", "spike", "deploy", "lock"]),
-  tx: z.string().nullable(),
-  chain: z.enum(["near", "base", "solana"]),
-  block_height: z.number().int().nullable(),
-  timestamp_utc: z.string(),
-  listing_id: z.union([z.number(), z.string()]).nullable(),
-  eval_id: z.union([z.number(), z.string()]).nullable(),
-  purchase_id: z.union([z.number(), z.string()]).nullable(),
-  oneclick_deposit: z.string().nullable(),
-  expect: z.string(),
-  observed: z.string(),
-  script: z.string(),
-  commit: z.string(),
-});
-export type EvidenceRun = z.infer<typeof EvidenceRun>;
-
-export const EvidenceFile = z.object({
-  network: z.enum(["testnet", "mainnet"]),
-  contract: z.string(),
-  contract_wasm_sha256: hex64OrNull,
-  program_wasm_sha256: hex64OrNull,
-  program_wasm_url: z.string().nullable(),
-  lock: z.object({ tx: z.string().nullable(), block_height: z.number().nullable(), timestamp_utc: z.string().nullable() }),
-  accounts: z.record(z.string(), z.string()),
-  runs: z.array(EvidenceRun),
-  corrections: z.array(z.unknown()),
-});
-export type EvidenceFile = z.infer<typeof EvidenceFile>;
+export { EvidenceFile, EvidenceRun };
 
 /** Caller may omit commit and timestamp_utc; they default to HEAD and now. */
 export type EvidenceRunInput = Omit<EvidenceRun, "commit" | "timestamp_utc"> & Partial<Pick<EvidenceRun, "commit" | "timestamp_utc">>;
