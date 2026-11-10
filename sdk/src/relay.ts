@@ -38,6 +38,19 @@ export class RelayRejected extends RelayError {
   }
 }
 
+/**
+ * The relay may have broadcast the payment but nobody confirmed it (RELAY-3): a RELAY_UNCLEAR answer, a lost connection,
+ * a 5xx without the API's error body, or a 200 we cannot read. The caller must not sign a new intent for the same payment:
+ * re-send the same signed multipayload (the relay dedupes it, intents.near refuses a used nonce) or check is_nonce_used.
+ */
+export class RelayUnclear extends RelayError {
+  constructor(message: string, status: number) {
+    super(message, status, "RELAY_UNCLEAR");
+    this.name = "RelayUnclear";
+  }
+}
+const UNCLEAR_TEXT = "Your payment may or may not have gone through. Do not sign a new payment: send the same signed payment again, or check it on NEAR Intents first.";
+
 /** Accepts a site origin or the full relay URL (ARROW_RELAY_URL). */
 export function relayUrl(base: string): string {
   const b = base.replace(/\/+$/, "");
@@ -45,20 +58,29 @@ export function relayUrl(base: string): string {
 }
 
 export async function relayHosted(baseUrl: string, multipayload: MultiPayload, fetchImpl: typeof fetch = fetch): Promise<RelayResponse> {
-  const res = await fetchImpl(relayUrl(baseUrl), {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ multipayload }),
-  });
+  let res: Response;
+  try {
+    res = await fetchImpl(relayUrl(baseUrl), {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ multipayload }),
+    });
+  } catch (e) {
+    throw new RelayUnclear(`the relay did not answer (${(e as Error).message}). ${UNCLEAR_TEXT}`, 0);
+  }
   const body: unknown = await res.json().catch(() => null);
   if (res.ok) {
     const ok = RelayResponse.safeParse(body);
-    if (!ok.success) throw new RelayRejected("relay answered 200 with an unexpected body", res.status, "BAD_RESPONSE");
+    if (!ok.success) throw new RelayUnclear(`relay answered 200 with an unexpected body. ${UNCLEAR_TEXT}`, res.status);
     return ok.data;
   }
   const err = ApiError.safeParse(body);
-  if (!err.success) throw new RelayRejected(`relay answered HTTP ${res.status} without an error body`, res.status, "BAD_RESPONSE");
+  if (!err.success) {
+    if (res.status >= 500) throw new RelayUnclear(`relay answered HTTP ${res.status} without an error body. ${UNCLEAR_TEXT}`, res.status);
+    throw new RelayRejected(`relay answered HTTP ${res.status} without an error body`, res.status, "BAD_RESPONSE");
+  }
   const { error, code, fallback, detail } = err.data;
+  if (code === "RELAY_UNCLEAR") throw new RelayUnclear(error, res.status);
   if (res.status === 429) {
     const raw = res.headers.get("retry-after");
     throw new RelayRateLimited(error, raw !== null && Number.isFinite(Number(raw)) ? Number(raw) : null);

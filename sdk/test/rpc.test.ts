@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { currentSalt, functionCallArgs, NETWORKS, parseEvents, RpcError, rpc, view } from "../src/index.ts";
+import { currentSalt, functionCallArgs, isNonceUsed, NETWORKS, parseEvents, RpcError, rpc, view } from "../src/index.ts";
 
 const tx = JSON.parse(readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "fixtures/tx-sample.json"), "utf8"));
 const ok = (result: unknown) => new Response(JSON.stringify({ jsonrpc: "2.0", id: "arrow", result }), { status: 200 });
@@ -77,6 +77,17 @@ describe("rpc", () => {
     fetchMock.mockResolvedValueOnce(ok({ result: bytes("zz") }));
     await expect(currentSalt()).rejects.toThrow("unexpected current_salt");
     await expect(currentSalt("testnet")).rejects.toThrow("no intents contract");
+  });
+});
+
+describe("isNonceUsed (RELAY-3)", () => {
+  it("asks intents.near is_nonce_used with the signer and the base64 nonce", async () => {
+    fetchMock.mockResolvedValueOnce(ok({ result: bytes(true) })).mockResolvedValueOnce(ok({ result: bytes(false) }));
+    await expect(isNonceUsed("0xab", "Vij2xgAlKBKzAAAAAAAAAA==")).resolves.toBe(true);
+    await expect(isNonceUsed("0xab", "Vij2xgAlKBKzAAAAAAAAAA==")).resolves.toBe(false);
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.params).toMatchObject({ account_id: "intents.near", method_name: "is_nonce_used" });
+    expect(JSON.parse(atob(body.params.args_base64))).toEqual({ account_id: "0xab", nonce: "Vij2xgAlKBKzAAAAAAAAAA==" });
   });
 });
 

@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   ApiError, EXECUTE_INTENTS_GAS, type MultiPayload, type NearCaller, RelayRateLimited, RelayRejected, RelayRequest,
-  RelayResponse, relayDirect, relayHosted, RelayUnavailable, relayUrl, SimulateFailed,
+  RelayResponse, relayDirect, relayHosted, RelayUnavailable, RelayUnclear, relayUrl, SimulateFailed,
 } from "../src/index.ts";
 
 const mp: MultiPayload = { standard: "erc191", payload: '{"signer_id":"0xab"}', signature: "secp256k1:abc" };
@@ -58,6 +58,19 @@ describe("relayHosted", () => {
     expect(nope.code).toBe("NOT_ARROW_INTENT");
     const rpc = await hosted(json(502, { error: "rpc", code: "RPC_ERROR" })).catch((e) => e);
     expect(rpc).toBeInstanceOf(RelayRejected);
+  });
+
+  it("RELAY-3: an unclear answer, a lost connection, a 5xx without the error body or an unreadable 200 is RelayUnclear", async () => {
+    const unclear = await hosted(json(502, { error: "may or may not", code: "RELAY_UNCLEAR", unclear: true })).catch((e) => e);
+    expect(unclear).toBeInstanceOf(RelayUnclear);
+    const lost = await relayHosted("https://a.app", mp, vi.fn().mockRejectedValue(new TypeError("Failed to fetch"))).catch((e) => e);
+    expect(lost).toBeInstanceOf(RelayUnclear);
+    expect(lost.message).toMatch(/Do not sign a new payment/);
+    expect(await hosted(new Response("<html>gateway</html>", { status: 504 })).catch((e) => e)).toBeInstanceOf(RelayUnclear);
+    expect(await hosted(json(200, { ok: true })).catch((e) => e)).toBeInstanceOf(RelayUnclear);
+    // refused before anything was broadcast: still a plain rejection
+    expect(await hosted(json(502, { error: "rpc", code: "RPC_ERROR" })).catch((e) => e)).not.toBeInstanceOf(RelayUnclear);
+    expect(await hosted(new Response("nope", { status: 400 })).catch((e) => e)).not.toBeInstanceOf(RelayUnclear);
   });
 
   it("rejects a body that does not match the schema", async () => {

@@ -141,6 +141,15 @@ export async function currentSalt(network: Network = "mainnet", o?: RpcOptions):
   return Uint8Array.from(hex.match(/../g)!.map((b) => parseInt(b, 16)));
 }
 
+/** intents.near is_nonce_used: true once a signed intent with this nonce has executed (RELAY-3 recovery). `nonce` is the payload's base64. */
+export async function isNonceUsed(accountId: string, nonce: string, network: Network = "mainnet", o?: RpcOptions): Promise<boolean> {
+  const intents = NETWORKS[network].intents;
+  if (!intents) throw new Error(`no intents contract on ${network}`);
+  const used = await view<unknown>(network, intents, "is_nonce_used", { account_id: accountId, nonce }, o);
+  if (typeof used !== "boolean") throw new RpcError(`unexpected is_nonce_used answer ${JSON.stringify(used)}`);
+  return used;
+}
+
 /** intents.near simulate_intents (a view). It checks signature, nonce, deadline and balances, but does not run mt_on_transfer. */
 export const simulateIntents = (signed: object[], network: Network = "mainnet", o?: RpcOptions) =>
   view<any>(network, NETWORKS[network].intents ?? "", "simulate_intents", { signed }, o);

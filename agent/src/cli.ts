@@ -11,7 +11,7 @@ import {
 } from "./commands.ts";
 import { resolveActor } from "./keys.ts";
 import { SettleTimeout } from "./settle.ts";
-import { realTransport, type RelayMode, type Transport } from "./transport.ts";
+import { PaymentUnclear, realTransport, type RelayMode, type Transport } from "./transport.ts";
 import { makeViews } from "./views.ts";
 
 const OPTIONS = {
@@ -152,7 +152,7 @@ export async function main(argv: string[], deps: { ctx?: (f: Flags) => Ctx; out?
         return EXIT.usage;
     }
   } catch (e) {
-    if (e instanceof SettleTimeout) {
+    if (e instanceof SettleTimeout || e instanceof PaymentUnclear) {
       console.error(mask(e.message));
       return EXIT.pending;
     }

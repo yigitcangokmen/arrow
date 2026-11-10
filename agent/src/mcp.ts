@@ -16,6 +16,7 @@ import { mask } from "../../scripts/src/lib/log.ts";
 import { buildCtx } from "./cli.ts";
 import { buyCommand, CliError, type Ctx, evalCommand, listingSummary, statusCommand } from "./commands.ts";
 import { SettleTimeout } from "./settle.ts";
+import { PaymentUnclear } from "./transport.ts";
 
 const NETWORK = z.enum(["testnet", "mainnet"]).optional().describe("testnet (default) or mainnet; mainnet is disabled unless the operator set ARROW_MCP_ALLOW_MAINNET=1");
 
@@ -82,7 +83,7 @@ export function createServer(deps: McpDeps = {}): McpServer {
     try {
       return text(await fn(a));
     } catch (e) {
-      if (e instanceof SettleTimeout) return fail(`${e.message} (pending, not failed)`);
+      if (e instanceof SettleTimeout || e instanceof PaymentUnclear) return fail(`${e.message} (pending, not failed)`);
       if (e instanceof GuardError || e instanceof CliError || e instanceof Error) return fail(e.message);
       return fail(String(e));
     }
