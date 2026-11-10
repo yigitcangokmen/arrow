@@ -243,7 +243,7 @@ describe("RELAY-2: amount and listing are checked before any gas is spent", () =
     ["list below the bond", makeMp("list", { intent: { tokens: { [USDC]: "99999" } } }), chain(), 400, "AMOUNT_TOO_LOW"],
     ["an unknown listing", makeMp("eval"), chain({ listing: async () => null }), 404, "LISTING_NOT_FOUND"],
     ["an exhausted leak budget", makeMp("eval"), chain({ listing: async () => listingFixture({ evals_used: 50, max_evals: 50 }) }), 409, "BUDGET_EXHAUSTED"],
-  ] as const)("%s: %i %s, and neither the balance, the simulation nor the relayer is touched", async (_n, mp, ch, status, code) => {
+  ] as const)("%s is refused, and neither the balance, the simulation nor the relayer is touched", async (_n, mp, ch, status, code) => {
     const { r, balance, simulate } = untouched();
     const res = await send(deps({ relayer: () => r.port, simulate, chain: ch }), mp);
     expect(res.status).toBe(status);
