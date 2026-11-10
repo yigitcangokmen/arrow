@@ -7,7 +7,8 @@ import {
   BlobHashMismatch, Criteria, decodeEvalResult, decryptFile, fetchAndCheckBlob, formatBits, formatUsdc,
   type Listing, type Mode, type Network, openRelease, parseUsdc, prepareBuy, prepareEval, prepareList, resolveNetwork, sha256Hex, signature, signatureHex,
 } from "@arrow/sdk";
-import { type EvidenceRunInput } from "../../scripts/src/lib/evidence.ts";
+import { isTeamAccount } from "@arrow/sdk/team";
+import { evidenceDir, type EvidenceRunInput } from "../../scripts/src/lib/evidence.ts";
 import { readTable } from "./data.ts";
 import { type Actor, type ActorFlags, configDir, type Role } from "./keys.ts";
 import { findEventId, pollRecord, recoveryHint, type WaitDeps } from "./settle.ts";
@@ -67,6 +68,26 @@ async function requireListing(ctx: Ctx, id: number): Promise<Listing> {
   return l;
 }
 
+/** Team-controlled accounts from evidence/team-accounts.json (NEAR ids and EVM addresses); empty when the file is missing. */
+function teamAccounts(): string[] {
+  const f = resolve(evidenceDir(), "team-accounts.json");
+  if (!existsSync(f)) return [];
+  const doc = JSON.parse(readFileSync(f, "utf8")) as { near?: string[]; evm?: { address: string }[] };
+  return [...(doc.near ?? []), ...(doc.evm ?? []).map((e) => e.address)];
+}
+
+/**
+ * CRY-5: the demo key's scalar is public, so whatever is sealed to it (a verdict, a purchase's K) is readable by anyone.
+ * On mainnet it may only be used on the team's own listings; a third-party seller's data must never be opened to everyone.
+ */
+function assertDemoKeyAllowed(ctx: Ctx, listing: Listing, demoKey: boolean | undefined): void {
+  if (!demoKey || ctx.network !== "mainnet" || isTeamAccount(listing.seller, teamAccounts())) return;
+  throw new CliError(
+    `--demo-key is refused on listing #${listing.id}: its key is public, so anyone could decrypt what you pay for from seller ${listing.seller}. On mainnet it works only on the team's demo listings; drop --demo-key to use your own viewing key.`,
+    EXIT.usage,
+  );
+}
+
 function record(ctx: Ctx, run: Parameters<Ctx["evidence"]>[0]) {
   try {
     ctx.evidence(run);
@@ -114,6 +135,7 @@ export async function evalCommand(
   a: { listingId: number; criteria: string | Record<string, unknown>; myList?: string; keyColumn?: string; demoKey?: boolean; account?: string },
 ): Promise<EvalResult> {
   const listing = await requireListing(ctx, a.listingId);
+  assertDemoKeyAllowed(ctx, listing, a.demoKey);
   const before = await ctx.views.leakBudget(a.listingId);
   if (listing.evals_used >= listing.max_evals || (before && before.left_milli < before.bits_per_eval_milli)) {
     throw new CliError("leak budget exhausted, buy-only listing", EXIT.budgetExhausted);
@@ -226,6 +248,7 @@ export interface BuyResult {
 
 export async function buyCommand(ctx: Ctx, a: { listingId: number; demoKey?: boolean; out?: string; outDir?: string; exclusive?: boolean; account?: string; recordDemo?: boolean }): Promise<BuyResult> {
   const listing = await requireListing(ctx, a.listingId);
+  assertDemoKeyAllowed(ctx, listing, a.demoKey);
   const programPk = await ctx.views.programPubkey();
   if (!programPk) throw new CliError("the market has no program key yet (init_program_key not run)");
   const buyer = ctx.actor("buyer", { demoKey: a.demoKey, account: a.account });

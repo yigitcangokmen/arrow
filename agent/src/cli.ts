@@ -69,7 +69,8 @@ export function buildCtx(f: Flags, env: Record<string, string | undefined> = pro
     contract: resolveNetwork(network, env).contract,
     views: makeViews(network, env),
     transport: env.ARROW_TEST_MOCK_RPC ? mockTransport() : realTransport({ network, relay, env }),
-    actor: (role, flags) => resolveActor(network, role, { account: f.account, ...flags }),
+    // TN-3: the commands always pass an `account` key (often undefined), which must not hide --account.
+    actor: (role, flags) => resolveActor(network, role, { ...flags, account: flags?.account ?? f.account }),
     confirm: async (plan) => {
       if (network === "mainnet") await confirmSpend(plan, f.yes === true);
     },

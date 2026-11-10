@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { generatePrivateKey } from "viem/accounts";
 import { b64, encryptFile, publicKeyHex, scalarFromLabel, seal, sha256Hex } from "@arrow/sdk";
-import { main } from "../src/cli.ts";
+import { buildCtx, main } from "../src/cli.ts";
 import { realTransport } from "../src/transport.ts";
 import { DEMO, eventTx, fakeCtx, fixture, NEAR_TX, VIEWS_DIR } from "./helpers.ts";
 
@@ -296,6 +296,34 @@ describe("buy and decrypt", () => {
   it("--record-demo needs --demo-key", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     expect((await run(["buy", "1", "--record-demo"])).code).toBe(2);
+  });
+});
+
+describe("CRY-5 / PRIV-6: the public demo key on mainnet", () => {
+  it("is refused before paying on a third-party listing, and works on a team listing", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const external = fakeCtx({ network: "mainnet", listing: { seller: "0x" + "c".repeat(40) } });
+    expect((await run(["buy", "1", "--demo-key", "--network", "mainnet"], external)).code).toBe(2);
+    expect((await run(["eval", "1", "--criteria", criteriaFile, "--demo-key", "--network", "mainnet"], external)).code).toBe(2);
+    expect(external.payCalls).toHaveLength(0);
+    const team = fakeCtx({ network: "mainnet", listing: { seller: "arrowhq.near" } });
+    expect((await run(["eval", "1", "--criteria", criteriaFile, "--demo-key", "--network", "mainnet"], team)).code).toBe(0);
+    expect(team.payCalls).toHaveLength(1);
+    const testnet = fakeCtx({ listing: { seller: "someone.testnet" } });
+    expect((await run(["eval", "1", "--criteria", criteriaFile, "--demo-key"], testnet)).code).toBe(0); // testnet data is free test data
+  });
+});
+
+describe("TN-3: --account", () => {
+  it("names the paying account even though every command passes account: undefined", () => {
+    process.env.NEAR_KEY_B_X_TESTNET = "ed25519:" + "1".repeat(64);
+    try {
+      const ctx = buildCtx({ account: "b.x.testnet" } as any, { ARROW_TEST_MOCK_RPC: VIEWS_DIR });
+      expect(ctx.actor("buyer", { demoKey: undefined, account: undefined }).id).toBe("b.x.testnet");
+      expect(ctx.actor("seller", { account: undefined }).id).toBe("b.x.testnet");
+    } finally {
+      delete process.env.NEAR_KEY_B_X_TESTNET;
+    }
   });
 });
 
