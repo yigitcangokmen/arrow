@@ -19,6 +19,8 @@ export interface Quirks {
   purchaseHash?: string;
   l1Verdict?: "BUY" | "PASS";
   l2Verdict?: "BUY" | "PASS";
+  /** the listing view answers null this many times per id before it shows the listing (final state lags the event) */
+  listingLag?: number;
 }
 
 export function world(q: Quirks = {}) {
@@ -29,6 +31,7 @@ export function world(q: Quirks = {}) {
   const blobs = new Map<string, Uint8Array>();
   const balances = new Map<string, bigint>([[SELLER, 0n], [BUYER, 0n]]);
   const evidence: any[] = [];
+  const lag = new Map<number, number>();
   let n = 0;
 
   const eventTx = (executor: string, standard: string, event: string, data: unknown) => ({
@@ -43,7 +46,11 @@ export function world(q: Quirks = {}) {
     config: async () => ({ ...fixture("config"), tank_available: "7000000000000000000000000" }),
     version: async () => fixture("version"),
     programPubkey: async () => MOCK_PROGRAM_PK,
-    listing: async (id) => listings.get(Number(id)) ?? null,
+    listing: async (id) => {
+      const seen = (lag.get(Number(id)) ?? 0) + 1;
+      lag.set(Number(id), seen);
+      return seen <= (q.listingLag ?? 0) ? null : listings.get(Number(id)) ?? null;
+    },
     listings: async () => [...listings.values()],
     eval: async (id) => evals.get(Number(id)) ?? null,
     evalsByListing: async (id) => [...evals.values()].filter((e) => e.listing_id === Number(id)),

@@ -1,5 +1,5 @@
 // WS4-T10 acceptance with a fake chain: step order and evidence, the refund step needs both events, G3 triple equality.
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -138,5 +138,23 @@ describe("e2e-testnet steps", () => {
     expect(r.results.map((x) => [x.n, x.status])).toEqual([[5, "PASS"], [6, "PASS"], [7, "PASS"], [8, "PASS"]]);
     expect(r.results[3].summary).toContain("L1 used 1");
     expect(r.results[3].summary).toContain("L3 used 1");
+  });
+
+  it("--publish-demo lists the two public demo scenes and writes the listings file try-testnet reads", async () => {
+    const { deps, w } = setup();
+    const out = join(work, "listings.json");
+    const r = await runE2e(deps, { steps: new Set([0]), publishDemo: true, listingsOut: out });
+    expect(r.results.at(-1)).toMatchObject({ n: 9, status: "PASS" });
+    const file = JSON.parse(readFileSync(out, "utf8"));
+    expect(file).toMatchObject({ contract: "arrow.arrowhq.testnet", pass_listing_id: 1, buy_listing_id: 2 });
+    expect(file.program_wasm_sha256).toMatch(/^[0-9a-f]{64}$/);
+    const titles = [...w.listings.values()].map((l) => l.title);
+    expect(titles[0]).toContain("[synthetic] Q1 2027 token unlock schedule");
+    expect(titles[1]).toContain("[synthetic] NEAR DeFi wallet labels");
+  });
+
+  it("a listing that the final state shows a moment late is waited for, not reported as a mismatch", async () => {
+    const r = await setup({ listingLag: 2 }).run(new Set([0, 1, 2]));
+    expect(r.results.find((x) => x.n === 2)).toMatchObject({ status: "PASS" });
   });
 });

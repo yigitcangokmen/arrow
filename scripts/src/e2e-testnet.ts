@@ -180,8 +180,14 @@ export async function runE2e(deps: E2eDeps, opts: E2eOpts): Promise<E2eReport> {
     const tx = await ctx.transport.pay({ actor: ctx.actor("seller"), amount: bond, msg: prepared.msg });
     const { id, rejection } = await findEventId(waitDeps(), tx, "arrow_listed", "listing_id");
     if (id === undefined) throw new Error(`the market refused the ${slot} listing: ${rejection}`);
-    const l = await ctx.views.listing(id);
-    if (!l || l.blob_sha256 !== prepared.blobSha256 || l.blob_url !== blobUrl) throw new Error(`${slot}: listing #${id} view does not match what was sent`);
+    // the event comes from the optimistic tx status, the view reads the final block a few seconds later
+    let l = await ctx.views.listing(id);
+    for (let i = 0; i < 15 && !l; i++) {
+      await deps.sleep(2000);
+      l = await ctx.views.listing(id);
+    }
+    if (!l) throw new Error(`${slot}: listing #${id} is not visible in the final state after 30 s`);
+    if (l.blob_sha256 !== prepared.blobSha256 || l.blob_url !== blobUrl) throw new Error(`${slot}: listing #${id} view does not match what was sent`);
     record(`list-${slot}-${id}`, { kind: "list", tx: tx.txHash, chain: "near", block_height: null, listing_id: id, eval_id: null, purchase_id: null, oneclick_deposit: null, expect: "listing created, blob hash on chain", observed: `listed #${id} ${broken ? "(broken host on purpose)" : "(ciphertext served)"} sha256 ${prepared.blobSha256.slice(0, 12)}…` });
     return { id, tx, sha: prepared.blobSha256 };
   }
