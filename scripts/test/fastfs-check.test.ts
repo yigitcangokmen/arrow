@@ -1,6 +1,6 @@
 // TN-4: a FastFS upload is good only when every chunk tx is FINAL and the URL serves the sha, within the wait.
 import { describe, expect, it } from "vitest";
-import { checkUpload, type FastfsDeps, senderOf } from "../src/fastfs-check.ts";
+import { checkUpload, chunkOutcome, type FastfsDeps, senderOf } from "../src/fastfs-check.ts";
 
 const SHA = "ab".repeat(32);
 const URL_ = `https://fastfs.io/arrowhq.near/outlayer.near/${SHA}.wasm`;
@@ -54,5 +54,15 @@ describe("fastfs-check", () => {
   it("reads the uploader from the FastFS path", () => {
     expect(senderOf(URL_)).toBe("arrowhq.near");
     expect(senderOf(`https://test.fastfs.io/arrowhq.testnet/outlayer.testnet/${SHA}.wasm`)).toBe("arrowhq.testnet");
+  });
+
+  it("a landed chunk that ran out of its 1 prepaid gas passes (FastFS sends it that way); other failures and non-FINAL do not", () => {
+    // the status shape testnet returned for the rc3 upload chunk 6eCRj1T1…
+    const gas = { Failure: { ActionError: { index: 0, kind: { FunctionCallError: { ExecutionError: "Exceeded the prepaid gas." } } } } };
+    expect(chunkOutcome({ final_execution_status: "FINAL", status: gas, receipts_outcome: [{ outcome: { status: gas } }] }).ok).toBe(true);
+    expect(chunkOutcome({ final_execution_status: "FINAL", status: { SuccessValue: "" }, receipts_outcome: [] }).ok).toBe(true);
+    const other = { Failure: { ActionError: { index: 0, kind: { AccountDoesNotExist: { account_id: "outlayer.testnet" } } } } };
+    expect(chunkOutcome({ final_execution_status: "FINAL", status: other, receipts_outcome: [] }).ok).toBe(false);
+    expect(chunkOutcome({ final_execution_status: "EXECUTED_OPTIMISTIC", status: gas, receipts_outcome: [] }).ok).toBe(false);
   });
 });

@@ -50,6 +50,16 @@ export async function checkUpload(d: FastfsDeps, o: FastfsOpts): Promise<{ ok: b
   return { ok: problems.length === 0, problems };
 }
 
+/** One chunk tx from a FINAL txStatus. FastFS calls the receiver with 1 gas on purpose, so "Exceeded the prepaid gas" is the
+ * expected outcome of a landed chunk (the indexer reads the arguments); any other failure, or no FINAL status, is not. */
+export function chunkOutcome(s: any): { ok: boolean; why: string } {
+  const failure = [s?.status, ...(s?.receipts_outcome ?? []).map((r: any) => r?.outcome?.status)].find((x) => x?.Failure)?.Failure;
+  const fastfsGas = failure?.ActionError?.kind?.FunctionCallError?.ExecutionError === "Exceeded the prepaid gas.";
+  if (failure && !fastfsGas) return { ok: false, why: `failed: ${JSON.stringify(failure).slice(0, 120)}` };
+  if (s?.final_execution_status !== "FINAL") return { ok: false, why: `status ${s?.final_execution_status ?? "unknown"}` };
+  return { ok: true, why: fastfsGas ? "FINAL, out of prepaid gas as FastFS intends" : "FINAL, success" };
+}
+
 async function main(argv: string[]): Promise<number> {
   const { values: v } = parseArgs({
     args: argv,
@@ -67,10 +77,7 @@ async function main(argv: string[]): Promise<number> {
     {
       txFinal: async (tx, who) => {
         try {
-          const s = await txStatus(network, tx, who, "FINAL");
-          const failure = [s?.status, ...(s?.receipts_outcome ?? []).map((r: any) => r?.outcome?.status)].find((x) => x?.Failure)?.Failure;
-          if (failure) return { ok: false, why: `failed: ${JSON.stringify(failure).slice(0, 120)}` };
-          return s?.final_execution_status === "FINAL" ? { ok: true, why: "FINAL, success" } : { ok: false, why: `status ${s?.final_execution_status ?? "unknown"}` };
+          return chunkOutcome(await txStatus(network, tx, who, "FINAL"));
         } catch (e) {
           return { ok: false, why: (e instanceof Error ? e.message : String(e)).split("\n")[0]!.slice(0, 120) };
         }
