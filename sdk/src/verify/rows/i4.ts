@@ -33,7 +33,8 @@ export async function i4(ctx: VerifyCtx) {
     }
     for (const e of await ctx.evalsOf(num(l.id))) {
       totalEvals++;
-      if (!isTeam(ctx, e.buyer)) {
+      // SCAM-7(c): a seller inspecting their own listing is not outside demand
+      if (!isTeam(ctx, e.buyer) && e.buyer !== l.seller) {
         externalEvals++;
         externalBuyers.add(e.buyer);
       }

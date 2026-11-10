@@ -49,3 +49,11 @@ describe("STATE-10: I4 inbound counts only 1Click deposits", () => {
     expect((await i4(ctx)).detail).toContain("inbound 1/2");
   });
 });
+
+describe("SCAM-7(c): I4 does not count a seller's evals of their own listing as external demand", () => {
+  it("buyer == seller is not an external eval", async () => {
+    const r = await i4(ctxWith([{ id: 1, seller: "s.near" }], { 1: [{ buyer: "s.near" }, { buyer: "b.near" }] }));
+    expect(r.detail).toContain("external: 1 listings, 1 evals");
+    expect(r.detail).not.toMatch(/External buyers: .*s\.near/);
+  });
+});
