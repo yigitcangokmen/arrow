@@ -27,6 +27,8 @@ hex = "0.4"
 
 # Enclave (wasm32-wasip2)
 wasi-http-client = "0.2"
+# arrow-tee http.rs: wasi-http-client 0.2.1 traps on bodies >4096 B; same crate it wraps
+wasi = "=0.13.3"
 ecies = { version = "=0.2.11", default-features = false, features = ["pure"] }
 libsecp256k1 = "0.7"
 k256 = { version = "0.13", features = ["ecdh", "arithmetic"] }
