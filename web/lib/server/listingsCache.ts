@@ -46,7 +46,8 @@ interface CacheEntry<T> {
 /**
  * Small time-based cache: a fresh entry is returned as is, the loader runs again once it is older than ttlMs.
  * It holds at most `maxEntries` keys (the oldest is dropped first), because /api/listings builds keys from the query string.
- * Concurrent callers of one key share a single load (single-flight), at most `maxWaiters` of them; a failed load is
+ * Concurrent callers of one key share a single load (single-flight); with `maxWaiters` set, callers beyond it get CacheBusy
+ * (the verify pages), without it every caller awaits the one shared promise (the listings caches, W2-6). A failed load is
  * remembered for `failTtlMs` so a slow, failing source is not hit again by every reload.
  */
 export function ttlCache<T>(ttlMs: number, now: () => number = Date.now, maxEntries = 200, o: { failTtlMs?: number; maxWaiters?: number } = {}) {
@@ -59,7 +60,7 @@ export function ttlCache<T>(ttlMs: number, now: () => number = Date.now, maxEntr
   return async (key: string, load: () => Promise<T>): Promise<T> => {
     const hit = m.get(key);
     if (hit?.pending) {
-      if (hit.waiters >= (o.maxWaiters ?? 16)) throw new CacheBusy();
+      if (o.maxWaiters !== undefined && hit.waiters >= o.maxWaiters) throw new CacheBusy();
       hit.waiters++;
       return hit.pending;
     }

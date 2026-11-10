@@ -140,6 +140,16 @@ describe("ttlCache: single flight and a negative cache (WEB-3)", () => {
     await get("k", load).catch(() => undefined);
     expect(calls).toBe(2);
   });
+  it("W2-6: without maxWaiters (the listings caches) 40 concurrent cold callers all share the one load", async () => {
+    let calls = 0;
+    let release!: (v: number) => void;
+    const gate = new Promise<number>((r) => (release = r));
+    const get = ttlCache<number>(30_000);
+    const all = Array.from({ length: 40 }, () => get("k", () => (calls++, gate)));
+    release(3);
+    expect(await Promise.all(all)).toEqual(Array(40).fill(3));
+    expect(calls).toBe(1);
+  });
   it("refuses callers beyond maxWaiters instead of holding every function open", async () => {
     const get = ttlCache<number>(60_000, Date.now, 200, { maxWaiters: 3 });
     const gate = new Promise<number>(() => undefined);
