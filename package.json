@@ -20,6 +20,7 @@
     "verify": "tsx scripts/src/verify.ts",
     "try:testnet": "tsx scripts/src/try-testnet.ts",
     "replay": "tsx scripts/src/replay.ts",
+    "md2jsonl": "tsx scripts/src/md-to-jsonl.ts",
     "bench:gen": "tsx bench/src/gen/index.ts",
     "bench:offline": "tsx bench/src/offline.ts",
     "bench:live": "tsx bench/src/live.ts",
