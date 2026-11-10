@@ -2,6 +2,7 @@
 # Read-only checks around the mainnet deploy (H-12, WS1-T17). Signs nothing, prints no key.
 #   bash scripts/deploy/mainnet-check.sh pre  [<market> <owner> <network>]   # before H-12 step 1
 #   bash scripts/deploy/mainnet-check.sh post [<market> <network>]           # after H-12 step 6
+#   bash scripts/deploy/mainnet-check.sh wasm                                # offline: the contract wasm against SHA256SUMS and this tree
 # Defaults: arrow-market.near, arrowhq.near, mainnet. Testnet twin:
 #   bash scripts/deploy/mainnet-check.sh pre mainnet-dryrun.arrowhq.testnet arrowhq.testnet testnet
 # Every row prints PASS or FAIL; the exit code is 1 when any row failed.
@@ -46,11 +47,26 @@ set_net() {
   esac
 }
 
-pre() {
-  local market=${1:-arrow-market.near} owner=${2:-arrowhq.near} net=${3:-mainnet} want sums url rc frozen dep acct ob init
-  set_net "$net"
+contract_wasm() { # the deployed contract wasm must be the one built from this tree's contract source (STATE-7, CI-1)
+  local want sums rev changed
   want=$(sha "$W"); sums=$(awk '$2=="arrow-mainnet.wasm"{print $1}' release/contracts/SHA256SUMS)
   [ "$want" = "$sums" ] && pass "contract_wasm_sha256 $want (= SHA256SUMS)" || fail "contract_wasm_sha256 $want != SHA256SUMS $sums"
+  # NEP-330 metadata inside the wasm names the commit it was built from (source_code_snapshot ...?rev=<40 hex>)
+  rev=$(LC_ALL=C grep -a -o 'source_code_snapshot":"[^"]*rev=[0-9a-f]\{40\}' "$W" | grep -o '[0-9a-f]\{40\}$' | head -1 || true)
+  if [ -z "$rev" ]; then fail "contract_wasm_stale: $W carries no NEP-330 source rev (rebuild: bash scripts/build-contracts.sh --reproducible)"; return; fi
+  git cat-file -e "$rev^{commit}" 2>/dev/null || { fail "contract_wasm_stale: built from $rev, which is not in this clone"; return; }
+  # What changes the contract wasm, or its wire format against the enclave: the contract source, the lockfile, the toolchain and the
+  # shared input/output/msg vectors that contracts/arrow and enclave/arrow-tee both parse (tests and docs are not in the wasm).
+  changed=$(git diff --name-only "$rev" -- contracts/arrow ':(exclude)contracts/arrow/tests' ':(exclude)contracts/arrow/*.md' Cargo.lock rust-toolchain.toml \
+    fixtures/input-vectors.json fixtures/output-vectors.json fixtures/msg-vectors.json | tr '\n' ' ')
+  if [ -z "$changed" ]; then pass "contract_wasm_fresh built from ${rev:0:10}; no contract source, lockfile, toolchain or wire vector changed since"
+  else fail "contract_wasm_stale: ${rev:0:10} -> working tree changed: ${changed}(rebuild: bash scripts/build-contracts.sh --reproducible, then commit release/contracts)"; fi
+}
+
+pre() {
+  local market=${1:-arrow-market.near} owner=${2:-arrowhq.near} net=${3:-mainnet} url rc frozen dep acct ob init
+  set_net "$net"
+  contract_wasm
   url=$(envget PROGRAM_WASM_URL); rc=$(envget PROGRAM_WASM_SHA256)
   frozen=$([ -f release/sha256.txt ] && tr -d ' \n' <release/sha256.txt || true)
   if [ -z "$frozen" ]; then fail "program_frozen: release/sha256.txt missing (K3 freeze not done)"
@@ -105,5 +121,6 @@ post() {
 case "${1:-}" in
   pre) shift; pre "$@" ;;
   post) shift; post "$@" ;;
-  *) sed -n '2,7p' "$0" >&2; exit 2 ;;
+  wasm) contract_wasm; exit $FAIL ;;
+  *) sed -n '2,8p' "$0" >&2; exit 2 ;;
 esac

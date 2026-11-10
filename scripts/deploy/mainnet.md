@@ -6,17 +6,36 @@ every signing line, one at a time, in this order. Each line was first run agains
 `sign-with-keychain`); the twin result is written under each step.
 
 **Status: BLOCKED until the K3 wasm freeze** (release/sha256.txt written, `.env` `PROGRAM_WASM_URL` /
-`PROGRAM_WASM_SHA256` set to the frozen program) **and H-01b** (`.env` `NEARAI_API_KEY_MAINNET` filled).
-Step 0 prints FAIL for both until then.
+`PROGRAM_WASM_SHA256` set to the frozen program), **H-01b** (`.env` `NEARAI_API_KEY_MAINNET` filled) **and the
+contract rebuild below** (WS2-T13). Step 0 prints FAIL for each until then.
+
+## Before step 0: rebuild the contract wasm at the final commit (hard precondition)
+
+The wasm in `release/contracts/` embeds the commit it was built from. Any later change to `contracts/arrow` (source,
+`Cargo.lock`, `rust-toolchain.toml`) or to the shared wire vectors (`fixtures/{input,output,msg}-vectors.json`) makes it
+stale: the frozen program and the fixed SDK then speak a different wire format than the contract (every list fails
+`E04`, or every eval and buy returns `ok:false` and refunds `not_ok`). So, once after the fix merge and the freeze, on a
+clean tree at the final commit:
+
+    cd ~/Desktop/hackathon/near-builds/arrow && bash scripts/build-contracts.sh --reproducible
+
+It builds twice in Docker, writes `release/contracts/{arrow-mainnet.wasm,SHA256SUMS,BUILD.md}` and records the sha in
+`evidence/mainnet.json`. Commit those three files. Then:
+
+    bash scripts/deploy/mainnet-check.sh wasm
+
+Expected: `PASS contract_wasm_sha256` and `PASS contract_wasm_fresh built from <rev>`. A `FAIL contract_wasm_stale` names
+the files that changed since the embedded commit: rebuild again. Step 0 runs the same two rows. Nothing below uses a
+literal contract sha: the value is whatever `release/contracts/SHA256SUMS` holds.
 
 | What | Value |
 |---|---|
 | Contract account | `arrow-market.near` (exists, 0.1 NEAR, no code) |
 | Owner / payer / treasury | `arrowhq.near` (macOS keychain) |
 | Reserve | `arrow-market-v2.near` (exists, 0.1 NEAR): no deploy in H-12 |
-| Contract wasm | `release/contracts/arrow-mainnet.wasm`, sha256 `24fe374a…6d4def`, code hash `3VQWQdgK…wynE` (`release/contracts/BUILD.md`). It is never rebuilt here: a new reproducible build embeds a new commit and changes the sha |
+| Contract wasm | `release/contracts/arrow-mainnet.wasm`, the reproducible build of the final commit (see above). Its sha256 is the line in `release/contracts/SHA256SUMS`, its code hash the last row of `release/contracts/BUILD.md`. It is not rebuilt during these lines |
 | Init argument | `bash scripts/deploy/render-init.sh mainnet` (template `scripts/deploy/init-mainnet.json` + frozen program URL/sha from `.env`) |
-| Storage money | `bash scripts/deploy/storage-estimate.sh` → `deposit: 3.4 NEAR` (282 662 bytes × 1e-5 + 0.5, rounded up) |
+| Storage money | `bash scripts/deploy/storage-estimate.sh` → `deposit: <n> NEAR` (wasm bytes × 1e-5 + 0.5, rounded up; the old build was 3.4). Step 0 prints it and step 1 reads it from the script |
 | Signing | `sign-with-keychain`: the macOS keychain may ask to allow access; allow it |
 
 `new` refuses a config whose `secrets_ref.account_id` is not the contract itself (`E15 bad config:
@@ -32,29 +51,38 @@ All lines start in the main checkout. Copy one line, run it, compare with "Expec
 
     cd ~/Desktop/hackathon/near-builds/arrow && bash scripts/deploy/mainnet-check.sh pre
 
-Expected: every row `PASS`, including `program_frozen`, `nearai_key_mainnet`, `market_empty arrow-market.near`,
-`owner_balance arrowhq.near … >= deposit 3.4 + 1`, `outlayer_logged_out on mainnet`, and
-`deposit for step 1: 3.4 NEAR`. If the deposit is not 3.4, use the printed value in step 1.
+Expected: every row `PASS`, including `contract_wasm_fresh`, `program_frozen`, `program_url_serves_sha`,
+`nearai_key_mainnet`, `market_empty arrow-market.near`, `owner_balance arrowhq.near … >= deposit <n> + 1`,
+`outlayer_logged_out on mainnet`, and `deposit for step 1: <n> NEAR`.
+
+`program_url_serves_sha` is the only guard against a FastFS upload that reported "Upload complete!" while a chunk
+transaction never landed, or that stays unindexed (404) for an hour. Upload the frozen program hours before the deploy and check
+it, with every chunk tx the upload printed:
+
+    npx tsx scripts/src/fastfs-check.ts --network mainnet --url "$PROGRAM_WASM_URL" --sha "$PROGRAM_WASM_SHA256" --tx <chunk tx>,<chunk tx> --wait 30
+
+It exits 1 unless each tx is FINAL and successful and the URL serves the sha within 30 minutes. If it does not, upload the
+file again; do not start step 1.
 
 Twin (2026-11-10): all rows ran; `program_frozen` and `nearai_key_mainnet` FAIL as expected today (no freeze,
 H-01b open); testnet `outlayer_logged_out` FAIL is the normal testnet login.
 
 ### 1. Storage money (arrowhq.near → arrow-market.near)
 
-    near tokens arrowhq.near send-near arrow-market.near '3.4 NEAR' network-config mainnet sign-with-keychain send
+    cd ~/Desktop/hackathon/near-builds/arrow && DEP=$(bash scripts/deploy/storage-estimate.sh | awk '/^deposit:/{print $2}') && echo "sending $DEP NEAR" && near tokens arrowhq.near send-near arrow-market.near "$DEP NEAR" network-config mainnet sign-with-keychain send
 
-Expected: `<arrowhq.near> has transferred 3.4 NEAR to <arrow-market.near> successfully.`
+Expected: `sending <n> NEAR` (the value step 0 printed), then `<arrowhq.near> has transferred <n> NEAR to <arrow-market.near> successfully.`
 
-Twin: OK `EVTKMY4N2TmeZVPJx6LC7u9qfCdyGdW4vWF6hKP5aNQC` (arrowhq.testnet → mainnet-dryrun, 3.4 NEAR).
+Twin: OK `EVTKMY4N2TmeZVPJx6LC7u9qfCdyGdW4vWF6hKP5aNQC` (arrowhq.testnet → mainnet-dryrun, 3.4 NEAR for the first build).
 
 ### 2. Deploy + init
 
     cd ~/Desktop/hackathon/near-builds/arrow && shasum -a 256 release/contracts/arrow-mainnet.wasm && I=$(bash scripts/deploy/render-init.sh mainnet) && near contract deploy arrow-market.near use-file release/contracts/arrow-mainnet.wasm with-init-call new json-args "$I" prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' network-config mainnet sign-with-keychain send
 
-Expected: the sha line shows `24fe374ac7b4410a6324bfd924bdcfa9a1dab50829dba21aaeea8c10876d4def`, then
-`Contract code has been successfully deployed.` If `render-init.sh` prints an error, nothing is sent.
+Expected: the sha line equals the one in `release/contracts/SHA256SUMS` (compare by eye; step 0 already checked it against
+the tree), then `Contract code has been successfully deployed.` If `render-init.sh` prints an error, nothing is sent.
 
-Twin: OK `29RhuCrmC2gLVoyxDLSHH9h1LpafLjNnjZkZ5d7ukLMG` (code hash 3VQWQdgK…, storage 283 462 bytes). The first try
+Twin: OK `29RhuCrmC2gLVoyxDLSHH9h1LpafLjNnjZkZ5d7ukLMG` (first build: code hash 3VQWQdgK…, storage 283 462 bytes). The first try
 with the unmodified mainnet JSON, `FM8kHR3yAA5znDoHKGan5uNom7ZgSXXpZcwC9AxeC4ro`, failed with
 `E15 bad config: secrets_ref` (the JSON names arrow-market.near, the twin is another account; the deploy action
 was rolled back with the failed init). The twin then rendered `secrets_ref.account_id` as its own name; that is the
@@ -112,6 +140,15 @@ After any `set_program`, run this step again and wait for `program_pubkey` to be
 A derive that was still in flight when `set_program` ran is ignored (log
 `arrow: program key derive failed: stale_program`), so its key never becomes the new program's key.
 
+After any `set_program` also run the verify row for the program hash chain (contract == release == URL == attestation):
+
+    cd ~/Desktop/hackathon/near-builds/arrow && npm run verify -- --network mainnet --pre-lock --only wasm
+
+Expected: `R1 PROVEN`. Evals recorded under the old program keep a different attestation `wasm_hash`, so R1 stays
+`NOT PROVEN` until the evidence carries the program of each run (audit STATE-2, group sdk) and one eval has run under
+the new program. Do not read a red R1 right after `set_program` as a deploy fault before that fix is on main; the first
+half of the row (`hash chain differs: contract … release … url …`) is the part that must be green.
+
 Twin: OK `DD4Q6MX8REqG1BgfzjqDgghEek7b6x4ChKpLhM7zEXEm`: the self-signed call passed `E14`; its callback logged
 `arrow: program key derive failed: null`, as expected, because the mainnet config points at `outlayer.near`,
 which does not exist on testnet. The full derive path is proven on testnet by `arrow.arrowhq.testnet`
@@ -148,8 +185,8 @@ No deploy, no secret (reserve only, DEC D-07).
 
 Paste the step 1, 2, 3 and 6 tx hashes. The agent records them (archival RPC fills block and time):
 
-    npx tsx scripts/src/evidence-add.ts --network mainnet --set contract=arrow-market.near --set contract_wasm_sha256=24fe374ac7b4410a6324bfd924bdcfa9a1dab50829dba21aaeea8c10876d4def --set "program_wasm_sha256=$PROGRAM_WASM_SHA256" --set "program_wasm_url=$PROGRAM_WASM_URL"
-    npx tsx scripts/src/evidence-add.ts --network mainnet --sender arrowhq.near --run '{"id":"h12-deploy-storage","kind":"deploy","tx":"<step 1 tx>","chain":"near","expect":"3.4 NEAR to arrow-market.near","observed":"…","script":"scripts/deploy/mainnet.md"}'
+    npx tsx scripts/src/evidence-add.ts --network mainnet --set contract=arrow-market.near --set "contract_wasm_sha256=$(awk '$2=="arrow-mainnet.wasm"{print $1}' release/contracts/SHA256SUMS)" --set "program_wasm_sha256=$PROGRAM_WASM_SHA256" --set "program_wasm_url=$PROGRAM_WASM_URL"
+    npx tsx scripts/src/evidence-add.ts --network mainnet --sender arrowhq.near --run '{"id":"h12-deploy-storage","kind":"deploy","tx":"<step 1 tx>","chain":"near","expect":"<n> NEAR to arrow-market.near (the step 1 value)","observed":"…","script":"scripts/deploy/mainnet.md"}'
 
 (one `--run` per tx: `h12-deploy-storage`, `h12-deploy-init` with sender arrow-market.near, `h12-deploy-tank`,
 `h12-deploy-pubkey` with sender arrow-market.near).
