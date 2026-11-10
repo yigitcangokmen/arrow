@@ -248,10 +248,10 @@ export function createServer(deps: McpDeps = {}): McpServer {
     "list_listings",
     {
       title: "List datasets for sale",
-      description: `Returns up to 50 listings (id, title, price, eval fee, evals used, remaining leak budget). Read-only, free. ${SELLER_TEXT_NOTICE}`,
-      inputSchema: { from: z.number().int().min(0).optional(), limit: z.number().int().min(1).max(50).optional(), network: NETWORK },
+      description: `Returns up to 50 listings (id, title, price, eval fee, evals used, remaining leak budget), starting at listing id \`from\` (default 1). For the next page pass the last id + 1. Read-only, free. ${SELLER_TEXT_NOTICE}`,
+      inputSchema: { from: z.number().int().min(0).optional().describe("first listing id (ids start at 1)"), limit: z.number().int().min(1).max(50).optional(), network: NETWORK },
     },
-    handle(async (a: { from?: number; limit?: number; network?: Network }) => statusCommand(ctxFor(a.network ?? defaultNetwork), { from: a.from, limit: a.limit })),
+    handle(async (a: { from?: number; limit?: number; network?: Network }) => statusCommand(ctxFor(a.network ?? defaultNetwork), { from: a.from ?? 1, limit: a.limit ?? 50 })),
   );
 
   return server;

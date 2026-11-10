@@ -172,7 +172,7 @@ export class VerifyCtx {
   }
 
   listings(): Promise<Listing[]> {
-    return this.once("listings", () => this.paged((from) => this.views.listings({ from, limit: 50 })));
+    return this.once("listings", () => this.views.allListings());
   }
 
   evalsOf(listingId: number | string): Promise<Eval[]> {

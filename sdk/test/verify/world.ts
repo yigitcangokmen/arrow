@@ -162,7 +162,7 @@ export function fakeFetch(w: World): typeof fetch {
   const callView = (name: string, args: any) => {
     switch (name) {
       case "get_config": return w.config;
-      case "get_listings": return w.listings.slice(args.from_index, args.from_index + args.limit);
+      case "get_listings": return w.listings.filter((l) => l.id >= Math.max(args.from_index, 1)).slice(0, args.limit); // from_index is an id, like views.rs
       case "get_listing": return w.listings.find((l) => l.id === args.listing_id) ?? null;
       case "get_evals_by_listing": return w.evals.filter((e) => e.listing_id === args.listing_id).slice(args.from_index, args.from_index + args.limit);
       case "get_eval": return w.evals.find((e) => e.id === args.eval_id) ?? null;

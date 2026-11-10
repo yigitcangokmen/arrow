@@ -433,3 +433,17 @@ describe("mainnet", () => {
     expect(row(await run(w), "R5").label).toBe("NOT PROVEN");
   });
 });
+
+describe("STATE-8 / QA-06: get_listings pages by id", () => {
+  it("reads every listing past #50 exactly once", async () => {
+    const { VerifyCtx } = await import("../../src/verify/context.ts");
+    const { ArrowViews } = await import("../../src/contract.ts");
+    const w = buildWorld("testnet");
+    w.listings = Array.from({ length: 120 }, (_, i) => ({ ...w.listings[0], id: i + 1 }));
+    const ctx = new VerifyCtx({ network: w.network, evidence: w.evidence, fetchImpl: fakeFetch(w) });
+    const ids = (await ctx.listings()).map((l) => Number(l.id));
+    expect(ids).toEqual(Array.from({ length: 120 }, (_, i) => i + 1));
+    const views = new ArrowViews(w.network, w.contract, { fetchImpl: fakeFetch(w) });
+    expect((await views.allListings()).map((l) => Number(l.id))).toEqual(ids);
+  });
+});

@@ -25,9 +25,20 @@ export class ArrowViews {
   listing(id: number | string) {
     return this.maybe(Listing, "get_listing", { listing_id: Number(id) });
   }
+  /** One page: `from` is a listing id (ids start at 1), not a position. */
   async listings({ from = 0, limit = MAX_PAGE }: { from?: number; limit?: number } = {}) {
     const raw = await this.call("get_listings", { from_index: from, limit: Math.min(limit, MAX_PAGE) });
     return Listing.array().parse(raw);
+  }
+  /** Every listing, paging by id; paging by count would repeat one listing per page and stop at #50 for callers that never page (STATE-8, QA-06). */
+  async allListings() {
+    const all: Listing[] = [];
+    for (let from = 1; ; ) {
+      const page = await this.listings({ from, limit: MAX_PAGE });
+      all.push(...page);
+      if (page.length < MAX_PAGE) return all;
+      from = Number(page[page.length - 1].id) + 1;
+    }
   }
   eval(id: number | string) {
     return this.maybe(Eval, "get_eval", { eval_id: Number(id) });

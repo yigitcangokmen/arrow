@@ -400,3 +400,13 @@ describe("spawned entry file with mock views", () => {
     expect(JSON.parse(r.stdout)).toMatchObject({ id: 1, price_usdc: "0.25", leak_budget_left_bits: "266.63" });
   }, 30_000);
 });
+
+describe("QA-06: status lists every listing", () => {
+  it("without --limit, status reads all listings (not only the first page)", async () => {
+    const fake = fakeCtx();
+    const many = Array.from({ length: 60 }, (_, i) => ({ ...fake.state.listing, id: i + 1 }));
+    fake.ctx.views.listings = async ({ from = 0, limit = 50 } = {}) => many.filter((l) => l.id >= Math.max(from, 1)).slice(0, limit) as any;
+    const r = await run(["status", "--json"], fake);
+    expect(JSON.parse(r.out)).toHaveLength(60);
+  });
+});

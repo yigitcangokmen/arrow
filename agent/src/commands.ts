@@ -414,8 +414,19 @@ export async function statusCommand(ctx: Ctx, a: { listing?: number; eval?: numb
     return { purchase_id: num(p.id), listing_id: num(p.listing_id), status: p.status, refund_reason: p.refund_reason ?? null, h: p.h ?? null };
   }
   if (a.listing !== undefined) return listingSummary(ctx, await requireListing(ctx, a.listing));
-  const ls = await ctx.views.listings({ from: a.from, limit: a.limit });
+  // QA-06: without --from/--limit every listing; get_listings returns at most 50 and its from_index is a listing id.
+  const ls = a.from === undefined && a.limit === undefined ? await allListings(ctx) : await ctx.views.listings({ from: a.from, limit: a.limit });
   return Promise.all(ls.map((l) => listingSummary(ctx, l)));
+}
+
+async function allListings(ctx: Ctx): Promise<Listing[]> {
+  const all: Listing[] = [];
+  for (let from = 1; ; ) {
+    const page = await ctx.views.listings({ from, limit: 50 });
+    all.push(...page);
+    if (page.length < 50) return all;
+    from = num(page[page.length - 1].id) + 1;
+  }
 }
 
 export async function listingSummary(ctx: Ctx, l: Listing) {
