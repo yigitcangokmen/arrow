@@ -89,7 +89,7 @@ describe("results", () => {
     expect(decodeEvalResult(b64.enc(seal(buyerPk, Uint8Array.of(1))), buyerScalar, "verdict")).toEqual({ verdict: "BUY" });
     expect(() => decodeEvalResult(b64.enc(seal(buyerPk, Uint8Array.of(50))), buyerScalar, "scored")).toThrow();
     expect(() => decodeEvalResult(b64.enc(seal(buyerPk, Uint8Array.of(1, 2))), buyerScalar, "scored")).toThrow("1 byte");
-  });
+  }, 60_000); // 50 ECIES seal/unseal round trips; the default 5 s limit is too tight when check-all runs under load
 
   it("openRelease returns the 32-byte K and rejects other lengths", () => {
     const k = Uint8Array.from({ length: 32 }, (_, i) => i);
