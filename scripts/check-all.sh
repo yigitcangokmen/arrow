@@ -4,6 +4,9 @@
 # CI runs only a subset (DEC F-13); this script is the integration gate (PLAN §7.4).
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
+# The gates run on the Node of package.json engines (>=22.22.2). A plain non-interactive shell opens Node 18, which CI never tests.
+have=$(node -p 'process.versions.node' 2>/dev/null || echo 0)
+if [ "$(printf '%s\n%s\n' 22.22.2 "$have" | sort -V | head -1)" != 22.22.2 ]; then echo "check-all: Node 22.22.2 or newer is needed (found $have). Run: nvm use" >&2; exit 2; fi
 STRICT=0; [ "${1:-}" = --strict ] && STRICT=1
 
 n=0; skipped=0; failed=()
@@ -26,6 +29,7 @@ skip() { # skip "<name>" "<reason>"
 [ -d node_modules ] || step "npm ci" npm ci
 step "npm test" npm test
 step "tsc --noEmit" npx tsc --noEmit -p tsconfig.json
+step "web build (copy-assets, tsc, next build)" npm run -w @arrow/web build
 step "cargo test arrow-core" cargo test -p arrow-core
 step "clippy arrow-core" cargo clippy -p arrow-core -- -D warnings
 step "clippy arrow-tee (wasm32-wasip2)" cargo clippy -p arrow-tee --target wasm32-wasip2 -- -D warnings

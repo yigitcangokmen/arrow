@@ -22,3 +22,39 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo test -p arrow-core
       - run: cargo test -p arrow --lib
+  web:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci
+      - run: npm run -w @arrow/web build   # copy-assets, then Next's own tsc and build: the root tsc skips web/app and web/components
+  tee:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: rustup toolchain install 1.97.1 --profile minimal --component clippy --target wasm32-unknown-unknown --target wasm32-wasip2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - run: cargo clippy -p arrow-core -- -D warnings
+      - run: cargo clippy -p arrow-tee --target wasm32-wasip2 -- -D warnings
+      - run: cargo test -p arrow-tee --bins
+      # Reproducibility from a CARGO_HOME outside HOME, on another host than the one that wrote the expected sha (X12-2, CI-6).
+      - run: |
+          want=$(tr -d ' \n' < release/arrow-tee-rc.sha256)
+          [ -f release/sha256.txt ] && want=$(tr -d ' \n' < release/sha256.txt)
+          got=$(CARGO_HOME="$RUNNER_TEMP/ch" bash scripts/build-tee.sh)
+          echo "want $want"; echo "got  $got"
+          [ "$got" = "$want" ]
+          ! strings target/rel-tee/wasm32-wasip2/release/arrow-tee.wasm | grep -E "/home/|/Users/|$RUNNER_TEMP"
+  secrets:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { fetch-depth: 0 }
+      - name: install gitleaks 8.30.1
+        run: |
+          curl -sSL -o gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tgz" | sha256sum -c -
+          tar -xzf gitleaks.tgz gitleaks && sudo mv gitleaks /usr/local/bin/
+      - run: bash scripts/secret-scan.sh
