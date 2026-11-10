@@ -35,6 +35,14 @@ for (const f of filesIn(join(repo, "bench/results"), ".json")) bench[basename(f)
 const criteria = {};
 for (const f of filesIn(join(repo, "fixtures/criteria"), ".json")) criteria[basename(f, ".json")] = readJson(join(repo, "fixtures/criteria", f));
 
+// /verify: release/sha256.txt exists only after the wasm freeze; without it row R1 stays NOT PROVEN.
+let releaseSha256 = null;
+try {
+  releaseSha256 = readFileSync(join(repo, "release/sha256.txt"), "utf8").trim().split(/\s+/)[0] || null;
+} catch {
+  // not frozen yet
+}
+
 mkdirSync(join(web, "generated"), { recursive: true });
 writeFileSync(
   join(web, "generated/data.ts"),
@@ -46,6 +54,7 @@ export const evidence: { mainnet: unknown; testnet: unknown } = ${JSON.stringify
 export const teamAccounts: string[] = ${JSON.stringify(teamAccounts)};
 export const bench: Record<string, unknown> = ${JSON.stringify(bench)};
 export const criteria: Record<string, unknown> = ${JSON.stringify(criteria)};
+export const releaseSha256: string | null = ${JSON.stringify(releaseSha256)};
 `,
 );
 console.log(`copy-assets: dcap wasm, ${filesIn(join(repo, "fixtures/demo"), ".csv").length} demo csv, ${Object.keys(bench).length} bench, ${Object.keys(criteria).length} criteria`);

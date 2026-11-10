@@ -1,0 +1,31 @@
+.lead { max-width: 64ch; color: var(--muted); }
+.switch { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0 0 16px; padding: 0; list-style: none; }
+.current { font-weight: 700; }
+.summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; background: var(--surface); margin: 0 0 24px; }
+.line { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 700; overflow-wrap: anywhere; }
+.fail { color: var(--danger); font-weight: 700; }
+.group { margin: 0 0 32px; }
+.group > h2 { margin-bottom: 4px; }
+.note { color: var(--muted); font-size: 0.9rem; margin: 0 0 8px; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.table th, .table td { text-align: left; vertical-align: top; padding: 8px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.table thead th { color: var(--muted); font-weight: 600; }
+.id { font-family: var(--font-mono); white-space: nowrap; }
+.detail { color: var(--muted); margin: 4px 0 0; }
+.links { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 4px 0 0; padding: 0; list-style: none; }
+.req { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em; margin-left: 6px; }
+.evals { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; padding: 0; list-style: none; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 8px 0 0; font-size: 0.9rem; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+.box { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; background: var(--surface); margin: 0 0 16px; }
+.box p { margin: 4px 0; overflow-wrap: anywhere; }
+
+@media (max-width: 640px) {
+  .table, .table tbody, .table tr, .table th, .table td { display: block; width: 100%; }
+  .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .table tr { margin: 0 0 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .table th, .table td { border-bottom: 0; padding: 6px 12px; }
+  .table td::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
+  .facts { grid-template-columns: 1fr; }
+}
