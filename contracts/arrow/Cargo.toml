@@ -4,6 +4,7 @@ description = "Arrow market contract: mt_on_transfer (Intents) -> OutLayer reque
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+repository = "https://github.com/yigitcangokmen/arrow"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
