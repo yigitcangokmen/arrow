@@ -15,7 +15,7 @@ Behaviour (KICKOFF.md §2.6):
   8. ECIES-encrypt it to `buyer_pk`.
   9. Pad to `T_PAD = 45 s`.
   10. Write `{"v":1,"ok":true,"r":…,"h":…}` (≤900 bytes, target ≤400).
-- **release.** Unseal, check the hash and seller binding, download the blob and hash it. Return `ECIES(buyer_pk, K)` and that hash as `h`; if the blob was swapped, `h` is the new hash and `k` seals 32 zero bytes (the contract refunds `hash_mismatch`).
+- **release.** Time guard 45 s. Unseal, check the hash and seller binding, download the blob and hash it. If the hash is the bound one, K must open the blob (else `ok:false`). Return `ECIES(buyer_pk, K)` and that hash as `h`; if the blob was swapped, `h` is the new hash and `k` seals 32 zero bytes (the contract refunds `hash_mismatch`).
 - **Errors (red-team B1).**
   - `panic::set_hook(Box::new(|_| {}))`.
   - Never write to stderr.

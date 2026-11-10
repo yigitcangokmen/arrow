@@ -36,9 +36,12 @@ pub const LLM: LlmProfile = QWEN;
 pub const NEARAI_URL: &str = "https://cloud-api.near.ai/v1/chat/completions";
 
 pub const T_PAD: Duration = Duration::from_secs(45);
-/// 80 / 50 if the S1-b clock skew were > 10 s; S1-b measured max 5.6 s (spikes/GATES.md).
+/// 80 / 35 if the S1-b clock skew were > 10 s; S1-b measured max 5.6 s (spikes/GATES.md).
 pub const EVAL_DEADLINE: Duration = Duration::from_secs(90);
-pub const RELEASE_DEADLINE: Duration = Duration::from_secs(60);
+/// ARW-C3: 45 s, not 60 s. The 200-block yield window measures 108-122 s, so a release output
+/// published late enough to miss it must now stall ≥63 s after this guard. Normal release: ~5 s
+/// queue + ≤25 s blob fetch + ~2 s, well inside 45 s.
+pub const RELEASE_DEADLINE: Duration = Duration::from_secs(45);
 pub const ALLOW_MAINNET: [&str; 2] = ["arrow-market.near", "arrow-market-v2.near"];
 pub const ALLOW_TESTNET: [&str; 2] = ["arrow.arrowhq.testnet", "arrow-v2.arrowhq.testnet"];
 pub const MAX_STDIN: usize = 32 * 1024;

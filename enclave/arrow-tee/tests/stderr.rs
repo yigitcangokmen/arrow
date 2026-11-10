@@ -245,6 +245,8 @@ fn cases(fx: &Fx) -> (Vec<Case>, Vec<Case>) {
     add("no_block_timestamp", Wasm::Rel, b.clone(), rel(), None, e.clone());
     add("eval_late_100s", Wasm::Rel, b.clone(), rel(), Some(100), Expect::ErrWithin(0, 10));
     add("release_late_70s", Wasm::Rel, release(&base["listing"]), rel(), Some(70), e.clone());
+    // ARW-C3: RELEASE_DEADLINE is 45 s; the dev wasm can fetch the fake host, so only the guard refuses
+    add("release_late_50s_dev", Wasm::Dev, release(&base["listing"]), dev("ok_buy"), Some(50), e.clone());
     // The base blob URL is the fake host's http URL, which wasmtime -S http would fetch: the
     // release wasm has to refuse it itself.
     add("rel_rejects_http_blob_url", Wasm::Rel, b.clone(), rel(), Some(1), e.clone());

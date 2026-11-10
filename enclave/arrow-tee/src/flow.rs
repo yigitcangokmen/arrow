@@ -660,12 +660,16 @@ mod tests {
         assert_eq!(open_r(&out, &attacker).0, 47);
     }
 
+    /// ARW-C3: 45 s, so a stalled release must sit ≥63 s past the guard before the 200-block yield
+    /// (≥108 s measured) times out, instead of ≥48 s.
     #[test]
     fn release_late_err() {
         let c = case(&csv(10, "x"), CRIT, "scored");
-        let env = env_at(61);
-        assert_eq!(run_v(&release_input(&c), &env, &net(&env, c.blob.clone(), vec![])), ERR_JSON);
-        let env = env_at(59);
+        for late in [46, 50, 61] {
+            let env = env_at(late);
+            assert_eq!(run_v(&release_input(&c), &env, &net(&env, c.blob.clone(), vec![])), ERR_JSON, "{late} s");
+        }
+        let env = env_at(44);
         assert_eq!(run_v(&release_input(&c), &env, &net(&env, c.blob.clone(), vec![])).len(), 267);
     }
 
