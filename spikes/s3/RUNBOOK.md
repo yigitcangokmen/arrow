@@ -11,14 +11,14 @@ What exists today:
 - `spikes/s3/spike-contract` (package `spike`): `mt_on_transfer` (`refund_all` → refund all, `keep` → keep all, `outlayer` / `outlayer_refund` → OutLayer chain call, then `on_outlayer` decides), `on_outlayer`, `set_wasm` (self only), `last` (view). Unit tests: `cargo test` in that folder. Build: `cargo near build non-reproducible-wasm` → `spikes/s3/spike-contract/target/near/spike.wasm`.
 - `spikes/s3/init-mainnet.json`: init args (no secrets). `wasm_url` is the S1-b testnet FastFS copy of `spike-tee.wasm` (the repo is private, so there is no raw GitHub URL).
 - `spikes/s3/s3c-b5-negative.ts` (`--prepare`, `--read <tx>`).
+- `spikes/s3/s3a-simulate.ts` (`--funded` for H-08b).
+- `spikes/s3/s3b-notify.ts --mode refund_all|keep [--dry]` and `spikes/s3/s3c-outlayer.ts --mode outlayer|outlayer_refund [--dry]` (shared flow in `spikes/s3/intent-run.ts`). `--dry` signs with a throwaway in-memory EOA and only calls `simulate_intents` (free view): every mode returns `class: SIGNATURE_OK_BALANCE_ERROR`. Without `--dry` they read `E2E_BUYER_EVM_PRIVATE_KEY`, `RELAYER_ACCOUNT_ID` and `RELAYER_PRIVATE_KEY` from `.env`, stop before sending unless the simulate class is `OK`, send `execute_intents` from the relayer's function-call key and append the run to `evidence/mainnet.json` through `scripts/src/evidence-add.ts`.
 - Testnet twin check: the same wasm and the same init JSON deploy and answer `last` on `s3twin.arrowhq.testnet` (deleted afterwards); a direct `mt_on_transfer` from a non-intents account panics with `predecessor must be intents`.
 
 Scripts that come from other workstreams (a step is ready only when its script exists):
 - `spikes/s4/s4a-inbound.ts` (WS4-T05) for H-08a.
-- `spikes/s3/s3a-simulate.ts` (WS1-T08, needs the WS4-T04 intent builder) for H-08b.
-- `spikes/s3/s3b-notify.ts` and `spikes/s3/s3c-outlayer.ts` (WS1-T09 second half, need the WS4-T04 intent builder and RPC helpers) for H-08c and H-08d.
 
-Every value-moving step below also needs the money decision (DEC K-06) approved by the user.
+The money decision is approved by the user (2026-11-10, DEC §K KU-06); every value-moving step below is still run by the human.
 
 ## H-08a · S4-a $2 inbound (1Click)
 Preconditions: H-03 DONE (Arrow Buyer EOA on Base has ≥15 USDC and ≥0.0008 ETH). `npx tsx spikes/s4/s4a-inbound.ts --dry` → quote 200.
