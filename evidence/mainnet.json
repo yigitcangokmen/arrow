@@ -1,11 +1,18 @@
 {
   "network": "mainnet",
   "contract": "arrow-market.near",
-  "contract_wasm_sha256": null,
+  "contract_wasm_sha256": "24fe374ac7b4410a6324bfd924bdcfa9a1dab50829dba21aaeea8c10876d4def",
   "program_wasm_sha256": null,
   "program_wasm_url": null,
-  "lock": {"tx": null, "block_height": null, "timestamp_utc": null},
-  "accounts": {"treasury": "arrowhq.near", "relayer": "arrow-relayer.arrowhq.near"},
+  "lock": {
+    "tx": null,
+    "block_height": null,
+    "timestamp_utc": null
+  },
+  "accounts": {
+    "treasury": "arrowhq.near",
+    "relayer": "arrow-relayer.arrowhq.near"
+  },
   "runs": [],
   "corrections": []
 }

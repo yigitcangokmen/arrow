@@ -30,7 +30,7 @@ Acceptance: `tools_versions_pinned` PASS · `outlayer_cli_present` PASS.
 - Chosen path: —
 - Changed claim: —
 
-### S1-a · NEAR AI · WAITING H-01a (no `NEARAI_API_KEY` in .env at 2026-11-10 15:12 GMT+7 [08:12Z]) · —
+### S1-a · NEAR AI · PENDING, UNBLOCKED: H-01a DONE 18:35 (key in .env; the S1-a run itself is NOT MEASURED yet at 19:40) · was WAITING H-01a (no `NEARAI_API_KEY` in .env at 2026-11-10 15:12 GMT+7 [08:12Z]) · —
 - Commands: —
 - Evidence: —
 - PASS items: —

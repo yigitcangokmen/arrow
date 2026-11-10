@@ -8,7 +8,7 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 
 | Due GMT+7 [UTC] | H | Owner (card) | Blocks what | Status |
 |---|---|---|---|---|
-| 10 Kas 16:49 [09:49Z] (was 08:00) | H-01a | WS-1 T02 | WS1-T06 (S1-a), S1-b NEAR AI call, bench | OPEN, OVERDUE (NEARAI_API_KEY still length 0 at 17:56) |
+| 10 Kas 16:49 [09:49Z] (was 08:00) | H-01a | WS-1 T02 | WS1-T06 (S1-a), S1-b NEAR AI call, bench | DONE 18:35 (key in .env; testnet OutLayer secret updated 18:37; X Premium: no) |
 | 10 Kas 17:49 [10:49Z] (was 09:00; latest 20:49 [13:49Z]) | H-02 | WS-1 T09 | H-07, all mainnet gates | OPEN, OVERDUE at 17:56 (money approved by the user 2026-11-10, DEC §K KU-06) |
 | 10 Kas 17:49 [10:49Z] (was 09:00) | H-03 | WS-4 T08 | H-08a (S4-a) | OPEN, OVERDUE at 17:56 (money approved by the user 2026-11-10, DEC §K KU-06) |
 | 10 Kas 18:49 [11:49Z] (was 10:00) | H-05 | WS-1 T04 | raw GitHub WasmUrl (S-02 primary); push DONE by agent 15:08 (origin/main 6c7b4d37, K-02) | OPEN (public step only; not approved, K-03) |
@@ -26,7 +26,7 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | 11 Kas 12:00 [05:00Z] | H-07b | WS-1 T11 | H-12 (only if K0 picks Escrow) | N/A unless Escrow |
 | 11 Kas 12:00 [05:00Z] | H-W6e | WS-6 T02 | WS6-T02 | DONE: B (KU-10) |
 | 11 Kas 15:00 [08:00Z] | H-21 | WS-6 T04 + WS-3 T06 (two blocks below: WS-3 pattern review, WS-6 bench review) | WS6-T05, WS3-T06 pattern sign-off | OPEN |
-| 11 Kas 23:00 [16:00Z] | H-WS2-a | WS-2 T12b | reproducible build (only if Docker is down) | N/A unless triggered |
+| 11 Kas 23:00 [16:00Z] | H-WS2-a | WS-2 T12b | reproducible build (only if Docker is down) | N/A: not triggered (Docker up, WS2-T12b DONE 18:21) |
 | when it appears | H-WS2-b | WS-2 | macOS Keychain prompt | N/A unless triggered |
 | daily 13:00 and 21:00 [06:00Z / 14:00Z] | H-10 | WS-1 T14 | push | N/A as human step: agent pushes (K-02) |
 | 12 Kas 10:00 [03:00Z] (latest 21:00 [14:00Z]) | H-13a | WS-5 T04 | `/sell` blob upload | OPEN |
@@ -38,7 +38,7 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | 12 Kas 21:00-23:00 [14:00-16:00Z] | H-14 | WS-1 T18 + WS-4 T15 | K4 | OPEN |
 | 13 Kas 10:30 [03:30Z] | H-09b | WS-7 T03 | outreach follow-up | OPEN |
 | 13 Kas 12:30-13:30 [05:30-06:30Z] | H-15a | WS-5 | first browser purchase before H-15 | OPEN |
-| 13 Kas 08:30 [01:30Z] | H-W3-2 | WS-3 T11b | WS3-T12 (only if triggered) | N/A unless triggered |
+| 13 Kas 08:30 [01:30Z] | H-W3-2 | WS-3 T11b | WS3-T12 (only if triggered) | N/A: not triggered (WS3-T11b DONE 19:18, every decision rule "no change") |
 | 13-14 Kas (only if demand) | H-22 | WS-7 | seller concierge | N/A unless triggered |
 | 13 Kas 19:00-23:00 [12:00-16:00Z] | H-15 | WS-1 T19 | K5 | OPEN |
 | 14 Kas 06:30 [13 Kas 23:30Z] | H-W6c | WS-6 T08 | H-18 (only if precheck fails) | N/A unless triggered |
