@@ -1,0 +1,51 @@
+# Arrow demo video: script (draft)
+
+Two cuts from one set of shots: **full** (YouTube, unlisted, at most 3:00) and **X** (native upload, at most 2:15, no X Premium). The 30-second moment, a PASS verdict, a BUY verdict and the hash line, is in both cuts. Voice-over is English, recorded by a person. This is a draft: segments that depend on the mainnet run are marked `TODO(K4)` and every number in `{{BRACES}}` is filled from recorded evidence, never by hand.
+
+## Rules
+
+- Speech at most 2.7 words per second per segment.
+- Any sped-up part shows "sped up xN" on screen. Waiting for 1Click or the enclave is the only thing that is sped up.
+- Synthetic listings carry the badge "synthetic · seller is us (demo)".
+- No face, no name until the closing card. Buyer and seller appear in consecutive scenes, never side by side.
+- Say "your NEAR Intents balance", never "your wallet", for refunds. Say Base and Solana USDC arrive as bridged tokens.
+- Say "the LLM cannot produce BUY unless the structural gates pass", never a bare "the LLM cannot produce BUY".
+- Only mainnet footage is called mainnet. A testnet re-run carries the on-screen label "testnet re-run".
+- Numbers on screen (room table, demand line, prices, verdict values) are the ones in the README and in `evidence/mainnet.json`.
+- Nothing on screen shows `.env`, a seed phrase or a private key.
+
+## Full cut (3:00)
+
+| id | start | end | screen (shot id) | voice-over (English) | on-screen text |
+|---|---|---|---|---|---|
+| F01 | 0:00 | 0:14 | S01 | Data is hard to sell. To judge a dataset, a buyer has to see it. Once they have seen it, why pay? So buyers pay blind, and often get lemons. | Arrow's information paradox (1962) |
+| F02 | 0:14 | 0:30 | S02 | I'm a fund analyst. This listing claims a token unlock schedule, 412 rows. Before I pay, my own AI reads it inside a TEE enclave that neither the seller nor Arrow can see into. | synthetic · seller is us (demo) |
+| F03 | 0:30 | 0:46 | S03 | Inspection costs twenty-five cents. The verdict is PASS, fit {{PASS_FIT}}, novelty {{PASS_NOVELTY}}. I already have most of these rows, and I never saw one. That was the lemon. | sped up x{{SPEEDUP}} |
+| F04 | 0:46 | 1:12 | S04 | Second listing: wallet labels. BUY, fit {{BUY_FIT}}, novelty {{BUY_NOVELTY}}. I pay {{BUY_PRICE}} in USDC from Base through NEAR Intents. The data key is sealed to my key on chain, and the file I download has the same hash the enclave inspected and the seller listed. | listed = inspected = delivered |
+| F05 | 1:12 | 1:26 | S05 | The seller lists with MetaMask and withdraws USDC to Solana. Neither of us needed a NEAR account. | Solscan link, TODO(K4) |
+| F06 | 1:26 | 1:50 | S06 | Can a buyer extract rows? Asking for row one returns PASS, fit one, and no text. Can a seller inject an instruction to answer BUY? In our refusal room, {{ROOM_BUY}} of 24 attacks got BUY. | {{ROOM_BUY}}/24 BUY · false flags on clean BUY/SELL data: {{FALSE_FLAGS}} |
+| F07 | 1:50 | 2:05 | S07 | If the enclave fails or times out, intents.near's own refund code returns the fee to my NEAR Intents balance, within about a minute. | nearblocks link |
+| F08 | 2:05 | 2:25 | S08 | Agents get the same flow: a command line, an MCP tool, and an HTTP 402 response. The 402 tells an agent how to inspect and pay. Arrow tells it whether it's worth paying. | the 402 response carries no payment |
+| F09 | 2:25 | 2:42 | S09 | NEAR makes this one flow: a model in a TEE on NEAR AI Cloud, an OutLayer enclave answering the contract, and NEAR Intents for cross-chain payment and refunds. Every listing has an on-chain leak budget. | leak budget: spent {{SPENT}} / {{BUDGET}} bits |
+| F10 | 2:42 | 3:00 | S10 | Every claim has a command. Verify prints what is proven, what is not, and what is risky. {{DEMAND_LINE_SPOKEN}} Built at NEAR HACKATHON. Code and steps are in the repo. | {{DEMAND_LINE}} · repo · Built at NEAR HACKATHON |
+
+## X cut (at most 2:15)
+
+| id | start | end | screen (shot id) | voice-over (English) | on-screen text |
+|---|---|---|---|---|---|
+| X01 | 0:00 | 0:10 | S01 | Data is hard to sell. To judge a dataset, a buyer has to see it. Once they have, why pay? | Arrow's information paradox (1962) |
+| X02 | 0:10 | 0:24 | S02 | I'm a fund analyst. This listing claims a token unlock schedule. Before I pay, my own AI reads it inside a TEE enclave that neither the seller nor Arrow can see into. | synthetic · seller is us (demo) |
+| X03 | 0:24 | 0:38 | S03 | Inspection costs twenty-five cents. The verdict is PASS, fit {{PASS_FIT}}, novelty {{PASS_NOVELTY}}. I never saw a row. That was the lemon. | sped up x{{SPEEDUP}} |
+| X04 | 0:38 | 1:04 | S04 | Second listing: BUY, fit {{BUY_FIT}}, novelty {{BUY_NOVELTY}}. I pay {{BUY_PRICE}} in USDC from Base through NEAR Intents. The file I download has the same hash the enclave inspected and the seller listed. | listed = inspected = delivered |
+| X05 | 1:04 | 1:20 | S06 | Can a seller inject an instruction to answer BUY? In our refusal room, {{ROOM_BUY}} of 24 attacks got BUY. Asking for row one returns no text. | {{ROOM_BUY}}/24 BUY |
+| X06 | 1:20 | 1:32 | S07 | If the enclave fails, intents.near's own refund code returns the fee to my NEAR Intents balance. | nearblocks link |
+| X07 | 1:32 | 1:48 | S08 | Agents use the same flow through a command line, an MCP tool and an HTTP 402. Arrow tells an agent whether it's worth paying. | the 402 response carries no payment |
+| X08 | 1:48 | 2:00 | S09 | A TEE model on NEAR AI Cloud, an OutLayer enclave, and NEAR Intents for payment and refunds. | leak budget: spent {{SPENT}} / {{BUDGET}} bits |
+| X09 | 2:00 | 2:14 | S10 | Every claim has a command. {{DEMAND_LINE_SPOKEN}} Built at NEAR HACKATHON. | {{DEMAND_LINE}} · repo · Built at NEAR HACKATHON |
+
+## Open items before recording
+
+- `TODO(K4)` Every segment above needs the Arrow program and contract on mainnet (listing, eval, buy, refund). Until then the footage would be testnet and must carry "testnet re-run".
+- `TODO(K4)` F05 needs a real USDC withdrawal to Solana. Only a dry quote exists today. If it is not run, cut F05 and the Solana sentence and move its seconds to F04.
+- `TODO(K5)` S10 is recorded after the lock so the lock row of `verify` reads PROVEN.
+- Voice-over placeholders `{{PASS_FIT}}`, `{{PASS_NOVELTY}}`, `{{BUY_FIT}}`, `{{BUY_NOVELTY}}`, `{{BUY_PRICE}}` come from the recorded runs (testnet run K2 showed PASS 2/1 and BUY 5/4, mainnet values may differ).
