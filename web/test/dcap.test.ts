@@ -1,99 +1,89 @@
 // WS5-T07: the in-browser DCAP check with a fake verifier module and a fake network.
 import { describe, expect, it, vi } from "vitest";
-import { checkQuote, COLLATERAL_KEYS, type DcapDeps, type DcapModule, PCCS_URL, shortHex } from "../lib/dcap.ts";
+import { checkQuote, type DcapDeps, type DcapModule, PCCS_URL, shortHex } from "../lib/dcap.ts";
 import { CAVEAT, fetchNearAiLine } from "../lib/nearAi.ts";
 
 const QUOTE = Buffer.from(new Uint8Array(700).fill(7)).toString("base64");
-const API = "https://api.outlayer.ai";
-const collateral = Object.fromEntries(COLLATERAL_KEYS.map((k) => [k, "x"]));
-const hex = (c: string, n = 96) => c.repeat(n);
-const report = { TD10: { mr_td: hex("a"), rt_mr0: hex("b"), rt_mr1: hex("c"), rt_mr2: hex("d"), rt_mr3: hex("e"), report_data: hex("f", 128) } };
+const collateral = { tcb_info: "x" };
+const bytes = (n: number, v: number) => new Uint8Array(n).fill(v);
+const report = { type: "td10", data: { mrTd: bytes(48, 0xaa), rtMr0: bytes(48, 0xbb), rtMr1: bytes(48, 0xcc), rtMr2: bytes(48, 0xdd), rtMr3: bytes(48, 0xee), reportData: bytes(64, 0xff) } };
 
-function setup(over: { status?: string; advisory?: string[]; verifyThrows?: boolean; outlayer?: () => Promise<unknown>; pccs?: () => Promise<unknown> } = {}) {
-  const verify = vi.fn((_q: Uint8Array, _c: unknown, _now: bigint) => {
-    if (over.verifyThrows) throw new Error("TCB level not supported");
+function setup(over: { status?: string; advisory?: string[]; verifyThrows?: boolean; pccs?: () => Promise<unknown> } = {}) {
+  const verify = vi.fn((_q: Uint8Array, _c: unknown, _now: number) => {
+    if (over.verifyThrows) throw new Error("Signature is invalid for qe_identity");
     return { status: over.status ?? "UpToDate", advisory_ids: over.advisory ?? [], report };
   });
-  const mod: DcapModule = {
-    default: vi.fn(async () => ({})),
-    js_verify: verify,
-    js_get_collateral: vi.fn(over.pccs ?? (async () => collateral)),
-  };
-  const fetchJson = vi.fn(over.outlayer ?? (async () => { throw new Error("HTTP 404"); }));
-  const deps: DcapDeps = { load: async () => mod, fetchJson, nowSeconds: () => 1_762_000_000.9 };
-  return { mod, verify, fetchJson, deps };
+  const mod: DcapModule = { verify, getCollateral: vi.fn(over.pccs ?? (async () => collateral)) };
+  const deps: DcapDeps = { load: async () => mod, nowSeconds: () => 1_762_000_000.9 };
+  return { mod, verify, deps };
 }
 
 describe("checkQuote", () => {
-  it("UpToDate is PROVEN, names its collateral source and passes the time as a BigInt", async () => {
+  it("UpToDate is PROVEN, names its collateral source and passes whole seconds", async () => {
     const s = setup();
-    const r = await checkQuote(QUOTE, API, s.deps);
+    const r = await checkQuote(QUOTE, s.deps);
     expect(r).toMatchObject({ label: "PROVEN", status: "UpToDate", source: "pccs.phala.network" });
     expect(r.text).toBe("Intel TDX quote served by OutLayer for this request verifies against Intel collateral (source: pccs.phala.network): UpToDate");
-    expect(typeof s.verify.mock.calls[0]![2]).toBe("bigint");
-    expect(s.verify.mock.calls[0]![2]).toBe(1_762_000_000n);
-    expect(s.mod.js_get_collateral).toHaveBeenCalledWith(PCCS_URL, expect.any(Uint8Array));
-    expect(s.mod.default).toHaveBeenCalledWith({ module_or_path: "/dcap/dcap-qvl-web_bg.wasm" });
-    expect(s.fetchJson).toHaveBeenCalledWith(`${API}/tdx/collateral`);
+    expect(s.verify.mock.calls[0]![2]).toBe(1_762_000_000);
+    expect(s.mod.getCollateral).toHaveBeenCalledWith(PCCS_URL, expect.any(Uint8Array));
   });
 
-  it("shows the measurements; report_data is cut to its first 32 bytes", async () => {
-    const r = await checkQuote(QUOTE, API, setup().deps);
-    expect(r.fields).toMatchObject({ mr_td: hex("a"), rt_mr0: hex("b"), rt_mr3: hex("e") });
-    expect(r.fields!.report_data).toBe(hex("f", 64));
-    expect(shortHex(hex("a"))).toBe("aaaaaaaaaaaaaaaa…aaaaaaaa");
+  it("shows the measurements as hex; report_data is cut to its first 32 bytes", async () => {
+    const r = await checkQuote(QUOTE, setup().deps);
+    expect(r.fields).toMatchObject({ mr_td: "aa".repeat(48), rt_mr0: "bb".repeat(48), rt_mr3: "ee".repeat(48) });
+    expect(r.fields!.report_data).toBe("ff".repeat(32));
+    expect(shortHex("a".repeat(96))).toBe("aaaaaaaaaaaaaaaa…aaaaaaaa");
     expect(shortHex("")).toBe("n/a");
   });
 
-  it("OutLayer collateral is used when it has the Phala shape", async () => {
-    const s = setup({ outlayer: async () => collateral });
-    const r = await checkQuote(QUOTE, API, s.deps);
-    expect(r.source).toBe("OutLayer");
-    expect(s.mod.js_get_collateral).not.toHaveBeenCalled();
-  });
-
-  it("OutLayer collateral in another shape is ignored and the PCCS is used", async () => {
-    const s = setup({ outlayer: async () => ({ tcb_info: "x" }) });
-    const r = await checkQuote(QUOTE, API, s.deps);
-    expect(r.source).toBe("pccs.phala.network");
-    expect(s.verify.mock.calls[0]![1]).toBe(collateral);
+  it("CI-2: the collateral is never taken from OutLayer, the party being verified", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    try {
+      await checkQuote(QUOTE, setup().deps);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("known advisories are RISKY and listed", async () => {
-    for (const status of ["SWHardeningNeeded", "ConfigurationNeeded", "ConfigurationAndSWHardeningNeeded", "OutOfDate"]) {
-      const r = await checkQuote(QUOTE, API, setup({ status, advisory: ["INTEL-SA-00837", "INTEL-SA-00960"] }).deps);
+    for (const status of ["SWHardeningNeeded", "ConfigurationNeeded", "ConfigurationAndSWHardeningNeeded", "OutOfDate", "TDRelaunchAdvised"]) {
+      const r = await checkQuote(QUOTE, setup({ status, advisory: ["INTEL-SA-00837", "INTEL-SA-00960"] }).deps);
       expect(r.label, status).toBe("RISKY");
       expect(r.advisoryIds).toEqual(["INTEL-SA-00837", "INTEL-SA-00960"]);
       expect(r.text).toContain("INTEL-SA-00837, INTEL-SA-00960");
     }
   });
 
-  it("an unknown status is never a pass", async () => {
-    const r = await checkQuote(QUOTE, API, setup({ status: "Revoked" }).deps);
-    expect(r.label).toBe("NOT PROVEN");
-    expect(r.text).toContain("not treated as a pass");
+  it("an unknown or revoked status is never a pass", async () => {
+    for (const status of ["Revoked", "Unknown"]) {
+      const r = await checkQuote(QUOTE, setup({ status }).deps);
+      expect(r.label).toBe("NOT PROVEN");
+      expect(r.text).toContain("not treated as a pass");
+    }
   });
 
   it("a verification error is NOT PROVEN with the reason", async () => {
-    const r = await checkQuote(QUOTE, API, setup({ verifyThrows: true }).deps);
+    const r = await checkQuote(QUOTE, setup({ verifyThrows: true }).deps);
     expect(r).toMatchObject({ label: "NOT PROVEN", status: null, source: "pccs.phala.network" });
-    expect(r.text).toContain("TCB level not supported");
+    expect(r.text).toContain("Signature is invalid for qe_identity");
   });
 
-  it("no collateral anywhere is NOT PROVEN (collateral unavailable)", async () => {
+  it("no collateral is NOT PROVEN (collateral unavailable)", async () => {
     const s = setup({ pccs: async () => { throw new Error("Failed to fetch"); } });
-    const r = await checkQuote(QUOTE, API, s.deps);
+    const r = await checkQuote(QUOTE, s.deps);
     expect(r.label).toBe("NOT PROVEN");
     expect(r.text).toMatch(/^NOT PROVEN \(collateral unavailable\)/);
     expect(s.verify).not.toHaveBeenCalled();
   });
 
-  it("a broken quote or a wasm that will not load is NOT PROVEN, not an exception", async () => {
-    expect((await checkQuote("%%%", API, setup().deps)).label).toBe("NOT PROVEN");
+  it("a broken quote or a verifier that will not load is NOT PROVEN, not an exception", async () => {
+    expect((await checkQuote("%%%", setup().deps)).label).toBe("NOT PROVEN");
     const s = setup();
-    const r = await checkQuote(QUOTE, API, { ...s.deps, load: async () => { throw new Error("wasm blocked"); } });
+    const r = await checkQuote(QUOTE, { ...s.deps, load: async () => { throw new Error("module blocked"); } });
     expect(r).toMatchObject({ label: "NOT PROVEN" });
-    expect(r.text).toContain("wasm blocked");
+    expect(r.text).toContain("module blocked");
   });
 });
 

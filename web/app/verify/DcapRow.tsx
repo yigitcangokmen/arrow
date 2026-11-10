@@ -5,30 +5,25 @@ import { checkQuote, type DcapModule, type DcapResult, shortHex } from "../../li
 import styles from "./verify.module.css";
 
 const deps = (nowMs: () => number) => ({
-  // A plain import(), made only when this row mounts: the verifier wasm is about a megabyte.
-  load: () => import("@phala/dcap-qvl-web") as unknown as Promise<DcapModule>,
-  fetchJson: async (url: string) => {
-    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json() as Promise<unknown>;
-  },
+  // A plain import(), made only when this row mounts.
+  load: () => import("@phala/dcap-qvl") as unknown as Promise<DcapModule>,
   nowSeconds: () => nowMs() / 1000,
 });
 
 /** Verifies the stored TDX quote of one request against Intel collateral, in this browser. */
-export function DcapRow({ quoteB64, outlayerApi }: { quoteB64: string; outlayerApi: string }) {
+export function DcapRow({ quoteB64 }: { quoteB64: string }) {
   const [result, setResult] = useState<DcapResult | null>(null);
 
   useEffect(() => {
     let alive = true;
     setResult(null);
-    checkQuote(quoteB64, outlayerApi, deps(Date.now)).then((r) => {
+    checkQuote(quoteB64, deps(Date.now)).then((r) => {
       if (alive) setResult(r);
     });
     return () => {
       alive = false;
     };
-  }, [quoteB64, outlayerApi]);
+  }, [quoteB64]);
 
   return (
     <div className={styles.box} aria-live="polite">

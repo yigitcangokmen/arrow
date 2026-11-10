@@ -134,7 +134,7 @@ export default async function VerifyEval({ params, searchParams }: { params: Pro
                 <dt>output_hash</dt><dd className="mono">{att.output_hash}</dd>
                 {typeof att.worker_measurement === "string" ? (<><dt>worker_measurement</dt><dd className="mono">{att.worker_measurement}</dd></>) : null}
               </dl>
-              <DcapRow quoteB64={att.tdx_quote} outlayerApi={NETWORKS[net].outlayerApi} />
+              <DcapRow quoteB64={att.tdx_quote} />
             </>
           ) : (
             <div className={styles.box}>

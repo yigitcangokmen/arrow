@@ -1,5 +1,4 @@
 // Runs before dev and build. Dependency-free. Missing sources become null / empty, never a build error.
-import { createRequire } from "node:module";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,7 +6,6 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const web = join(here, "..");
 const repo = join(web, "..");
-const require = createRequire(import.meta.url);
 
 const readJson = (p) => {
   try {
@@ -18,16 +16,11 @@ const readJson = (p) => {
 };
 const filesIn = (dir, ext) => (existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(ext)).sort() : []);
 
-// 1. DCAP verifier wasm, served at /dcap/ so init({ module_or_path }) can fetch it (WS5-T07).
-mkdirSync(join(web, "public/dcap"), { recursive: true });
-const dcapPkg = dirname(require.resolve("@phala/dcap-qvl-web/package.json"));
-copyFileSync(join(dcapPkg, "dcap-qvl-web_bg.wasm"), join(web, "public/dcap/dcap-qvl-web_bg.wasm"));
-
-// 2. Synthetic demo files only (each carries a `synthetic` marker, checked in WS6-T01).
+// 1. Synthetic demo files only (each carries a `synthetic` marker, checked in WS6-T01).
 mkdirSync(join(web, "public/demo"), { recursive: true });
 for (const f of filesIn(join(repo, "fixtures/demo"), ".csv")) copyFileSync(join(repo, "fixtures/demo", f), join(web, "public/demo", f));
 
-// 3. Data modules the pages import instead of reading files at runtime.
+// 2. Data modules the pages import instead of reading files at runtime.
 const team = readJson(join(repo, "evidence/team-accounts.json"));
 const teamAccounts = team ? [...(team.near ?? []), ...(team.evm ?? []).map((e) => e.address)] : [];
 const bench = {};
@@ -88,4 +81,4 @@ export const benchRoom: unknown = ${JSON.stringify(benchRoom)};
 export const benchLive: Record<string, unknown> = ${JSON.stringify(benchLive)};
 `,
 );
-console.log(`copy-assets: dcap wasm, ${filesIn(join(repo, "fixtures/demo"), ".csv").length} demo csv, ${Object.keys(bench).length} bench, ${Object.keys(criteria).length} criteria`);
+console.log(`copy-assets: ${filesIn(join(repo, "fixtures/demo"), ".csv").length} demo csv, ${Object.keys(bench).length} bench, ${Object.keys(criteria).length} criteria`);
