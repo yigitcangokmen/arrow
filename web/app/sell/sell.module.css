@@ -1,0 +1,4 @@
+.lead { max-width: 62ch; color: var(--muted); }
+.steps { margin: 0 0 16px; }
+.file { font-size: 0.9rem; }
+.success a { overflow-wrap: anywhere; }

@@ -21,3 +21,8 @@ export function shortHash(hash: string): string {
 export function withNetwork(path: string, net: Network): string {
   return net === DEFAULT_NETWORK ? path : `${path}${path.includes("?") ? "&" : "?"}network=${net}`;
 }
+
+/** Page links of one listing: its inspect/buy page and its x402-shaped 402 endpoint. */
+export function listingLinks(id: number | string, net: Network): { buy: string; x402: string } {
+  return { buy: withNetwork(`/buy/${id}`, net), x402: withNetwork(`/l/${id}/data`, net) };
+}

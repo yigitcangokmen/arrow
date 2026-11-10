@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { DEFAULT_NETWORK, type Network } from "../lib/config.ts";
+import type { Network } from "../lib/config.ts";
 import { formatUsdc } from "../lib/format.ts";
-import { withNetwork } from "../lib/links.ts";
+import { listingLinks } from "../lib/links.ts";
 import type { ListingView } from "../lib/server/listingsCache.ts";
 import { Badge } from "./Badge.tsx";
 import { BitCounter } from "./BitCounter.tsx";
@@ -10,7 +10,7 @@ import styles from "./ListingCard.module.css";
 export function ListingCard({ listing: l, network }: { listing: ListingView; network: Network }) {
   const shown = l.columns.slice(0, 4);
   const more = l.columns.length - shown.length;
-  const x402 = `/l/${l.id}/data${network === DEFAULT_NETWORK ? "" : `?network=${network}`}`;
+  const links = listingLinks(l.id, network);
   return (
     <article className={styles.card}>
       <header className={styles.head}>
@@ -30,8 +30,8 @@ export function ListingCard({ listing: l, network }: { listing: ListingView; net
         Inspect · ${formatUsdc(l.eval_fee)} <span aria-hidden="true">/</span> Buy · ${formatUsdc(l.price)}
       </p>
       <div className={styles.actions}>
-        <Link className={styles.primary} href={withNetwork(`/buy/${l.id}`, network)}>Inspect</Link>
-        <a className={styles.small} href={x402}>x402</a>
+        <Link className={styles.primary} href={links.buy}>Inspect</Link>
+        <a className={styles.small} href={links.x402}>x402</a>
       </div>
     </article>
   );
