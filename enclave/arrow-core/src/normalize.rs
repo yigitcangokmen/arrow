@@ -32,9 +32,53 @@ pub fn normalize_key(s: &str) -> String {
     out
 }
 
+/// Format characters the G5 scan deletes (DEC I-19): zero-width, word joiner, BOM, soft hyphen,
+/// invisible operators, Mongolian vowel separator.
+pub fn is_scan_format(c: char) -> bool {
+    matches!(c, '\u{200B}'..='\u{200D}' | '\u{2060}'..='\u{2064}' | '\u{FEFF}' | '\u{AD}' | '\u{180E}')
+}
+
+/// NFKC, then the scan's format characters removed. Case is kept (base64 needs it).
+pub fn scan_fold(s: &str) -> String {
+    s.nfkc().filter(|c| !is_scan_format(*c)).collect()
+}
+
+/// G5 scan normalization only (no TS twin): NFKC → delete format characters → lowercase → delete
+/// U+0307 (Turkish `İ` lowercases to `i` + U+0307) → collapse whitespace runs. A run that contains
+/// a line break becomes `\n`, so `(?m)^` patterns still see line starts; any other run becomes ' '.
+pub fn scan_norm(s: &str) -> String {
+    let lower = scan_fold(s).to_lowercase();
+    let mut out = String::with_capacity(lower.len());
+    let mut run: Option<char> = None;
+    for c in lower.chars().filter(|c| *c != '\u{307}') {
+        if c.is_whitespace() || is_js_ws(c) {
+            let nl = c == '\n' || c == '\r' || c == '\u{2028}' || c == '\u{2029}' || c == '\u{85}';
+            run = Some(if nl || run == Some('\n') { '\n' } else { ' ' });
+        } else {
+            if let Some(r) = run.take() {
+                out.push(r);
+            }
+            out.push(c);
+        }
+    }
+    if let Some(r) = run {
+        out.push(r);
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn scan_norm_folds_and_collapses() {
+        assert_eq!(scan_norm("ＩＧＮＯＲＥ\u{200B}  me"), "ignore me");
+        assert_eq!(scan_norm("ÖNCEKİ TALİMATLARI"), "önceki talimatlari");
+        assert_eq!(scan_norm("a \r\n  SYSTEM: x"), "a\nsystem: x");
+        assert_eq!(scan_norm("so\u{AD}ft"), "soft");
+        assert_eq!(scan_norm("𝐢𝐠𝐧𝐨𝐫𝐞"), "ignore");
+    }
 
     #[test]
     fn normalize_js_whitespace_set() {
