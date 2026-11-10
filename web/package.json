@@ -5,9 +5,12 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/copy-assets.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/copy-assets.mjs",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "check:bundle": "node scripts/check-bundle.mjs"
   },
   "dependencies": {
     "@arrow/sdk": "0.1.0",

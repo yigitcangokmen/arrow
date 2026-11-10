@@ -1,0 +1,3 @@
+.footer { border-top: 1px solid var(--border); }
+.inner { max-width: 1080px; margin: 0 auto; padding: 16px var(--gutter); display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+.note { color: var(--muted); }

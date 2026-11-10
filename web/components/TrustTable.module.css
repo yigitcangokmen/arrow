@@ -1,0 +1,13 @@
+.lead { color: var(--muted); }
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.table th, .table td { text-align: left; vertical-align: top; padding: 8px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.table thead th { color: var(--muted); font-weight: 600; }
+.table tbody th { font-weight: 600; }
+
+@media (max-width: 640px) {
+  .table, .table tbody, .table tr, .table th, .table td { display: block; width: 100%; }
+  .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .table tr { margin: 0 0 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .table th, .table td { border-bottom: 0; padding: 6px 12px; }
+  .table td::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
+}

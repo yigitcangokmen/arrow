@@ -1,0 +1,14 @@
+.badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.synthetic, .team, .external { color: var(--text); }
+.prelock { color: var(--notproven); border-color: var(--notproven); }
+.mainnet { color: var(--proven); border-color: var(--proven); }
+.testnet { color: var(--notproven); border-color: var(--notproven); }

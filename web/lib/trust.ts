@@ -1,0 +1,195 @@
+// Trust table rows. Source of truth for the UI; WS-7 compares README.md against this array when it updates the README.
+// One row differs from the README on purpose: the 1Click row avoids a phrase that DEC R-03 forbids.
+export interface TrustRow {
+  part: string;
+  trust: string;
+  sees: string;
+  cannot: string;
+  check: string;
+  flag?: "RISKY" | "NOT PROVEN";
+}
+
+export const TRUST_ROWS: readonly TrustRow[] = [
+  {
+    part: "Seller data at rest",
+    trust: "Nobody (ciphertext; the host is untrusted)",
+    sees: "—",
+    cannot: "Decrypt",
+    check: "blob_sha256 is on chain and the enclave checks it",
+  },
+  {
+    part: "Program key / PROTECTED_MASTER",
+    trust: "OutLayer keystore (TDX) and the shared OutLayer master",
+    sees: "Inside the TEE",
+    cannot: "Release to an unpinned wasm or a non-Arrow caller",
+    check: "WasmHash and Predecessor conditions; in-wasm network allowlist; negative tests recorded on /verify",
+  },
+  {
+    part: "OutLayer keystore DAO",
+    trust: "Can export keys on \"cessation\"",
+    sees: "Potentially everything",
+    cannot: "—",
+    check: "Open risk",
+    flag: "RISKY",
+  },
+  {
+    part: "Evaluation",
+    trust: "Intel TDX (OutLayer worker)",
+    sees: "Plaintext inside the TEE",
+    cannot: "Emit anything outside the schema",
+    check: "Open source; attestation wasm_hash",
+  },
+  {
+    part: "LLM",
+    trust: "NEAR AI gateway (TDX) and the model TEE (TDX + NVIDIA CC)",
+    sees: "A 40-row sample and the criteria",
+    cannot: "Retain data (NEAR AI's zero-data-retention claim is a trust assumption)",
+    check: "/v1/attestation/report shows the endpoint's current attestation, not eval-time; the wasm does not verify quotes itself",
+    flag: "NOT PROVEN",
+  },
+  {
+    part: "Wasm to NEAR AI",
+    trust: "TLS (not E2EE)",
+    sees: "—",
+    cannot: "—",
+    check: "Endpoint and model ID are fixed in the source",
+  },
+  {
+    part: "OutLayer coordinator (closed source)",
+    trust: "Liveness",
+    sees: "Encrypted input",
+    cannot: "Read secrets",
+    check: "If it fails, the callback gets null and the buyer is refunded in full",
+  },
+  {
+    part: "outlayer.near and intents.near contracts",
+    trust: "Their owners (both are upgradable); Arrow depends on them",
+    sees: "—",
+    cannot: "—",
+    check: "Open risk; verify reads historical transactions",
+    flag: "RISKY",
+  },
+  {
+    part: "Arrow operator",
+    trust: "Relayer liveness and the gas tank",
+    sees: "Encrypted blobs",
+    cannot: "Read data, take funds, or change the contract or wasm hash after the lock",
+    check: "No access keys after the lock transaction; the contract owns itself",
+  },
+  {
+    part: "NEAR AI API key (inside an OutLayer secret)",
+    trust: "Billing",
+    sees: "Usage volume",
+    cannot: "See content",
+    check: "—",
+  },
+  {
+    part: "1Click / PoA bridge (Intents Technology)",
+    trust: "Short custody during swaps. Users do not see a bridge step, but Base and Solana USDC arrive as omft.near bridged tokens",
+    sees: "Swap transactions",
+    cannot: "—",
+    check: "1Click /v0/status",
+  },
+  {
+    part: "Output channel",
+    trust: "Schema and rule composition",
+    sees: "At most 5.67 bits per eval (scored), 1.58 (verdict)",
+    cannot: "Free text",
+    check: "cargo test, leak-bench",
+  },
+  {
+    part: "Error channel",
+    trust: "One fixed error state, empty stderr",
+    sees: "1 state (counted in the bound)",
+    cannot: "Carry data",
+    check: "no_stderr_on_any_error, leak-bench error path",
+  },
+  {
+    part: "Side channels",
+    trust: "Not closed",
+    sees: "time_ms and instructions on chain",
+    cannot: "—",
+    check: "Timing is measured in the leak bench; the number is published once measured",
+    flag: "RISKY",
+  },
+  {
+    part: "Decision correctness",
+    trust: "Structural gates and the LLM",
+    sees: "—",
+    cannot: "The LLM cannot produce BUY unless the structural gates pass",
+    check: "quality-bench. Semantic injection on structurally valid data is an open risk",
+    flag: "RISKY",
+  },
+  {
+    part: "Buyer viewing key",
+    trust: "The buyer's EOA signature over a domain-bound message",
+    sees: "—",
+    cannot: "—",
+    check: "Any site that obtains the same signature can derive the key; an EOA is required (EIP-1271 wallets are not deterministic)",
+  },
+  {
+    part: "After purchase",
+    trust: "Buyer",
+    sees: "All data",
+    cannot: "—",
+    check: "Out of scope (resale is not prevented)",
+  },
+  {
+    part: "Time guard",
+    trust: "The host clock of the OutLayer worker",
+    sees: "—",
+    cannot: "—",
+    check: "The enclave writes an error output when the block timestamp is more than 90 s (eval) or 60 s (release) old; the clock itself is not attested",
+  },
+  {
+    part: "Leak budget",
+    trust: "The contract counter",
+    sees: "—",
+    cannot: "—",
+    check: "evals_used rises inside mt_on_transfer and never falls, not even on a refund: a refunded eval still burns budget",
+  },
+  {
+    part: "OutLayer on mainnet",
+    trust: "Its owners; the contract was upgraded this week",
+    sees: "—",
+    cannot: "—",
+    check: "The program hash is pinned in the listing, the platform underneath it can still change",
+    flag: "RISKY",
+  },
+  {
+    part: "Refunds",
+    trust: "intents.near's own mt_resolve_transfer",
+    sees: "—",
+    cannot: "—",
+    check: "Refunded to your NEAR Intents balance. Moving it back to a Base wallet is a separate 1Click withdrawal",
+  },
+  {
+    part: "x402-shaped 402 response",
+    trust: "Nothing: it carries no payment",
+    sees: "—",
+    cannot: "Move funds",
+    check: "accepts is empty on purpose; payment goes through NEAR Intents",
+  },
+  {
+    part: "40-row sample to NEAR AI",
+    trust: "TLS to the NEAR AI gateway (no E2EE)",
+    sees: "The sampled rows leave the enclave to the model TEE",
+    cannot: "—",
+    check: "Stated here and in the README; see the LLM row",
+  },
+  {
+    part: "Mainnet inference key",
+    trust: "NEAR AI billing account",
+    sees: "Usage volume",
+    cannot: "—",
+    check: "The key can be topped up but not rotated",
+  },
+  {
+    part: "Program bytes",
+    trust: "Hosting of the wasm file (hash-pinned)",
+    sees: "—",
+    cannot: "Swap the program: the hash is pinned",
+    check: "Availability depends on the host staying reachable, e.g. a public repository",
+    flag: "RISKY",
+  },
+];

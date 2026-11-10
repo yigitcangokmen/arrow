@@ -41,3 +41,9 @@ submission*.json
 evidence/.lock
 spikes/**/out/
 spikes/**/target/
+
+# web build outputs (WS5-T01)
+web/generated/
+web/public/dcap/
+web/public/demo/
+web/next-env.d.ts

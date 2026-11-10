@@ -1,0 +1,9 @@
+.box {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 24px 16px;
+  text-align: center;
+  background: var(--surface);
+}
+.title { margin: 0; font-weight: 600; }
+.body { margin-top: 8px; color: var(--muted); }
