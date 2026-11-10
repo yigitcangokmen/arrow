@@ -4,7 +4,7 @@ Measured 2026-11-10 between 18:46 and 19:20 GMT+7. All data is the synthetic dem
 
 ## Testnet
 
-- Contract: `arrow.arrowhq.testnet` running program rc `73415b8f…` (the testnet rc, built before the minhash change below) and before the binding fixes. The current testnet market `arrow-v2.arrowhq.testnet` runs rc2 `5daa76fb…` and has not been re-measured.
+- Contract: `arrow.arrowhq.testnet` running program rc `73415b8f…` (the testnet rc, built before the minhash change below) and before the binding fixes. The current testnet market `arrow-v2.arrowhq.testnet` runs rc3 `b2786f85…` and has not been re-measured.
 - Listings: seller `spike.arrowhq.testnet` listed both scored demo datasets. The blobs are on testnet FastFS.
   - Listing 8 is the unlock scene: https://testnet.nearblocks.io/txns/5TUZURcuV2RPWcy2GtH6W4K7nGUSXDCqgN1gv4WEZGGf
   - Listing 9 is the labels scene: https://testnet.nearblocks.io/txns/HTa2E87jTyR3poTtfUpTTCbWEmtonHJrJVQ3typwhhAE
