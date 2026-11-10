@@ -50,3 +50,5 @@ web/next-env.d.ts
 
 # S3a dry run output (the funded run owns spikes/s3/s3a-results.json)
 spikes/s3/s3a-dry-results.json
+.vercel
+.env.local

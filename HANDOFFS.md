@@ -29,7 +29,7 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | 11 Kas 23:00 [16:00Z] | H-WS2-a | WS-2 T12b | reproducible build (only if Docker is down) | N/A: not triggered (Docker up, WS2-T12b DONE 18:21) |
 | when it appears | H-WS2-b | WS-2 | macOS Keychain prompt | N/A unless triggered |
 | daily 13:00 and 21:00 [06:00Z / 14:00Z] | H-10 | WS-1 T14 | push | N/A as human step: agent pushes (K-02) |
-| 12 Kas 10:00 [03:00Z] (latest 21:00 [14:00Z]) | H-13a | WS-5 T04 | `/sell` blob upload | OPEN |
+| 12 Kas 10:00 [03:00Z] (latest 21:00 [14:00Z]) | H-13a | WS-5 T04 | `/sell` blob upload | DONE 11 Kas ~02:00: store arrow-blobs (store_hJvfN8WAsLpJYjIp, public, iad1) linked to arrow-market for prod/preview/dev; BLOB_READ_WRITE_TOKEN in .env and .env.local |
 | 12 Kas 12:00 [05:00Z] | H-01b | WS-1 T02 | H-12 mainnet secret | DONE by decision (DEC §K KU-11): no paid key; NEARAI_API_KEY_MAINNET = the NEAR Builders key |
 | 12 Kas 18:10 [11:10Z] | H-11 | WS-1 T16 | freeze push; agent pushes (K-02) | N/A as human step: agent pushes (K-02) |
 | 12 Kas 18:30-20:30 [11:30-13:30Z] | H-12 | WS-1 T17 | mainnet deploy, H-14 | BLOCKED until K3 freeze + H-01b (lines ready and twin-rehearsed 22:50, block below; runbook scripts/deploy/mainnet.md on main 5081eca) |
@@ -128,7 +128,7 @@ Write result to: Result line (address only, no keys).
 If it fails: ATA error → do step 3; the agent re-runs the dry quote.
 Result (human fills): "Arrow Sol" AUcCcG8YvcAW5oYuj6kvmESUoJ9Jrv5DxjXfZnvWahVj in .env SOLANA_PAYOUT_ADDRESS (21:05); 3.3 USDC + 0.002 SOL (orchestrator 21:40). Agent 21:45: Solana RPC getTokenAccountsByOwner (USDC mint EPjF…Dt1v) → one token account, 3.3 USDC; `npx tsx spikes/s4/s4a-solana-dry.ts` → "dry quote 200 · amountIn 3 · amountOut 2.989698 (2989698) · withdrawFee 9951 · timeEstimate 7 s · no ATA error", exit 0, written to spikes/s4/s4a-solana-dry.json (no addresses in the file).
 
-## H-06 · Vercel login + project link (monorepo root) · due 10 Kas 20:49 GMT+7 [13:49Z] · status: OPEN
+## H-06 · Vercel login + project link (monorepo root) · due 10 Kas 20:49 GMT+7 [13:49Z] · status: DONE 11 Kas ~01:55 (user ran: project miragelabs/arrow-market prj_TDXUNceQ…, rootDirectory web, framework nextjs; GitHub auto-deploy DISCONNECTED on purpose: deploys only by CLI after the audit fixes; .gitignore gained .vercel and .env.local, uncommitted)
 Purpose: let WS5-T10 deploy web/ as project arrow-market. Corrects PLAN H-06: Vercel CLI must run from the repo root in a monorepo (Vercel docs, monorepos).
 Preconditions: Node 24 (`source ~/.nvm/nvm.sh && nvm use` → v24.15.0); a Vercel account (Hobby is fine). `.vercelignore` is committed on main (DEC S-03; WS1-T04).
 Run exactly:

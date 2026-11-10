@@ -5,7 +5,9 @@
     "arrow-market-v2.near",
     "arrow-relayer.arrowhq.near",
     "arrow-spike.arrowhq.near",
-    "arrowhq.testnet"
+    "arrowhq.testnet",
+    "arrow-judge-45228169.testnet",
+    "arrow-judge-e3a2703c.testnet"
   ],
   "evm": [
     {
