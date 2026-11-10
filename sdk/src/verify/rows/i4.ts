@@ -48,7 +48,8 @@ export async function i4(ctx: VerifyCtx) {
     buy: has("BUY"),
     purchase: count(ctx, "buy"),
     refund: count(ctx, "refund"),
-    inbound: count(ctx, "inbound"),
+    // STATE-10: fund-seller and CLI transfers move USDC inside Intents and are recorded as inbound without a 1Click deposit.
+    inbound: ctx.runs("inbound").filter((r) => r.oneclick_deposit).length,
     outbound: count(ctx, "outbound"),
   };
   const mainnet = ctx.network === "mainnet";

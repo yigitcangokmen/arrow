@@ -38,3 +38,14 @@ describe("I4 external accounts", () => {
     expect(r.detail).toContain("+4 more");
   });
 });
+
+describe("STATE-10: I4 inbound counts only 1Click deposits", () => {
+  it("an Intents-internal transfer recorded as inbound is not an inbound swap", async () => {
+    const runs = [
+      { kind: "inbound", chain: "base", oneclick_deposit: "dep-in", observed: "" },
+      { kind: "inbound", chain: "near", oneclick_deposit: null, observed: "transferred 1 USDC buyer -> seller" },
+    ];
+    const ctx = { network: "mainnet", opts: {}, listings: async () => [], evalsOf: async () => [], runs: (...k: string[]) => runs.filter((r) => k.includes(r.kind)) } as unknown as VerifyCtx;
+    expect((await i4(ctx)).detail).toContain("inbound 1/2");
+  });
+});

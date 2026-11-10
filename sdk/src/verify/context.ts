@@ -88,8 +88,9 @@ export class VerifyCtx {
     return p;
   }
 
+  /** Runs of these kinds on this contract (STATE-2: a run that names another contract reads that contract's ids, not ours). */
   runs(...kinds: EvidenceKind[]): EvidenceRun[] {
-    return this.evidence.runs.filter((r) => kinds.includes(r.kind));
+    return this.evidence.runs.filter((r) => kinds.includes(r.kind) && (r.contract === undefined || r.contract === this.contract));
   }
 
   config() {

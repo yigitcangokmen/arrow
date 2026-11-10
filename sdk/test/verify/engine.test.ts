@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { formatReport, runVerify, SUMMARY_RE, type VerifyOptions } from "../../src/verify/index.ts";
 import { base58ToHex } from "../../src/verify/links.ts";
-import { buildWorld, fakeFetch, fixture, type World } from "./world.ts";
+import { buildWorld, fakeFetch, fixture, makeAttestation, sha, type World } from "./world.ts";
 
 const run = (w: World, extra: Partial<VerifyOptions> = {}) =>
   runVerify({ network: w.network, evidence: w.evidence, releaseSha256: w.releaseSha256, fetchImpl: fakeFetch(w), now: new Date("2026-11-12T13:00:00Z"), ...extra });
@@ -450,5 +450,59 @@ describe("STATE-8 / QA-06: get_listings pages by id", () => {
     expect(ids).toEqual(Array.from({ length: 120 }, (_, i) => i + 1));
     const views = new ArrowViews(w.network, w.contract, { fetchImpl: fakeFetch(w) });
     expect((await views.allListings()).map((l) => Number(l.id))).toEqual(ids);
+  });
+});
+
+describe("STATE-6: R8 checks the counter against the eval records", () => {
+  it("an evals_used lower than the evals the listing holds is NOT PROVEN, naming the listing", async () => {
+    const w = buildWorld("testnet");
+    const id = w.listings[0].id;
+    const held = w.evals.filter((e) => e.listing_id === id).length;
+    expect(held).toBeGreaterThan(0);
+    w.evals.push({ ...w.evals.find((e) => e.listing_id === id), id: 999 }); // one more record than the counter says
+    const r8 = row(await run(w), "R8");
+    expect(r8.label).toBe("NOT PROVEN");
+    expect(r8.detail).toContain(`listing #${id}: get_evals_by_listing has ${held + 1} evals, evals_used is ${held}`);
+  });
+});
+
+describe("STATE-2: R1 after set_program", () => {
+  /** The program moves to B; listing 1 and its evals stay under A. With `withNewEval`, listing 2 is listed and inspected under B. */
+  function moved(withNewEval: boolean) {
+    const w = buildWorld("testnet");
+    const b = Uint8Array.from({ length: 64 }, () => 9);
+    const bHash = sha(b);
+    w.config.config.program_wasm_hash = bHash;
+    w.files["https://wasm.test/arrow-tee.wasm"] = b;
+    w.releaseSha256 = bHash;
+    if (withNewEval) {
+      w.listings.push({ ...w.listings[0], id: 2, program_hash_at_list: bHash });
+      w.txs.EVAL3 = JSON.parse(JSON.stringify(w.txs.EVAL1).replaceAll("EVAL1", "EVAL3").replaceAll("4001", "4003"));
+      w.attestations[4003] = makeAttestation({ ...w.attestations[4001], request_id: 4003, transaction_hash: "EVAL3", wasm_hash: bHash, executed_wasm_sha256: bHash });
+      w.evidence.runs.push({ ...w.evidence.runs.find((r) => r.id === "e1")!, id: "e3", tx: "EVAL3", listing_id: 2, eval_id: 4 });
+    }
+    return w;
+  }
+
+  it("evals under the old program do not fail R1; one eval under the new program proves it", async () => {
+    const r1 = row(await run(moved(true)), "R1");
+    expect(r1.label, r1.detail).toBe("PROVEN");
+    expect(r1.detail).toContain("equal on 1 eval (2 under older programs not compared)");
+  });
+
+  it("runs that name another contract are not read against this one", async () => {
+    const w = buildWorld("testnet");
+    for (const r of w.evidence.runs) r.contract = "old-market.arrowhq.testnet"; // another market
+    const r = await run(w);
+    expect(row(r, "R1").label).toBe("NOT PROVEN");
+    expect(row(r, "R3").label).toBe("NOT PROVEN");
+    w.evidence.runs.forEach((x) => (x.contract = w.contract));
+    expect((await run(w)).required).toEqual({ proven: 5, total: 5 });
+  });
+
+  it("with only old-program evals R1 says so, instead of a hash mismatch", async () => {
+    const r1 = row(await run(moved(false)), "R1");
+    expect(r1.label).toBe("NOT PROVEN");
+    expect(r1.detail).toContain("no eval under the current program yet");
   });
 });

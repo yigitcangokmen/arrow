@@ -71,7 +71,7 @@ export function buildWorld(network: Network = "testnet"): World {
   const { key, blob, blobSha256 } = encryptFile(plaintext);
   const sealedKBuyer = b64.enc(seal(demoKey.buyerPk, key));
 
-  const listing = { ...view("listing.json"), id: 1, seller: "seller.arrowhq.testnet", blob_url: BLOB_URL, blob_sha256: blobSha256, evals_used: 3, max_evals: 50, mode: "scored", bits_per_eval_milli: 5673, created_at_ns: 1_762_761_600_000_000_000 };
+  const listing = { ...view("listing.json"), id: 1, seller: "seller.arrowhq.testnet", blob_url: BLOB_URL, blob_sha256: blobSha256, evals_used: 3, max_evals: 50, mode: "scored", bits_per_eval_milli: 5673, created_at_ns: 1_762_761_600_000_000_000, program_hash_at_list: wasmHash };
   const base = { listing_id: 1, buyer, buyer_pk: demoKey.buyerPk, rail: mainnet ? "mt" : "ft", sealed_result: "A".repeat(132) };
   const evals = [
     { ...base, id: 1, status: "done", h: blobSha256, refund_reason: null, settled_at_ns: 1 },

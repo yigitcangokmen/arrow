@@ -241,6 +241,9 @@ export const EvidenceRun = z.object({
   observed: z.string(),
   script: z.string(),
   commit: z.string(),
+  /** STATE-2: the market contract and program the run used; runs without them predate the field. */
+  contract: z.string().optional(),
+  program_wasm_sha256: Hash.optional(),
 });
 export type EvidenceRun = z.infer<typeof EvidenceRun>;
 
