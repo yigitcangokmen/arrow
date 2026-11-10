@@ -71,7 +71,7 @@ Write result to: bu bloğun Result satırı ("HTTP 200, <saat>, X Premium: no").
 If it fails: 401 → key yanlış kopyalandı ya da bu key başka bir base URL istiyor (dashboard'da yazan URL'yi Result'a yaz, ajan ping.sh'ı o URL'yle dener ve GATES.md S1-a'ya yazar). 402/429 → kredi yok: H-01b'yi şimdi yap ve testnet için cloud.near.ai'de $5'lık ikinci bir key aç (`NEARAI_API_KEY`'e o yazılır; DEC E-04 yedeği). Ajan bu sırada S1-b'yi `echo` modunda (NEAR AI'sız) başlatır.
 Result (human fills):
 
-## H-01b · Mainnet NEAR AI key (doldurulabilir, kilitli secret için) · due 12 Kas 12:00 GMT+7 [05:00Z] · status: OPEN
+## H-01b · Mainnet NEAR AI key (doldurulabilir, kilitli secret için) · due 12 Kas 12:00 GMT+7 [05:00Z] · status: SUPERSEDED (KU-11, 2026-11-11): no paid key is bought; the mainnet secret uses the free NEAR Builders key (`NEARAI_API_KEY_MAINNET` = `NEARAI_API_KEY`), which cannot be topped up and has no published expiry; `balances.ts --ops` runs a liveness probe instead of a credit check. The steps below are kept for history only.
 Purpose: arrow-market.near'in OutLayer secret'ı kilitten sonra değiştirilemez. Bu yüzden mainnet'e, cloud.near.ai'de kredisi sonradan yüklenebilen ayrı bir key girer (DEC E-04, G-03, B-14). Testnet/bench trafiği bu key'in kredisini tüketmez.
 Preconditions: H-01a DONE. Kart ya da kripto ile $10. Para kararı (DEC K-06) kullanıcı tarafından onaylandı.
 Run exactly:
@@ -82,7 +82,7 @@ Run exactly:
     5. NEARAI_API_KEY="$(grep '^NEARAI_API_KEY_MAINNET=' .env | cut -d= -f2-)" bash spikes/s1/ping.sh
 Expected: `HTTP 200`; cloud.near.ai dashboard'da bakiye ≥ $9
 Write result to: Result satırı ("HTTP 200, bakiye $…, <saat>")
-If it fails: ödeme reddi → kripto ile tekrar; 12 Kas 18:00'e kadar olmazsa H-12 H-01a key'iyle yapılır ve trust table'a "mainnet inference key is NOT top-up-able" RISKY satırı girer (ajan yazar)
+[SUPERSEDED (KU-11)] If it fails: ödeme reddi → kripto ile tekrar; 12 Kas 18:00'e kadar olmazsa H-12 H-01a key'iyle yapılır ve trust table'a "mainnet inference key is NOT top-up-able" RISKY satırı girer (ajan yazar)
 Result (human fills):
 
 ## H-02 · 10 NEAR + arrowhq.near · due 10 Kas 17:49 GMT+7 [10:49Z] (en geç 20:49 [13:49Z]) · status: DONE
@@ -174,6 +174,7 @@ Purpose: S1-b ve freeze için public raw GitHub URL (DEC S-01, S-02); commit ge�
 Preconditions (ajan çıktısı, 2026-11-10 15:07-15:08 GMT+7):
     - `bash scripts/secret-scan.sh` → `SECRET_SCAN: PASS` (raw S-04 grep 17 eşleşme, hepsi boş env adı ya da doküman satırı; strict kalıp yok; gitleaks "no leaks found", 3 commit).
     - Plan belgeleri takipte değil: `git ls-files | grep -E "KICKOFF|DECISIONS|PLAN|OPEN-QUESTIONS|^tasks/"` → boş (DEC S-01, W-17). The local maintainer notes file is gitignored.
+    - Takip edilen dosyalarda ve geçmişte yasak kelime yok: `bash scripts/secret-scan.sh --public` → `SECRET_SCAN: PASS` (kelimeler `.git/info/banned-words` içinde, takipte değil)
     - Push DONE (ajan, K-02): `git push -u origin main` → `origin/main = 6c7b4d37` (42595fc bootstrap, aa012ce scaffold + fixtures v1, 6c7b4d3 ledger sync). `gh repo view yigitcangokmen/arrow --json visibility` → `PRIVATE`.
     - Not: `STATUS.md` henüz commit edilmedi (Workstreams tablosu oturum model adlarını içeriyor, DEC K-04); public'ten önce entegratör bu satırları temizleyip commit eder ya da defteri yerel tutar.
 Run exactly (ONLY if the user approves making the repo public):
@@ -296,18 +297,18 @@ Result (human fills): DONE 22:15 GMT+7. mt_transfer 20000 → arrowhq.near 7pQZR
 
 ## H-12 · Mainnet deploy + secret + init_program_key · due 12 Kas 18:30-20:30 GMT+7 [11:30-13:30Z] · status: BLOCKED until K3 freeze (12 Kas 18:00) + H-01b
 Purpose: deploy the market to arrow-market.near, not locked (DEC B-06); arrow-market-v2.near stays a reserve with no deploy (DEC D-07). Rewritten 22:50 by S-α (WS1-T17) as single lines in run order; full runbook with expected output and each step's testnet twin: `scripts/deploy/mainnet.md` (ws/1-gates 5081eca, on main after the next merge).
-Preconditions: K3 PASS (release/sha256.txt written; `.env` PROGRAM_WASM_URL / PROGRAM_WASM_SHA256 = frozen values); H-01b DONE (`.env` NEARAI_API_KEY_MAINNET filled); step 0 prints PASS on every row. Agent read-only 22:45: arrow-market.near exists, 0.1 NEAR, no code; arrowhq.near 9.0611 NEAR (needs ≥ 3.4 + 0.5 + gas); outlayer not logged in on mainnet; contract wasm sha 24fe374a…6d4def = SHA256SUMS; storage-estimate → deposit 3.4 NEAR. Today step 0 FAILs exactly on `program_frozen` and `nearai_key_mainnet`. Each `sign-with-keychain` may show a macOS Keychain prompt: allow it.
+Preconditions: K3 PASS (release/sha256.txt written; `.env` PROGRAM_WASM_URL / PROGRAM_WASM_SHA256 = frozen values); H-01b DONE (`.env` NEARAI_API_KEY_MAINNET filled); step 0 prints PASS on every row. Agent read-only 22:45: arrow-market.near exists, 0.1 NEAR, no code; arrowhq.near 9.0611 NEAR (needs ≥ the step 0 deposit + 0.5 + gas); outlayer not logged in on mainnet; contract wasm = SHA256SUMS and fresh (WS2-T13 reproducible rebuild at the final commit is a hard precondition; `mainnet-check.sh wasm` → PASS contract_wasm_fresh); storage-estimate prints the deposit. Today step 0 FAILs exactly on `program_frozen` and `nearai_key_mainnet`. Each `sign-with-keychain` may show a macOS Keychain prompt: allow it.
 Twin: every signing line ran 22:30-22:44 on testnet against mainnet-dryrun.arrowhq.testnet with the same wasm, the same init JSON and the same `sign-with-keychain` form (create Eb6sXMQM…, storage EVTKMY4N…, deploy+init 29RhuCrm…, tank C5vnSJfF…, secret set + logout/restore OK, init_program_key DD4Q6MX8… → "derive failed: null" because outlayer.near does not exist on testnet, self-only check frrHwP7u… → E14, account deleted 2wU5urgX…). Finding: `new` only accepts the mainnet init JSON on arrow-market.near (secrets_ref must be the contract itself; first twin try FM8kHR3y… → E15 secrets_ref), so the twin rendered its own name there.
 Run exactly (one line per step, in this order):
     0. preflight (read-only):
        cd ~/Desktop/hackathon/near-builds/arrow && bash scripts/deploy/mainnet-check.sh pre
-       → every row PASS, last lines "deposit for step 1: 3.4 NEAR" and "PASS outlayer_logged_out on mainnet". Stop on any FAIL.
+       → every row PASS, last lines "deposit for step 1: <N> NEAR" (send that amount in step 1) and "PASS outlayer_logged_out on mainnet". Stop on any FAIL.
     1. storage money:
-       near tokens arrowhq.near send-near arrow-market.near '3.4 NEAR' network-config mainnet sign-with-keychain send
-       → "<arrowhq.near> has transferred 3.4 NEAR to <arrow-market.near> successfully."
+       near tokens arrowhq.near send-near arrow-market.near '<N> NEAR' network-config mainnet sign-with-keychain send   # <N> = the deposit step 0 printed
+       → "<arrowhq.near> has transferred <N> NEAR to <arrow-market.near> successfully."
     2. deploy + init:
        cd ~/Desktop/hackathon/near-builds/arrow && shasum -a 256 release/contracts/arrow-mainnet.wasm && I=$(bash scripts/deploy/render-init.sh mainnet) && near contract deploy arrow-market.near use-file release/contracts/arrow-mainnet.wasm with-init-call new json-args "$I" prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' network-config mainnet sign-with-keychain send
-       → sha 24fe374ac7b4410a6324bfd924bdcfa9a1dab50829dba21aaeea8c10876d4def, then "Contract code has been successfully deployed."
+       → the sha in release/contracts/SHA256SUMS (rebuilt reproducibly at the final commit, WS2-T13, hard precondition; `bash scripts/deploy/mainnet-check.sh wasm` → PASS contract_wasm_fresh), then "Contract code has been successfully deployed."
     3. gas tank:
        near contract call-function as-transaction arrow-market.near fund_tank json-args '{}' prepaid-gas '30.0 Tgas' attached-deposit '0.5 NEAR' sign-as arrowhq.near network-config mainnet sign-with-keychain send
        → log "arrow: tank funded 500000000000000000000000"
