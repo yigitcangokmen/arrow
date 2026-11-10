@@ -124,6 +124,24 @@ mod tests {
         band(u128::from(inter), u128::from(n_a))
     }
 
+    /// X12-U1: a reseller who prefixes or suffixes every key with an invisible character still
+    /// meets the buyer's own list: novelty 1, not 5.
+    #[test]
+    fn invisible_characters_do_not_fake_novelty() {
+        let b = keys("ACME-", 0..1000);
+        let sig = signature(b.iter().map(String::as_str)).unwrap();
+        let tricks: [fn(&str) -> String; 4] = [
+            |k| format!("\u{200B}{k}"),
+            |k| format!("{k}\u{2060}"),
+            |k| k.replacen('A', "A\u{FE0F}", 1),
+            |k| format!("\u{E0020}{k}\u{E007F}"),
+        ];
+        for (i, t) in tricks.iter().enumerate() {
+            let base: Vec<u64> = b.iter().filter_map(|k| key_hash(&t(k))).collect();
+            assert_eq!(novelty(true, true, Some(counts(&base, &sig).unwrap())), Some(1), "trick {i}");
+        }
+    }
+
     /// Deterministic key sets: |A| = 1000, |B| ∈ {100, 1000, 5000}, |A∩B| = pct · min(|A|, |B|).
     /// All within ±1 band; 0% exact; B ⊂ A and A = B exact. (A ⊂ B with |B| = 5|A| is exact here,
     /// but by simulation only in ~85% of random sets: k = 128 limits accuracy when |B| ≫ |A|.)

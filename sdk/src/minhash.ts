@@ -21,9 +21,14 @@ export function loadParams(): MinhashParams {
 }
 const DEFAULT_PARAMS = loadParams();
 
-/** trim, NFKC, lowercase, whitespace runs to a single space. Zero-width characters are not removed. */
+/** Default_Ignorable_Code_Point, written out so TS and Rust agree without either side's Unicode tables. */
+const DEFAULT_IGNORABLE =
+  /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\uFFF0-\uFFF8\u{1BCA0}-\u{1BCA3}\u{1D173}-\u{1D17A}\u{E0000}-\u{E0FFF}]/gu;
+
+/** trim, NFKC, lowercase, Default_Ignorable characters deleted, the U+0307 right after an "i" deleted,
+ * whitespace runs to a single space, trim. Invisible characters cannot make a known key look new. */
 export function normalizeKey(s: string): string {
-  return s.trim().normalize("NFKC").toLowerCase().replace(/\s+/gu, " ");
+  return s.trim().normalize("NFKC").toLowerCase().replace(DEFAULT_IGNORABLE, "").replace(/i\u0307/g, "i").replace(/\s+/gu, " ").trim();
 }
 
 /** First 8 bytes of sha256(utf8(normalizeKey(s))), big-endian. */

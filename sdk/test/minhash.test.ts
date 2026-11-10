@@ -33,15 +33,16 @@ describe("minhash", () => {
   });
 
   it("normalize_vectors", () => {
-    expect(vectors.cases).toHaveLength(8);
+    expect(vectors.cases).toHaveLength(9);
     for (const c of vectors.cases) expect(c.keys.map(normalizeKey), c.id).toEqual(c.normalized);
   });
 
   it("normalization rules", () => {
     expect(normalizeKey("  Ａ B\t c ")).toBe("a b c");
     expect(normalizeKey("ΟΔΟΣ")).toBe("οδος"); // final sigma
-    expect(normalizeKey("İ")).toBe("i̇");
-    expect(normalizeKey("a​b")).toBe("a​b"); // zero-width characters stay (DEC I-17)
+    expect(normalizeKey("İ")).toBe("i");
+    expect(normalizeKey("a\u200Bb")).toBe("ab"); // Default_Ignorable characters go (X12-U1)
+    expect(normalizeKey("\u200BACME\u2060")).toBe("acme");
   });
 
   it("minhash_vectors_exact", () => {
