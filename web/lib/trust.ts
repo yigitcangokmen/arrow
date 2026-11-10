@@ -110,7 +110,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "Two failure states on chain: ok:false (refund reason not_ok) and null. Scored mode has at least 52 outcomes and verdict mode 4 (2 bits); the 5.67 and 1.58 bits and the on-chain budget do not count null",
     cannot: "Carry data",
     check:
-      "scripts/dev/stderr-harness.sh covers stderr and the fixed ok:false output. Seen locally, not a committed test: a 5 MB dataset with U+FDFA in the key column runs out of fuel when the buyer names it as key_column, so the buyer can steer between null and a verdict",
+      "scripts/dev/stderr-harness.sh covers stderr, the fixed ok:false output and out-of-memory. A key column that expands under normalization (U+FDFA) ends as ok:false, not out of fuel (key_column_normalization_is_capped), and the injection scan reads only the cell prefix the prompt shows. null still comes from OutLayer or worker failures",
     flag: "RISKY",
   },
   {
@@ -150,7 +150,8 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "The host clock of the OutLayer worker",
     sees: "—",
     cannot: "—",
-    check: "The enclave writes an error output when the block timestamp is more than 90 s (eval) or 60 s (release) old; the clock itself is not attested",
+    check:
+      "The enclave writes an error output when the block timestamp is more than 90 s (eval) or 45 s (release) old; the clock itself is not attested. A release output OutLayer publishes after the yield window is refused, but its k (sealed to the buyer) is public while the buyer keeps the refund",
     flag: "RISKY",
   },
   {

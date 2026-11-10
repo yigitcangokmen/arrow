@@ -43,7 +43,7 @@ const buyerSk = scalarFromLabel("arrow:perf:buyer:v1");
 const buyerPk = publicKeyHex(buyerSk);
 const SELLER = "perf.arrowhq.testnet";
 
-interface Case { name: string; blobUrl: string; blobSha: string; sealedK: string; columns: string[]; crit: Criteria; mode: string }
+interface Case { name: string; blobUrl: string; blobSha: string; sealedK: string; columns: string[]; crit: Criteria; mode: string; release?: boolean }
 
 function makeCase(name: string, plain: Uint8Array, crit: Criteria, fakeMode: string): Case {
   const enc = encryptFile(plain);
@@ -55,6 +55,8 @@ function makeCase(name: string, plain: Uint8Array, crit: Criteria, fakeMode: str
 }
 
 function input(c: Case): Buffer {
+  const listing = { id: 1, seller: SELLER, blob_url: c.blobUrl, blob_sha256: c.blobSha, sealed_k: c.sealedK, mode: "scored", columns: c.columns };
+  if (c.release) return Buffer.from(JSON.stringify({ v: 1, action: "release", listing, release: { id: 1, buyer_pk: buyerPk } }));
   return Buffer.from(JSON.stringify({
     v: 1, action: "eval",
     listing: { id: 1, seller: SELLER, blob_url: c.blobUrl, blob_sha256: c.blobSha, sealed_k: c.sealedK, mode: "scored", columns: c.columns },
@@ -91,7 +93,8 @@ function runWasm(c: Case, o: { fuel?: number; mem?: number; rss?: boolean; fakeL
   try {
     const v = JSON.parse(out);
     ok = v.ok === true;
-    if (ok) {
+    if (ok && c.release) state = "release";
+    else if (ok) {
       const s = decodeEvalResult(v.r, buyerSk, "scored");
       state = `${s.verdict}·${s.fit}·${s.novelty}`;
     }
@@ -156,7 +159,29 @@ if (!values["no-fuel"]) {
   fuel = { [demo1.name]: minFuel(demo1), [demo2.name]: minFuel(demo2), [maxCase.name]: minFuel(maxCase) };
   console.log(`fuel to finish (±2 %): ${Object.entries(fuel).map(([k, v]) => `${k}=${v.toExponential(2)}`).join(" ")}`);
 }
-const allOk = rows.every((r) => r.ok) && mx.ok;
+// Cases that used to trap (fuel) on honest or buyer-chosen input, and the 5 MiB release (DEC I-13 limits):
+// - ENC-LEAK-4: 200k rows whose key column is 7 x U+FDFA (NFKC: 18 characters each). The key normalization budget
+//   ends it as ok:false; before, it ran out of fuel only when the buyer named the column, a buyer-steered null.
+// - ENC-A4: 40 rows of ~130 KB prose. Only the cell prefix the prompt shows is scanned.
+// - ENC-A1: release downloads, hashes and opens a 5 MiB blob under limits_release.
+const REL_FUEL = 2_000_000_000, REL_MEM = 128 * 1024 * 1024; // limits_release (init-*.json)
+const enc = new TextEncoder();
+let fdfaCsv = "k,v\n";
+for (let i = 0; i < MAX_ROWS; i++) fdfaCsv += "\uFDFA".repeat(7) + `,${i % 10}\n`;
+const fdfa = makeCase("fdfa-key", enc.encode(fdfaCsv), { v: 1, text: "Synthetic perf case: U+FDFA key column.", key_column: "k", minhash: maxCrit.minhash, min_fit: 4, min_novelty: 3 }, "ok_pass");
+const para = "Synthetic quarterly note: steady volume across venues, settlement on the next business day. ";
+let proseCsv = "id,note\n";
+for (let i = 0; i < 40; i++) proseCsv += `${i},"${para.repeat(Math.floor(130_000 / para.length))}"\n`;
+const prose = makeCase("prose-40x130k", enc.encode(proseCsv), { v: 1, text: "Synthetic perf case: long prose cells.", min_fit: 4, min_novelty: 3 }, "ok_pass");
+const relCase = { ...makeCase("release-5mib", enc.encode("k\n" + "a".repeat(5 * 1024 * 1024 - 43) + "\n"), maxCrit, "ok_pass"), release: true };
+const fx = runWasm(fdfa, { fuel: FUEL_CAP, mem: MEM_CAP, fakeLlm: true });
+const px = runWasm(prose, { fuel: FUEL_CAP, mem: MEM_CAP, fakeLlm: true });
+const rx = runWasm(relCase, { fuel: REL_FUEL, mem: REL_MEM, fakeLlm: true });
+const fdfaOk = !fx.trapped && !fx.ok; // capped: ok:false, never a trap
+console.log(`fdfa-key (key_column of U+FDFA): ${fx.trapped ? `TRAP ${fx.trap}` : fx.ok ? "ok:true (expected ok:false)" : "ok:false (capped)"}`);
+console.log(`prose-40x130k: ${px.ok ? "ok" : `FAILED${px.trap ? ` TRAP ${px.trap}` : ""}`}${values["no-fuel"] ? "" : ` fuel=${minFuel(prose).toExponential(2)}`}`);
+console.log(`release-5mib at limits_release (fuel ${REL_FUEL}, ${REL_MEM / 1048576} MiB): ${rx.ok ? "ok" : `FAILED${rx.trap ? ` TRAP ${rx.trap}` : ""}`}${values["no-fuel"] ? "" : ` fuel=${minFuel(relCase).toExponential(2)}`}`);
+const allOk = rows.every((r) => r.ok) && mx.ok && fdfaOk && px.ok && rx.ok;
 console.log(`local work p50=${p50.toFixed(2)}s p95=${p95.toFixed(2)}s (llm=${llm}, n=${nRuns}, p95 = nearest rank) ; maxcase ${mx.ok ? "OK" : "FAILED"}${fuel ? ` fuel=${fuel[maxCase.name].toExponential(2)}` : ""}`);
 if (values.json) {
   writeFileSync(values.json, JSON.stringify({
