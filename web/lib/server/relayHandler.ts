@@ -17,7 +17,7 @@ import { NETWORKS } from "@arrow/sdk/config";
 // One execute_intents prepays 600 TGas = 0.60 NEAR, locked until every follow-up receipt has run (about 40-60 s, measured on
 // mainnet). Below this a second payment passes the balance check and then fails inside the node.
 const MIN_RELAYER_BALANCE = nearToYocto("0.65");
-/** Longer than any execute_intents receipt tree (the OutLayer round trip is about 40-60 s): a balance that stays under the
+/** Longer than any execute_intents payment takes to finish (the OutLayer round trip is about 40-60 s): a balance that stays under the
  *  minimum this long is not a payment in flight but a relayer out of gas funds (W2-7). */
 const IN_FLIGHT_MAX_MS = 5 * 60_000;
 /** Evals are the one op a funded signer can repeat for free (a failed eval refunds); keep this much tank for lists and buys. */
