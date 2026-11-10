@@ -377,6 +377,11 @@ describe("mainnet", () => {
     const keys = buildWorld("mainnet");
     keys.accessKeys = [{ public_key: "ed25519:x" }];
     expect(row(await run(keys), "R6").label).toBe("NOT PROVEN");
+    const intentsKey = buildWorld("mainnet"); // X12-3: a key registered inside intents.near survives the NEAR DeleteKey
+    intentsKey.intentsKeys = ["ed25519:3666zm"];
+    const ik = row(await run(intentsKey), "R6");
+    expect(ik.label).toBe("NOT PROVEN");
+    expect(ik.detail).toContain("ed25519:3666zm");
     const signer = buildWorld("mainnet");
     signer.txs.LOCK1.transaction.signer_id = "someone.near";
     expect(row(await run(signer), "R6").label).toBe("NOT PROVEN");

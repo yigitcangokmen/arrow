@@ -1,9 +1,9 @@
-import { viewAccessKeyList, viewAccount } from "../../rpc.ts";
+import { view, viewAccessKeyList, viewAccount } from "../../rpc.ts";
 import type { VerifyCtx } from "../context.ts";
 import { txLink } from "../links.ts";
 import { row } from "./util.ts";
 
-export const TITLE = "lock: the contract account has no access keys";
+export const TITLE = "lock: the contract account has no access keys, on NEAR or inside intents.near";
 
 /** Mainnet only. Pre-lock the row is informational; with an unlocked reason it is RISKY. Neither counts as REQUIRED. */
 export async function r6(ctx: VerifyCtx) {
@@ -28,11 +28,15 @@ export async function r6(ctx: VerifyCtx) {
   if (/^1+$/.test(account.code_hash)) return row("R6", "NOT PROVEN", true, TITLE, `${ctx.contract} has no contract code deployed`);
   const keys = (await viewAccessKeyList(ctx.network, ctx.contract, ctx.rpcOpts)).keys;
   if (keys.length > 0) return row("R6", "NOT PROVEN", true, TITLE, `${ctx.contract} still has ${keys.length} access key${keys.length === 1 ? "" : "s"}`);
+  // X12-3: the contract's USDC lives in intents.near, which keeps its own key registry; a key added there before the lock
+  // survives the NEAR DeleteKey and can still sign transfer intents for the contract's balance.
+  const intentsKeys = await view<string[]>(ctx.network, ctx.cfg.intents ?? "intents.near", "public_keys_of", { account_id: ctx.contract }, ctx.rpcOpts);
+  if (intentsKeys.length > 0) return row("R6", "NOT PROVEN", true, TITLE, `intents.near still holds ${intentsKeys.length} key${intentsKeys.length === 1 ? "" : "s"} for ${ctx.contract}: ${intentsKeys.join(", ")}`);
   const tx = await ctx.tx(lock.tx, [ctx.contract]);
   const actions: any[] = tx?.transaction?.actions ?? [];
   const succeeded = tx?.status && "SuccessValue" in tx.status;
   const deleteKeys = actions.filter((a) => a === "DeleteKey" || a?.DeleteKey !== undefined);
   if (tx?.transaction?.signer_id !== ctx.contract) return row("R6", "NOT PROVEN", true, TITLE, `lock tx signer is ${String(tx?.transaction?.signer_id)}, not ${ctx.contract}`);
   if (deleteKeys.length === 0 || !succeeded) return row("R6", "NOT PROVEN", true, TITLE, `lock tx has ${deleteKeys.length} DeleteKey action(s), ${succeeded ? "succeeded" : "did not succeed"}`);
-  return row("R6", "PROVEN", true, TITLE, `0 access keys · ${deleteKeys.length} DeleteKey signed by ${ctx.contract}`, [txLink(ctx.network, "near", lock.tx)]);
+  return row("R6", "PROVEN", true, TITLE, `0 access keys · 0 intents.near keys · ${deleteKeys.length} DeleteKey signed by ${ctx.contract}`, [txLink(ctx.network, "near", lock.tx)]);
 }

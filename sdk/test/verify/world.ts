@@ -43,6 +43,8 @@ export interface World {
   files: Record<string, Uint8Array>;
   oneclick: Record<string, any>;
   accessKeys: unknown[];
+  /** intents.near public_keys_of(contract) */
+  intentsKeys: string[];
   codeHash: string;
   evidence: EvidenceFile;
   /** every RPC call: [url, method] */
@@ -148,7 +150,7 @@ export function buildWorld(network: Network = "testnet"): World {
       "dep-in": { status: "SUCCESS", updatedAt: "x", swapDetails: { originChainTxHashes: [{ hash: "0xbase1", explorerUrl: "https://basescan.org/tx/0xbase1" }], destinationChainTxHashes: [] } },
       "dep-out": { status: "SUCCESS", updatedAt: "x", swapDetails: { originChainTxHashes: [], destinationChainTxHashes: [{ hash: "solsig1", explorerUrl: "https://solscan.io/tx/solsig1" }] } },
     },
-    accessKeys: [], codeHash: "BnQQU2PY3ngVwf1KixcYbxCVnYqzrwBAMk6eku5BKpMh", evidence, calls: [],
+    accessKeys: [], intentsKeys: [], codeHash: "BnQQU2PY3ngVwf1KixcYbxCVnYqzrwBAMk6eku5BKpMh", evidence, calls: [],
   };
 }
 
@@ -168,6 +170,7 @@ export function fakeFetch(w: World): typeof fetch {
       case "get_eval": return w.evals.find((e) => e.id === args.eval_id) ?? null;
       case "get_purchase": return w.purchases.find((p) => p.id === args.purchase_id) ?? null;
       case "leak_budget": return w.leak[args.listing_id] ?? null;
+      case "public_keys_of": return w.intentsKeys;
       default: throw new Error(`unexpected view ${name}`);
     }
   };
