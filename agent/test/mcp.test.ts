@@ -55,7 +55,7 @@ const call = async (c: Client, name: string, args: Record<string, unknown>) => {
 };
 
 describe("arrow MCP server", () => {
-  it("tools_list_exactly_seven: the four market tools plus the three recovery tools (QA-07)", async () => {
+  it("tools_list_exactly_seven", async () => { // the four market tools plus the three recovery tools (QA-07)
     const { tools } = await (await connect()).listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(["buy", "decrypt_purchase", "get_eval_result", "get_listing", "get_purchase", "inspect_before_buy", "list_listings"]);
     const inspect = tools.find((t) => t.name === "inspect_before_buy")!.description!;

@@ -149,7 +149,7 @@ seller browser                         buyer (any chain)
 ## For agents: CLI and MCP
 
 - CLI: `npm run arrow -- <list|eval|buy|status|decrypt>` (always through `npm run`; the bare npx package name belongs to an unrelated project). Exit codes: 0 ok, 1 error, 2 usage, 3 pending, 4 refunded, 5 needs a terminal or `--yes`, 6 leak budget exhausted.
-- MCP: `npx -y tsx agent/src/mcp.ts` serves a server named `arrow` with the tools `inspect_before_buy`, `buy`, `get_listing`, `list_listings`. `TODO(mcp-snippet)` client configuration snippet and a per-call spend cap.
+- MCP: `npx -y tsx agent/src/mcp.ts` serves a server named `arrow` with the tools `inspect_before_buy`, `buy`, `get_listing`, `list_listings` and the free recovery tools `get_eval_result`, `get_purchase`, `decrypt_purchase`. `TODO(mcp-snippet)` client configuration snippet and a per-call spend cap.
 - HTTP: `TODO(web)` `/api/x402/<listing_id>` returns an x402-shaped 402 response whose `accepts` is empty on purpose. x402 tells you how to pay. Arrow tells you whether it's worth paying. Payment itself goes through NEAR Intents (`mt_on_transfer`), not an x402 facilitator.
 
 ## Differences from prior work
