@@ -13,8 +13,8 @@ You cannot sell information: to judge its value the buyer must see it, and once 
 - Mainnet contract: `TODO(mainnet)` `arrow-market.near`, locked (all access keys deleted) in tx `{{LOCK_TX}}`. Program wasm sha256 `{{WASM_SHA256}}`, contract wasm sha256 `{{CONTRACT_WASM_SHA256}}`.
 - Testnet: contract `arrow.arrowhq.testnet` (live, release-candidate program wasm `73415b8f…` served from testnet FastFS) and the testnet token `arrow-usd.arrowhq.testnet`. The end-to-end run on it is green (9 of 9 steps) and the enclave has produced real verdicts with a NEAR AI call inside it; see [Testnet end-to-end and timings](#testnet-end-to-end-and-timings). The release candidate is not the final program: the wasm freeze is still ahead, and listings made now stop being readable when the program key changes.
 - Demand: `{{DEMAND_LINE}}`
-- Gates run so far (testnet and free mainnet views): S2, S1-b (echo), S3a (dry), S4-b, and the K2 testnet end-to-end run. See [Gates and evidence](#gates-and-evidence).
-- Not live / not claimed: NEAR AI calls from inside the enclave on mainnet (`TODO(mainnet)`; on testnet they run), the paid cross-chain inbound (S4-a), mainnet purchases, E2EE to NEAR AI (TLS only), on-chain TDX quote verification, resale prevention, eval-time NEAR AI attestation.
+- Gates run so far: S2, S1-b (echo), S4-b and the K2 testnet end-to-end run on testnet, and on mainnet S3a (funded simulate), S3b (transfer notification and refund), S3c (OutLayer composition plus the B5 negative test) and S4-a (paid cross-chain inbound, 2 USDC from Base). The mainnet gates ran against a spike contract and a spike program, not against the Arrow contract and program. See [Gates and evidence](#gates-and-evidence) and [Mainnet gates](#mainnet-gates-run-on-2026-11-10).
+- Not live / not claimed: the Arrow program and contract on mainnet (`TODO(mainnet)`; on testnet the enclave runs real verdicts, and a spike program made one NEAR AI call from a mainnet enclave), mainnet purchases, E2EE to NEAR AI (TLS only), on-chain TDX quote verification, resale prevention, eval-time NEAR AI attestation.
 - The testnet contract is not locked, so daily caps can be adjusted.
 
 ## Trust table
@@ -24,7 +24,7 @@ Labels: **PROVEN** = a command or tx in this repo shows it. **RISKY** = true, an
 | Part | Who you trust | Can see | Cannot | How to check | Label |
 |---|---|---|---|---|---|
 | Seller data at rest | Nobody (ciphertext; the blob host is untrusted) | Ciphertext | Decrypt | `blob_sha256` is on chain and the enclave checks it before reading; `cargo test -p arrow-core` | TODO (mainnet run) |
-| Program key / `PROTECTED_MASTER` | OutLayer keystore (TDX) and the shared OutLayer master | Inside the TEE | Release to an unpinned wasm or a non-Arrow caller | `WasmHash` + `Predecessor` access condition. Negative test: an attacker account calling OutLayer directly gets `Access denied by access condition`, tx [`smm9T86m…`](https://testnet.nearblocks.io/txns/smm9T86m4RU8grrrbHgAsSd3TeD5zkCuT4FH4tbugH6) | PROVEN (testnet, echo program) |
+| Program key / `PROTECTED_MASTER` | OutLayer keystore (TDX) and the shared OutLayer master | Inside the TEE | Release to an unpinned wasm or a non-Arrow caller | `WasmHash` + `Predecessor` access condition. Negative test: an attacker account calling OutLayer directly gets `Access denied by access condition`, tx [`smm9T86m…`](https://testnet.nearblocks.io/txns/smm9T86m4RU8grrrbHgAsSd3TeD5zkCuT4FH4tbugH6); same refusal on mainnet, tx [`Bzzg22r9…`](https://nearblocks.io/txns/Bzzg22r9tRpUZrbKmJDHSBWLCtgXhEAV3Vj3wuSCwbsf) | PROVEN (testnet echo program, mainnet spike program) |
 | OutLayer keystore DAO | Can export keys on "cessation" | Potentially everything | n/a | Open risk | RISKY |
 | Evaluation | Intel TDX (OutLayer worker) | Plaintext inside the TEE | Emit anything outside the schema | Open source; attestation `wasm_hash` and `transaction_hash` match the run (S1-b item 5) | PROVEN (testnet, echo program) |
 | LLM | NEAR AI gateway (TDX) and model TEE (TDX + NVIDIA CC) | 40 sampled rows + criteria | Retain data (NEAR AI's zero-data-retention claim is a trust assumption) | `/v1/attestation/report` shows the endpoint's **current** attestation, not eval-time; the wasm does not verify quotes itself | NOT PROVEN |
@@ -35,8 +35,8 @@ Labels: **PROVEN** = a command or tx in this repo shows it. **RISKY** = true, an
 | Program bytes | Whoever serves the wasm URL | The wasm | Change it unnoticed (hash-pinned) | Availability depends on the host (FastFS on testnet; the repo is private) | RISKY |
 | Arrow operator | Relayer liveness, gas tank | Encrypted blobs | Read data, take funds, change contract or wasm hash after the lock | `TODO(lock)` no access keys (`{{LOCK_TX}}`); the contract owns itself | TODO |
 | NEAR AI API key (inside the OutLayer secret) | Billing | Usage volume | See content | The mainnet inference key can be topped up, not rotated | RISKY |
-| 1Click and the PoA bridge (Intents Technology) | Short custody during swaps | Swap txs | n/a | Base and Solana USDC arrive as bridged tokens (`omft.near`); 1Click `/v0/status`. `TODO(S4-a)` paid inbound not run yet | NOT PROVEN |
-| Refund destination | `intents.near` | n/a | n/a | Refunds go to the buyer's NEAR Intents balance (`0x…` account in `intents.near`). Moving them back to Base is a separate 1Click withdrawal | TODO (mainnet refund tx) |
+| 1Click and the PoA bridge (Intents Technology) | Short custody during swaps | Swap txs | n/a | Base and Solana USDC arrive as bridged tokens (`omft.near`); 1Click `/v0/status`. Paid inbound ran once on mainnet: 2 USDC from Base, SUCCESS in 30 s ([`0xaef58959…`](https://basescan.org/tx/0xaef58959048af87eed58e7e062dd88b6e486720ea99a01c01b8ee7f439fdb9f4)). The outbound Solana withdrawal is a dry quote only | NOT PROVEN (custody), PROVEN (one inbound) |
+| Refund destination | `intents.near` | n/a | n/a | Refunds go to the buyer's NEAR Intents balance (`0x…` account in `intents.near`). Moving them back to Base is a separate 1Click withdrawal. Mainnet refund by `intents.near`'s `mt_resolve_transfer`: [`2oiKhXvj…`](https://nearblocks.io/txns/2oiKhXvjvmNmPtZB3oT2S5t2mNYNox1oTtJz6QsVEvsp), [`9NvREUZ1…`](https://nearblocks.io/txns/9NvREUZ1pEqnjuTY8osX3E51knjCBS3LYCgNgybiezKj) (spike contract). `TODO(K4)` a refund from the Arrow contract | PROVEN (mainnet, spike contract); TODO (Arrow contract) |
 | Output channel | Schema and rule composition | At most 5.67 bits per eval (scored), 1.58 (verdict) | Free text | `cargo test -p arrow-core` (`output_space_is_at_most_51_states`, `output_le_900_bytes`) | PROVEN |
 | Error channel | One fixed error state, empty stderr | 1 state (counted in the bound) | Carry data | `bash scripts/dev/stderr-harness.sh` | PROVEN (native harness) |
 | Leak budget | The contract counter | n/a | n/a | A buyer can burn a listing's budget by forcing failed evals (pays gas, learns at most the error state). `evals_used` never decreases | RISKY |
@@ -62,7 +62,7 @@ What runs today with Node 22.22.2 or later (tested on 24.15.0) and, for steps 4-
 
 ## Gates and evidence
 
-Each gate is a spike run before the real build. Transaction links point at the testnet explorer; raw notes are in `spikes/GATES.md` (integration ledger).
+Each gate is a spike run before the real build. Transaction links in this table point at the testnet explorer, those in the mainnet section below at the mainnet one; raw notes are in `spikes/GATES.md` (integration ledger).
 
 | Gate | Result | Evidence |
 |---|---|---|
@@ -71,7 +71,27 @@ Each gate is a spike run before the real build. Transaction links point at the t
 | **S3a** signature simulation (dry) | (i) PASS. A signed ERC-191 transfer intent carrying `msg` and `min_gas` is accepted; the only error is `insufficient balance or overflow`. (ii) `TODO` the funded simulate needs a funded buyer. | `npx tsx spikes/s3/s3a-simulate.ts`; result file `spikes/s3/s3a-results.json` |
 | **S4-b** ECIES, XChaCha, MinHash interop | PASS in both directions: ECIES 7/7 and 5/5, XChaCha 4/4 and 4/4, MinHash 8/8, plus the TypeScript interop test. | `cargo run -p s4-interop --release`; `npx vitest run sdk/test/crypto.interop.test.ts` |
 | **K2** testnet end-to-end | PASS, `E2E testnet: 9/9 steps green`. The PASS scene returns `PASS fit 2/5 novelty 1/5` and the BUY scene `BUY fit 5/5 novelty 4/5`; a purchase releases the key and the decrypted data hashes equal; an eval against a broken blob host is refunded with both events and the balance back; the leak counters move. Evidence rows: 12 listings, 16 evals, 3 purchases, 3 refunds in `evidence/testnet.json`. Run on the release-candidate wasm. | Eval PASS [`6fSU8y8U…`](https://testnet.nearblocks.io/txns/6fSU8y8UxJ3KYps91yVyfyMHo6TCFnQJZwyyz3FTTEnm), eval BUY [`4RzSuxeo…`](https://testnet.nearblocks.io/txns/4RzSuxeo1coQZangy4inXt4yhVf9ta7G8eWFJ3M7fS2j), purchase [`DwKeJ1YX…`](https://testnet.nearblocks.io/txns/DwKeJ1YXXWixQQmCNnqLXTZPKgm1CAvXxGDPyDY3ocgz), refund [`EQPftWo8…`](https://testnet.nearblocks.io/txns/EQPftWo8vA6Foyz7UzM2Mnk56mWuT6s8LDUDQPerEmmz). Needs the team's testnet accounts, so it is a recorded run, not a judge command |
-| S3b, S3c (mainnet), S4-a (paid inbound) | `TODO` not run. Dry runs only (`SIGNATURE_OK_BALANCE_ERROR`); the real runs move value and are done by a human. | n/a |
+| **S3b** transfer notification (mainnet) | PASS. A signed transfer intent with `msg` makes `intents.near` call `mt_on_transfer` on the receiver with the buyer's `0x…` account as sender; `refund_all` leaves both balances unchanged, `keep` moves exactly 10000. Spike contract, not Arrow. | See [Mainnet gates](#mainnet-gates-run-on-2026-11-10) |
+| **S3c** OutLayer composition and B5 (mainnet) | PASS. One transaction carries the whole chain (`execute_intents`, `mt_on_transfer`, `request_execution`, `on_execution_response`, callback, `mt_resolve_transfer`): keep in 10.0 s, refund in 38.0 s. B5: a second account calling `outlayer.near` directly with the same secret is refused. Spike program, not the Arrow program. | See [Mainnet gates](#mainnet-gates-run-on-2026-11-10) |
+| **S4-a** paid inbound (mainnet) | PASS. 2 USDC from Base through 1Click became 1.999596 USDC in the buyer's NEAR Intents balance in 30 s. The Solana withdrawal was a dry quote only. | See [Mainnet gates](#mainnet-gates-run-on-2026-11-10) |
+
+## Mainnet gates run on 2026-11-10
+
+Run between 21:45 and 22:15 GMT+7 and read back from the chain afterwards. They prove the payment, refund and enclave-composition path on mainnet with a small spike contract (`arrow-spike.arrowhq.near`) and a spike program (sha256 `195508a1…151e`), both separate from the Arrow contract and program. Nothing here shows an Arrow listing, evaluation or purchase on mainnet; those rows stay `TODO(mainnet)`.
+
+| Gate | What it shows | Evidence |
+|---|---|---|
+| **S3b** `refund_all` | `execute_intents` from the relayer, `mt_on_transfer` on the spike contract with the buyer's `0x…` account as sender and the signed `msg`; the receiver returns the whole amount and `intents.near`'s `mt_resolve_transfer` leaves the buyer's balance at 1 999 596 | [`2oiKhXvj…`](https://nearblocks.io/txns/2oiKhXvjvmNmPtZB3oT2S5t2mNYNox1oTtJz6QsVEvsp) |
+| **S3b** `keep` | Same flow; buyer 1 999 596 to 1 989 596, spike 0 to 10 000 | [`EVsShxK1…`](https://nearblocks.io/txns/EVsShxK1d771UXpucrBFF5C6FryVgE4PfiT12f2PjaHB) |
+| **S3c** keep | Whole chain in one transaction, 10.0 s from the `execute_intents` block to the last receipt; the enclave made a NEAR AI call (HTTP 200, 0.96 s); the attestation on `api.outlayer.ai` matches the wasm hash, the transaction hash and both I/O hashes | [`BTX324Jz…`](https://nearblocks.io/txns/BTX324JzvDVZJa5dMxbK1bojhqkXZJwx2ii2qfnngP6q) |
+| **S3c** refund | Same chain, refund decided by the program, returned by `intents.near`'s `mt_resolve_transfer`, balances unchanged. 38.0 s, because the NEAR AI call inside the enclave stalled for 30 s without an HTTP status | [`9NvREUZ1…`](https://nearblocks.io/txns/9NvREUZ1pEqnjuTY8osX3E51knjCBS3LYCgNgybiezKj) |
+| **B5** negative | `arrowhq.near` calling `outlayer.near` directly with the spike's secret reference: `Access denied by access condition`, 0 instructions, final value `null`, and the secret never reached the second caller | [`Bzzg22r9…`](https://nearblocks.io/txns/Bzzg22r9tRpUZrbKmJDHSBWLCtgXhEAV3Vj3wuSCwbsf) |
+| **S4-a** inbound | 2 USDC from Base to the 1Click deposit address; 1Click status SUCCESS in 30 s; buyer's Intents balance 0 to 1.999596 USDC | [Base tx `0xaef58959…`](https://basescan.org/tx/0xaef58959048af87eed58e7e062dd88b6e486720ea99a01c01b8ee7f439fdb9f4) |
+
+- Refunds on mainnet can take about a minute, not seconds: a stalled NEAR AI call costs up to 30 s inside the enclave before the program gives up and the refund starts. The Arrow program caps the chat call at 35 s and the blob fetch at 25 s, which stays under its 90 s evaluation guard.
+- Measured clock skew on mainnet: 4.99 s and 3.69 s, within the 10 s limit that keeps the 90 s and 60 s guards.
+- The spike deploy is [`ERT9znZx…`](https://nearblocks.io/txns/ERT9znZxK2EPfrhrVmTpTE3opUE4d1gsvBJuFC71aNGP). The Solana withdrawal was a dry quote only (quote 200, no token-account error); no USDC was withdrawn to Solana.
+- `TODO(K4)` the same table for the Arrow program on `arrow-market.near`: list, eval, buy and a refund. `TODO(K5)` the lock transaction.
 
 ## Testnet end-to-end and timings
 
