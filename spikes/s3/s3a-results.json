@@ -1,14 +1,14 @@
 {
   "gate": "S3a(i)",
-  "timestamp_utc": "2026-11-10T08:26:32.707Z",
-  "address": "0xf9e1bded1c58ed325c5d5870a309eb1916aee021",
+  "timestamp_utc": "2026-11-10T09:10:35.923Z",
+  "address": "0x43795233c094a03adf26218aca210aae37587e13",
   "carries_msg": true,
   "carries_min_gas": true,
   "payload_body": {
-    "signer_id": "0xf9e1bded1c58ed325c5d5870a309eb1916aee021",
+    "signer_id": "0x43795233c094a03adf26218aca210aae37587e13",
     "verifying_contract": "intents.near",
-    "deadline": "2026-11-10T08:36:29.612Z",
-    "nonce": "Vij2xgAlKBKzAPuo5DSi5hhnwLpkOOL0Ix/0d1zfjzU=",
+    "deadline": "2026-11-10T09:20:32.795Z",
+    "nonce": "Vij2xgAlKBKzwNSkTpyk5hjJtXbKZdT+mJegEPvsUU4=",
     "intents": [
       {
         "intent": "transfer",
