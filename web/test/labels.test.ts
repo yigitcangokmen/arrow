@@ -23,7 +23,28 @@ describe("labelOf", () => {
   });
 });
 
+describe("labelOf with several leading tags", () => {
+  it("finds the label tag anywhere in the leading run of bracket tags", () => {
+    expect(labelOf({ title: "[perf] [synthetic] Unlock schedule", seller: "perf.arrowhq.testnet" }, team)).toBe("synthetic");
+    expect(labelOf({ title: "[v2][Team-Made] Chain stats", seller: "arrowhq.near" }, team)).toBe("team-made");
+  });
+
+  it("a tag after the first word of the title does not count", () => {
+    expect(labelOf({ title: "[perf] Sales [synthetic]", seller: "someone.near" }, team)).toBe("external");
+  });
+
+  it("a subaccount of a team root without a label is unlabelled, not external", () => {
+    expect(labelOf({ title: "Sales", seller: "perf.arrowhq.testnet" }, team)).toBe("unlabelled");
+    expect(labelOf({ title: "Sales", seller: "arrowhq.testnet" }, team)).toBe("unlabelled");
+    expect(labelOf({ title: "Sales", seller: "notarrowhq.testnet" }, team)).toBe("external");
+  });
+});
+
 describe("displayTitle", () => {
+  it("drops only the label tag from a run of tags", () => {
+    expect(displayTitle("[perf] [synthetic] Unlock schedule")).toBe("[perf] Unlock schedule");
+  });
+
   it("drops the prefix only at the start", () => {
     expect(displayTitle("[synthetic] Sales sample")).toBe("Sales sample");
     expect(displayTitle("Sales [synthetic] sample")).toBe("Sales [synthetic] sample");

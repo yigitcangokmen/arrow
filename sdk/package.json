@@ -18,6 +18,7 @@
     "./relay": "./src/relay.ts",
     "./x402": "./src/x402.ts",
     "./flows": "./src/flows.ts",
+    "./team": "./src/team.ts",
     "./verify": "./src/verify/index.ts",
     "./crypto": "./src/crypto.ts",
     "./minhash": "./src/minhash.ts",

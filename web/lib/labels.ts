@@ -1,15 +1,20 @@
+import { isTeamAccount } from "@arrow/sdk/team";
+
 // DEC H-07: the title prefix decides the label. Team accounts matter only for "external" vs "unlabelled".
 export type ListingLabel = "synthetic" | "team-made" | "external" | "unlabelled";
 
-const PREFIX = /^\[(synthetic|team-made)\]\s*/i;
+// The label tag may follow other tags: "[perf] [synthetic] ..." is synthetic. Only the leading run of bracket tags counts.
+const TAG_RUN = /^(?:\[[^\]]*\]\s*)+/;
+const LABEL_TAG = /\[(synthetic|team-made)\]\s*/i;
 
 export function labelOf(listing: { title: string; seller: string }, teamAccounts: readonly string[]): ListingLabel {
-  const m = PREFIX.exec(listing.title);
+  const m = LABEL_TAG.exec(TAG_RUN.exec(listing.title)?.[0] ?? "");
   if (m) return m[1].toLowerCase() as "synthetic" | "team-made";
-  return teamAccounts.includes(listing.seller) ? "unlabelled" : "external";
+  return isTeamAccount(listing.seller, teamAccounts) ? "unlabelled" : "external";
 }
 
-/** The title without its `[synthetic]` / `[team-made]` prefix. */
+/** The title without its `[synthetic]` / `[team-made]` tag (other leading tags stay). */
 export function displayTitle(title: string): string {
-  return title.replace(PREFIX, "");
+  const run = TAG_RUN.exec(title)?.[0] ?? "";
+  return run.replace(LABEL_TAG, "") + title.slice(run.length);
 }
