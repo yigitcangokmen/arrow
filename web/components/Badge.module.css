@@ -8,7 +8,7 @@
   color: var(--muted);
   white-space: nowrap;
 }
-.synthetic, .team, .external { color: var(--text); }
+.synthetic, .team, .external, .unlabelled { color: var(--text); }
 .prelock { color: var(--notproven); border-color: var(--notproven); }
 .mainnet { color: var(--proven); border-color: var(--proven); }
 .testnet { color: var(--notproven); border-color: var(--notproven); }

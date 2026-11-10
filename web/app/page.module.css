@@ -1,2 +1,10 @@
 .hero { margin: 0 0 32px; }
 .lead { max-width: 60ch; color: var(--muted); font-size: 1.1rem; }
+.sub { max-width: 60ch; }
+.buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.primary, .secondary { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: var(--radius); text-decoration: none; font-weight: 600; border: 1px solid var(--accent); }
+.primary { background: var(--accent); color: var(--bg); }
+.secondary { color: var(--accent); background: var(--surface); }
+.listings { margin: 0 0 40px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+.note { color: var(--muted); font-size: 0.9rem; }

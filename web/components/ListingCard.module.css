@@ -1,0 +1,10 @@
+.card { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--surface); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.title { margin: 0; font-size: 1.05rem; overflow-wrap: anywhere; }
+.spent { font-size: 0.8rem; color: var(--risky); border: 1px solid var(--risky); border-radius: 999px; padding: 1px 8px; }
+.desc { margin: 4px 0 0; overflow-wrap: anywhere; }
+.meta { margin: 0; color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
+.price { margin: 4px 0; font-weight: 600; }
+.actions { display: flex; align-items: center; gap: 16px; margin-top: auto; }
+.primary { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: var(--radius); background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 600; }
+.small { font-size: 0.85rem; }

@@ -1,5 +1,5 @@
 // DEC G-07: the only explorers we link to. No NearBlocks API call anywhere.
-import type { Network } from "./config.ts";
+import { DEFAULT_NETWORK, type Network } from "./config.ts";
 
 export type Chain = "near" | "base" | "solana";
 
@@ -15,4 +15,9 @@ export function txUrl(chain: Chain, network: Network, hash: string): string {
 /** First 6 and last 4 characters: "ED5VCv…jT4k". Short hashes are shown whole. */
 export function shortHash(hash: string): string {
   return hash.length <= 12 ? hash : `${hash.slice(0, 6)}…${hash.slice(-4)}`;
+}
+
+/** A page path that keeps the viewed network: `?network=` is added only when it differs from the deploy's default. */
+export function withNetwork(path: string, net: Network): string {
+  return net === DEFAULT_NETWORK ? path : `${path}${path.includes("?") ? "&" : "?"}network=${net}`;
 }

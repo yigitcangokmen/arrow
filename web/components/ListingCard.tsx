@@ -1,0 +1,38 @@
+import Link from "next/link";
+import { DEFAULT_NETWORK, type Network } from "../lib/config.ts";
+import { formatUsdc } from "../lib/format.ts";
+import { withNetwork } from "../lib/links.ts";
+import type { ListingView } from "../lib/server/listingsCache.ts";
+import { Badge } from "./Badge.tsx";
+import { BitCounter } from "./BitCounter.tsx";
+import styles from "./ListingCard.module.css";
+
+export function ListingCard({ listing: l, network }: { listing: ListingView; network: Network }) {
+  const shown = l.columns.slice(0, 4);
+  const more = l.columns.length - shown.length;
+  const x402 = `/l/${l.id}/data${network === DEFAULT_NETWORK ? "" : `?network=${network}`}`;
+  return (
+    <article className={styles.card}>
+      <header className={styles.head}>
+        <h3 className={styles.title}>{l.displayTitle}</h3>
+        <Badge kind={l.label} />
+        {l.budget.leftBits === 0 ? <span className={styles.spent}>Inspection budget used up: buy-only</span> : null}
+      </header>
+      {l.public_desc ? <p className={styles.desc}>{l.public_desc}</p> : null}
+      <p className={styles.meta}>
+        {l.columns.length} columns: <span className="mono">{shown.join(", ")}{more > 0 ? `, +${more} more` : ""}</span>
+        {" · "}~{String(l.rows_claimed)} rows claimed by the seller · {l.mode} mode
+      </p>
+      <div title="Counts every eval, including refunded ones.">
+        <BitCounter spentBits={l.budget.spentBits} budgetBits={l.budget.budgetBits} />
+      </div>
+      <p className={styles.price}>
+        Inspect · ${formatUsdc(l.eval_fee)} <span aria-hidden="true">/</span> Buy · ${formatUsdc(l.price)}
+      </p>
+      <div className={styles.actions}>
+        <Link className={styles.primary} href={withNetwork(`/buy/${l.id}`, network)}>Inspect</Link>
+        <a className={styles.small} href={x402}>x402</a>
+      </div>
+    </article>
+  );
+}
