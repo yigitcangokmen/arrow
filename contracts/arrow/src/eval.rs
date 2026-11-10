@@ -678,6 +678,19 @@ mod tests {
         }
 
         #[test]
+        fn nested_subaccount_of_sponsored_is_not_sponsored() {
+            let mut c = listed_testnet();
+            for i in 0..12 {
+                assert!(eval_as(&mut c, &format!("u{}.test.near", i % 6)).is_ok());
+            }
+            // A sponsored judge account holds a full-access key, so it can mint x1.j1…, x2.j1… freely.
+            for who in ["x1.j1.bench.test.near", "a.b.c.bench.test.near"] {
+                assert!(eval_as(&mut c, who).err().map(panic_text).unwrap().contains("E12"), "{who} got past the global cap");
+            }
+            assert!(eval_as(&mut c, "j1.bench.test.near").is_ok());
+        }
+
+        #[test]
         fn cap_exempt_not_counted() {
             let mut c = listed_testnet();
             for _ in 0..15 {
