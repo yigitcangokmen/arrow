@@ -1,19 +1,18 @@
 // S3a: does intents.near accept an ERC-191 transfer intent that carries msg and min_gas? (DEC K-03, V-07)
-// simulate_intents is a free mainnet view. Default: a throwaway unfunded EOA kept in memory only (S3a(i)).
-// --funded: the buyer key from .env (S3a(ii), H-08b, run by the human). --gates-line prints a GATES.md draft.
+// simulate_intents is a free mainnet view. Default: a throwaway unfunded EOA kept in memory only (S3a(i)); its result goes to s3a-dry-results.json.
+// --funded: the buyer key from .env (S3a(ii), H-08b, run by the human); only this run writes s3a-results.json. --gates-line prints a GATES.md draft.
 // Written by WS4-T04; WS1-T08 owns the gate. Nothing is sent or spent: it simulates only.
 import { writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { arrowTransferIntent, buildPayload, currentSalt, NETWORKS, signPayloadViem, simulateIntents } from "@arrow/sdk";
 import { loadEnv, requireEnv } from "../../scripts/src/lib/env.ts";
 import { log } from "../../scripts/src/lib/log.ts";
+import { s3aResultsFile } from "./s3a-results-file.ts";
 
 loadEnv();
 const { values } = parseArgs({ options: { funded: { type: "boolean", default: false }, "gates-line": { type: "boolean", default: false } } });
-const OUT = resolve(dirname(fileURLToPath(import.meta.url)), "s3a-results.json");
+const OUT = s3aResultsFile(values.funded === true);
 
 const account = privateKeyToAccount((values.funded ? requireEnv("E2E_BUYER_EVM_PRIVATE_KEY") : generatePrivateKey()) as `0x${string}`);
 const intent = arrowTransferIntent({
@@ -70,6 +69,6 @@ if (values["gates-line"]) {
   const pass = values.funded ? cls === "OK" : cls === "SIGNATURE_OK_BALANCE_ERROR" || cls === "OK";
   log(`### S3a${values.funded ? "(ii)" : "(i)"} · ${pass ? "PASS" : "FAIL"} · ${new Date().toISOString()}`);
   log(`- Commands: npx tsx spikes/s3/s3a-simulate.ts${values.funded ? " --funded" : ""}`);
-  log(`- Evidence: spikes/s3/s3a-results.json · class ${cls} · ${error ?? `intents_executed=${executed}`}`);
+  log(`- Evidence: spikes/s3/${values.funded ? "s3a-results.json" : "s3a-dry-results.json"} · class ${cls} · ${error ?? `intents_executed=${executed}`}`);
 }
 process.exit(cls === "SIGNATURE_ERROR" || cls === "OTHER" ? 1 : 0);
