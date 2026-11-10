@@ -2,7 +2,8 @@
 // The relay uses them to refuse before it spends gas; the buy page uses them to say why Inspect and Buy are off.
 import type { ConfigView } from "@arrow/sdk/schemas";
 
-export type BlockerCode = "MARKET_PAUSED" | "PROGRAM_KEY_MISSING" | "TANK_LOW" | "LISTING_STALE";
+export const BLOCKER_CODES = ["MARKET_PAUSED", "PROGRAM_KEY_MISSING", "TANK_LOW", "LISTING_STALE"] as const;
+export type BlockerCode = (typeof BLOCKER_CODES)[number];
 export interface Blocker {
   code: BlockerCode;
   message: string;

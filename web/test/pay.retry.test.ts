@@ -1,4 +1,5 @@
 // RELAY-3 on the browser side: after a relay answer that does not prove "nothing was sent", the client never signs again.
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { RelayRejected, RelayUnavailable } from "@arrow/sdk/relay";
 import { historyStore, memoryStorage, pendingStore } from "../lib/pending.ts";
@@ -93,6 +94,20 @@ describe("resumePending", () => {
     h.advance(11 * 60_000);
     expect((await resumePending(h.deps, SIGNER)).state).toBe("waiting");
   });
+});
+
+describe("W2-4: every code the relay answers before it broadcasts frees the wallet", () => {
+  const src = (f: string) => readFileSync(new URL(f, import.meta.url), "utf8");
+  const relayCodes = [...src("../lib/server/relayHandler.ts").matchAll(/(?:apiError\(\d+, |rateLimited\([^,)]*, )"([A-Z_]+)"/g)].map((m) => m[1]);
+  const blockerCodes = [...(src("../lib/blockers.ts").match(/code: "([A-Z_]+)"/g) ?? [])].map((m) => m.slice(7, -1));
+  const sentOrMaybe = new Set(["ALREADY_RELAYED", "RELAY_UNCLEAR"]);
+  it.each([...new Set([...relayCodes, ...blockerCodes, "BAD_REQUEST", "NOT_ARROW_INTENT", "RATE_LIMITED"])].filter((c) => !sentOrMaybe.has(c)))("%s", async (code) => {
+    expect(provablyNotSent(new RelayRejected("x Nothing was sent.", 409, code))).toBe(true);
+    const h = harness({ relay: async () => { throw new RelayRejected("x Nothing was sent.", 409, code); } });
+    await expect(payOnce(h.deps, req)).rejects.not.toBeInstanceOf(PaymentUnclear);
+    expect(h.deps.store.get("mainnet", SIGNER)).toBeNull();
+  });
+  it("found the blocker codes", () => expect(blockerCodes).toEqual(expect.arrayContaining(["MARKET_PAUSED", "PROGRAM_KEY_MISSING", "LISTING_STALE", "TANK_LOW"])));
 });
 
 describe("locateLatest", () => {

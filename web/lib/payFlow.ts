@@ -3,6 +3,7 @@
 // only when the first one is provably dead: refused before broadcast, or past its deadline with an unused nonce.
 import { RelayError } from "@arrow/sdk/relay";
 import type { MultiPayload } from "@arrow/sdk/schemas";
+import { BLOCKER_CODES } from "./blockers.ts";
 import type { Network } from "./config.ts";
 import type { HistoryStore, PayKind, PayMeta, PendingPayment, PendingStore } from "./pending.ts";
 
@@ -37,10 +38,10 @@ export class PaymentUnclear extends Error {
   }
 }
 
-/** Codes /api/relay answers only before it broadcasts anything. */
-const BEFORE_BROADCAST = new Set([
-  "BAD_REQUEST", "NOT_ARROW_INTENT", "AMOUNT_TOO_LOW", "LISTING_NOT_FOUND", "BUDGET_EXHAUSTED", "SIMULATE_FAILED", "RATE_LIMITED",
-  "RELAYER_UNAVAILABLE", "RELAYER_BUSY", "RPC_ERROR", "PAUSED", "LISTING_STALE", "TANK_LOW",
+/** Codes /api/relay answers only before it broadcasts anything (the blocker codes come from blockers.ts, W2-4). */
+const BEFORE_BROADCAST = new Set<string>([
+  "BAD_REQUEST", "NOT_ARROW_INTENT", "TOO_LARGE", "AMOUNT_TOO_LOW", "LISTING_NOT_FOUND", "BUDGET_EXHAUSTED", "NOT_SELLER", "SIMULATE_FAILED",
+  "RATE_LIMITED", "EVAL_RATE_LIMITED", "EVAL_DAILY_CAP", "RELAYER_UNAVAILABLE", "RELAYER_BUSY", "RPC_ERROR", ...BLOCKER_CODES,
 ]);
 
 /** True only for an error that proves the relay sent nothing. A network error, RELAY_UNCLEAR and ALREADY_RELAYED do not. */
