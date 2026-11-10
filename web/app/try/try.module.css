@@ -1,0 +1,6 @@
+.lead { max-width: 62ch; color: var(--muted); }
+.scenes { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0 0 16px; padding: 0; list-style: none; }
+.current { font-weight: 700; }
+.txs { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 2px; font-size: 0.9rem; }
+.verdict { font-size: clamp(1.4rem, 5vw, 2rem); font-weight: 700; margin: 8px 0; overflow-wrap: anywhere; }
+.help { color: var(--muted); font-size: 0.9rem; }
