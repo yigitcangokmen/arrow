@@ -3,7 +3,7 @@
 import { execFileSync } from "node:child_process";
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { EvidenceFile, EvidenceRun } from "@arrow/sdk";
+import { EvidenceFile, EvidenceRun } from "@arrow/sdk/schemas";
 import { mainCheckout, repoRoot } from "./env.ts";
 
 export type EvidenceNetwork = "testnet" | "mainnet";
