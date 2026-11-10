@@ -185,10 +185,8 @@ fn minhash_rs_vectors_golden() {
     check_minhash_vectors("minhash-vectors-rs.json");
 }
 
-/// The TS vectors (WS4-T03, `fixtures/minhash-vectors.json`) are not on main yet. This test is
-/// ignored, i.e. NOT passed, until they land; then drop the ignore attribute.
+/// The TS vectors (WS4-T03, `fixtures/minhash-vectors.json`).
 #[test]
-#[ignore = "pending fixtures/minhash-vectors.json from WS4-T03"]
 fn minhash_matches_ts_vectors() {
     check_minhash_vectors("minhash-vectors.json");
 }
