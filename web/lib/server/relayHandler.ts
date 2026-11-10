@@ -14,7 +14,7 @@ import { RelayRuns, type Snap } from "./relayRuns.ts";
 import { type RelayValidateConfig, validateArrowMultipayload } from "./relayValidate.ts";
 import { NETWORKS } from "@arrow/sdk/config";
 
-// One execute_intents prepays 600 TGas = 0.60 NEAR, locked until its whole receipt tree has run (about 40-60 s, measured on
+// One execute_intents prepays 600 TGas = 0.60 NEAR, locked until every follow-up receipt has run (about 40-60 s, measured on
 // mainnet). Below this a second payment passes the balance check and then fails inside the node.
 const MIN_RELAYER_BALANCE = nearToYocto("0.65");
 /** Evals are the one op a funded signer can repeat for free (a failed eval refunds); keep this much tank for lists and buys. */
