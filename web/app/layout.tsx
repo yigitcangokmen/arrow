@@ -8,7 +8,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Arrow",
   description:
-    "Inspect before you pay: the buyer's AI reads the sealed data inside a TEE, and only a capped verdict (≤5.67 bits) comes back to the buyer.",
+    "Inspect before you pay: the buyer's AI reads the sealed data inside a TEE, and only a capped verdict (≤5.67 bits on the output channel) comes back to the buyer.",
 };
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1 };

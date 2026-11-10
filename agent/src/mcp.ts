@@ -95,7 +95,7 @@ export function createServer(deps: McpDeps = {}): McpServer {
     {
       title: "Inspect a dataset before buying it",
       description:
-        "Pays the eval fee (USDC) and has a sealed AI evaluate a dataset against your criteria inside a TEE. Returns only a capped verdict: PASS or BUY, optionally fit 1-5 and novelty 1-5, at most 5.67 bits per call. You never see the data. If the evaluation fails the fee is refunded to your NEAR Intents balance.",
+        "Pays the eval fee (USDC) and has a sealed AI evaluate a dataset against your criteria inside a TEE. Returns a capped verdict: PASS or BUY, optionally fit 1-5 and novelty 1-5, at most 5.67 bits per call on the output channel (the public instruction count is a separate side channel). You never see the data. If the evaluation fails the fee is refunded to your NEAR Intents balance.",
       inputSchema: {
         listing_id: z.string().describe("listing id from list_listings"),
         criteria: z.union([z.string(), z.record(z.string(), z.any())]).describe("what you need: a criteria object, JSON text, or the path of a criteria JSON file ({v:1, text, required_columns?, min_rows?, min_fit?, min_novelty?})"),

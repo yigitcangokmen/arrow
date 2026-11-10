@@ -256,7 +256,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
         <div className={form.field}>
           <label htmlFor="file">CSV or JSONL file (up to {Math.floor(MAX_PLAINTEXT_BYTES / 1_000_000 * 10) / 10} MB)</label>
           <input id="file" type="file" accept=".csv,.jsonl" onChange={(e) => void onFile(e.target.files?.[0])} />
-          <p className={form.hint}>The file is read here and encrypted here. Its contents are in no request: only the ciphertext is uploaded.</p>
+          <p className={form.hint}>The file is read here and encrypted here. Row data is in no request: only the ciphertext is uploaded. Column names and the row count are public.</p>
         </div>
         {picked ? (
           <p className={styles.file}>
@@ -307,8 +307,8 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
           <div className={form.field}>
             <label htmlFor="mode">Answer</label>
             <select id="mode" value={mode} onChange={(e) => setMode(e.target.value as "scored" | "verdict")}>
-              <option value="scored">BUY/PASS with fit and novelty (5.67 bits per inspection)</option>
-              <option value="verdict">BUY/PASS only (1.59 bits per inspection)</option>
+              <option value="scored">BUY/PASS with fit and novelty (5.67 bits per inspection on the output channel)</option>
+              <option value="verdict">BUY/PASS only (1.59 bits per inspection on the output channel)</option>
             </select>
           </div>
           <div className={form.field}>
@@ -317,7 +317,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
           </div>
         </div>
         <p className={form.hint} aria-live="polite">
-          The most the chain lets out for this listing: {budgetPreview(Number.isInteger(Number(maxEvals)) && Number(maxEvals) > 0 ? Number(maxEvals) : 0, mode)}.
+          The most the verdicts let out for this listing (run time and instruction count are public too): {budgetPreview(Number.isInteger(Number(maxEvals)) && Number(maxEvals) > 0 ? Number(maxEvals) : 0, mode)}.
         </p>
         <div className={form.field}>
           <label>
