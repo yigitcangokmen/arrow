@@ -31,7 +31,7 @@ afterEach(() => {
 
 function build(env: Record<string, string>) {
   const base: Record<string, string> = { PATH: `${join(tmp, "bin")}:${process.env.PATH}`, HOME: "/home/builder" };
-  const r = spawnSync("bash", [join(ROOT, "scripts/build-tee.sh"), OUT], { cwd: ROOT, env: { ...base, ...env }, encoding: "utf8" });
+  const r = spawnSync("bash", [join(ROOT, "scripts/build-tee.sh"), OUT], { cwd: ROOT, env: { NODE_ENV: "test", ...base, ...env }, encoding: "utf8" });
   let seen = "";
   try {
     seen = readFileSync(join(tmp, "seen"), "utf8");
