@@ -2,7 +2,7 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { list } from "@vercel/blob";
 import { clientIp } from "../ip.ts";
 import { type Limiter, limits } from "../ratelimit.ts";
-import { BlobPolicyError, checkQuota, type StoreUsage, tokenOptionsFor } from "./blobPolicy.ts";
+import { BlobPolicyError, checkQuota, type StoreUsage, TOKEN_TTL_MS, tokenOptionsFor } from "./blobPolicy.ts";
 import { apiError, json, rateLimited, readJsonCapped } from "./http.ts";
 import { sameSiteJson } from "./origin.ts";
 
@@ -12,7 +12,11 @@ export interface BlobDeps {
   upload: typeof handleUpload;
   /** What the store holds now. It is read from the store, so the cap holds across serverless instances. */
   usage(token: string): Promise<StoreUsage>;
+  /** Bytes this instance has issued tokens for that may not show in `usage` yet (W2-5). Default: one list per process. */
+  reserved?: { bytes: number; until: number }[];
 }
+
+const processReserved: { bytes: number; until: number }[] = [];
 
 async function storeUsage(token: string): Promise<StoreUsage> {
   let totalBytes = 0;
@@ -72,7 +76,14 @@ export async function handleBlobPost(req: Request, d: BlobDeps = realBlobDeps): 
         } catch {
           throw new BlobPolicyError("STORE_UNAVAILABLE", "Could not check the blob store. Host the encrypted file yourself.");
         }
-        checkQuota(usage, size);
+        // A token issued here can be used for TOKEN_TTL_MS; count it until then, so parallel requests that read the
+        // same usage cannot each pass the cap (per instance; across instances only the store reading holds).
+        const reserved = d.reserved ?? processReserved;
+        const now = Date.now();
+        for (let i = reserved.length - 1; i >= 0; i--) if (reserved[i].until <= now) reserved.splice(i, 1);
+        const held = reserved.reduce((n, r) => n + r.bytes, 0);
+        checkQuota({ totalBytes: usage.totalBytes + held, last24hBytes: usage.last24hBytes + held }, size);
+        reserved.push({ bytes: size, until: now + TOKEN_TTL_MS });
         return options;
       },
     });

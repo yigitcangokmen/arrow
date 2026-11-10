@@ -113,6 +113,11 @@ describe("WEB-7 / X12-4: abuse limits on the hosted upload", () => {
   it("429 QUOTA when the store itself is over its cap, whatever the day looks like", async () => {
     expect((await run(async () => ({ totalBytes: STORE_CAP_BYTES, last24hBytes: 0 }))).status).toBe(429);
   });
+  it("W2-5: parallel token requests that all read the same usage cannot together pass the cap on one instance", async () => {
+    const d = { limiter: tokenBucket({ capacity: 10, refillEveryMs: 360_000 }), token: () => "t", upload: real as any, usage: async () => ({ totalBytes: STORE_CAP_BYTES - 1500, last24hBytes: 0 }), reserved: [] };
+    const codes = await Promise.all([0, 1].map(() => handleBlobPost(post("http://localhost/api/blob", body), d).then((r) => r.status)));
+    expect(codes.sort()).toEqual([200, 429]);
+  });
   it("issues a token while both caps have room", async () => {
     expect((await run(async () => ({ totalBytes: 1000, last24hBytes: 1000 }))).status).toBe(200);
   });
