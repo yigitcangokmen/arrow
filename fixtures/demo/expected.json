@@ -1,0 +1,52 @@
+{
+  "v": 1,
+  "synthetic": true,
+  "note": "Fictional data made by the Arrow team for the demo. Bands are the arrow-core novelty() result; demo_bands.rs is the proof.",
+  "unlock": {
+    "rows": 412,
+    "overlap": 371,
+    "containment_seller_in_buyer": 0.9,
+    "containment_buyer_in_seller": 0.9,
+    "minhash": {
+      "by_hits": 0.852,
+      "jaccard_times_size": 0.852,
+      "j": 95,
+      "c": 109
+    },
+    "band": 1,
+    "fit_rule": 4,
+    "expected": "PASS · fit ≤4 · novelty 1"
+  },
+  "labels": {
+    "rows": 1000,
+    "overlap": 300,
+    "containment_seller_in_buyer": 0.3,
+    "containment_buyer_in_seller": 0.3,
+    "minhash": {
+      "by_hits": 0.305,
+      "jaccard_times_size": 0.282,
+      "j": 21,
+      "c": 39
+    },
+    "band": 4,
+    "fit_rule": 5,
+    "expected": "BUY · fit ≥4 · novelty 4 (LLM-dependent)"
+  },
+  "print_row_1": {
+    "expected": "PASS · fit 1 · novelty 1"
+  },
+  "plaintext_sha256": {
+    "unlock-schedule-412.csv": "730fc32c799059d0622dd6dc400e0032c36b11e61b57d55f3d21f15677256661",
+    "wallet-labels-1000.csv": "a2ce0c2bb68d42cf117c1b09fa743a43ca309937102351a5a73bd59704aabd60",
+    "buyer-list-unlock.csv": "3849996a701167a9c0d0a048175aad0e083145415d30bf33b1a727422dbce43b",
+    "buyer-list-labels.csv": "3bed32f1a9b1f54e6efa2fdfac86b5114ae0608487f5da64bbf59b7b7d16655c"
+  },
+  "seeds": {
+    "bump": 0,
+    "unlock": "demo/unlock/0",
+    "labels": "demo/labels/0",
+    "buyer_unlock": "demo/buyer-unlock/0",
+    "buyer_labels": "demo/buyer-labels/0",
+    "prng": "sfc32, seed = sha256('arrow/bench/v1/' + name)[0..16]"
+  }
+}

@@ -1,0 +1,413 @@
+unlock_id,token_symbol,token_contract,chain,unlock_date,unlock_amount,pct_of_supply,category,cliff,source_note,synthetic
+U27-0001,XNDB,t0001-b3f324.synthetic-demo.near,base,2027-01-01,7482235,0.42,team,false,governance proposal #123 (fictional),yes
+U27-0002,XSVG,t0002-68545e.synthetic-demo.near,near,2027-01-01,731290,8.04,advisors,true,governance proposal #237 (fictional),yes
+U27-0003,XLRK,t0003-b6ad0d.synthetic-demo.near,arbitrum,2027-01-01,5502395,3.21,ecosystem,true,foundation blog post (fictional),yes
+U27-0004,XUYS,t0004-d34f0b.synthetic-demo.near,near,2027-01-01,1670374,3.08,treasury,false,foundation blog post (fictional),yes
+U27-0005,XILJ,t0005-1236cc.synthetic-demo.near,arbitrum,2027-01-01,260801,0.28,advisors,false,governance proposal #111 (fictional),yes
+U27-0006,XEOR,t0006-6ea1f6.synthetic-demo.near,near,2027-01-02,13344230,0.10,ecosystem,false,governance proposal #132 (fictional),yes
+U27-0007,XPGM,t0007-24d512.synthetic-demo.near,base,2027-01-02,69364,2.63,team,true,governance proposal #94 (fictional),yes
+U27-0008,XCUW,t0008-d4dc22.synthetic-demo.near,arbitrum,2027-01-02,751451,0.44,investors,true,vesting schedule v2,yes
+U27-0009,XXMC,t0009-da85c7.synthetic-demo.near,near,2027-01-02,37215622,11.42,treasury,false,token terms PDF (fictional),yes
+U27-0010,XEZZ,t0010-8d1658.synthetic-demo.near,near,2027-01-02,13785586,10.22,ecosystem,true,governance proposal #144 (fictional),yes
+U27-0011,XXQK,t0011-e98008.synthetic-demo.near,near,2027-01-03,1010589,11.15,ecosystem,false,governance proposal #230 (fictional),yes
+U27-0012,XBRB,t0012-f9603b.synthetic-demo.near,near,2027-01-03,8424323,6.50,treasury,true,vesting schedule v2,yes
+U27-0013,XFII,t0013-c2bb4b.synthetic-demo.near,base,2027-01-03,7287041,3.40,team,false,foundation blog post (fictional),yes
+U27-0014,XONJ,t0014-7c52bb.synthetic-demo.near,near,2027-01-03,923174,5.22,investors,false,governance proposal #64 (fictional),yes
+U27-0015,XVPY,t0015-9a0046.synthetic-demo.near,base,2027-01-04,2251137,3.19,ecosystem,false,vesting schedule v2,yes
+U27-0016,XUDY,t0016-5149dd.synthetic-demo.near,base,2027-01-04,3161755,2.92,investors,true,token terms PDF (fictional),yes
+U27-0017,XAMO,t0017-1bb930.synthetic-demo.near,near,2027-01-04,18381,4.44,team,true,foundation blog post (fictional),yes
+U27-0018,XQLJ,t0018-9f0d00.synthetic-demo.near,near,2027-01-04,7739212,2.43,investors,true,governance proposal #59 (fictional),yes
+U27-0019,XRED,t0019-23fd9d.synthetic-demo.near,near,2027-01-04,13419231,1.21,ecosystem,true,foundation blog post (fictional),yes
+U27-0020,XQZO,t0020-c744dc.synthetic-demo.near,near,2027-01-05,5887281,8.20,ecosystem,true,foundation blog post (fictional),yes
+U27-0021,XTRH,t0021-ba0015.synthetic-demo.near,solana,2027-01-05,10562740,2.33,team,true,token terms PDF (fictional),yes
+U27-0022,XUXL,t0022-851762.synthetic-demo.near,near,2027-01-05,46394,4.65,ecosystem,false,governance proposal #81 (fictional),yes
+U27-0023,XLYL,t0023-714b07.synthetic-demo.near,solana,2027-01-05,1388983,11.09,team,false,governance proposal #20 (fictional),yes
+U27-0024,XPSE,t0024-2509b0.synthetic-demo.near,solana,2027-01-05,5801881,4.41,investors,false,governance proposal #33 (fictional),yes
+U27-0025,XFXQ,t0025-f43049.synthetic-demo.near,base,2027-01-06,7997254,9.10,ecosystem,true,token terms PDF (fictional),yes
+U27-0026,XETG,t0026-255c3e.synthetic-demo.near,ethereum,2027-01-06,125297,1.15,investors,true,foundation blog post (fictional),yes
+U27-0027,XQMD,t0027-41d468.synthetic-demo.near,base,2027-01-06,547120,8.45,team,true,governance proposal #77 (fictional),yes
+U27-0028,XAKX,t0028-2cb399.synthetic-demo.near,arbitrum,2027-01-06,1501665,10.60,investors,true,vesting schedule v2,yes
+U27-0029,XSDD,t0029-2ce90a.synthetic-demo.near,solana,2027-01-07,878558,3.47,team,false,vesting schedule v2,yes
+U27-0030,XAFA,t0030-b4795a.synthetic-demo.near,near,2027-01-07,408267,4.24,treasury,true,vesting schedule v2,yes
+U27-0031,XIGF,t0031-6dbe84.synthetic-demo.near,base,2027-01-07,10660616,0.12,advisors,false,foundation blog post (fictional),yes
+U27-0032,XEQV,t0032-ed4556.synthetic-demo.near,near,2027-01-07,444707,0.13,treasury,false,vesting schedule v2,yes
+U27-0033,XZVJ,t0033-cd8905.synthetic-demo.near,base,2027-01-07,5800787,1.14,ecosystem,false,token terms PDF (fictional),yes
+U27-0034,XSFF,t0034-72af85.synthetic-demo.near,arbitrum,2027-01-08,2205298,7.67,advisors,false,governance proposal #182 (fictional),yes
+U27-0035,XNDY,t0035-694802.synthetic-demo.near,near,2027-01-08,12069789,1.47,advisors,true,governance proposal #29 (fictional),yes
+U27-0036,XBAM,t0036-e4c09f.synthetic-demo.near,solana,2027-01-08,91378,1.28,investors,true,vesting schedule v2,yes
+U27-0037,XPYD,t0037-4848e1.synthetic-demo.near,solana,2027-01-08,132381,10.33,team,false,vesting schedule v2,yes
+U27-0038,XODH,t0038-08b41a.synthetic-demo.near,near,2027-01-09,399164,2.24,advisors,true,governance proposal #193 (fictional),yes
+U27-0039,XCIX,t0039-5017ed.synthetic-demo.near,near,2027-01-09,7747799,3.46,investors,true,vesting schedule v2,yes
+U27-0040,XKFU,t0040-9aac2a.synthetic-demo.near,solana,2027-01-09,23340665,0.10,advisors,false,foundation blog post (fictional),yes
+U27-0041,XYLK,t0041-311a7b.synthetic-demo.near,ethereum,2027-01-09,11912722,0.14,team,true,token terms PDF (fictional),yes
+U27-0042,XBWK,t0042-ab65a9.synthetic-demo.near,base,2027-01-09,3835179,5.80,advisors,false,foundation blog post (fictional),yes
+U27-0043,XOYB,t0043-e117b1.synthetic-demo.near,solana,2027-01-10,149649,3.59,team,true,governance proposal #178 (fictional),yes
+U27-0044,XTTB,t0044-d31adc.synthetic-demo.near,near,2027-01-10,3415270,7.77,advisors,false,token terms PDF (fictional),yes
+U27-0045,XODI,t0045-8d7f0d.synthetic-demo.near,near,2027-01-10,4923474,10.68,ecosystem,false,foundation blog post (fictional),yes
+U27-0046,XGLM,t0046-fa8a29.synthetic-demo.near,near,2027-01-10,328168,6.48,treasury,false,vesting schedule v2,yes
+U27-0047,XCFH,t0047-398a0b.synthetic-demo.near,near,2027-01-10,18568307,3.22,team,true,token terms PDF (fictional),yes
+U27-0048,XQOP,t0048-300c77.synthetic-demo.near,near,2027-01-11,875051,0.41,advisors,false,foundation blog post (fictional),yes
+U27-0049,XEAG,t0049-09f3af.synthetic-demo.near,ethereum,2027-01-11,709546,5.14,investors,true,foundation blog post (fictional),yes
+U27-0050,XKJU,t0050-0857d7.synthetic-demo.near,base,2027-01-11,1465024,0.79,ecosystem,true,token terms PDF (fictional),yes
+U27-0051,XVWV,t0051-6df7f6.synthetic-demo.near,solana,2027-01-11,25057606,1.53,advisors,true,token terms PDF (fictional),yes
+U27-0052,XHBO,t0052-572e26.synthetic-demo.near,near,2027-01-12,10935134,7.50,ecosystem,true,token terms PDF (fictional),yes
+U27-0053,XGDY,t0053-5262b7.synthetic-demo.near,base,2027-01-12,1430076,9.45,treasury,false,foundation blog post (fictional),yes
+U27-0054,XTOJ,t0054-537ba2.synthetic-demo.near,near,2027-01-12,1903663,1.84,treasury,true,governance proposal #69 (fictional),yes
+U27-0055,XEAM,t0055-fc8f36.synthetic-demo.near,near,2027-01-12,5663240,3.64,investors,true,vesting schedule v2,yes
+U27-0056,XERD,t0056-38d472.synthetic-demo.near,solana,2027-01-12,307405,6.90,treasury,true,token terms PDF (fictional),yes
+U27-0057,XYPK,t0057-96f4cf.synthetic-demo.near,base,2027-01-13,11633421,0.15,advisors,false,foundation blog post (fictional),yes
+U27-0058,XQNK,t0058-397ccf.synthetic-demo.near,base,2027-01-13,986590,8.80,team,true,vesting schedule v2,yes
+U27-0059,XWWL,t0059-5c8b27.synthetic-demo.near,arbitrum,2027-01-13,2109125,2.69,team,true,token terms PDF (fictional),yes
+U27-0060,XKSI,t0060-aa1f36.synthetic-demo.near,near,2027-01-13,1166403,4.72,ecosystem,false,token terms PDF (fictional),yes
+U27-0061,XWGR,t0061-15337b.synthetic-demo.near,near,2027-01-13,371269,3.97,treasury,true,vesting schedule v2,yes
+U27-0062,XTER,t0062-b52c17.synthetic-demo.near,near,2027-01-14,207043,0.93,team,false,vesting schedule v2,yes
+U27-0063,XZGM,t0063-d8b247.synthetic-demo.near,near,2027-01-14,46404,0.10,investors,true,governance proposal #118 (fictional),yes
+U27-0064,XUNM,t0064-613b20.synthetic-demo.near,near,2027-01-14,10168172,4.56,investors,true,token terms PDF (fictional),yes
+U27-0065,XPAV,t0065-a905d2.synthetic-demo.near,arbitrum,2027-01-14,1704330,6.98,investors,true,governance proposal #224 (fictional),yes
+U27-0066,XPBE,t0066-b6a26f.synthetic-demo.near,near,2027-01-15,5963552,0.27,team,false,foundation blog post (fictional),yes
+U27-0067,XXBH,t0067-4f5104.synthetic-demo.near,solana,2027-01-15,9598152,0.24,team,false,governance proposal #25 (fictional),yes
+U27-0068,XGMU,t0068-74a821.synthetic-demo.near,near,2027-01-15,1001868,3.28,team,false,governance proposal #153 (fictional),yes
+U27-0069,XEPY,t0069-95163d.synthetic-demo.near,near,2027-01-15,1229882,5.64,treasury,false,governance proposal #55 (fictional),yes
+U27-0070,XZHP,t0070-5b08f1.synthetic-demo.near,near,2027-01-15,12647318,7.00,investors,false,vesting schedule v2,yes
+U27-0071,XNSX,t0071-bdad06.synthetic-demo.near,arbitrum,2027-01-16,3685145,0.31,advisors,true,foundation blog post (fictional),yes
+U27-0072,XBBI,t0072-ff2af3.synthetic-demo.near,near,2027-01-16,1706889,4.03,advisors,true,vesting schedule v2,yes
+U27-0073,XCRZ,t0073-46a0dd.synthetic-demo.near,base,2027-01-16,6926713,5.13,ecosystem,true,foundation blog post (fictional),yes
+U27-0074,XUEP,t0074-041339.synthetic-demo.near,solana,2027-01-16,42265,10.83,advisors,false,token terms PDF (fictional),yes
+U27-0075,XFWJ,t0075-508c73.synthetic-demo.near,near,2027-01-17,425770,10.72,team,true,vesting schedule v2,yes
+U27-0076,XDSA,t0076-289427.synthetic-demo.near,near,2027-01-17,232617,0.13,team,true,token terms PDF (fictional),yes
+U27-0077,XCHI,t0077-9060f5.synthetic-demo.near,near,2027-01-17,22785674,3.88,investors,false,foundation blog post (fictional),yes
+U27-0078,XRNP,t0078-887a76.synthetic-demo.near,arbitrum,2027-01-17,7787314,4.65,investors,true,token terms PDF (fictional),yes
+U27-0079,XIUG,t0079-868d30.synthetic-demo.near,near,2027-01-17,578160,9.59,advisors,true,vesting schedule v2,yes
+U27-0080,XMTH,t0080-201283.synthetic-demo.near,near,2027-01-18,8346435,0.71,advisors,false,token terms PDF (fictional),yes
+U27-0081,XUUC,t0081-81fd07.synthetic-demo.near,arbitrum,2027-01-18,5591255,1.58,team,true,vesting schedule v2,yes
+U27-0082,XGGR,t0082-00725d.synthetic-demo.near,base,2027-01-18,372271,8.66,team,true,governance proposal #189 (fictional),yes
+U27-0083,XEOI,t0083-38baa3.synthetic-demo.near,near,2027-01-18,3912372,8.50,team,true,governance proposal #110 (fictional),yes
+U27-0084,XEPI,t0084-f29f82.synthetic-demo.near,arbitrum,2027-01-18,3361102,0.14,investors,true,governance proposal #62 (fictional),yes
+U27-0085,XNQH,t0085-099cce.synthetic-demo.near,near,2027-01-19,390153,8.15,ecosystem,true,governance proposal #144 (fictional),yes
+U27-0086,XDKS,t0086-c49e04.synthetic-demo.near,near,2027-01-19,45830,10.03,treasury,true,token terms PDF (fictional),yes
+U27-0087,XVQJ,t0087-a9d393.synthetic-demo.near,base,2027-01-19,102164,4.43,investors,true,foundation blog post (fictional),yes
+U27-0088,XXXK,t0088-24a354.synthetic-demo.near,near,2027-01-19,5060652,0.82,ecosystem,false,vesting schedule v2,yes
+U27-0089,XEFC,t0089-a5c339.synthetic-demo.near,near,2027-01-20,12134236,1.75,team,false,vesting schedule v2,yes
+U27-0090,XAFB,t0090-a32c79.synthetic-demo.near,arbitrum,2027-01-20,3274846,7.86,advisors,false,governance proposal #114 (fictional),yes
+U27-0091,XPRN,t0091-2fceb0.synthetic-demo.near,arbitrum,2027-01-20,5176051,1.43,advisors,false,vesting schedule v2,yes
+U27-0092,XISU,t0092-c90892.synthetic-demo.near,ethereum,2027-01-20,1900437,0.10,investors,false,foundation blog post (fictional),yes
+U27-0093,XYUJ,t0093-f373e6.synthetic-demo.near,base,2027-01-20,2331290,1.74,advisors,true,vesting schedule v2,yes
+U27-0094,XMSY,t0094-40dd48.synthetic-demo.near,ethereum,2027-01-21,19138053,0.10,ecosystem,false,vesting schedule v2,yes
+U27-0095,XBUM,t0095-27cd70.synthetic-demo.near,arbitrum,2027-01-21,5097738,5.38,advisors,false,governance proposal #227 (fictional),yes
+U27-0096,XEGO,t0096-2baa77.synthetic-demo.near,solana,2027-01-21,22695175,8.11,investors,false,governance proposal #176 (fictional),yes
+U27-0097,XFJY,t0097-f101f7.synthetic-demo.near,solana,2027-01-21,5010982,0.31,team,true,governance proposal #95 (fictional),yes
+U27-0098,XRRC,t0098-f85d6d.synthetic-demo.near,near,2027-01-22,3321933,11.98,advisors,false,governance proposal #122 (fictional),yes
+U27-0099,XIBZ,t0099-37ff51.synthetic-demo.near,solana,2027-01-22,1544236,4.86,team,true,foundation blog post (fictional),yes
+U27-0100,XZDZ,t0100-285c9c.synthetic-demo.near,near,2027-01-22,1912774,7.76,team,true,foundation blog post (fictional),yes
+U27-0101,XVSQ,t0101-a88cbe.synthetic-demo.near,ethereum,2027-01-22,48668,3.18,team,false,foundation blog post (fictional),yes
+U27-0102,XCPS,t0102-c9faec.synthetic-demo.near,base,2027-01-22,38886,7.30,investors,false,governance proposal #235 (fictional),yes
+U27-0103,XMYQ,t0103-9ccb4c.synthetic-demo.near,arbitrum,2027-01-23,20979171,5.06,team,true,foundation blog post (fictional),yes
+U27-0104,XCSC,t0104-398178.synthetic-demo.near,near,2027-01-23,960380,7.12,advisors,true,governance proposal #174 (fictional),yes
+U27-0105,XQCE,t0105-979dd7.synthetic-demo.near,solana,2027-01-23,10211175,0.97,investors,false,vesting schedule v2,yes
+U27-0106,XXSS,t0106-f901dc.synthetic-demo.near,ethereum,2027-01-23,12777047,0.17,team,false,token terms PDF (fictional),yes
+U27-0107,XTEN,t0107-192e95.synthetic-demo.near,ethereum,2027-01-23,8414904,3.16,investors,true,token terms PDF (fictional),yes
+U27-0108,XBXT,t0108-582306.synthetic-demo.near,near,2027-01-24,11443192,4.35,ecosystem,false,foundation blog post (fictional),yes
+U27-0109,XRTF,t0109-72d5a1.synthetic-demo.near,ethereum,2027-01-24,3123434,1.38,advisors,true,governance proposal #220 (fictional),yes
+U27-0110,XTPV,t0110-8c446c.synthetic-demo.near,base,2027-01-24,4995796,7.05,advisors,true,foundation blog post (fictional),yes
+U27-0111,XALW,t0111-902082.synthetic-demo.near,near,2027-01-24,123988,1.84,treasury,true,vesting schedule v2,yes
+U27-0112,XHFY,t0112-d2a38b.synthetic-demo.near,solana,2027-01-25,2233667,9.77,investors,true,token terms PDF (fictional),yes
+U27-0113,XDQS,t0113-f6b268.synthetic-demo.near,near,2027-01-25,9236522,0.33,investors,false,token terms PDF (fictional),yes
+U27-0114,XLSU,t0114-4cbc5c.synthetic-demo.near,near,2027-01-25,3849729,1.71,team,false,vesting schedule v2,yes
+U27-0115,XQXE,t0115-3322b5.synthetic-demo.near,near,2027-01-25,134650,7.68,treasury,true,token terms PDF (fictional),yes
+U27-0116,XQRD,t0116-c4499c.synthetic-demo.near,near,2027-01-25,6042079,0.21,team,true,foundation blog post (fictional),yes
+U27-0117,XRGN,t0117-ad3f24.synthetic-demo.near,near,2027-01-26,7360060,7.94,team,true,foundation blog post (fictional),yes
+U27-0118,XHHB,t0118-c7a2b3.synthetic-demo.near,solana,2027-01-26,6860276,4.31,investors,true,foundation blog post (fictional),yes
+U27-0119,XNNX,t0119-f3aa75.synthetic-demo.near,solana,2027-01-26,2978015,3.90,investors,false,vesting schedule v2,yes
+U27-0120,XRTO,t0120-1f3207.synthetic-demo.near,near,2027-01-26,6664540,2.38,team,false,foundation blog post (fictional),yes
+U27-0121,XZNM,t0121-277494.synthetic-demo.near,near,2027-01-26,2197282,0.52,treasury,true,token terms PDF (fictional),yes
+U27-0122,XMCQ,t0122-fc7276.synthetic-demo.near,near,2027-01-27,1075423,7.58,investors,true,foundation blog post (fictional),yes
+U27-0123,XMET,t0123-07abee.synthetic-demo.near,near,2027-01-27,2448030,9.61,ecosystem,true,foundation blog post (fictional),yes
+U27-0124,XEZQ,t0124-8d8677.synthetic-demo.near,solana,2027-01-27,55821,4.77,investors,true,token terms PDF (fictional),yes
+U27-0125,XOXC,t0125-81ad54.synthetic-demo.near,base,2027-01-27,164983,8.35,investors,true,governance proposal #118 (fictional),yes
+U27-0126,XECC,t0126-09b238.synthetic-demo.near,solana,2027-01-28,519473,0.66,investors,false,foundation blog post (fictional),yes
+U27-0127,XSLK,t0127-46bd06.synthetic-demo.near,solana,2027-01-28,4961500,0.20,treasury,true,governance proposal #68 (fictional),yes
+U27-0128,XCCT,t0128-8be41a.synthetic-demo.near,solana,2027-01-28,1569122,1.00,investors,true,token terms PDF (fictional),yes
+U27-0129,XRTZ,t0129-ad0c32.synthetic-demo.near,arbitrum,2027-01-28,6421865,5.71,advisors,false,governance proposal #133 (fictional),yes
+U27-0130,XZAG,t0130-ecd34b.synthetic-demo.near,near,2027-01-28,6198292,3.42,investors,true,vesting schedule v2,yes
+U27-0131,XQIA,t0131-66553e.synthetic-demo.near,near,2027-01-29,9742672,3.47,advisors,false,vesting schedule v2,yes
+U27-0132,XDFS,t0132-d679e6.synthetic-demo.near,base,2027-01-29,23771,5.68,advisors,false,token terms PDF (fictional),yes
+U27-0133,XQBP,t0133-8d56c7.synthetic-demo.near,base,2027-01-29,1143561,8.07,investors,false,vesting schedule v2,yes
+U27-0134,XWPF,t0134-c1673d.synthetic-demo.near,solana,2027-01-29,4675497,1.00,advisors,true,vesting schedule v2,yes
+U27-0135,XNQT,t0135-998980.synthetic-demo.near,near,2027-01-30,5590407,1.23,investors,false,vesting schedule v2,yes
+U27-0136,XEYD,t0136-35f987.synthetic-demo.near,base,2027-01-30,2092363,3.07,treasury,false,vesting schedule v2,yes
+U27-0137,XTRQ,t0137-9ffb8f.synthetic-demo.near,base,2027-01-30,858609,0.27,investors,true,foundation blog post (fictional),yes
+U27-0138,XUWG,t0138-fba3cb.synthetic-demo.near,near,2027-01-30,10338541,2.61,investors,false,token terms PDF (fictional),yes
+U27-0139,XFKW,t0139-d9a851.synthetic-demo.near,base,2027-01-30,26542126,4.80,treasury,true,foundation blog post (fictional),yes
+U27-0140,XUZZ,t0140-06d3f0.synthetic-demo.near,base,2027-01-31,444907,0.38,ecosystem,false,vesting schedule v2,yes
+U27-0141,XUQD,t0141-bfdd12.synthetic-demo.near,near,2027-01-31,1881361,1.65,team,true,governance proposal #44 (fictional),yes
+U27-0142,XFIU,t0142-aedfa0.synthetic-demo.near,near,2027-01-31,13071207,0.54,team,false,token terms PDF (fictional),yes
+U27-0143,XRCV,t0143-73e198.synthetic-demo.near,arbitrum,2027-01-31,26964859,1.56,team,false,vesting schedule v2,yes
+U27-0144,XUXT,t0144-271640.synthetic-demo.near,base,2027-01-31,451170,5.57,treasury,false,foundation blog post (fictional),yes
+U27-0145,XUUY,t0145-580734.synthetic-demo.near,solana,2027-02-01,1157489,3.19,ecosystem,false,governance proposal #72 (fictional),yes
+U27-0146,XBTQ,t0146-6caefd.synthetic-demo.near,near,2027-02-01,16804470,0.38,team,true,foundation blog post (fictional),yes
+U27-0147,XZPM,t0147-c47afe.synthetic-demo.near,near,2027-02-01,21631116,11.91,team,true,foundation blog post (fictional),yes
+U27-0148,XTDA,t0148-bc928a.synthetic-demo.near,near,2027-02-01,5031130,8.70,advisors,false,vesting schedule v2,yes
+U27-0149,XHIY,t0149-f2deb8.synthetic-demo.near,base,2027-02-02,1519704,7.94,investors,true,vesting schedule v2,yes
+U27-0150,XDOB,t0150-0c300f.synthetic-demo.near,base,2027-02-02,13522822,2.45,team,false,token terms PDF (fictional),yes
+U27-0151,XHNN,t0151-08011e.synthetic-demo.near,near,2027-02-02,3163376,8.87,advisors,true,governance proposal #122 (fictional),yes
+U27-0152,XSWS,t0152-4f697b.synthetic-demo.near,near,2027-02-02,4710274,2.58,team,true,governance proposal #124 (fictional),yes
+U27-0153,XBFO,t0153-d9704b.synthetic-demo.near,near,2027-02-02,13665257,0.33,treasury,false,foundation blog post (fictional),yes
+U27-0154,XGJR,t0154-b23f9d.synthetic-demo.near,arbitrum,2027-02-03,8984914,0.21,team,false,vesting schedule v2,yes
+U27-0155,XZLB,t0155-e0e1e7.synthetic-demo.near,base,2027-02-03,4093009,0.38,ecosystem,false,foundation blog post (fictional),yes
+U27-0156,XYMZ,t0156-37ef28.synthetic-demo.near,near,2027-02-03,15773499,1.69,team,true,vesting schedule v2,yes
+U27-0157,XCFB,t0157-b20649.synthetic-demo.near,near,2027-02-03,1132283,9.38,advisors,false,token terms PDF (fictional),yes
+U27-0158,XTXC,t0158-857543.synthetic-demo.near,near,2027-02-03,281382,4.87,investors,false,vesting schedule v2,yes
+U27-0159,XQSX,t0159-012263.synthetic-demo.near,arbitrum,2027-02-04,751397,1.87,ecosystem,true,vesting schedule v2,yes
+U27-0160,XBTY,t0160-c7da16.synthetic-demo.near,near,2027-02-04,5515350,3.62,advisors,true,foundation blog post (fictional),yes
+U27-0161,XPGP,t0161-40238e.synthetic-demo.near,near,2027-02-04,19326442,4.59,ecosystem,true,governance proposal #78 (fictional),yes
+U27-0162,XYLC,t0162-3cd7f7.synthetic-demo.near,solana,2027-02-04,22417338,5.34,ecosystem,true,token terms PDF (fictional),yes
+U27-0163,XGEY,t0163-50412b.synthetic-demo.near,solana,2027-02-05,5113554,9.68,team,false,vesting schedule v2,yes
+U27-0164,XCPW,t0164-e96f73.synthetic-demo.near,base,2027-02-05,12044619,8.56,team,false,foundation blog post (fictional),yes
+U27-0165,XKMB,t0165-3a1a47.synthetic-demo.near,arbitrum,2027-02-05,14079318,0.51,ecosystem,false,token terms PDF (fictional),yes
+U27-0166,XNQL,t0166-3013ac.synthetic-demo.near,near,2027-02-05,2092298,0.20,advisors,true,vesting schedule v2,yes
+U27-0167,XZDM,t0167-a838cb.synthetic-demo.near,arbitrum,2027-02-05,26481758,7.31,advisors,false,governance proposal #210 (fictional),yes
+U27-0168,XIZP,t0168-a6c220.synthetic-demo.near,base,2027-02-06,1174914,0.16,team,false,foundation blog post (fictional),yes
+U27-0169,XJPN,t0169-aa804d.synthetic-demo.near,near,2027-02-06,7203230,0.85,team,false,token terms PDF (fictional),yes
+U27-0170,XQHU,t0170-3446e9.synthetic-demo.near,base,2027-02-06,6299660,0.51,team,false,vesting schedule v2,yes
+U27-0171,XIXO,t0171-e17e40.synthetic-demo.near,near,2027-02-06,24283827,0.28,ecosystem,true,governance proposal #218 (fictional),yes
+U27-0172,XUJT,t0172-da32f4.synthetic-demo.near,near,2027-02-07,8785025,0.45,investors,false,governance proposal #70 (fictional),yes
+U27-0173,XTUR,t0173-4b97de.synthetic-demo.near,near,2027-02-07,5648684,11.34,investors,false,token terms PDF (fictional),yes
+U27-0174,XBLJ,t0174-52aa63.synthetic-demo.near,base,2027-02-07,4078189,9.25,ecosystem,false,vesting schedule v2,yes
+U27-0175,XXVA,t0175-03a2ab.synthetic-demo.near,solana,2027-02-07,14587425,3.81,team,true,foundation blog post (fictional),yes
+U27-0176,XXCQ,t0176-620c4c.synthetic-demo.near,base,2027-02-07,5914389,9.99,team,true,token terms PDF (fictional),yes
+U27-0177,XNAY,t0177-e1d281.synthetic-demo.near,arbitrum,2027-02-08,382899,2.08,team,true,vesting schedule v2,yes
+U27-0178,XHZL,t0178-c53dd8.synthetic-demo.near,near,2027-02-08,2699023,7.27,advisors,false,token terms PDF (fictional),yes
+U27-0179,XOPN,t0179-0ed960.synthetic-demo.near,near,2027-02-08,1231523,3.39,advisors,false,governance proposal #237 (fictional),yes
+U27-0180,XAYL,t0180-ade30e.synthetic-demo.near,solana,2027-02-08,22434,8.19,team,true,foundation blog post (fictional),yes
+U27-0181,XNQA,t0181-358fce.synthetic-demo.near,near,2027-02-08,2417291,5.25,ecosystem,false,vesting schedule v2,yes
+U27-0182,XXDY,t0182-ada751.synthetic-demo.near,near,2027-02-09,490953,10.71,treasury,false,governance proposal #187 (fictional),yes
+U27-0183,XCYX,t0183-2dbd78.synthetic-demo.near,near,2027-02-09,4250726,0.10,advisors,false,foundation blog post (fictional),yes
+U27-0184,XLXM,t0184-967a01.synthetic-demo.near,near,2027-02-09,140499,0.95,investors,true,governance proposal #193 (fictional),yes
+U27-0185,XXNM,t0185-4391e6.synthetic-demo.near,solana,2027-02-09,511639,0.42,ecosystem,false,vesting schedule v2,yes
+U27-0186,XJCW,t0186-76c5d9.synthetic-demo.near,solana,2027-02-10,3061885,1.69,advisors,false,foundation blog post (fictional),yes
+U27-0187,XZBV,t0187-66ad29.synthetic-demo.near,base,2027-02-10,8763047,9.38,investors,false,vesting schedule v2,yes
+U27-0188,XKXR,t0188-3fe856.synthetic-demo.near,near,2027-02-10,9230924,0.20,investors,true,vesting schedule v2,yes
+U27-0189,XTAB,t0189-6798e6.synthetic-demo.near,base,2027-02-10,2682051,3.31,treasury,true,token terms PDF (fictional),yes
+U27-0190,XPQY,t0190-4ad9aa.synthetic-demo.near,base,2027-02-10,5351526,9.88,treasury,true,foundation blog post (fictional),yes
+U27-0191,XCKF,t0191-f3669f.synthetic-demo.near,base,2027-02-11,1610670,3.39,ecosystem,true,governance proposal #119 (fictional),yes
+U27-0192,XVES,t0192-49d19f.synthetic-demo.near,near,2027-02-11,2494557,10.11,treasury,true,governance proposal #163 (fictional),yes
+U27-0193,XRIK,t0193-df246e.synthetic-demo.near,near,2027-02-11,11402381,11.71,treasury,false,token terms PDF (fictional),yes
+U27-0194,XRVS,t0194-c80ff9.synthetic-demo.near,base,2027-02-11,6564426,8.40,team,false,token terms PDF (fictional),yes
+U27-0195,XOHN,t0195-093703.synthetic-demo.near,near,2027-02-12,6570761,10.04,treasury,true,vesting schedule v2,yes
+U27-0196,XDCU,t0196-5a2712.synthetic-demo.near,near,2027-02-12,288904,0.11,team,true,token terms PDF (fictional),yes
+U27-0197,XWBQ,t0197-e19dc8.synthetic-demo.near,near,2027-02-12,4692948,5.81,team,true,governance proposal #63 (fictional),yes
+U27-0198,XURQ,t0198-7fa87d.synthetic-demo.near,near,2027-02-12,2506312,10.00,investors,true,governance proposal #150 (fictional),yes
+U27-0199,XXFU,t0199-b8f94b.synthetic-demo.near,base,2027-02-12,1543639,11.50,investors,false,foundation blog post (fictional),yes
+U27-0200,XCIA,t0200-d889f3.synthetic-demo.near,base,2027-02-13,147159,3.45,ecosystem,true,token terms PDF (fictional),yes
+U27-0201,XATV,t0201-c8be05.synthetic-demo.near,arbitrum,2027-02-13,4377661,10.22,advisors,false,foundation blog post (fictional),yes
+U27-0202,XAYJ,t0202-9cfb45.synthetic-demo.near,base,2027-02-13,13260592,6.21,team,true,vesting schedule v2,yes
+U27-0203,XFTP,t0203-30e784.synthetic-demo.near,near,2027-02-13,3801381,3.59,team,true,governance proposal #92 (fictional),yes
+U27-0204,XMKB,t0204-b968f3.synthetic-demo.near,near,2027-02-13,15127369,0.36,treasury,true,foundation blog post (fictional),yes
+U27-0205,XOCM,t0205-8cf500.synthetic-demo.near,near,2027-02-14,4944741,1.27,advisors,true,foundation blog post (fictional),yes
+U27-0206,XWWI,t0206-a30240.synthetic-demo.near,solana,2027-02-14,103266,4.18,investors,false,token terms PDF (fictional),yes
+U27-0207,XDKI,t0207-12f7c4.synthetic-demo.near,near,2027-02-14,55132,8.00,advisors,true,token terms PDF (fictional),yes
+U27-0208,XGHL,t0208-05d9f3.synthetic-demo.near,near,2027-02-14,15113247,5.49,treasury,true,foundation blog post (fictional),yes
+U27-0209,XGIA,t0209-2029ea.synthetic-demo.near,near,2027-02-15,10450768,10.50,advisors,false,governance proposal #134 (fictional),yes
+U27-0210,XVAV,t0210-6fcd4b.synthetic-demo.near,near,2027-02-15,1184204,7.88,investors,false,vesting schedule v2,yes
+U27-0211,XGXQ,t0211-ad5c7c.synthetic-demo.near,base,2027-02-15,140820,7.93,treasury,true,foundation blog post (fictional),yes
+U27-0212,XPCY,t0212-0351d2.synthetic-demo.near,near,2027-02-15,791651,3.35,investors,true,token terms PDF (fictional),yes
+U27-0213,XHVA,t0213-912a4b.synthetic-demo.near,near,2027-02-15,178439,2.71,ecosystem,true,token terms PDF (fictional),yes
+U27-0214,XKUV,t0214-6733ae.synthetic-demo.near,near,2027-02-16,3648959,9.75,investors,false,token terms PDF (fictional),yes
+U27-0215,XIUR,t0215-cfc7bb.synthetic-demo.near,near,2027-02-16,11927,8.61,advisors,false,vesting schedule v2,yes
+U27-0216,XPDG,t0216-c061de.synthetic-demo.near,near,2027-02-16,16039569,8.60,advisors,false,vesting schedule v2,yes
+U27-0217,XAVE,t0217-1a7392.synthetic-demo.near,near,2027-02-16,2784023,7.00,advisors,false,foundation blog post (fictional),yes
+U27-0218,XYSR,t0218-ce385d.synthetic-demo.near,near,2027-02-16,11321596,8.16,investors,true,token terms PDF (fictional),yes
+U27-0219,XCKT,t0219-66c193.synthetic-demo.near,ethereum,2027-02-17,393393,10.68,investors,false,token terms PDF (fictional),yes
+U27-0220,XTXP,t0220-e958da.synthetic-demo.near,near,2027-02-17,26738893,0.46,investors,true,governance proposal #20 (fictional),yes
+U27-0221,XZET,t0221-8ed8c4.synthetic-demo.near,solana,2027-02-17,276181,11.64,investors,true,governance proposal #121 (fictional),yes
+U27-0222,XOZO,t0222-c8c018.synthetic-demo.near,base,2027-02-17,1959492,6.93,treasury,true,governance proposal #238 (fictional),yes
+U27-0223,XSEK,t0223-8995de.synthetic-demo.near,near,2027-02-18,1570565,6.46,advisors,true,vesting schedule v2,yes
+U27-0224,XIYZ,t0224-716691.synthetic-demo.near,base,2027-02-18,10354770,0.27,ecosystem,true,token terms PDF (fictional),yes
+U27-0225,XSGN,t0225-0a6ebc.synthetic-demo.near,near,2027-02-18,5893710,5.25,team,true,governance proposal #30 (fictional),yes
+U27-0226,XTRO,t0226-daf71e.synthetic-demo.near,solana,2027-02-18,135738,0.73,team,false,vesting schedule v2,yes
+U27-0227,XWGZ,t0227-3d2a2d.synthetic-demo.near,ethereum,2027-02-18,16197302,2.57,team,true,governance proposal #13 (fictional),yes
+U27-0228,XPBP,t0228-3d02e6.synthetic-demo.near,near,2027-02-19,2584532,0.12,team,true,vesting schedule v2,yes
+U27-0229,XJOP,t0229-c295aa.synthetic-demo.near,solana,2027-02-19,6522857,0.22,ecosystem,false,foundation blog post (fictional),yes
+U27-0230,XCUZ,t0230-a7b959.synthetic-demo.near,near,2027-02-19,5115852,0.11,ecosystem,true,token terms PDF (fictional),yes
+U27-0231,XBSD,t0231-9df7df.synthetic-demo.near,base,2027-02-19,6302215,1.16,treasury,false,vesting schedule v2,yes
+U27-0232,XGAD,t0232-f11fc0.synthetic-demo.near,arbitrum,2027-02-20,1521810,1.87,investors,true,foundation blog post (fictional),yes
+U27-0233,XFJP,t0233-62acc4.synthetic-demo.near,near,2027-02-20,8520587,3.18,investors,false,token terms PDF (fictional),yes
+U27-0234,XMLH,t0234-00d576.synthetic-demo.near,near,2027-02-20,1039091,8.21,advisors,false,governance proposal #213 (fictional),yes
+U27-0235,XRPH,t0235-7c7c2d.synthetic-demo.near,near,2027-02-20,18934028,8.64,team,true,vesting schedule v2,yes
+U27-0236,XIBA,t0236-59cf69.synthetic-demo.near,near,2027-02-20,10570175,3.47,investors,true,token terms PDF (fictional),yes
+U27-0237,XYEZ,t0237-19488b.synthetic-demo.near,near,2027-02-21,13405629,1.82,team,true,governance proposal #109 (fictional),yes
+U27-0238,XYHU,t0238-c7c8f2.synthetic-demo.near,arbitrum,2027-02-21,2765740,3.31,ecosystem,false,foundation blog post (fictional),yes
+U27-0239,XGCH,t0239-f24225.synthetic-demo.near,near,2027-02-21,111370,3.97,ecosystem,false,governance proposal #70 (fictional),yes
+U27-0240,XVQX,t0240-e6fc00.synthetic-demo.near,arbitrum,2027-02-21,12515457,0.68,team,false,foundation blog post (fictional),yes
+U27-0241,XGJE,t0241-312e4f.synthetic-demo.near,arbitrum,2027-02-21,371499,3.36,treasury,false,token terms PDF (fictional),yes
+U27-0242,XERW,t0242-de74fe.synthetic-demo.near,near,2027-02-22,29342889,10.90,advisors,false,token terms PDF (fictional),yes
+U27-0243,XQJF,t0243-c6839e.synthetic-demo.near,near,2027-02-22,3164813,2.79,team,true,governance proposal #87 (fictional),yes
+U27-0244,XVSU,t0244-b4a0d8.synthetic-demo.near,near,2027-02-22,954453,9.15,advisors,true,foundation blog post (fictional),yes
+U27-0245,XFWY,t0245-640dd8.synthetic-demo.near,solana,2027-02-22,17711660,6.21,ecosystem,true,foundation blog post (fictional),yes
+U27-0246,XMCS,t0246-a696da.synthetic-demo.near,near,2027-02-23,1076698,3.34,team,false,foundation blog post (fictional),yes
+U27-0247,XHXK,t0247-2b8589.synthetic-demo.near,solana,2027-02-23,336608,0.12,investors,true,token terms PDF (fictional),yes
+U27-0248,XYHS,t0248-9aef3f.synthetic-demo.near,base,2027-02-23,23481563,6.06,investors,false,governance proposal #39 (fictional),yes
+U27-0249,XULA,t0249-ab860d.synthetic-demo.near,arbitrum,2027-02-23,2246717,9.06,investors,true,vesting schedule v2,yes
+U27-0250,XMAU,t0250-b0a83f.synthetic-demo.near,near,2027-02-23,1606791,5.40,treasury,true,governance proposal #108 (fictional),yes
+U27-0251,XZNI,t0251-3bd190.synthetic-demo.near,solana,2027-02-24,1347692,1.04,investors,false,governance proposal #227 (fictional),yes
+U27-0252,XMIF,t0252-dfd02a.synthetic-demo.near,near,2027-02-24,41144757,4.77,team,false,governance proposal #59 (fictional),yes
+U27-0253,XFEW,t0253-5b036e.synthetic-demo.near,solana,2027-02-24,17556521,4.31,advisors,false,foundation blog post (fictional),yes
+U27-0254,XCMP,t0254-d0f8ea.synthetic-demo.near,near,2027-02-24,798815,10.77,treasury,true,governance proposal #116 (fictional),yes
+U27-0255,XVWT,t0255-ced327.synthetic-demo.near,near,2027-02-25,891714,0.70,investors,true,token terms PDF (fictional),yes
+U27-0256,XZMY,t0256-fc588a.synthetic-demo.near,base,2027-02-25,14305450,0.90,ecosystem,true,token terms PDF (fictional),yes
+U27-0257,XVAK,t0257-a84b2d.synthetic-demo.near,base,2027-02-25,729630,1.49,investors,true,governance proposal #20 (fictional),yes
+U27-0258,XVEM,t0258-b82c11.synthetic-demo.near,near,2027-02-25,17279569,2.87,treasury,true,governance proposal #46 (fictional),yes
+U27-0259,XDBK,t0259-a15c25.synthetic-demo.near,ethereum,2027-02-25,899485,5.15,investors,false,token terms PDF (fictional),yes
+U27-0260,XIGP,t0260-ed3a76.synthetic-demo.near,near,2027-02-26,274430,0.25,treasury,false,governance proposal #54 (fictional),yes
+U27-0261,XJUG,t0261-f46ff6.synthetic-demo.near,solana,2027-02-26,3207878,0.52,treasury,false,vesting schedule v2,yes
+U27-0262,XWNI,t0262-eafce3.synthetic-demo.near,near,2027-02-26,4100993,3.43,ecosystem,true,governance proposal #104 (fictional),yes
+U27-0263,XSOZ,t0263-e2d221.synthetic-demo.near,ethereum,2027-02-26,8455640,7.06,team,false,vesting schedule v2,yes
+U27-0264,XLCV,t0264-125fd8.synthetic-demo.near,solana,2027-02-26,4767030,0.13,team,false,foundation blog post (fictional),yes
+U27-0265,XHWS,t0265-b8983f.synthetic-demo.near,base,2027-02-27,1778457,10.23,investors,false,foundation blog post (fictional),yes
+U27-0266,XVTE,t0266-992a09.synthetic-demo.near,ethereum,2027-02-27,13681248,0.72,ecosystem,true,vesting schedule v2,yes
+U27-0267,XIFT,t0267-f19fb5.synthetic-demo.near,base,2027-02-27,10848648,5.73,treasury,false,token terms PDF (fictional),yes
+U27-0268,XEQX,t0268-7b19dc.synthetic-demo.near,base,2027-02-27,579838,11.63,investors,true,governance proposal #181 (fictional),yes
+U27-0269,XWWD,t0269-ad5ec6.synthetic-demo.near,solana,2027-02-28,52635,2.93,ecosystem,false,token terms PDF (fictional),yes
+U27-0270,XCJP,t0270-c23cc6.synthetic-demo.near,solana,2027-02-28,2368487,0.20,treasury,true,vesting schedule v2,yes
+U27-0271,XWPZ,t0271-1bd875.synthetic-demo.near,near,2027-02-28,701396,1.17,treasury,true,foundation blog post (fictional),yes
+U27-0272,XWDX,t0272-ed8a1d.synthetic-demo.near,near,2027-02-28,1149515,0.25,advisors,true,vesting schedule v2,yes
+U27-0273,XYFZ,t0273-f8f284.synthetic-demo.near,solana,2027-02-28,16738833,0.61,treasury,true,vesting schedule v2,yes
+U27-0274,XVHO,t0274-198b40.synthetic-demo.near,near,2027-03-01,2873754,0.16,ecosystem,false,vesting schedule v2,yes
+U27-0275,XHGR,t0275-97b012.synthetic-demo.near,near,2027-03-01,9585521,1.60,investors,true,foundation blog post (fictional),yes
+U27-0276,XMWJ,t0276-b92fc0.synthetic-demo.near,solana,2027-03-01,9849877,0.97,ecosystem,true,governance proposal #31 (fictional),yes
+U27-0277,XMGX,t0277-a47b48.synthetic-demo.near,base,2027-03-01,430196,0.51,ecosystem,true,governance proposal #205 (fictional),yes
+U27-0278,XXRZ,t0278-39a9ac.synthetic-demo.near,base,2027-03-01,9691394,0.11,advisors,true,vesting schedule v2,yes
+U27-0279,XILO,t0279-8329ca.synthetic-demo.near,near,2027-03-02,394002,8.62,ecosystem,false,token terms PDF (fictional),yes
+U27-0280,XEFX,t0280-d91e00.synthetic-demo.near,ethereum,2027-03-02,3637412,1.19,treasury,false,vesting schedule v2,yes
+U27-0281,XKCH,t0281-146506.synthetic-demo.near,near,2027-03-02,6529484,2.37,treasury,false,foundation blog post (fictional),yes
+U27-0282,XUVL,t0282-1fe311.synthetic-demo.near,arbitrum,2027-03-02,1376481,6.91,treasury,true,governance proposal #1 (fictional),yes
+U27-0283,XOZN,t0283-809002.synthetic-demo.near,near,2027-03-03,2786110,1.11,team,true,governance proposal #82 (fictional),yes
+U27-0284,XGGM,t0284-11b832.synthetic-demo.near,base,2027-03-03,14799,10.02,treasury,false,vesting schedule v2,yes
+U27-0285,XBMF,t0285-3b46b0.synthetic-demo.near,base,2027-03-03,6552108,2.81,treasury,true,token terms PDF (fictional),yes
+U27-0286,XITG,t0286-31aeee.synthetic-demo.near,solana,2027-03-03,9566630,2.81,ecosystem,false,governance proposal #102 (fictional),yes
+U27-0287,XGJW,t0287-297db7.synthetic-demo.near,arbitrum,2027-03-03,1161385,2.30,advisors,true,governance proposal #28 (fictional),yes
+U27-0288,XNHS,t0288-92fc45.synthetic-demo.near,base,2027-03-04,18327416,0.10,treasury,true,governance proposal #33 (fictional),yes
+U27-0289,XRMQ,t0289-213c66.synthetic-demo.near,base,2027-03-04,234729,7.33,advisors,true,governance proposal #232 (fictional),yes
+U27-0290,XQEU,t0290-4920d6.synthetic-demo.near,solana,2027-03-04,10021240,0.30,investors,false,foundation blog post (fictional),yes
+U27-0291,XDLK,t0291-58db8c.synthetic-demo.near,near,2027-03-04,27109713,0.23,treasury,true,token terms PDF (fictional),yes
+U27-0292,XARQ,t0292-0a7a63.synthetic-demo.near,near,2027-03-05,10758077,8.08,advisors,false,vesting schedule v2,yes
+U27-0293,XDBY,t0293-9cc0a5.synthetic-demo.near,near,2027-03-05,4063234,2.56,ecosystem,true,foundation blog post (fictional),yes
+U27-0294,XOMY,t0294-ff5744.synthetic-demo.near,arbitrum,2027-03-05,5749928,10.33,advisors,true,foundation blog post (fictional),yes
+U27-0295,XZYU,t0295-e86413.synthetic-demo.near,base,2027-03-05,290564,6.43,team,false,token terms PDF (fictional),yes
+U27-0296,XSYH,t0296-c556f4.synthetic-demo.near,base,2027-03-05,3135501,0.21,treasury,true,vesting schedule v2,yes
+U27-0297,XWPA,t0297-b17bc6.synthetic-demo.near,near,2027-03-06,355818,3.39,team,true,foundation blog post (fictional),yes
+U27-0298,XFBU,t0298-08b881.synthetic-demo.near,ethereum,2027-03-06,28473143,0.11,investors,false,token terms PDF (fictional),yes
+U27-0299,XBCX,t0299-897c9a.synthetic-demo.near,base,2027-03-06,2353973,4.61,ecosystem,true,token terms PDF (fictional),yes
+U27-0300,XEOG,t0300-881e3b.synthetic-demo.near,base,2027-03-06,4825595,0.65,investors,false,vesting schedule v2,yes
+U27-0301,XCHS,t0301-d10da4.synthetic-demo.near,base,2027-03-06,4753795,1.89,advisors,true,foundation blog post (fictional),yes
+U27-0302,XBNT,t0302-5c6068.synthetic-demo.near,near,2027-03-07,2900504,0.60,treasury,true,vesting schedule v2,yes
+U27-0303,XHXY,t0303-f7fb44.synthetic-demo.near,base,2027-03-07,6332268,9.70,ecosystem,true,governance proposal #235 (fictional),yes
+U27-0304,XJFX,t0304-f40862.synthetic-demo.near,near,2027-03-07,266690,5.91,treasury,true,foundation blog post (fictional),yes
+U27-0305,XSYY,t0305-dc78b4.synthetic-demo.near,near,2027-03-07,761467,8.33,advisors,false,foundation blog post (fictional),yes
+U27-0306,XGRU,t0306-ea9b51.synthetic-demo.near,solana,2027-03-08,16941202,2.54,team,true,governance proposal #133 (fictional),yes
+U27-0307,XCCM,t0307-4e4b86.synthetic-demo.near,near,2027-03-08,9230577,0.10,team,false,token terms PDF (fictional),yes
+U27-0308,XHQN,t0308-9d4684.synthetic-demo.near,arbitrum,2027-03-08,14120189,0.10,investors,true,vesting schedule v2,yes
+U27-0309,XUUV,t0309-7e2320.synthetic-demo.near,near,2027-03-08,3133836,1.80,advisors,false,vesting schedule v2,yes
+U27-0310,XMGV,t0310-98c53a.synthetic-demo.near,solana,2027-03-08,1128140,0.50,investors,false,foundation blog post (fictional),yes
+U27-0311,XJER,t0311-54d31e.synthetic-demo.near,base,2027-03-09,150072,7.16,team,true,vesting schedule v2,yes
+U27-0312,XIVO,t0312-51a4f7.synthetic-demo.near,base,2027-03-09,425734,0.91,team,false,vesting schedule v2,yes
+U27-0313,XPAR,t0313-55bc1c.synthetic-demo.near,arbitrum,2027-03-09,690491,11.02,team,true,governance proposal #33 (fictional),yes
+U27-0314,XWYW,t0314-21ec71.synthetic-demo.near,near,2027-03-09,9584083,2.32,team,false,governance proposal #62 (fictional),yes
+U27-0315,XTQE,t0315-161294.synthetic-demo.near,near,2027-03-09,10744711,5.55,advisors,false,token terms PDF (fictional),yes
+U27-0316,XHKU,t0316-d700c3.synthetic-demo.near,near,2027-03-10,3840627,0.26,treasury,true,vesting schedule v2,yes
+U27-0317,XQDN,t0317-c21cd3.synthetic-demo.near,near,2027-03-10,4889871,0.85,team,false,token terms PDF (fictional),yes
+U27-0318,XWCH,t0318-90ce7b.synthetic-demo.near,near,2027-03-10,21105639,4.39,treasury,true,vesting schedule v2,yes
+U27-0319,XKPO,t0319-d2b9eb.synthetic-demo.near,near,2027-03-10,426983,7.84,ecosystem,false,token terms PDF (fictional),yes
+U27-0320,XKDZ,t0320-e513a4.synthetic-demo.near,arbitrum,2027-03-11,255562,0.70,team,false,governance proposal #18 (fictional),yes
+U27-0321,XABF,t0321-31d51e.synthetic-demo.near,solana,2027-03-11,21841,1.59,treasury,false,vesting schedule v2,yes
+U27-0322,XAYF,t0322-1a7ad8.synthetic-demo.near,near,2027-03-11,1009563,2.25,team,true,governance proposal #145 (fictional),yes
+U27-0323,XBQV,t0323-08ada8.synthetic-demo.near,near,2027-03-11,9508044,0.14,advisors,false,governance proposal #234 (fictional),yes
+U27-0324,XPCR,t0324-54a816.synthetic-demo.near,arbitrum,2027-03-11,2139760,1.96,treasury,true,governance proposal #185 (fictional),yes
+U27-0325,XVAB,t0325-0dea86.synthetic-demo.near,near,2027-03-12,8120558,4.51,team,true,foundation blog post (fictional),yes
+U27-0326,XUJG,t0326-f799fe.synthetic-demo.near,near,2027-03-12,878393,2.70,advisors,true,governance proposal #108 (fictional),yes
+U27-0327,XVAD,t0327-a26f9a.synthetic-demo.near,solana,2027-03-12,4122977,9.72,treasury,false,governance proposal #89 (fictional),yes
+U27-0328,XJAR,t0328-9aab20.synthetic-demo.near,base,2027-03-12,8422390,5.76,team,false,foundation blog post (fictional),yes
+U27-0329,XYMW,t0329-17e20e.synthetic-demo.near,solana,2027-03-13,14728614,3.82,ecosystem,true,token terms PDF (fictional),yes
+U27-0330,XBAF,t0330-9f3b06.synthetic-demo.near,near,2027-03-13,259067,0.22,treasury,false,foundation blog post (fictional),yes
+U27-0331,XIGU,t0331-5d4306.synthetic-demo.near,near,2027-03-13,1091171,3.51,team,false,foundation blog post (fictional),yes
+U27-0332,XDLC,t0332-39f2c5.synthetic-demo.near,near,2027-03-13,6628650,5.41,ecosystem,true,governance proposal #54 (fictional),yes
+U27-0333,XXNI,t0333-1e44d3.synthetic-demo.near,near,2027-03-13,170631,3.50,ecosystem,true,vesting schedule v2,yes
+U27-0334,XQZJ,t0334-4b16d0.synthetic-demo.near,near,2027-03-14,4813907,0.34,treasury,false,governance proposal #3 (fictional),yes
+U27-0335,XJII,t0335-207986.synthetic-demo.near,arbitrum,2027-03-14,3479637,0.35,treasury,true,token terms PDF (fictional),yes
+U27-0336,XISZ,t0336-279c86.synthetic-demo.near,near,2027-03-14,22834391,8.02,advisors,false,token terms PDF (fictional),yes
+U27-0337,XJNV,t0337-1fafe0.synthetic-demo.near,near,2027-03-14,1191783,7.48,advisors,false,token terms PDF (fictional),yes
+U27-0338,XFHH,t0338-a98768.synthetic-demo.near,near,2027-03-14,1956948,0.48,treasury,true,vesting schedule v2,yes
+U27-0339,XFSS,t0339-37f176.synthetic-demo.near,near,2027-03-15,20381038,2.68,treasury,true,foundation blog post (fictional),yes
+U27-0340,XIQR,t0340-5f809d.synthetic-demo.near,ethereum,2027-03-15,9461568,10.11,team,false,token terms PDF (fictional),yes
+U27-0341,XBYT,t0341-c5d221.synthetic-demo.near,base,2027-03-15,24119003,0.97,advisors,true,vesting schedule v2,yes
+U27-0342,XIXM,t0342-32dd91.synthetic-demo.near,near,2027-03-15,11537844,4.99,ecosystem,true,governance proposal #170 (fictional),yes
+U27-0343,XVDN,t0343-d1c458.synthetic-demo.near,near,2027-03-16,1698556,4.50,treasury,false,foundation blog post (fictional),yes
+U27-0344,XQJX,t0344-008022.synthetic-demo.near,near,2027-03-16,270612,0.52,team,false,governance proposal #27 (fictional),yes
+U27-0345,XYTH,t0345-375b0e.synthetic-demo.near,arbitrum,2027-03-16,10032709,0.19,team,false,foundation blog post (fictional),yes
+U27-0346,XJKV,t0346-f21792.synthetic-demo.near,base,2027-03-16,5509093,0.17,ecosystem,true,foundation blog post (fictional),yes
+U27-0347,XNYF,t0347-f20c13.synthetic-demo.near,ethereum,2027-03-16,20192762,10.66,treasury,false,governance proposal #10 (fictional),yes
+U27-0348,XWUI,t0348-3380a5.synthetic-demo.near,arbitrum,2027-03-17,4880734,3.87,advisors,false,vesting schedule v2,yes
+U27-0349,XHWB,t0349-593fd0.synthetic-demo.near,base,2027-03-17,5064844,0.34,investors,true,foundation blog post (fictional),yes
+U27-0350,XKUH,t0350-84201e.synthetic-demo.near,near,2027-03-17,4003856,0.11,treasury,false,token terms PDF (fictional),yes
+U27-0351,XUWU,t0351-8c71bc.synthetic-demo.near,near,2027-03-17,3539594,4.36,ecosystem,true,governance proposal #202 (fictional),yes
+U27-0352,XVZB,t0352-aea133.synthetic-demo.near,base,2027-03-18,12688423,0.53,investors,true,foundation blog post (fictional),yes
+U27-0353,XNXO,t0353-06c0fd.synthetic-demo.near,near,2027-03-18,1853966,1.35,treasury,false,token terms PDF (fictional),yes
+U27-0354,XVKK,t0354-27a6e9.synthetic-demo.near,base,2027-03-18,262915,3.47,treasury,false,token terms PDF (fictional),yes
+U27-0355,XAXG,t0355-98ed0d.synthetic-demo.near,solana,2027-03-18,17553802,8.39,investors,false,token terms PDF (fictional),yes
+U27-0356,XHMF,t0356-4b973b.synthetic-demo.near,near,2027-03-18,174208,8.29,advisors,true,vesting schedule v2,yes
+U27-0357,XSAC,t0357-c3870b.synthetic-demo.near,ethereum,2027-03-19,10000718,9.69,advisors,true,foundation blog post (fictional),yes
+U27-0358,XPSG,t0358-b075f9.synthetic-demo.near,solana,2027-03-19,12308873,0.30,advisors,true,vesting schedule v2,yes
+U27-0359,XHPA,t0359-4b6027.synthetic-demo.near,near,2027-03-19,6105484,0.45,advisors,true,foundation blog post (fictional),yes
+U27-0360,XQQX,t0360-29eb44.synthetic-demo.near,arbitrum,2027-03-19,6056314,3.79,treasury,true,vesting schedule v2,yes
+U27-0361,XHPG,t0361-58b806.synthetic-demo.near,solana,2027-03-19,203978,9.27,investors,false,foundation blog post (fictional),yes
+U27-0362,XDNV,t0362-f942ea.synthetic-demo.near,near,2027-03-20,26799,5.04,advisors,false,foundation blog post (fictional),yes
+U27-0363,XKAR,t0363-5b03b3.synthetic-demo.near,base,2027-03-20,1458432,4.26,treasury,false,foundation blog post (fictional),yes
+U27-0364,XMNQ,t0364-df4fc0.synthetic-demo.near,near,2027-03-20,7321527,3.31,investors,true,token terms PDF (fictional),yes
+U27-0365,XAJT,t0365-99e05d.synthetic-demo.near,near,2027-03-20,325363,1.62,team,true,token terms PDF (fictional),yes
+U27-0366,XLLP,t0366-aa265f.synthetic-demo.near,base,2027-03-21,1726531,0.14,team,true,governance proposal #143 (fictional),yes
+U27-0367,XGBP,t0367-537b67.synthetic-demo.near,base,2027-03-21,5364659,0.44,ecosystem,false,vesting schedule v2,yes
+U27-0368,XZGH,t0368-54c191.synthetic-demo.near,base,2027-03-21,1046154,0.73,treasury,true,token terms PDF (fictional),yes
+U27-0369,XHSG,t0369-29d33b.synthetic-demo.near,near,2027-03-21,17596270,0.15,advisors,true,vesting schedule v2,yes
+U27-0370,XLAW,t0370-608e5f.synthetic-demo.near,arbitrum,2027-03-21,5300909,9.74,investors,false,token terms PDF (fictional),yes
+U27-0371,XRAD,t0371-a80ca5.synthetic-demo.near,base,2027-03-22,520699,0.61,treasury,false,governance proposal #11 (fictional),yes
+U27-0372,XZYV,t0372-9852f7.synthetic-demo.near,solana,2027-03-22,1609657,10.85,investors,true,foundation blog post (fictional),yes
+U27-0373,XFVM,t0373-4c64bc.synthetic-demo.near,base,2027-03-22,3701244,2.98,team,false,vesting schedule v2,yes
+U27-0374,XMHC,t0374-2fe05f.synthetic-demo.near,solana,2027-03-22,8772414,7.59,team,true,token terms PDF (fictional),yes
+U27-0375,XZYM,t0375-85e7ef.synthetic-demo.near,near,2027-03-22,2726985,8.11,advisors,true,governance proposal #180 (fictional),yes
+U27-0376,XERY,t0376-ebf5fe.synthetic-demo.near,near,2027-03-23,14379436,0.79,investors,false,vesting schedule v2,yes
+U27-0377,XLFX,t0377-63ec40.synthetic-demo.near,near,2027-03-23,99623,1.35,treasury,false,foundation blog post (fictional),yes
+U27-0378,XIHY,t0378-7d7ad2.synthetic-demo.near,base,2027-03-23,3786973,0.11,treasury,false,vesting schedule v2,yes
+U27-0379,XHPE,t0379-7e27cd.synthetic-demo.near,near,2027-03-23,15476257,0.25,advisors,true,governance proposal #23 (fictional),yes
+U27-0380,XSKB,t0380-b9bce3.synthetic-demo.near,base,2027-03-24,964495,8.23,advisors,false,token terms PDF (fictional),yes
+U27-0381,XXHY,t0381-fc286a.synthetic-demo.near,base,2027-03-24,13907840,5.70,ecosystem,false,token terms PDF (fictional),yes
+U27-0382,XDUJ,t0382-b5b367.synthetic-demo.near,solana,2027-03-24,23909086,0.16,treasury,true,vesting schedule v2,yes
+U27-0383,XMIN,t0383-da6fc9.synthetic-demo.near,near,2027-03-24,1038430,1.49,team,false,vesting schedule v2,yes
+U27-0384,XLOE,t0384-5b50e0.synthetic-demo.near,near,2027-03-24,5311083,0.21,treasury,false,token terms PDF (fictional),yes
+U27-0385,XISN,t0385-ac5c08.synthetic-demo.near,near,2027-03-25,320554,0.65,ecosystem,true,foundation blog post (fictional),yes
+U27-0386,XARG,t0386-c98754.synthetic-demo.near,near,2027-03-25,9204130,3.52,advisors,false,token terms PDF (fictional),yes
+U27-0387,XZBS,t0387-b1bc9a.synthetic-demo.near,near,2027-03-25,2415084,2.07,investors,false,governance proposal #51 (fictional),yes
+U27-0388,XFOF,t0388-8c2fc6.synthetic-demo.near,near,2027-03-25,308307,2.57,team,false,token terms PDF (fictional),yes
+U27-0389,XIUD,t0389-e635c9.synthetic-demo.near,near,2027-03-26,20998715,3.68,team,true,token terms PDF (fictional),yes
+U27-0390,XQAI,t0390-fb8777.synthetic-demo.near,base,2027-03-26,4377812,0.33,investors,false,token terms PDF (fictional),yes
+U27-0391,XFHB,t0391-bdffa1.synthetic-demo.near,near,2027-03-26,4396672,6.97,investors,true,foundation blog post (fictional),yes
+U27-0392,XVTL,t0392-111ad1.synthetic-demo.near,ethereum,2027-03-26,3382455,6.80,ecosystem,false,vesting schedule v2,yes
+U27-0393,XAYR,t0393-913db5.synthetic-demo.near,near,2027-03-26,5378112,1.92,advisors,true,token terms PDF (fictional),yes
+U27-0394,XKZV,t0394-140136.synthetic-demo.near,near,2027-03-27,1904002,0.12,investors,true,token terms PDF (fictional),yes
+U27-0395,XZLG,t0395-8b15ee.synthetic-demo.near,near,2027-03-27,17501531,1.57,treasury,false,token terms PDF (fictional),yes
+U27-0396,XGCO,t0396-833833.synthetic-demo.near,solana,2027-03-27,1945342,7.98,team,false,foundation blog post (fictional),yes
+U27-0397,XDMX,t0397-4af29e.synthetic-demo.near,near,2027-03-27,455356,2.78,ecosystem,false,token terms PDF (fictional),yes
+U27-0398,XLOG,t0398-be8b38.synthetic-demo.near,near,2027-03-27,1140906,0.31,treasury,false,governance proposal #217 (fictional),yes
+U27-0399,XIOJ,t0399-601cdf.synthetic-demo.near,ethereum,2027-03-28,2208207,1.01,ecosystem,false,vesting schedule v2,yes
+U27-0400,XKQC,t0400-adab5c.synthetic-demo.near,near,2027-03-28,781788,7.15,treasury,true,governance proposal #11 (fictional),yes
+U27-0401,XRWD,t0401-c4acbd.synthetic-demo.near,near,2027-03-28,103530,4.14,team,true,foundation blog post (fictional),yes
+U27-0402,XPTI,t0402-fcf522.synthetic-demo.near,near,2027-03-28,4851774,2.28,team,true,token terms PDF (fictional),yes
+U27-0403,XPIE,t0403-eaa9b4.synthetic-demo.near,near,2027-03-29,14075685,0.13,treasury,false,vesting schedule v2,yes
+U27-0404,XDXK,t0404-264fa9.synthetic-demo.near,ethereum,2027-03-29,6132318,2.29,treasury,false,governance proposal #162 (fictional),yes
+U27-0405,XDLX,t0405-9e880e.synthetic-demo.near,near,2027-03-29,770800,3.10,investors,true,token terms PDF (fictional),yes
+U27-0406,XJHE,t0406-89ee56.synthetic-demo.near,solana,2027-03-29,1749142,10.34,team,true,governance proposal #155 (fictional),yes
+U27-0407,XCVJ,t0407-3fa60d.synthetic-demo.near,base,2027-03-29,24647383,2.56,advisors,true,vesting schedule v2,yes
+U27-0408,XFUR,t0408-cb99c6.synthetic-demo.near,near,2027-03-30,11557580,0.73,treasury,false,governance proposal #22 (fictional),yes
+U27-0409,XUWO,t0409-cfdc65.synthetic-demo.near,near,2027-03-30,11409525,2.04,investors,false,token terms PDF (fictional),yes
+U27-0410,XMGE,t0410-715bf0.synthetic-demo.near,near,2027-03-30,15581891,7.58,treasury,false,foundation blog post (fictional),yes
+U27-0411,XZVB,t0411-4104b8.synthetic-demo.near,near,2027-03-30,580226,0.10,advisors,true,token terms PDF (fictional),yes
+U27-0412,XVBE,t0412-a0e921.synthetic-demo.near,ethereum,2027-03-31,2465401,0.12,investors,false,token terms PDF (fictional),yes

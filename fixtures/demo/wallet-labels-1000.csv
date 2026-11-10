@@ -1,0 +1,1001 @@
+account_id,label,confidence,first_seen,last_active,tx_count_90d,top_protocol,evidence,synthetic
+w0001-8d4f8d.synthetic-demo.near,cex_hot_wallet,0.59,2026-06-24,2026-08-01,2269,other,deposit sweeps to one hot wallet,yes
+w0002-9926d8.synthetic-demo.near,arbitrage_bot,0.99,2026-07-15,2026-08-01,108,liquid_staking,same-block round trips across two pools,yes
+w0003-855644.synthetic-demo.near,airdrop_farmer,0.68,2024-04-22,2026-08-01,4147,nft_market,minimal activity before each snapshot,yes
+w0004-aa8d01.synthetic-demo.near,arbitrage_bot,0.90,2025-05-01,2026-08-01,2523,intents,sub-second arbitrage pattern,yes
+w0005-25bd85.synthetic-demo.near,lp_whale,0.52,2026-06-02,2026-08-01,527,lending,large single-sided liquidity deposits,yes
+w0006-5fe000.synthetic-demo.near,nft_trader,0.66,2026-03-19,2026-08-01,3667,other,floor-price sweeps on collections,yes
+w0007-eff33e.synthetic-demo.near,dao_treasury,0.70,2025-06-24,2026-08-01,167,bridge,multisig-style outgoing payments,yes
+w0008-502667.synthetic-demo.near,airdrop_farmer,0.72,2024-04-18,2026-08-01,2469,dex,many small claims from linked wallets,yes
+w0009-fcd5e4.synthetic-demo.near,dao_treasury,0.81,2026-06-27,2026-08-01,235,bridge,periodic grants to many recipients,yes
+w0010-b4a98f.synthetic-demo.near,nft_trader,0.72,2026-02-06,2026-08-01,554,lending,bursts of mints followed by sales,yes
+w0011-0c2774.synthetic-demo.near,dao_treasury,0.70,2025-05-12,2026-08-01,425,nft_market,multisig-style outgoing payments,yes
+w0012-87186a.synthetic-demo.near,bridge_user,0.66,2025-09-26,2026-08-02,1,bridge,round-number cross-chain deposits,yes
+w0013-d9359d.synthetic-demo.near,airdrop_farmer,0.75,2026-03-09,2026-08-02,911,liquid_staking,many small claims from linked wallets,yes
+w0014-fb6e69.synthetic-demo.near,dao_treasury,0.62,2025-06-13,2026-08-02,1411,dex,periodic grants to many recipients,yes
+w0015-08d921.synthetic-demo.near,cex_hot_wallet,0.60,2025-12-01,2026-08-02,2527,other,fixed-size withdrawals at regular intervals,yes
+w0016-9bb951.synthetic-demo.near,airdrop_farmer,0.74,2025-11-13,2026-08-02,3919,liquid_staking,many small claims from linked wallets,yes
+w0017-4f9027.synthetic-demo.near,validator_operator,0.73,2025-02-19,2026-08-02,1943,liquid_staking,stake and unstake on a fixed cycle,yes
+w0018-185f5c.synthetic-demo.near,validator_operator,0.98,2025-04-26,2026-08-02,2193,other,stake and unstake on a fixed cycle,yes
+w0019-635bb0.synthetic-demo.near,dao_treasury,0.88,2025-05-12,2026-08-02,2527,dex,periodic grants to many recipients,yes
+w0020-01a246.synthetic-demo.near,dao_treasury,0.98,2025-03-10,2026-08-02,4069,dex,periodic grants to many recipients,yes
+w0021-cad3e1.synthetic-demo.near,lp_whale,0.94,2025-09-13,2026-08-02,467,lending,repeated LP adds over 30d,yes
+w0022-0e60c7.synthetic-demo.near,airdrop_farmer,0.78,2025-08-31,2026-08-02,38,other,many small claims from linked wallets,yes
+w0023-7f5ad1.synthetic-demo.near,lp_whale,0.75,2025-05-03,2026-08-03,4680,bridge,repeated LP adds over 30d,yes
+w0024-06c85f.synthetic-demo.near,arbitrage_bot,0.71,2024-04-06,2026-08-03,541,intents,same-block round trips across two pools,yes
+w0025-f1bdbf.synthetic-demo.near,cex_hot_wallet,0.87,2025-03-10,2026-08-03,1039,other,deposit sweeps to one hot wallet,yes
+w0026-b09c02.synthetic-demo.near,validator_operator,0.66,2024-03-08,2026-08-03,33,bridge,reward claims every epoch,yes
+w0027-593084.synthetic-demo.near,cex_hot_wallet,0.73,2026-02-21,2026-08-03,1099,intents,fixed-size withdrawals at regular intervals,yes
+w0028-47106c.synthetic-demo.near,arbitrage_bot,0.83,2024-01-07,2026-08-03,2235,liquid_staking,same-block round trips across two pools,yes
+w0029-4384d4.synthetic-demo.near,bridge_user,0.96,2026-04-28,2026-08-03,2066,bridge,round-number cross-chain deposits,yes
+w0030-979f47.synthetic-demo.near,arbitrage_bot,0.54,2024-04-14,2026-08-03,3768,intents,sub-second arbitrage pattern,yes
+w0031-2fcfe1.synthetic-demo.near,validator_operator,0.57,2024-06-27,2026-08-03,907,liquid_staking,stake and unstake on a fixed cycle,yes
+w0032-c4672e.synthetic-demo.near,lp_whale,0.57,2025-08-08,2026-08-03,44,lending,repeated LP adds over 30d,yes
+w0033-ae331e.synthetic-demo.near,bridge_user,0.53,2024-10-09,2026-08-03,285,other,frequent in/out transfers via bridges,yes
+w0034-3028b0.synthetic-demo.near,arbitrage_bot,0.57,2026-04-03,2026-08-04,1,intents,same-block round trips across two pools,yes
+w0035-b3f11e.synthetic-demo.near,airdrop_farmer,0.58,2025-11-11,2026-08-04,2778,intents,many small claims from linked wallets,yes
+w0036-457156.synthetic-demo.near,validator_operator,0.85,2024-12-03,2026-08-04,1493,liquid_staking,stake and unstake on a fixed cycle,yes
+w0037-bd7624.synthetic-demo.near,bridge_user,0.52,2024-02-18,2026-08-04,382,dex,frequent in/out transfers via bridges,yes
+w0038-7b9993.synthetic-demo.near,lp_whale,0.79,2026-02-28,2026-08-04,450,bridge,repeated LP adds over 30d,yes
+w0039-b812c0.synthetic-demo.near,bridge_user,0.80,2024-09-11,2026-08-04,243,dex,round-number cross-chain deposits,yes
+w0040-adbe3d.synthetic-demo.near,bridge_user,0.74,2026-03-05,2026-08-04,183,lending,round-number cross-chain deposits,yes
+w0041-ead9ae.synthetic-demo.near,airdrop_farmer,0.75,2025-12-21,2026-08-04,3377,nft_market,minimal activity before each snapshot,yes
+w0042-8023ff.synthetic-demo.near,airdrop_farmer,0.91,2025-10-25,2026-08-04,2054,liquid_staking,many small claims from linked wallets,yes
+w0043-e83ba4.synthetic-demo.near,validator_operator,0.55,2024-10-01,2026-08-04,311,liquid_staking,stake and unstake on a fixed cycle,yes
+w0044-286d08.synthetic-demo.near,cex_hot_wallet,0.97,2025-04-08,2026-08-04,1718,bridge,fixed-size withdrawals at regular intervals,yes
+w0045-6f6af5.synthetic-demo.near,airdrop_farmer,0.53,2024-12-10,2026-08-05,2007,other,many small claims from linked wallets,yes
+w0046-f97bed.synthetic-demo.near,validator_operator,0.55,2025-09-12,2026-08-05,6,dex,reward claims every epoch,yes
+w0047-48a166.synthetic-demo.near,arbitrage_bot,0.54,2024-03-21,2026-08-05,56,other,same-block round trips across two pools,yes
+w0048-684b4f.synthetic-demo.near,nft_trader,0.85,2025-11-03,2026-08-05,565,bridge,floor-price sweeps on collections,yes
+w0049-9b9110.synthetic-demo.near,bridge_user,0.77,2024-07-23,2026-08-05,467,bridge,round-number cross-chain deposits,yes
+w0050-6fe2e0.synthetic-demo.near,arbitrage_bot,0.59,2026-02-21,2026-08-05,1355,lending,same-block round trips across two pools,yes
+w0051-9bfd8f.synthetic-demo.near,dao_treasury,0.97,2024-10-03,2026-08-05,1335,other,multisig-style outgoing payments,yes
+w0052-3211e4.synthetic-demo.near,arbitrage_bot,0.64,2025-05-23,2026-08-05,2235,other,sub-second arbitrage pattern,yes
+w0053-cacf53.synthetic-demo.near,bridge_user,0.61,2026-01-15,2026-08-05,12,lending,round-number cross-chain deposits,yes
+w0054-66d52c.synthetic-demo.near,dao_treasury,0.89,2025-09-23,2026-08-05,290,intents,multisig-style outgoing payments,yes
+w0055-f4adac.synthetic-demo.near,nft_trader,0.74,2024-02-22,2026-08-05,2362,dex,bursts of mints followed by sales,yes
+w0056-5516f5.synthetic-demo.near,lp_whale,0.68,2025-04-15,2026-08-06,1568,other,large single-sided liquidity deposits,yes
+w0057-b4bd1c.synthetic-demo.near,arbitrage_bot,0.71,2026-01-17,2026-08-06,3242,other,same-block round trips across two pools,yes
+w0058-8c754a.synthetic-demo.near,arbitrage_bot,0.55,2026-07-24,2026-08-06,86,lending,same-block round trips across two pools,yes
+w0059-0c905b.synthetic-demo.near,arbitrage_bot,0.64,2024-11-19,2026-08-06,2791,nft_market,sub-second arbitrage pattern,yes
+w0060-6bc758.synthetic-demo.near,nft_trader,0.88,2025-10-07,2026-08-06,1031,lending,floor-price sweeps on collections,yes
+w0061-854b3f.synthetic-demo.near,validator_operator,0.97,2026-04-18,2026-08-06,487,other,stake and unstake on a fixed cycle,yes
+w0062-f55dd8.synthetic-demo.near,cex_hot_wallet,0.88,2024-08-31,2026-08-06,3244,bridge,fixed-size withdrawals at regular intervals,yes
+w0063-05c181.synthetic-demo.near,lp_whale,0.58,2026-05-10,2026-08-06,11,other,repeated LP adds over 30d,yes
+w0064-f3684e.synthetic-demo.near,validator_operator,0.78,2024-12-29,2026-08-06,505,intents,stake and unstake on a fixed cycle,yes
+w0065-fcf77a.synthetic-demo.near,cex_hot_wallet,0.71,2026-04-25,2026-08-06,359,dex,fixed-size withdrawals at regular intervals,yes
+w0066-29b44a.synthetic-demo.near,cex_hot_wallet,0.66,2026-02-19,2026-08-06,3323,other,deposit sweeps to one hot wallet,yes
+w0067-01e043.synthetic-demo.near,validator_operator,0.67,2024-02-15,2026-08-07,2898,liquid_staking,reward claims every epoch,yes
+w0068-30f238.synthetic-demo.near,bridge_user,0.65,2024-12-02,2026-08-07,118,intents,round-number cross-chain deposits,yes
+w0069-781038.synthetic-demo.near,bridge_user,0.76,2024-12-04,2026-08-07,3407,nft_market,frequent in/out transfers via bridges,yes
+w0070-8c5c52.synthetic-demo.near,validator_operator,0.67,2024-07-06,2026-08-07,3265,bridge,reward claims every epoch,yes
+w0071-e564a9.synthetic-demo.near,nft_trader,0.79,2025-07-15,2026-08-07,1068,lending,bursts of mints followed by sales,yes
+w0072-71ba5b.synthetic-demo.near,cex_hot_wallet,0.73,2024-11-22,2026-08-07,1966,lending,fixed-size withdrawals at regular intervals,yes
+w0073-3ba9c1.synthetic-demo.near,lp_whale,0.51,2024-10-11,2026-08-07,540,dex,large single-sided liquidity deposits,yes
+w0074-f46e58.synthetic-demo.near,cex_hot_wallet,0.65,2026-07-12,2026-08-07,8,dex,deposit sweeps to one hot wallet,yes
+w0075-78487a.synthetic-demo.near,lp_whale,0.56,2025-12-28,2026-08-07,4183,intents,large single-sided liquidity deposits,yes
+w0076-a0812e.synthetic-demo.near,lp_whale,0.89,2024-09-29,2026-08-07,40,dex,large single-sided liquidity deposits,yes
+w0077-99f165.synthetic-demo.near,arbitrage_bot,0.60,2026-06-27,2026-08-07,349,intents,same-block round trips across two pools,yes
+w0078-d74266.synthetic-demo.near,bridge_user,0.75,2026-02-09,2026-08-08,9,lending,frequent in/out transfers via bridges,yes
+w0079-bc84eb.synthetic-demo.near,cex_hot_wallet,0.81,2024-05-28,2026-08-08,853,nft_market,fixed-size withdrawals at regular intervals,yes
+w0080-713cf7.synthetic-demo.near,arbitrage_bot,0.75,2024-08-08,2026-08-08,2815,other,same-block round trips across two pools,yes
+w0081-6283b2.synthetic-demo.near,airdrop_farmer,0.74,2025-03-23,2026-08-08,170,liquid_staking,many small claims from linked wallets,yes
+w0082-bdde4e.synthetic-demo.near,cex_hot_wallet,0.68,2025-06-16,2026-08-08,1486,dex,deposit sweeps to one hot wallet,yes
+w0083-66e819.synthetic-demo.near,dao_treasury,0.54,2024-08-31,2026-08-08,1282,liquid_staking,periodic grants to many recipients,yes
+w0084-b0f157.synthetic-demo.near,airdrop_farmer,0.97,2024-08-12,2026-08-08,251,lending,minimal activity before each snapshot,yes
+w0085-9db6a7.synthetic-demo.near,validator_operator,0.70,2025-07-06,2026-08-08,26,nft_market,stake and unstake on a fixed cycle,yes
+w0086-fa2bec.synthetic-demo.near,nft_trader,0.51,2025-03-29,2026-08-08,775,other,floor-price sweeps on collections,yes
+w0087-ffa5e5.synthetic-demo.near,bridge_user,0.61,2024-02-24,2026-08-08,4815,intents,frequent in/out transfers via bridges,yes
+w0088-fc54ae.synthetic-demo.near,lp_whale,0.74,2025-01-21,2026-08-08,1010,intents,repeated LP adds over 30d,yes
+w0089-91fe54.synthetic-demo.near,cex_hot_wallet,0.82,2025-05-11,2026-08-09,40,liquid_staking,fixed-size withdrawals at regular intervals,yes
+w0090-2ff842.synthetic-demo.near,validator_operator,0.86,2024-02-25,2026-08-09,63,lending,stake and unstake on a fixed cycle,yes
+w0091-0f87f2.synthetic-demo.near,arbitrage_bot,0.77,2024-07-08,2026-08-09,3346,intents,sub-second arbitrage pattern,yes
+w0092-9166c7.synthetic-demo.near,nft_trader,0.85,2024-07-20,2026-08-09,2449,other,floor-price sweeps on collections,yes
+w0093-a9f6b7.synthetic-demo.near,arbitrage_bot,0.79,2024-08-31,2026-08-09,1030,lending,sub-second arbitrage pattern,yes
+w0094-c3f4d1.synthetic-demo.near,dao_treasury,0.93,2025-09-16,2026-08-09,859,intents,multisig-style outgoing payments,yes
+w0095-c9e5ac.synthetic-demo.near,arbitrage_bot,0.61,2025-11-03,2026-08-09,2562,intents,same-block round trips across two pools,yes
+w0096-ec5a4c.synthetic-demo.near,arbitrage_bot,0.62,2025-12-18,2026-08-09,1541,intents,sub-second arbitrage pattern,yes
+w0097-13db5f.synthetic-demo.near,dao_treasury,0.61,2025-10-22,2026-08-09,85,lending,multisig-style outgoing payments,yes
+w0098-cac885.synthetic-demo.near,lp_whale,0.66,2025-03-27,2026-08-09,11,intents,repeated LP adds over 30d,yes
+w0099-7559ea.synthetic-demo.near,bridge_user,0.75,2026-04-12,2026-08-09,434,liquid_staking,frequent in/out transfers via bridges,yes
+w0100-3509fb.synthetic-demo.near,bridge_user,0.78,2024-08-11,2026-08-10,467,dex,round-number cross-chain deposits,yes
+w0101-d1b45b.synthetic-demo.near,cex_hot_wallet,0.69,2026-01-05,2026-08-10,1488,nft_market,deposit sweeps to one hot wallet,yes
+w0102-8d2994.synthetic-demo.near,arbitrage_bot,0.56,2026-06-01,2026-08-10,17,other,sub-second arbitrage pattern,yes
+w0103-80715a.synthetic-demo.near,bridge_user,0.98,2024-07-20,2026-08-10,2363,liquid_staking,round-number cross-chain deposits,yes
+w0104-a8fdd9.synthetic-demo.near,bridge_user,0.74,2024-11-03,2026-08-10,15,lending,round-number cross-chain deposits,yes
+w0105-549530.synthetic-demo.near,cex_hot_wallet,0.50,2026-04-19,2026-08-10,2775,bridge,deposit sweeps to one hot wallet,yes
+w0106-d3e88b.synthetic-demo.near,lp_whale,0.95,2026-05-03,2026-08-10,2897,lending,large single-sided liquidity deposits,yes
+w0107-74ee59.synthetic-demo.near,cex_hot_wallet,0.77,2025-07-22,2026-08-10,4280,dex,fixed-size withdrawals at regular intervals,yes
+w0108-591756.synthetic-demo.near,dao_treasury,0.85,2026-03-25,2026-08-10,814,other,periodic grants to many recipients,yes
+w0109-772116.synthetic-demo.near,arbitrage_bot,0.70,2025-10-11,2026-08-10,3439,dex,sub-second arbitrage pattern,yes
+w0110-a408aa.synthetic-demo.near,bridge_user,0.98,2024-11-16,2026-08-10,1,bridge,frequent in/out transfers via bridges,yes
+w0111-937101.synthetic-demo.near,airdrop_farmer,0.95,2026-04-12,2026-08-11,2089,dex,many small claims from linked wallets,yes
+w0112-a4b79a.synthetic-demo.near,validator_operator,0.57,2026-04-18,2026-08-11,279,liquid_staking,reward claims every epoch,yes
+w0113-d1c941.synthetic-demo.near,nft_trader,0.77,2026-01-11,2026-08-11,680,lending,bursts of mints followed by sales,yes
+w0114-009467.synthetic-demo.near,airdrop_farmer,0.80,2025-09-19,2026-08-11,661,other,minimal activity before each snapshot,yes
+w0115-08f3e2.synthetic-demo.near,dao_treasury,0.68,2026-03-21,2026-08-11,3040,intents,multisig-style outgoing payments,yes
+w0116-2f5aaf.synthetic-demo.near,nft_trader,0.56,2024-07-06,2026-08-11,1933,liquid_staking,bursts of mints followed by sales,yes
+w0117-a2f416.synthetic-demo.near,dao_treasury,0.51,2025-11-02,2026-08-11,3394,dex,multisig-style outgoing payments,yes
+w0118-fd6680.synthetic-demo.near,lp_whale,0.76,2025-11-05,2026-08-11,8,bridge,repeated LP adds over 30d,yes
+w0119-d549ce.synthetic-demo.near,dao_treasury,0.94,2024-10-05,2026-08-11,42,liquid_staking,multisig-style outgoing payments,yes
+w0120-ea3d66.synthetic-demo.near,arbitrage_bot,0.77,2024-05-30,2026-08-11,3410,nft_market,sub-second arbitrage pattern,yes
+w0121-3529af.synthetic-demo.near,dao_treasury,0.63,2024-10-14,2026-08-11,4405,other,multisig-style outgoing payments,yes
+w0122-faa8ff.synthetic-demo.near,lp_whale,0.57,2026-02-09,2026-08-12,2355,other,repeated LP adds over 30d,yes
+w0123-059686.synthetic-demo.near,airdrop_farmer,0.60,2026-04-06,2026-08-12,1502,intents,minimal activity before each snapshot,yes
+w0124-f6a636.synthetic-demo.near,validator_operator,0.55,2024-08-24,2026-08-12,16,dex,stake and unstake on a fixed cycle,yes
+w0125-c54ee2.synthetic-demo.near,validator_operator,0.69,2024-05-24,2026-08-12,37,bridge,reward claims every epoch,yes
+w0126-c85d28.synthetic-demo.near,arbitrage_bot,0.60,2024-12-14,2026-08-12,185,bridge,sub-second arbitrage pattern,yes
+w0127-83d0ba.synthetic-demo.near,cex_hot_wallet,0.77,2026-01-17,2026-08-12,2872,lending,deposit sweeps to one hot wallet,yes
+w0128-232b1b.synthetic-demo.near,dao_treasury,0.89,2026-07-03,2026-08-12,2537,liquid_staking,periodic grants to many recipients,yes
+w0129-98b907.synthetic-demo.near,arbitrage_bot,0.53,2024-12-13,2026-08-12,470,dex,same-block round trips across two pools,yes
+w0130-e159e1.synthetic-demo.near,dao_treasury,0.67,2025-03-21,2026-08-12,505,lending,periodic grants to many recipients,yes
+w0131-4cb240.synthetic-demo.near,validator_operator,0.59,2025-02-14,2026-08-12,1234,lending,reward claims every epoch,yes
+w0132-4ef1ba.synthetic-demo.near,validator_operator,0.52,2024-07-18,2026-08-12,4227,intents,stake and unstake on a fixed cycle,yes
+w0133-3ee642.synthetic-demo.near,nft_trader,0.58,2024-12-22,2026-08-13,4132,nft_market,bursts of mints followed by sales,yes
+w0134-8fc457.synthetic-demo.near,lp_whale,0.90,2025-03-17,2026-08-13,127,nft_market,repeated LP adds over 30d,yes
+w0135-28fcc1.synthetic-demo.near,airdrop_farmer,0.87,2025-05-18,2026-08-13,804,other,minimal activity before each snapshot,yes
+w0136-aaeb85.synthetic-demo.near,cex_hot_wallet,0.67,2025-03-21,2026-08-13,382,bridge,fixed-size withdrawals at regular intervals,yes
+w0137-6e8470.synthetic-demo.near,lp_whale,0.57,2025-02-08,2026-08-13,2497,liquid_staking,repeated LP adds over 30d,yes
+w0138-36b30c.synthetic-demo.near,airdrop_farmer,0.78,2026-07-18,2026-08-13,601,intents,minimal activity before each snapshot,yes
+w0139-78bc2c.synthetic-demo.near,bridge_user,0.64,2026-02-21,2026-08-13,2071,nft_market,frequent in/out transfers via bridges,yes
+w0140-6fe0eb.synthetic-demo.near,airdrop_farmer,0.92,2026-05-10,2026-08-13,128,lending,minimal activity before each snapshot,yes
+w0141-34afd6.synthetic-demo.near,cex_hot_wallet,0.91,2025-03-26,2026-08-13,425,dex,fixed-size withdrawals at regular intervals,yes
+w0142-1eeade.synthetic-demo.near,dao_treasury,0.83,2024-04-28,2026-08-13,437,other,periodic grants to many recipients,yes
+w0143-d6a11a.synthetic-demo.near,airdrop_farmer,0.65,2025-11-08,2026-08-13,3313,nft_market,minimal activity before each snapshot,yes
+w0144-549dab.synthetic-demo.near,dao_treasury,0.86,2024-04-20,2026-08-14,2977,other,multisig-style outgoing payments,yes
+w0145-20b88a.synthetic-demo.near,cex_hot_wallet,0.95,2025-07-09,2026-08-14,1351,dex,deposit sweeps to one hot wallet,yes
+w0146-6f64a7.synthetic-demo.near,arbitrage_bot,0.51,2025-07-20,2026-08-14,414,dex,same-block round trips across two pools,yes
+w0147-322072.synthetic-demo.near,nft_trader,0.94,2026-04-30,2026-08-14,4469,liquid_staking,floor-price sweeps on collections,yes
+w0148-52aa68.synthetic-demo.near,cex_hot_wallet,0.87,2024-02-27,2026-08-14,4644,liquid_staking,deposit sweeps to one hot wallet,yes
+w0149-d9140a.synthetic-demo.near,cex_hot_wallet,0.55,2025-10-08,2026-08-14,3452,liquid_staking,deposit sweeps to one hot wallet,yes
+w0150-59464c.synthetic-demo.near,lp_whale,0.58,2026-01-28,2026-08-14,3178,nft_market,large single-sided liquidity deposits,yes
+w0151-dcb5ba.synthetic-demo.near,lp_whale,0.97,2024-11-16,2026-08-14,1041,bridge,repeated LP adds over 30d,yes
+w0152-56dd19.synthetic-demo.near,lp_whale,0.71,2025-08-11,2026-08-14,368,nft_market,repeated LP adds over 30d,yes
+w0153-09edd6.synthetic-demo.near,lp_whale,0.76,2025-01-05,2026-08-14,210,other,large single-sided liquidity deposits,yes
+w0154-eb5d94.synthetic-demo.near,nft_trader,0.78,2025-08-30,2026-08-14,41,liquid_staking,bursts of mints followed by sales,yes
+w0155-e84363.synthetic-demo.near,lp_whale,0.84,2024-08-20,2026-08-15,199,intents,repeated LP adds over 30d,yes
+w0156-f8bdfe.synthetic-demo.near,lp_whale,0.69,2024-09-27,2026-08-15,4121,liquid_staking,large single-sided liquidity deposits,yes
+w0157-3b4848.synthetic-demo.near,dao_treasury,0.78,2026-02-23,2026-08-15,623,intents,multisig-style outgoing payments,yes
+w0158-f3cdd8.synthetic-demo.near,dao_treasury,0.70,2024-04-20,2026-08-15,1904,liquid_staking,multisig-style outgoing payments,yes
+w0159-a12a18.synthetic-demo.near,dao_treasury,0.94,2025-07-11,2026-08-15,250,other,multisig-style outgoing payments,yes
+w0160-690c26.synthetic-demo.near,cex_hot_wallet,0.96,2024-06-11,2026-08-15,1283,lending,deposit sweeps to one hot wallet,yes
+w0161-8884ec.synthetic-demo.near,cex_hot_wallet,0.81,2024-05-06,2026-08-15,408,dex,deposit sweeps to one hot wallet,yes
+w0162-07e842.synthetic-demo.near,nft_trader,0.93,2025-07-12,2026-08-15,361,intents,floor-price sweeps on collections,yes
+w0163-e68721.synthetic-demo.near,lp_whale,0.59,2024-05-24,2026-08-15,137,bridge,repeated LP adds over 30d,yes
+w0164-19ff0a.synthetic-demo.near,validator_operator,0.56,2024-08-10,2026-08-15,1751,lending,reward claims every epoch,yes
+w0165-b1b648.synthetic-demo.near,nft_trader,0.87,2024-03-22,2026-08-15,169,lending,floor-price sweeps on collections,yes
+w0166-0f308d.synthetic-demo.near,nft_trader,0.85,2024-07-05,2026-08-16,2029,intents,bursts of mints followed by sales,yes
+w0167-e2ff17.synthetic-demo.near,validator_operator,0.68,2024-06-20,2026-08-16,4415,nft_market,reward claims every epoch,yes
+w0168-5dc92c.synthetic-demo.near,cex_hot_wallet,0.87,2024-06-25,2026-08-16,926,nft_market,fixed-size withdrawals at regular intervals,yes
+w0169-f8c63f.synthetic-demo.near,airdrop_farmer,0.82,2024-04-01,2026-08-16,110,other,minimal activity before each snapshot,yes
+w0170-bcf763.synthetic-demo.near,cex_hot_wallet,0.58,2025-03-12,2026-08-16,212,intents,fixed-size withdrawals at regular intervals,yes
+w0171-4b5197.synthetic-demo.near,arbitrage_bot,0.93,2024-11-03,2026-08-16,699,dex,sub-second arbitrage pattern,yes
+w0172-7c726d.synthetic-demo.near,lp_whale,0.58,2025-05-18,2026-08-16,44,bridge,repeated LP adds over 30d,yes
+w0173-f87507.synthetic-demo.near,bridge_user,0.59,2024-08-04,2026-08-16,1395,dex,frequent in/out transfers via bridges,yes
+w0174-f64268.synthetic-demo.near,nft_trader,0.76,2024-10-20,2026-08-16,287,other,bursts of mints followed by sales,yes
+w0175-0de994.synthetic-demo.near,nft_trader,0.92,2024-04-16,2026-08-16,2877,lending,floor-price sweeps on collections,yes
+w0176-5920d0.synthetic-demo.near,airdrop_farmer,0.83,2025-06-09,2026-08-16,3,other,many small claims from linked wallets,yes
+w0177-759542.synthetic-demo.near,cex_hot_wallet,0.52,2026-05-23,2026-08-17,3848,intents,fixed-size withdrawals at regular intervals,yes
+w0178-0778bc.synthetic-demo.near,validator_operator,0.62,2024-04-12,2026-08-17,3995,dex,stake and unstake on a fixed cycle,yes
+w0179-696222.synthetic-demo.near,airdrop_farmer,0.54,2024-11-30,2026-08-17,2614,bridge,minimal activity before each snapshot,yes
+w0180-6c2322.synthetic-demo.near,nft_trader,0.56,2025-06-29,2026-08-17,411,liquid_staking,bursts of mints followed by sales,yes
+w0181-91b464.synthetic-demo.near,bridge_user,0.57,2026-01-15,2026-08-17,5,bridge,round-number cross-chain deposits,yes
+w0182-4252c2.synthetic-demo.near,lp_whale,0.92,2025-11-15,2026-08-17,1819,dex,repeated LP adds over 30d,yes
+w0183-511eb2.synthetic-demo.near,bridge_user,0.55,2026-01-27,2026-08-17,2,other,round-number cross-chain deposits,yes
+w0184-003e24.synthetic-demo.near,airdrop_farmer,0.76,2026-02-27,2026-08-17,3236,other,many small claims from linked wallets,yes
+w0185-a95fa5.synthetic-demo.near,nft_trader,0.69,2025-04-14,2026-08-17,3901,lending,floor-price sweeps on collections,yes
+w0186-d484ad.synthetic-demo.near,validator_operator,0.81,2025-12-07,2026-08-17,783,nft_market,reward claims every epoch,yes
+w0187-320f0c.synthetic-demo.near,bridge_user,0.94,2024-06-03,2026-08-17,913,dex,frequent in/out transfers via bridges,yes
+w0188-f916f1.synthetic-demo.near,validator_operator,0.79,2025-10-18,2026-08-18,2402,liquid_staking,stake and unstake on a fixed cycle,yes
+w0189-c62d87.synthetic-demo.near,bridge_user,0.73,2024-03-18,2026-08-18,591,intents,round-number cross-chain deposits,yes
+w0190-4a8686.synthetic-demo.near,airdrop_farmer,0.58,2025-10-17,2026-08-18,891,dex,many small claims from linked wallets,yes
+w0191-ea24b0.synthetic-demo.near,dao_treasury,0.75,2025-12-10,2026-08-18,13,intents,periodic grants to many recipients,yes
+w0192-c891d3.synthetic-demo.near,arbitrage_bot,0.80,2024-07-22,2026-08-18,2557,lending,sub-second arbitrage pattern,yes
+w0193-b802e0.synthetic-demo.near,arbitrage_bot,0.71,2024-09-25,2026-08-18,2081,lending,sub-second arbitrage pattern,yes
+w0194-3031b3.synthetic-demo.near,airdrop_farmer,0.96,2025-05-06,2026-08-18,4803,intents,minimal activity before each snapshot,yes
+w0195-101a93.synthetic-demo.near,dao_treasury,0.57,2025-07-26,2026-08-18,3131,bridge,multisig-style outgoing payments,yes
+w0196-ab3db8.synthetic-demo.near,nft_trader,0.62,2025-10-20,2026-08-18,1832,intents,floor-price sweeps on collections,yes
+w0197-906a90.synthetic-demo.near,arbitrage_bot,0.75,2025-04-24,2026-08-18,1621,other,sub-second arbitrage pattern,yes
+w0198-58b7f2.synthetic-demo.near,nft_trader,0.95,2024-02-24,2026-08-18,1607,lending,floor-price sweeps on collections,yes
+w0199-e9133d.synthetic-demo.near,arbitrage_bot,0.77,2026-04-21,2026-08-19,1010,nft_market,same-block round trips across two pools,yes
+w0200-cc6e5f.synthetic-demo.near,nft_trader,0.50,2024-03-11,2026-08-19,95,liquid_staking,floor-price sweeps on collections,yes
+w0201-de2237.synthetic-demo.near,arbitrage_bot,0.65,2025-04-19,2026-08-19,4766,liquid_staking,same-block round trips across two pools,yes
+w0202-4a6f75.synthetic-demo.near,airdrop_farmer,0.87,2025-11-02,2026-08-19,971,dex,minimal activity before each snapshot,yes
+w0203-94034c.synthetic-demo.near,arbitrage_bot,0.84,2025-02-06,2026-08-19,310,intents,same-block round trips across two pools,yes
+w0204-9c184b.synthetic-demo.near,lp_whale,0.62,2026-06-13,2026-08-19,129,nft_market,large single-sided liquidity deposits,yes
+w0205-1e630b.synthetic-demo.near,arbitrage_bot,0.89,2025-12-25,2026-08-19,2837,liquid_staking,same-block round trips across two pools,yes
+w0206-8a2bb0.synthetic-demo.near,nft_trader,0.55,2025-07-24,2026-08-19,123,nft_market,floor-price sweeps on collections,yes
+w0207-71ed86.synthetic-demo.near,cex_hot_wallet,0.94,2024-08-09,2026-08-19,36,other,deposit sweeps to one hot wallet,yes
+w0208-8a44f1.synthetic-demo.near,airdrop_farmer,0.75,2024-08-05,2026-08-19,992,other,minimal activity before each snapshot,yes
+w0209-11e6a7.synthetic-demo.near,arbitrage_bot,0.72,2024-07-22,2026-08-19,3495,bridge,sub-second arbitrage pattern,yes
+w0210-be6077.synthetic-demo.near,validator_operator,0.75,2025-05-30,2026-08-20,49,nft_market,reward claims every epoch,yes
+w0211-94a7b7.synthetic-demo.near,airdrop_farmer,0.84,2026-07-31,2026-08-20,13,dex,minimal activity before each snapshot,yes
+w0212-4617e5.synthetic-demo.near,lp_whale,0.76,2026-07-21,2026-08-20,302,bridge,repeated LP adds over 30d,yes
+w0213-13e2f2.synthetic-demo.near,airdrop_farmer,0.88,2026-07-20,2026-08-20,9,intents,minimal activity before each snapshot,yes
+w0214-ea7870.synthetic-demo.near,nft_trader,0.93,2024-01-21,2026-08-20,1268,intents,bursts of mints followed by sales,yes
+w0215-8a1872.synthetic-demo.near,validator_operator,0.96,2025-08-24,2026-08-20,290,liquid_staking,reward claims every epoch,yes
+w0216-cf19bb.synthetic-demo.near,bridge_user,0.51,2024-03-28,2026-08-20,224,dex,frequent in/out transfers via bridges,yes
+w0217-220a92.synthetic-demo.near,lp_whale,0.72,2026-06-30,2026-08-20,1037,other,large single-sided liquidity deposits,yes
+w0218-f30637.synthetic-demo.near,bridge_user,0.94,2025-07-28,2026-08-20,1094,liquid_staking,round-number cross-chain deposits,yes
+w0219-237145.synthetic-demo.near,validator_operator,0.65,2025-06-09,2026-08-20,1955,dex,reward claims every epoch,yes
+w0220-ba1f6b.synthetic-demo.near,dao_treasury,0.78,2024-12-03,2026-08-20,2089,bridge,periodic grants to many recipients,yes
+w0221-d05429.synthetic-demo.near,bridge_user,0.68,2026-01-13,2026-08-21,143,lending,frequent in/out transfers via bridges,yes
+w0222-b50660.synthetic-demo.near,nft_trader,0.77,2024-02-21,2026-08-21,650,intents,bursts of mints followed by sales,yes
+w0223-47b923.synthetic-demo.near,bridge_user,0.63,2025-11-16,2026-08-21,33,nft_market,round-number cross-chain deposits,yes
+w0224-490d55.synthetic-demo.near,airdrop_farmer,0.97,2025-09-19,2026-08-21,4354,other,minimal activity before each snapshot,yes
+w0225-26d5d6.synthetic-demo.near,nft_trader,0.68,2024-02-09,2026-08-21,113,liquid_staking,floor-price sweeps on collections,yes
+w0226-817b2e.synthetic-demo.near,cex_hot_wallet,0.79,2025-09-06,2026-08-21,2309,dex,deposit sweeps to one hot wallet,yes
+w0227-d3688c.synthetic-demo.near,lp_whale,0.90,2024-10-31,2026-08-21,3367,dex,repeated LP adds over 30d,yes
+w0228-259eee.synthetic-demo.near,bridge_user,0.70,2025-04-28,2026-08-21,250,nft_market,round-number cross-chain deposits,yes
+w0229-832c8d.synthetic-demo.near,dao_treasury,0.71,2026-01-27,2026-08-21,447,bridge,periodic grants to many recipients,yes
+w0230-80c527.synthetic-demo.near,bridge_user,0.69,2024-10-23,2026-08-21,3662,lending,round-number cross-chain deposits,yes
+w0231-9b36ef.synthetic-demo.near,airdrop_farmer,0.93,2024-12-31,2026-08-21,2405,bridge,minimal activity before each snapshot,yes
+w0232-48f95f.synthetic-demo.near,nft_trader,0.82,2025-03-25,2026-08-22,425,intents,floor-price sweeps on collections,yes
+w0233-95273c.synthetic-demo.near,lp_whale,0.81,2024-08-18,2026-08-22,35,intents,repeated LP adds over 30d,yes
+w0234-6411da.synthetic-demo.near,bridge_user,0.80,2024-01-20,2026-08-22,245,other,round-number cross-chain deposits,yes
+w0235-c2100c.synthetic-demo.near,bridge_user,0.95,2024-01-26,2026-08-22,81,nft_market,round-number cross-chain deposits,yes
+w0236-522f75.synthetic-demo.near,arbitrage_bot,0.56,2024-11-23,2026-08-22,23,nft_market,sub-second arbitrage pattern,yes
+w0237-7d68ac.synthetic-demo.near,dao_treasury,0.60,2026-03-03,2026-08-22,16,liquid_staking,periodic grants to many recipients,yes
+w0238-0a51f0.synthetic-demo.near,lp_whale,0.86,2026-01-31,2026-08-22,2297,intents,repeated LP adds over 30d,yes
+w0239-0c04c2.synthetic-demo.near,airdrop_farmer,0.53,2024-03-21,2026-08-22,1154,lending,minimal activity before each snapshot,yes
+w0240-d3cd20.synthetic-demo.near,bridge_user,0.85,2024-01-14,2026-08-22,898,liquid_staking,frequent in/out transfers via bridges,yes
+w0241-37caa6.synthetic-demo.near,bridge_user,0.75,2025-07-06,2026-08-22,1439,lending,frequent in/out transfers via bridges,yes
+w0242-db0b8d.synthetic-demo.near,dao_treasury,0.92,2026-01-10,2026-08-22,3477,other,periodic grants to many recipients,yes
+w0243-d5de14.synthetic-demo.near,airdrop_farmer,0.80,2025-01-14,2026-08-23,1560,intents,minimal activity before each snapshot,yes
+w0244-ec9056.synthetic-demo.near,airdrop_farmer,0.64,2024-10-18,2026-08-23,96,bridge,minimal activity before each snapshot,yes
+w0245-97af63.synthetic-demo.near,cex_hot_wallet,0.79,2026-01-29,2026-08-23,238,nft_market,fixed-size withdrawals at regular intervals,yes
+w0246-251eaa.synthetic-demo.near,validator_operator,0.85,2025-02-12,2026-08-23,405,lending,reward claims every epoch,yes
+w0247-934fa1.synthetic-demo.near,airdrop_farmer,0.84,2026-03-05,2026-08-23,222,nft_market,minimal activity before each snapshot,yes
+w0248-a6c6b1.synthetic-demo.near,nft_trader,0.64,2024-10-23,2026-08-23,751,dex,floor-price sweeps on collections,yes
+w0249-745533.synthetic-demo.near,bridge_user,0.90,2025-07-08,2026-08-23,624,other,frequent in/out transfers via bridges,yes
+w0250-e800ac.synthetic-demo.near,validator_operator,0.51,2025-02-19,2026-08-23,3723,other,stake and unstake on a fixed cycle,yes
+w0251-78d59a.synthetic-demo.near,cex_hot_wallet,0.85,2024-12-08,2026-08-23,1167,intents,fixed-size withdrawals at regular intervals,yes
+w0252-650be4.synthetic-demo.near,lp_whale,0.88,2026-05-17,2026-08-23,1147,nft_market,repeated LP adds over 30d,yes
+w0253-b0949b.synthetic-demo.near,lp_whale,0.84,2026-03-14,2026-08-23,3760,nft_market,repeated LP adds over 30d,yes
+w0254-bdb36b.synthetic-demo.near,arbitrage_bot,0.64,2024-12-18,2026-08-24,2339,dex,sub-second arbitrage pattern,yes
+w0255-4034df.synthetic-demo.near,nft_trader,0.61,2024-03-19,2026-08-24,29,lending,floor-price sweeps on collections,yes
+w0256-a79664.synthetic-demo.near,airdrop_farmer,0.68,2025-11-29,2026-08-24,100,other,many small claims from linked wallets,yes
+w0257-733027.synthetic-demo.near,validator_operator,0.68,2025-10-03,2026-08-24,174,lending,reward claims every epoch,yes
+w0258-3263d2.synthetic-demo.near,dao_treasury,0.73,2025-06-10,2026-08-24,689,intents,periodic grants to many recipients,yes
+w0259-9751c4.synthetic-demo.near,dao_treasury,0.64,2025-04-05,2026-08-24,4963,liquid_staking,multisig-style outgoing payments,yes
+w0260-386816.synthetic-demo.near,cex_hot_wallet,0.68,2024-07-16,2026-08-24,2274,bridge,deposit sweeps to one hot wallet,yes
+w0261-5cb406.synthetic-demo.near,bridge_user,0.59,2024-11-07,2026-08-24,2820,lending,round-number cross-chain deposits,yes
+w0262-cb3459.synthetic-demo.near,nft_trader,0.57,2025-04-09,2026-08-24,1272,intents,bursts of mints followed by sales,yes
+w0263-251981.synthetic-demo.near,arbitrage_bot,0.98,2024-06-11,2026-08-24,2121,bridge,sub-second arbitrage pattern,yes
+w0264-e8510b.synthetic-demo.near,lp_whale,0.89,2024-02-29,2026-08-24,498,liquid_staking,large single-sided liquidity deposits,yes
+w0265-b65f12.synthetic-demo.near,dao_treasury,0.81,2025-01-21,2026-08-25,381,liquid_staking,multisig-style outgoing payments,yes
+w0266-48311a.synthetic-demo.near,lp_whale,0.94,2025-11-30,2026-08-25,3764,bridge,repeated LP adds over 30d,yes
+w0267-1acfa7.synthetic-demo.near,arbitrage_bot,0.99,2025-07-20,2026-08-25,1881,dex,sub-second arbitrage pattern,yes
+w0268-efa25d.synthetic-demo.near,airdrop_farmer,0.96,2024-11-08,2026-08-25,4686,other,minimal activity before each snapshot,yes
+w0269-fcae27.synthetic-demo.near,nft_trader,0.83,2024-09-05,2026-08-25,1798,dex,bursts of mints followed by sales,yes
+w0270-c943d3.synthetic-demo.near,nft_trader,0.67,2024-11-02,2026-08-25,3994,lending,floor-price sweeps on collections,yes
+w0271-2a1cf3.synthetic-demo.near,cex_hot_wallet,0.62,2026-04-26,2026-08-25,1753,liquid_staking,fixed-size withdrawals at regular intervals,yes
+w0272-f78075.synthetic-demo.near,arbitrage_bot,0.63,2024-01-01,2026-08-25,786,other,same-block round trips across two pools,yes
+w0273-b06084.synthetic-demo.near,bridge_user,0.87,2025-08-27,2026-08-25,11,liquid_staking,frequent in/out transfers via bridges,yes
+w0274-eb5288.synthetic-demo.near,arbitrage_bot,0.83,2024-10-07,2026-08-25,426,dex,same-block round trips across two pools,yes
+w0275-0595f4.synthetic-demo.near,bridge_user,0.84,2026-07-24,2026-08-25,711,nft_market,frequent in/out transfers via bridges,yes
+w0276-30eae6.synthetic-demo.near,nft_trader,0.59,2025-05-17,2026-08-26,105,dex,floor-price sweeps on collections,yes
+w0277-d8ef87.synthetic-demo.near,dao_treasury,0.56,2025-01-31,2026-08-26,143,bridge,periodic grants to many recipients,yes
+w0278-df10c8.synthetic-demo.near,airdrop_farmer,0.84,2025-04-11,2026-08-26,224,intents,minimal activity before each snapshot,yes
+w0279-430fe2.synthetic-demo.near,airdrop_farmer,0.93,2025-11-23,2026-08-26,3173,nft_market,minimal activity before each snapshot,yes
+w0280-3bc08a.synthetic-demo.near,dao_treasury,0.77,2025-02-24,2026-08-26,4761,liquid_staking,periodic grants to many recipients,yes
+w0281-f70175.synthetic-demo.near,nft_trader,0.55,2024-06-13,2026-08-26,3946,bridge,bursts of mints followed by sales,yes
+w0282-1f9944.synthetic-demo.near,arbitrage_bot,0.63,2026-07-07,2026-08-26,76,dex,sub-second arbitrage pattern,yes
+w0283-f6f7b1.synthetic-demo.near,dao_treasury,0.85,2024-08-21,2026-08-26,753,nft_market,periodic grants to many recipients,yes
+w0284-b3dda3.synthetic-demo.near,lp_whale,0.96,2025-06-03,2026-08-26,520,bridge,large single-sided liquidity deposits,yes
+w0285-7c42d2.synthetic-demo.near,arbitrage_bot,0.66,2025-11-12,2026-08-26,1399,lending,same-block round trips across two pools,yes
+w0286-d943e0.synthetic-demo.near,airdrop_farmer,0.74,2024-08-18,2026-08-26,1838,liquid_staking,many small claims from linked wallets,yes
+w0287-520c88.synthetic-demo.near,lp_whale,0.72,2026-03-17,2026-08-27,2096,dex,repeated LP adds over 30d,yes
+w0288-bb2448.synthetic-demo.near,airdrop_farmer,0.62,2025-01-07,2026-08-27,801,lending,many small claims from linked wallets,yes
+w0289-6f71a2.synthetic-demo.near,arbitrage_bot,0.97,2024-09-26,2026-08-27,3236,lending,same-block round trips across two pools,yes
+w0290-0e3f65.synthetic-demo.near,lp_whale,0.51,2024-05-27,2026-08-27,485,liquid_staking,repeated LP adds over 30d,yes
+w0291-29b2b6.synthetic-demo.near,cex_hot_wallet,0.94,2025-07-28,2026-08-27,433,lending,deposit sweeps to one hot wallet,yes
+w0292-28bc57.synthetic-demo.near,airdrop_farmer,0.55,2024-09-10,2026-08-27,1098,dex,minimal activity before each snapshot,yes
+w0293-723af7.synthetic-demo.near,arbitrage_bot,0.76,2024-06-04,2026-08-27,1754,bridge,sub-second arbitrage pattern,yes
+w0294-9f87df.synthetic-demo.near,lp_whale,0.55,2024-07-01,2026-08-27,4409,nft_market,repeated LP adds over 30d,yes
+w0295-3dc948.synthetic-demo.near,arbitrage_bot,0.61,2024-06-18,2026-08-27,3115,intents,same-block round trips across two pools,yes
+w0296-999934.synthetic-demo.near,validator_operator,0.91,2025-05-04,2026-08-27,629,dex,reward claims every epoch,yes
+w0297-0cf5bf.synthetic-demo.near,bridge_user,0.63,2025-05-10,2026-08-27,3182,bridge,frequent in/out transfers via bridges,yes
+w0298-53a2f3.synthetic-demo.near,arbitrage_bot,0.95,2024-02-21,2026-08-28,34,intents,same-block round trips across two pools,yes
+w0299-3d3a58.synthetic-demo.near,validator_operator,0.81,2024-12-21,2026-08-28,328,dex,stake and unstake on a fixed cycle,yes
+w0300-dad46f.synthetic-demo.near,validator_operator,0.68,2026-06-22,2026-08-28,161,intents,reward claims every epoch,yes
+w0301-ffe71e.synthetic-demo.near,dao_treasury,0.72,2024-10-30,2026-08-28,628,nft_market,periodic grants to many recipients,yes
+w0302-c47541.synthetic-demo.near,cex_hot_wallet,0.79,2026-01-23,2026-08-28,413,dex,fixed-size withdrawals at regular intervals,yes
+w0303-820448.synthetic-demo.near,lp_whale,0.63,2024-02-24,2026-08-28,1876,bridge,large single-sided liquidity deposits,yes
+w0304-003e6c.synthetic-demo.near,airdrop_farmer,0.60,2025-07-27,2026-08-28,1280,intents,minimal activity before each snapshot,yes
+w0305-ced6ca.synthetic-demo.near,bridge_user,0.81,2024-06-21,2026-08-28,3477,other,round-number cross-chain deposits,yes
+w0306-f2b825.synthetic-demo.near,nft_trader,0.79,2026-07-01,2026-08-28,1,lending,floor-price sweeps on collections,yes
+w0307-872f80.synthetic-demo.near,airdrop_farmer,0.58,2025-06-24,2026-08-28,180,intents,many small claims from linked wallets,yes
+w0308-0e3376.synthetic-demo.near,bridge_user,0.62,2025-04-23,2026-08-28,295,lending,round-number cross-chain deposits,yes
+w0309-5cd162.synthetic-demo.near,lp_whale,0.93,2025-01-19,2026-08-29,144,nft_market,repeated LP adds over 30d,yes
+w0310-f81da2.synthetic-demo.near,nft_trader,0.78,2025-10-12,2026-08-29,1662,lending,floor-price sweeps on collections,yes
+w0311-d209ee.synthetic-demo.near,airdrop_farmer,0.71,2025-10-25,2026-08-29,1576,intents,minimal activity before each snapshot,yes
+w0312-f69033.synthetic-demo.near,nft_trader,0.94,2024-03-18,2026-08-29,806,dex,floor-price sweeps on collections,yes
+w0313-619415.synthetic-demo.near,bridge_user,0.55,2025-10-18,2026-08-29,2622,intents,frequent in/out transfers via bridges,yes
+w0314-2db72f.synthetic-demo.near,airdrop_farmer,0.65,2026-01-22,2026-08-29,40,intents,many small claims from linked wallets,yes
+w0315-4c33c7.synthetic-demo.near,bridge_user,0.67,2025-01-25,2026-08-29,12,liquid_staking,round-number cross-chain deposits,yes
+w0316-e693d2.synthetic-demo.near,cex_hot_wallet,0.86,2025-03-06,2026-08-29,62,nft_market,deposit sweeps to one hot wallet,yes
+w0317-4653e3.synthetic-demo.near,lp_whale,0.78,2024-02-06,2026-08-29,4471,lending,repeated LP adds over 30d,yes
+w0318-636705.synthetic-demo.near,airdrop_farmer,0.63,2024-04-10,2026-08-29,203,dex,many small claims from linked wallets,yes
+w0319-692ccf.synthetic-demo.near,bridge_user,0.51,2025-02-14,2026-08-29,2162,bridge,round-number cross-chain deposits,yes
+w0320-9bd5aa.synthetic-demo.near,airdrop_farmer,0.63,2025-11-15,2026-08-30,1,lending,many small claims from linked wallets,yes
+w0321-25274c.synthetic-demo.near,airdrop_farmer,0.94,2024-06-06,2026-08-30,1277,nft_market,many small claims from linked wallets,yes
+w0322-4e3f14.synthetic-demo.near,lp_whale,0.54,2026-01-14,2026-08-30,2971,lending,repeated LP adds over 30d,yes
+w0323-a4b257.synthetic-demo.near,airdrop_farmer,0.92,2025-09-20,2026-08-30,328,lending,many small claims from linked wallets,yes
+w0324-8d893c.synthetic-demo.near,airdrop_farmer,0.84,2026-02-09,2026-08-30,231,bridge,many small claims from linked wallets,yes
+w0325-d454eb.synthetic-demo.near,airdrop_farmer,0.74,2024-11-12,2026-08-30,2429,intents,many small claims from linked wallets,yes
+w0326-6e49ec.synthetic-demo.near,validator_operator,0.75,2024-05-04,2026-08-30,4,intents,reward claims every epoch,yes
+w0327-a3cf24.synthetic-demo.near,cex_hot_wallet,0.65,2026-05-22,2026-08-30,1610,other,deposit sweeps to one hot wallet,yes
+w0328-0d2409.synthetic-demo.near,bridge_user,0.91,2026-03-07,2026-08-30,370,nft_market,frequent in/out transfers via bridges,yes
+w0329-69632f.synthetic-demo.near,lp_whale,0.80,2025-06-20,2026-08-30,409,other,repeated LP adds over 30d,yes
+w0330-b15b75.synthetic-demo.near,airdrop_farmer,0.57,2026-04-02,2026-08-30,499,nft_market,minimal activity before each snapshot,yes
+w0331-86b7db.synthetic-demo.near,dao_treasury,0.98,2024-07-21,2026-08-31,1501,other,multisig-style outgoing payments,yes
+w0332-7a64e9.synthetic-demo.near,cex_hot_wallet,0.67,2025-05-26,2026-08-31,1239,intents,deposit sweeps to one hot wallet,yes
+w0333-b4cdde.synthetic-demo.near,cex_hot_wallet,0.99,2026-07-19,2026-08-31,2170,liquid_staking,deposit sweeps to one hot wallet,yes
+w0334-a75029.synthetic-demo.near,bridge_user,0.52,2024-05-27,2026-08-31,20,other,round-number cross-chain deposits,yes
+w0335-cdd69c.synthetic-demo.near,bridge_user,0.83,2026-03-11,2026-08-31,7,nft_market,frequent in/out transfers via bridges,yes
+w0336-2ded17.synthetic-demo.near,nft_trader,0.70,2025-06-14,2026-08-31,4927,nft_market,bursts of mints followed by sales,yes
+w0337-cf11e5.synthetic-demo.near,arbitrage_bot,0.95,2024-04-27,2026-08-31,1180,dex,sub-second arbitrage pattern,yes
+w0338-b61b5c.synthetic-demo.near,airdrop_farmer,0.78,2025-11-01,2026-08-31,156,dex,minimal activity before each snapshot,yes
+w0339-f78889.synthetic-demo.near,lp_whale,0.79,2025-07-06,2026-08-31,4583,dex,large single-sided liquidity deposits,yes
+w0340-55581f.synthetic-demo.near,arbitrage_bot,0.62,2024-04-07,2026-08-31,1316,liquid_staking,sub-second arbitrage pattern,yes
+w0341-dae4c7.synthetic-demo.near,nft_trader,0.78,2024-11-01,2026-08-31,4073,bridge,bursts of mints followed by sales,yes
+w0342-cf335e.synthetic-demo.near,validator_operator,0.81,2024-01-03,2026-09-01,4567,intents,reward claims every epoch,yes
+w0343-c7543f.synthetic-demo.near,cex_hot_wallet,0.60,2025-02-11,2026-09-01,4749,intents,fixed-size withdrawals at regular intervals,yes
+w0344-1c724f.synthetic-demo.near,bridge_user,0.89,2026-03-29,2026-09-01,26,other,frequent in/out transfers via bridges,yes
+w0345-35bd68.synthetic-demo.near,dao_treasury,0.97,2026-05-28,2026-09-01,358,dex,multisig-style outgoing payments,yes
+w0346-cb0bca.synthetic-demo.near,lp_whale,0.51,2024-04-15,2026-09-01,3913,nft_market,repeated LP adds over 30d,yes
+w0347-ef90d4.synthetic-demo.near,lp_whale,0.80,2025-04-30,2026-09-01,2421,bridge,repeated LP adds over 30d,yes
+w0348-9f3f58.synthetic-demo.near,arbitrage_bot,0.70,2024-10-22,2026-09-01,2382,liquid_staking,same-block round trips across two pools,yes
+w0349-768731.synthetic-demo.near,nft_trader,0.55,2025-08-27,2026-09-01,794,lending,bursts of mints followed by sales,yes
+w0350-77f7a1.synthetic-demo.near,cex_hot_wallet,0.82,2025-01-23,2026-09-01,1082,liquid_staking,deposit sweeps to one hot wallet,yes
+w0351-e8ebec.synthetic-demo.near,nft_trader,0.90,2024-12-22,2026-09-01,342,intents,floor-price sweeps on collections,yes
+w0352-4229c4.synthetic-demo.near,nft_trader,0.59,2026-05-26,2026-09-01,2904,lending,bursts of mints followed by sales,yes
+w0353-59b8e9.synthetic-demo.near,airdrop_farmer,0.53,2026-07-01,2026-09-02,1668,nft_market,many small claims from linked wallets,yes
+w0354-4eddf3.synthetic-demo.near,cex_hot_wallet,0.53,2025-05-04,2026-09-02,1321,liquid_staking,deposit sweeps to one hot wallet,yes
+w0355-016c90.synthetic-demo.near,arbitrage_bot,0.77,2026-07-15,2026-09-02,3065,lending,same-block round trips across two pools,yes
+w0356-93788a.synthetic-demo.near,arbitrage_bot,0.75,2025-05-17,2026-09-02,2956,dex,same-block round trips across two pools,yes
+w0357-306fff.synthetic-demo.near,nft_trader,0.59,2024-11-06,2026-09-02,1,other,floor-price sweeps on collections,yes
+w0358-c2a6b1.synthetic-demo.near,airdrop_farmer,0.83,2024-01-28,2026-09-02,408,other,many small claims from linked wallets,yes
+w0359-8c7d82.synthetic-demo.near,arbitrage_bot,0.95,2024-11-20,2026-09-02,1979,liquid_staking,sub-second arbitrage pattern,yes
+w0360-c5c4b6.synthetic-demo.near,lp_whale,0.72,2024-08-10,2026-09-02,18,bridge,repeated LP adds over 30d,yes
+w0361-89aa3c.synthetic-demo.near,dao_treasury,0.67,2026-05-11,2026-09-02,4139,other,multisig-style outgoing payments,yes
+w0362-c75608.synthetic-demo.near,cex_hot_wallet,0.65,2025-08-16,2026-09-02,106,other,deposit sweeps to one hot wallet,yes
+w0363-9f209e.synthetic-demo.near,bridge_user,0.90,2024-11-24,2026-09-02,837,other,frequent in/out transfers via bridges,yes
+w0364-9c6f37.synthetic-demo.near,airdrop_farmer,0.59,2026-02-12,2026-09-03,26,other,many small claims from linked wallets,yes
+w0365-8a3e34.synthetic-demo.near,lp_whale,0.71,2025-12-21,2026-09-03,29,dex,repeated LP adds over 30d,yes
+w0366-e007a4.synthetic-demo.near,nft_trader,0.91,2025-12-31,2026-09-03,527,nft_market,floor-price sweeps on collections,yes
+w0367-d8b243.synthetic-demo.near,dao_treasury,0.71,2024-08-05,2026-09-03,1156,nft_market,multisig-style outgoing payments,yes
+w0368-9ce9fb.synthetic-demo.near,validator_operator,0.84,2025-08-04,2026-09-03,1932,dex,reward claims every epoch,yes
+w0369-cdb48a.synthetic-demo.near,dao_treasury,0.75,2024-07-05,2026-09-03,41,bridge,periodic grants to many recipients,yes
+w0370-afcc2a.synthetic-demo.near,cex_hot_wallet,0.81,2025-10-08,2026-09-03,263,dex,fixed-size withdrawals at regular intervals,yes
+w0371-b6398d.synthetic-demo.near,dao_treasury,0.80,2025-11-08,2026-09-03,4692,nft_market,periodic grants to many recipients,yes
+w0372-ddd1da.synthetic-demo.near,lp_whale,0.57,2024-05-02,2026-09-03,4168,nft_market,repeated LP adds over 30d,yes
+w0373-8fc440.synthetic-demo.near,validator_operator,0.84,2024-10-02,2026-09-03,34,dex,reward claims every epoch,yes
+w0374-27c611.synthetic-demo.near,arbitrage_bot,0.89,2024-11-16,2026-09-03,1362,liquid_staking,same-block round trips across two pools,yes
+w0375-526614.synthetic-demo.near,lp_whale,0.51,2026-03-03,2026-09-04,204,intents,large single-sided liquidity deposits,yes
+w0376-b49384.synthetic-demo.near,arbitrage_bot,0.56,2024-08-24,2026-09-04,4080,nft_market,sub-second arbitrage pattern,yes
+w0377-ad4e3c.synthetic-demo.near,dao_treasury,0.60,2025-07-12,2026-09-04,1855,other,periodic grants to many recipients,yes
+w0378-143a05.synthetic-demo.near,nft_trader,0.67,2025-06-28,2026-09-04,1662,liquid_staking,floor-price sweeps on collections,yes
+w0379-67d13a.synthetic-demo.near,nft_trader,0.82,2025-01-08,2026-09-04,1399,liquid_staking,floor-price sweeps on collections,yes
+w0380-b15cd3.synthetic-demo.near,lp_whale,0.88,2025-04-25,2026-09-04,467,other,large single-sided liquidity deposits,yes
+w0381-34d56e.synthetic-demo.near,nft_trader,0.76,2024-03-18,2026-09-04,1,dex,bursts of mints followed by sales,yes
+w0382-55ed68.synthetic-demo.near,arbitrage_bot,0.70,2024-08-26,2026-09-04,769,nft_market,sub-second arbitrage pattern,yes
+w0383-94480f.synthetic-demo.near,bridge_user,0.73,2025-12-17,2026-09-04,42,intents,frequent in/out transfers via bridges,yes
+w0384-38bb35.synthetic-demo.near,lp_whale,0.84,2025-11-23,2026-09-04,282,lending,large single-sided liquidity deposits,yes
+w0385-aff9d2.synthetic-demo.near,cex_hot_wallet,0.56,2024-08-02,2026-09-04,2764,liquid_staking,deposit sweeps to one hot wallet,yes
+w0386-87b00d.synthetic-demo.near,arbitrage_bot,0.83,2025-12-03,2026-09-05,571,intents,same-block round trips across two pools,yes
+w0387-547773.synthetic-demo.near,validator_operator,0.80,2024-10-13,2026-09-05,872,liquid_staking,reward claims every epoch,yes
+w0388-959071.synthetic-demo.near,nft_trader,0.86,2025-03-16,2026-09-05,2222,intents,floor-price sweeps on collections,yes
+w0389-0c1931.synthetic-demo.near,nft_trader,0.53,2026-05-16,2026-09-05,178,lending,bursts of mints followed by sales,yes
+w0390-b6d49b.synthetic-demo.near,arbitrage_bot,0.94,2025-11-29,2026-09-05,305,bridge,same-block round trips across two pools,yes
+w0391-3c48a1.synthetic-demo.near,nft_trader,0.61,2025-01-07,2026-09-05,460,liquid_staking,bursts of mints followed by sales,yes
+w0392-896e4f.synthetic-demo.near,arbitrage_bot,0.93,2025-03-17,2026-09-05,173,liquid_staking,sub-second arbitrage pattern,yes
+w0393-c9053b.synthetic-demo.near,arbitrage_bot,0.71,2024-12-21,2026-09-05,3377,other,same-block round trips across two pools,yes
+w0394-52dbb4.synthetic-demo.near,nft_trader,0.52,2024-07-04,2026-09-05,638,intents,bursts of mints followed by sales,yes
+w0395-6bd702.synthetic-demo.near,lp_whale,0.55,2025-09-16,2026-09-05,1870,other,repeated LP adds over 30d,yes
+w0396-6cf35d.synthetic-demo.near,bridge_user,0.70,2024-12-07,2026-09-05,4791,intents,round-number cross-chain deposits,yes
+w0397-910fdf.synthetic-demo.near,nft_trader,0.73,2024-09-30,2026-09-06,1147,other,floor-price sweeps on collections,yes
+w0398-77d5c8.synthetic-demo.near,lp_whale,0.86,2024-01-01,2026-09-06,2701,other,large single-sided liquidity deposits,yes
+w0399-b4b332.synthetic-demo.near,bridge_user,0.85,2025-06-08,2026-09-06,4141,dex,round-number cross-chain deposits,yes
+w0400-733c8c.synthetic-demo.near,airdrop_farmer,0.64,2024-07-11,2026-09-06,387,lending,minimal activity before each snapshot,yes
+w0401-e9d07c.synthetic-demo.near,arbitrage_bot,0.77,2025-02-06,2026-09-06,19,bridge,sub-second arbitrage pattern,yes
+w0402-8bc91c.synthetic-demo.near,airdrop_farmer,0.68,2024-11-06,2026-09-06,2354,dex,minimal activity before each snapshot,yes
+w0403-a36bfe.synthetic-demo.near,nft_trader,0.70,2025-02-22,2026-09-06,330,nft_market,floor-price sweeps on collections,yes
+w0404-f7e5eb.synthetic-demo.near,cex_hot_wallet,0.62,2024-02-20,2026-09-06,61,bridge,fixed-size withdrawals at regular intervals,yes
+w0405-8a25a5.synthetic-demo.near,validator_operator,0.68,2026-07-16,2026-09-06,1167,liquid_staking,stake and unstake on a fixed cycle,yes
+w0406-9e3b22.synthetic-demo.near,lp_whale,0.90,2024-02-28,2026-09-06,2,lending,large single-sided liquidity deposits,yes
+w0407-c41cb1.synthetic-demo.near,airdrop_farmer,0.73,2024-03-02,2026-09-06,649,lending,many small claims from linked wallets,yes
+w0408-e50ee0.synthetic-demo.near,bridge_user,0.77,2024-04-06,2026-09-07,214,lending,round-number cross-chain deposits,yes
+w0409-ea3c9c.synthetic-demo.near,arbitrage_bot,0.77,2026-02-15,2026-09-07,2273,nft_market,sub-second arbitrage pattern,yes
+w0410-df9d31.synthetic-demo.near,cex_hot_wallet,0.87,2025-03-19,2026-09-07,61,intents,fixed-size withdrawals at regular intervals,yes
+w0411-1b194e.synthetic-demo.near,cex_hot_wallet,0.86,2026-04-13,2026-09-07,1514,other,fixed-size withdrawals at regular intervals,yes
+w0412-224491.synthetic-demo.near,bridge_user,0.88,2024-08-09,2026-09-07,1569,dex,round-number cross-chain deposits,yes
+w0413-01e11a.synthetic-demo.near,cex_hot_wallet,0.62,2026-01-29,2026-09-07,1857,lending,deposit sweeps to one hot wallet,yes
+w0414-b99540.synthetic-demo.near,nft_trader,0.54,2024-09-27,2026-09-07,1559,liquid_staking,bursts of mints followed by sales,yes
+w0415-c977b0.synthetic-demo.near,bridge_user,0.63,2026-01-09,2026-09-07,1616,bridge,round-number cross-chain deposits,yes
+w0416-afff44.synthetic-demo.near,cex_hot_wallet,0.87,2024-03-16,2026-09-07,2225,intents,fixed-size withdrawals at regular intervals,yes
+w0417-ef77a1.synthetic-demo.near,airdrop_farmer,0.97,2024-11-03,2026-09-07,4782,lending,minimal activity before each snapshot,yes
+w0418-258606.synthetic-demo.near,cex_hot_wallet,0.81,2026-01-23,2026-09-07,394,intents,deposit sweeps to one hot wallet,yes
+w0419-44bb40.synthetic-demo.near,bridge_user,0.68,2025-01-12,2026-09-08,1060,lending,round-number cross-chain deposits,yes
+w0420-57d3d6.synthetic-demo.near,airdrop_farmer,0.62,2025-03-23,2026-09-08,4063,other,minimal activity before each snapshot,yes
+w0421-4fece1.synthetic-demo.near,validator_operator,0.67,2024-02-06,2026-09-08,4638,dex,stake and unstake on a fixed cycle,yes
+w0422-294698.synthetic-demo.near,nft_trader,0.64,2024-08-02,2026-09-08,2793,dex,floor-price sweeps on collections,yes
+w0423-6a981f.synthetic-demo.near,arbitrage_bot,0.63,2026-03-01,2026-09-08,3440,liquid_staking,same-block round trips across two pools,yes
+w0424-a782ad.synthetic-demo.near,airdrop_farmer,0.50,2026-02-03,2026-09-08,1293,liquid_staking,many small claims from linked wallets,yes
+w0425-8bbe67.synthetic-demo.near,lp_whale,0.93,2024-10-17,2026-09-08,1821,intents,large single-sided liquidity deposits,yes
+w0426-23b8ca.synthetic-demo.near,nft_trader,0.77,2025-07-29,2026-09-08,3056,other,bursts of mints followed by sales,yes
+w0427-902a9f.synthetic-demo.near,cex_hot_wallet,0.93,2024-11-17,2026-09-08,2866,bridge,fixed-size withdrawals at regular intervals,yes
+w0428-c34d7d.synthetic-demo.near,airdrop_farmer,0.60,2024-06-28,2026-09-08,357,liquid_staking,many small claims from linked wallets,yes
+w0429-47f390.synthetic-demo.near,bridge_user,0.86,2024-06-28,2026-09-08,1229,bridge,frequent in/out transfers via bridges,yes
+w0430-98e919.synthetic-demo.near,bridge_user,0.85,2025-07-31,2026-09-09,54,nft_market,round-number cross-chain deposits,yes
+w0431-f2b67b.synthetic-demo.near,nft_trader,0.75,2025-01-28,2026-09-09,4776,nft_market,floor-price sweeps on collections,yes
+w0432-bcd1c1.synthetic-demo.near,nft_trader,0.79,2025-10-19,2026-09-09,2590,liquid_staking,bursts of mints followed by sales,yes
+w0433-155e11.synthetic-demo.near,validator_operator,0.52,2025-11-04,2026-09-09,2870,nft_market,stake and unstake on a fixed cycle,yes
+w0434-49fe0f.synthetic-demo.near,bridge_user,0.86,2025-03-10,2026-09-09,4345,lending,round-number cross-chain deposits,yes
+w0435-0af8ce.synthetic-demo.near,cex_hot_wallet,0.64,2025-12-09,2026-09-09,1,nft_market,fixed-size withdrawals at regular intervals,yes
+w0436-98398a.synthetic-demo.near,cex_hot_wallet,0.79,2025-10-21,2026-09-09,132,liquid_staking,fixed-size withdrawals at regular intervals,yes
+w0437-d34439.synthetic-demo.near,lp_whale,0.56,2025-03-22,2026-09-09,612,liquid_staking,repeated LP adds over 30d,yes
+w0438-5c09e7.synthetic-demo.near,nft_trader,0.78,2025-05-23,2026-09-09,4352,other,floor-price sweeps on collections,yes
+w0439-ec30c4.synthetic-demo.near,nft_trader,0.62,2024-02-06,2026-09-09,747,bridge,floor-price sweeps on collections,yes
+w0440-563ba0.synthetic-demo.near,airdrop_farmer,0.97,2024-03-31,2026-09-09,1468,liquid_staking,minimal activity before each snapshot,yes
+w0441-774b5b.synthetic-demo.near,cex_hot_wallet,0.58,2025-04-24,2026-09-10,1353,intents,deposit sweeps to one hot wallet,yes
+w0442-67a6fe.synthetic-demo.near,nft_trader,0.64,2026-04-08,2026-09-10,1683,bridge,floor-price sweeps on collections,yes
+w0443-1621d3.synthetic-demo.near,nft_trader,0.94,2026-05-18,2026-09-10,552,dex,bursts of mints followed by sales,yes
+w0444-9fc1e1.synthetic-demo.near,nft_trader,0.50,2026-01-19,2026-09-10,911,other,bursts of mints followed by sales,yes
+w0445-9e6c1b.synthetic-demo.near,validator_operator,0.71,2025-10-29,2026-09-10,3242,lending,reward claims every epoch,yes
+w0446-8b8841.synthetic-demo.near,arbitrage_bot,0.55,2025-03-23,2026-09-10,2528,lending,sub-second arbitrage pattern,yes
+w0447-5d95f1.synthetic-demo.near,arbitrage_bot,0.67,2025-01-14,2026-09-10,318,bridge,sub-second arbitrage pattern,yes
+w0448-04ea26.synthetic-demo.near,arbitrage_bot,0.57,2025-03-22,2026-09-10,46,lending,same-block round trips across two pools,yes
+w0449-dbeab4.synthetic-demo.near,bridge_user,0.59,2025-10-14,2026-09-10,4563,liquid_staking,round-number cross-chain deposits,yes
+w0450-614ee9.synthetic-demo.near,bridge_user,0.70,2025-10-11,2026-09-10,1943,intents,round-number cross-chain deposits,yes
+w0451-b11f88.synthetic-demo.near,lp_whale,0.60,2024-09-14,2026-09-10,1365,lending,repeated LP adds over 30d,yes
+w0452-f51cbb.synthetic-demo.near,bridge_user,0.96,2025-02-25,2026-09-11,1547,lending,round-number cross-chain deposits,yes
+w0453-b0e8ee.synthetic-demo.near,dao_treasury,0.53,2025-05-31,2026-09-11,1086,intents,multisig-style outgoing payments,yes
+w0454-57645e.synthetic-demo.near,arbitrage_bot,0.69,2024-03-15,2026-09-11,12,liquid_staking,sub-second arbitrage pattern,yes
+w0455-a62d3c.synthetic-demo.near,dao_treasury,0.89,2025-12-25,2026-09-11,4,dex,multisig-style outgoing payments,yes
+w0456-28c083.synthetic-demo.near,nft_trader,0.50,2025-09-13,2026-09-11,147,nft_market,bursts of mints followed by sales,yes
+w0457-c7fd07.synthetic-demo.near,bridge_user,0.70,2024-06-18,2026-09-11,2512,lending,round-number cross-chain deposits,yes
+w0458-0ffd6c.synthetic-demo.near,bridge_user,0.82,2026-01-20,2026-09-11,3240,other,round-number cross-chain deposits,yes
+w0459-4ed3c5.synthetic-demo.near,nft_trader,0.61,2024-04-18,2026-09-11,2897,other,floor-price sweeps on collections,yes
+w0460-b86c40.synthetic-demo.near,dao_treasury,0.68,2026-02-02,2026-09-11,529,nft_market,periodic grants to many recipients,yes
+w0461-942da3.synthetic-demo.near,cex_hot_wallet,0.75,2024-10-06,2026-09-11,43,bridge,fixed-size withdrawals at regular intervals,yes
+w0462-e6ae35.synthetic-demo.near,validator_operator,0.99,2025-01-14,2026-09-11,4213,nft_market,reward claims every epoch,yes
+w0463-bf1435.synthetic-demo.near,cex_hot_wallet,0.71,2024-03-15,2026-09-12,809,other,deposit sweeps to one hot wallet,yes
+w0464-c3aaa5.synthetic-demo.near,lp_whale,0.62,2025-01-01,2026-09-12,4652,other,large single-sided liquidity deposits,yes
+w0465-9a3e97.synthetic-demo.near,lp_whale,0.96,2025-12-27,2026-09-12,4108,nft_market,repeated LP adds over 30d,yes
+w0466-eb28f8.synthetic-demo.near,dao_treasury,0.59,2024-10-27,2026-09-12,4899,bridge,periodic grants to many recipients,yes
+w0467-c889dc.synthetic-demo.near,airdrop_farmer,0.61,2024-02-26,2026-09-12,95,dex,minimal activity before each snapshot,yes
+w0468-a0765c.synthetic-demo.near,nft_trader,0.95,2025-02-06,2026-09-12,290,liquid_staking,floor-price sweeps on collections,yes
+w0469-62195e.synthetic-demo.near,nft_trader,0.76,2024-07-10,2026-09-12,8,bridge,bursts of mints followed by sales,yes
+w0470-5620e3.synthetic-demo.near,dao_treasury,0.53,2026-06-09,2026-09-12,4478,bridge,periodic grants to many recipients,yes
+w0471-139389.synthetic-demo.near,arbitrage_bot,0.89,2025-04-06,2026-09-12,320,dex,same-block round trips across two pools,yes
+w0472-88bd21.synthetic-demo.near,airdrop_farmer,0.86,2026-06-06,2026-09-12,1375,other,many small claims from linked wallets,yes
+w0473-cbd63a.synthetic-demo.near,bridge_user,0.59,2025-12-09,2026-09-12,471,intents,round-number cross-chain deposits,yes
+w0474-762ba3.synthetic-demo.near,dao_treasury,0.98,2024-07-17,2026-09-13,1080,intents,periodic grants to many recipients,yes
+w0475-08b80c.synthetic-demo.near,nft_trader,0.69,2025-12-21,2026-09-13,1421,lending,bursts of mints followed by sales,yes
+w0476-6dd858.synthetic-demo.near,lp_whale,0.77,2026-03-04,2026-09-13,1145,bridge,repeated LP adds over 30d,yes
+w0477-274ebe.synthetic-demo.near,validator_operator,0.60,2025-04-04,2026-09-13,115,nft_market,stake and unstake on a fixed cycle,yes
+w0478-146f01.synthetic-demo.near,cex_hot_wallet,0.75,2025-07-09,2026-09-13,991,liquid_staking,fixed-size withdrawals at regular intervals,yes
+w0479-4f3b4e.synthetic-demo.near,bridge_user,0.97,2024-06-15,2026-09-13,3099,other,frequent in/out transfers via bridges,yes
+w0480-ae3a37.synthetic-demo.near,arbitrage_bot,0.72,2024-03-25,2026-09-13,353,intents,sub-second arbitrage pattern,yes
+w0481-68aafa.synthetic-demo.near,arbitrage_bot,0.77,2025-08-19,2026-09-13,208,dex,sub-second arbitrage pattern,yes
+w0482-9db544.synthetic-demo.near,dao_treasury,0.66,2024-09-17,2026-09-13,2660,other,periodic grants to many recipients,yes
+w0483-7d76f4.synthetic-demo.near,cex_hot_wallet,0.85,2026-01-05,2026-09-13,2045,nft_market,fixed-size withdrawals at regular intervals,yes
+w0484-45b337.synthetic-demo.near,validator_operator,0.55,2024-11-20,2026-09-13,55,nft_market,reward claims every epoch,yes
+w0485-0bfed6.synthetic-demo.near,validator_operator,0.52,2025-05-23,2026-09-14,2069,intents,reward claims every epoch,yes
+w0486-73b825.synthetic-demo.near,arbitrage_bot,0.69,2024-09-21,2026-09-14,1888,bridge,same-block round trips across two pools,yes
+w0487-596add.synthetic-demo.near,lp_whale,0.78,2025-06-11,2026-09-14,2432,intents,large single-sided liquidity deposits,yes
+w0488-338cc3.synthetic-demo.near,cex_hot_wallet,0.85,2026-06-07,2026-09-14,3094,liquid_staking,fixed-size withdrawals at regular intervals,yes
+w0489-4e5eb1.synthetic-demo.near,nft_trader,0.99,2025-01-03,2026-09-14,619,intents,bursts of mints followed by sales,yes
+w0490-aa9b83.synthetic-demo.near,cex_hot_wallet,0.83,2024-06-23,2026-09-14,107,dex,deposit sweeps to one hot wallet,yes
+w0491-d05a96.synthetic-demo.near,nft_trader,0.66,2026-02-07,2026-09-14,2730,dex,bursts of mints followed by sales,yes
+w0492-1e406a.synthetic-demo.near,arbitrage_bot,0.51,2026-06-06,2026-09-14,1,nft_market,sub-second arbitrage pattern,yes
+w0493-2614ac.synthetic-demo.near,airdrop_farmer,0.88,2024-09-01,2026-09-14,1704,other,minimal activity before each snapshot,yes
+w0494-9c286a.synthetic-demo.near,airdrop_farmer,0.90,2025-10-21,2026-09-14,4060,liquid_staking,many small claims from linked wallets,yes
+w0495-971f56.synthetic-demo.near,nft_trader,0.90,2024-04-18,2026-09-14,4419,bridge,floor-price sweeps on collections,yes
+w0496-55e66c.synthetic-demo.near,dao_treasury,0.77,2024-02-24,2026-09-15,2429,bridge,multisig-style outgoing payments,yes
+w0497-1ebced.synthetic-demo.near,bridge_user,0.78,2026-01-14,2026-09-15,385,liquid_staking,round-number cross-chain deposits,yes
+w0498-98cc34.synthetic-demo.near,lp_whale,0.51,2025-04-02,2026-09-15,1592,bridge,large single-sided liquidity deposits,yes
+w0499-ce0444.synthetic-demo.near,cex_hot_wallet,0.76,2025-12-18,2026-09-15,3746,other,deposit sweeps to one hot wallet,yes
+w0500-442ad8.synthetic-demo.near,lp_whale,0.75,2025-07-08,2026-09-15,2673,lending,large single-sided liquidity deposits,yes
+w0501-fdcb3d.synthetic-demo.near,lp_whale,0.75,2024-01-30,2026-09-15,3465,bridge,large single-sided liquidity deposits,yes
+w0502-9bdec1.synthetic-demo.near,lp_whale,0.55,2024-01-24,2026-09-15,3677,lending,large single-sided liquidity deposits,yes
+w0503-2fe126.synthetic-demo.near,cex_hot_wallet,0.79,2026-01-16,2026-09-15,2512,lending,fixed-size withdrawals at regular intervals,yes
+w0504-bded6b.synthetic-demo.near,arbitrage_bot,0.66,2026-07-27,2026-09-15,276,intents,sub-second arbitrage pattern,yes
+w0505-0a289a.synthetic-demo.near,dao_treasury,0.92,2025-06-02,2026-09-15,3034,bridge,multisig-style outgoing payments,yes
+w0506-07cdb9.synthetic-demo.near,bridge_user,0.56,2024-06-19,2026-09-16,1016,bridge,frequent in/out transfers via bridges,yes
+w0507-619010.synthetic-demo.near,bridge_user,0.72,2024-02-01,2026-09-16,3003,dex,frequent in/out transfers via bridges,yes
+w0508-57deb2.synthetic-demo.near,cex_hot_wallet,0.81,2025-03-03,2026-09-16,568,other,fixed-size withdrawals at regular intervals,yes
+w0509-ac5f59.synthetic-demo.near,nft_trader,0.74,2024-09-29,2026-09-16,3987,nft_market,floor-price sweeps on collections,yes
+w0510-80641b.synthetic-demo.near,arbitrage_bot,0.77,2024-08-05,2026-09-16,1188,lending,same-block round trips across two pools,yes
+w0511-1ab75c.synthetic-demo.near,airdrop_farmer,0.92,2025-04-23,2026-09-16,183,dex,minimal activity before each snapshot,yes
+w0512-5f5ca3.synthetic-demo.near,arbitrage_bot,0.98,2024-10-03,2026-09-16,3,other,sub-second arbitrage pattern,yes
+w0513-340f91.synthetic-demo.near,validator_operator,0.94,2024-11-25,2026-09-16,298,bridge,stake and unstake on a fixed cycle,yes
+w0514-59f8d6.synthetic-demo.near,lp_whale,0.88,2024-09-23,2026-09-16,1615,liquid_staking,large single-sided liquidity deposits,yes
+w0515-91eda2.synthetic-demo.near,airdrop_farmer,0.85,2025-02-11,2026-09-16,1628,lending,minimal activity before each snapshot,yes
+w0516-2debfa.synthetic-demo.near,bridge_user,0.81,2026-07-15,2026-09-16,4904,other,frequent in/out transfers via bridges,yes
+w0517-29bfa1.synthetic-demo.near,validator_operator,0.78,2025-07-13,2026-09-17,368,lending,reward claims every epoch,yes
+w0518-61bac6.synthetic-demo.near,validator_operator,0.81,2025-07-31,2026-09-17,2208,bridge,stake and unstake on a fixed cycle,yes
+w0519-c3081b.synthetic-demo.near,validator_operator,0.88,2026-01-19,2026-09-17,2707,bridge,reward claims every epoch,yes
+w0520-07fad8.synthetic-demo.near,cex_hot_wallet,0.72,2025-05-25,2026-09-17,3533,dex,deposit sweeps to one hot wallet,yes
+w0521-75c73e.synthetic-demo.near,dao_treasury,0.86,2025-12-06,2026-09-17,9,dex,periodic grants to many recipients,yes
+w0522-4fe273.synthetic-demo.near,bridge_user,0.51,2024-02-06,2026-09-17,2002,dex,frequent in/out transfers via bridges,yes
+w0523-f28cda.synthetic-demo.near,validator_operator,0.59,2024-11-25,2026-09-17,116,nft_market,stake and unstake on a fixed cycle,yes
+w0524-6943c0.synthetic-demo.near,dao_treasury,0.88,2024-12-05,2026-09-17,34,lending,multisig-style outgoing payments,yes
+w0525-d06fe3.synthetic-demo.near,lp_whale,0.88,2024-01-22,2026-09-17,1138,dex,repeated LP adds over 30d,yes
+w0526-e5e237.synthetic-demo.near,dao_treasury,0.52,2024-02-06,2026-09-17,199,lending,multisig-style outgoing payments,yes
+w0527-2970d1.synthetic-demo.near,cex_hot_wallet,0.96,2026-03-07,2026-09-17,44,other,deposit sweeps to one hot wallet,yes
+w0528-10e598.synthetic-demo.near,arbitrage_bot,0.87,2025-02-15,2026-09-18,1120,bridge,same-block round trips across two pools,yes
+w0529-12e30f.synthetic-demo.near,nft_trader,0.82,2024-06-01,2026-09-18,979,other,floor-price sweeps on collections,yes
+w0530-20650f.synthetic-demo.near,nft_trader,0.61,2024-08-30,2026-09-18,3965,intents,floor-price sweeps on collections,yes
+w0531-5c2f1e.synthetic-demo.near,bridge_user,0.76,2024-12-05,2026-09-18,4049,intents,round-number cross-chain deposits,yes
+w0532-3591c1.synthetic-demo.near,dao_treasury,0.79,2025-08-09,2026-09-18,397,bridge,multisig-style outgoing payments,yes
+w0533-3abcb3.synthetic-demo.near,lp_whale,0.97,2026-02-19,2026-09-18,1289,liquid_staking,large single-sided liquidity deposits,yes
+w0534-4660d0.synthetic-demo.near,arbitrage_bot,0.50,2024-06-05,2026-09-18,1116,dex,sub-second arbitrage pattern,yes
+w0535-2a81c1.synthetic-demo.near,bridge_user,0.58,2026-01-25,2026-09-18,1960,nft_market,frequent in/out transfers via bridges,yes
+w0536-feec72.synthetic-demo.near,lp_whale,0.79,2024-07-30,2026-09-18,83,other,repeated LP adds over 30d,yes
+w0537-ff645c.synthetic-demo.near,lp_whale,0.94,2025-02-05,2026-09-18,4093,nft_market,large single-sided liquidity deposits,yes
+w0538-17593d.synthetic-demo.near,lp_whale,0.97,2024-10-31,2026-09-18,4080,lending,large single-sided liquidity deposits,yes
+w0539-c26c34.synthetic-demo.near,validator_operator,0.82,2026-02-10,2026-09-19,3276,liquid_staking,reward claims every epoch,yes
+w0540-52bbe6.synthetic-demo.near,dao_treasury,0.59,2024-01-26,2026-09-19,3593,other,periodic grants to many recipients,yes
+w0541-866de5.synthetic-demo.near,dao_treasury,0.54,2024-04-29,2026-09-19,1070,bridge,periodic grants to many recipients,yes
+w0542-39874e.synthetic-demo.near,bridge_user,0.97,2025-10-17,2026-09-19,1,nft_market,frequent in/out transfers via bridges,yes
+w0543-faefd4.synthetic-demo.near,airdrop_farmer,0.68,2026-02-15,2026-09-19,1687,lending,minimal activity before each snapshot,yes
+w0544-ee0893.synthetic-demo.near,cex_hot_wallet,0.58,2026-04-23,2026-09-19,2156,dex,fixed-size withdrawals at regular intervals,yes
+w0545-7cbc70.synthetic-demo.near,lp_whale,0.76,2025-03-07,2026-09-19,64,intents,repeated LP adds over 30d,yes
+w0546-7f1b2c.synthetic-demo.near,bridge_user,0.61,2025-12-09,2026-09-19,1,dex,frequent in/out transfers via bridges,yes
+w0547-027a58.synthetic-demo.near,bridge_user,0.87,2025-09-12,2026-09-19,606,nft_market,frequent in/out transfers via bridges,yes
+w0548-779886.synthetic-demo.near,lp_whale,0.84,2024-12-06,2026-09-19,1260,dex,large single-sided liquidity deposits,yes
+w0549-410747.synthetic-demo.near,bridge_user,0.79,2025-10-20,2026-09-19,776,bridge,round-number cross-chain deposits,yes
+w0550-de71f1.synthetic-demo.near,bridge_user,0.68,2024-02-09,2026-09-20,1907,other,round-number cross-chain deposits,yes
+w0551-894bf6.synthetic-demo.near,validator_operator,0.76,2024-10-25,2026-09-20,3486,bridge,reward claims every epoch,yes
+w0552-4d93e0.synthetic-demo.near,dao_treasury,0.57,2025-11-15,2026-09-20,723,nft_market,multisig-style outgoing payments,yes
+w0553-89f2bd.synthetic-demo.near,nft_trader,0.72,2024-07-02,2026-09-20,41,nft_market,floor-price sweeps on collections,yes
+w0554-12cff8.synthetic-demo.near,validator_operator,0.53,2024-04-17,2026-09-20,2581,liquid_staking,stake and unstake on a fixed cycle,yes
+w0555-ff23df.synthetic-demo.near,bridge_user,0.86,2024-10-22,2026-09-20,1266,liquid_staking,round-number cross-chain deposits,yes
+w0556-47a03c.synthetic-demo.near,lp_whale,0.51,2026-06-26,2026-09-20,1136,other,large single-sided liquidity deposits,yes
+w0557-9f2e9b.synthetic-demo.near,arbitrage_bot,0.63,2026-01-30,2026-09-20,2232,lending,sub-second arbitrage pattern,yes
+w0558-e0e0a6.synthetic-demo.near,cex_hot_wallet,0.85,2024-04-24,2026-09-20,4041,dex,deposit sweeps to one hot wallet,yes
+w0559-3b0487.synthetic-demo.near,validator_operator,0.71,2024-07-15,2026-09-20,1129,bridge,reward claims every epoch,yes
+w0560-999455.synthetic-demo.near,airdrop_farmer,0.60,2024-12-02,2026-09-20,107,intents,minimal activity before each snapshot,yes
+w0561-38595f.synthetic-demo.near,bridge_user,0.78,2024-11-20,2026-09-21,755,liquid_staking,frequent in/out transfers via bridges,yes
+w0562-b9dde9.synthetic-demo.near,dao_treasury,0.58,2025-04-13,2026-09-21,1299,nft_market,periodic grants to many recipients,yes
+w0563-859bfe.synthetic-demo.near,airdrop_farmer,0.84,2026-04-26,2026-09-21,3029,dex,minimal activity before each snapshot,yes
+w0564-ea87f1.synthetic-demo.near,arbitrage_bot,0.69,2025-11-25,2026-09-21,42,dex,sub-second arbitrage pattern,yes
+w0565-82e4fd.synthetic-demo.near,cex_hot_wallet,0.50,2025-09-26,2026-09-21,877,lending,deposit sweeps to one hot wallet,yes
+w0566-aa99d0.synthetic-demo.near,validator_operator,0.76,2024-10-25,2026-09-21,1154,dex,stake and unstake on a fixed cycle,yes
+w0567-c6de17.synthetic-demo.near,nft_trader,0.77,2024-08-20,2026-09-21,1143,other,bursts of mints followed by sales,yes
+w0568-64f353.synthetic-demo.near,arbitrage_bot,0.52,2026-01-16,2026-09-21,147,bridge,sub-second arbitrage pattern,yes
+w0569-f5c85b.synthetic-demo.near,cex_hot_wallet,0.62,2024-12-12,2026-09-21,201,liquid_staking,deposit sweeps to one hot wallet,yes
+w0570-a217fe.synthetic-demo.near,cex_hot_wallet,0.97,2024-06-07,2026-09-21,1,lending,fixed-size withdrawals at regular intervals,yes
+w0571-39b5dc.synthetic-demo.near,validator_operator,0.68,2024-09-26,2026-09-21,269,nft_market,stake and unstake on a fixed cycle,yes
+w0572-78d06e.synthetic-demo.near,cex_hot_wallet,0.72,2025-04-05,2026-09-22,823,nft_market,fixed-size withdrawals at regular intervals,yes
+w0573-03f67c.synthetic-demo.near,validator_operator,0.65,2025-06-24,2026-09-22,4704,other,reward claims every epoch,yes
+w0574-b189df.synthetic-demo.near,nft_trader,0.74,2026-01-19,2026-09-22,623,intents,floor-price sweeps on collections,yes
+w0575-605508.synthetic-demo.near,cex_hot_wallet,0.86,2024-07-21,2026-09-22,1,intents,fixed-size withdrawals at regular intervals,yes
+w0576-5620ee.synthetic-demo.near,cex_hot_wallet,0.56,2026-02-12,2026-09-22,289,dex,fixed-size withdrawals at regular intervals,yes
+w0577-b24e88.synthetic-demo.near,bridge_user,0.51,2024-06-08,2026-09-22,3158,bridge,round-number cross-chain deposits,yes
+w0578-0dbf49.synthetic-demo.near,dao_treasury,0.62,2025-05-31,2026-09-22,138,bridge,multisig-style outgoing payments,yes
+w0579-45b85d.synthetic-demo.near,bridge_user,0.87,2026-02-04,2026-09-22,27,lending,round-number cross-chain deposits,yes
+w0580-c84743.synthetic-demo.near,validator_operator,0.63,2026-05-01,2026-09-22,3983,liquid_staking,reward claims every epoch,yes
+w0581-bbdd26.synthetic-demo.near,cex_hot_wallet,0.60,2024-11-26,2026-09-22,400,dex,fixed-size withdrawals at regular intervals,yes
+w0582-e56d08.synthetic-demo.near,bridge_user,0.97,2026-01-06,2026-09-22,2050,dex,frequent in/out transfers via bridges,yes
+w0583-60cfe4.synthetic-demo.near,airdrop_farmer,0.96,2025-06-16,2026-09-23,997,nft_market,minimal activity before each snapshot,yes
+w0584-3d9f67.synthetic-demo.near,lp_whale,0.96,2025-11-07,2026-09-23,4478,intents,repeated LP adds over 30d,yes
+w0585-3fecd6.synthetic-demo.near,validator_operator,0.59,2025-04-17,2026-09-23,1824,other,stake and unstake on a fixed cycle,yes
+w0586-e1ea78.synthetic-demo.near,airdrop_farmer,0.95,2026-02-20,2026-09-23,3090,nft_market,many small claims from linked wallets,yes
+w0587-aea4da.synthetic-demo.near,lp_whale,0.60,2024-10-04,2026-09-23,1431,liquid_staking,repeated LP adds over 30d,yes
+w0588-113b85.synthetic-demo.near,nft_trader,0.95,2024-12-10,2026-09-23,280,bridge,bursts of mints followed by sales,yes
+w0589-9279be.synthetic-demo.near,dao_treasury,0.52,2025-09-20,2026-09-23,1550,liquid_staking,multisig-style outgoing payments,yes
+w0590-9ab2c4.synthetic-demo.near,cex_hot_wallet,0.58,2025-12-12,2026-09-23,1317,intents,fixed-size withdrawals at regular intervals,yes
+w0591-796c86.synthetic-demo.near,validator_operator,0.63,2025-11-04,2026-09-23,4751,nft_market,reward claims every epoch,yes
+w0592-2caee2.synthetic-demo.near,nft_trader,0.79,2024-01-02,2026-09-23,1113,lending,floor-price sweeps on collections,yes
+w0593-c8bb44.synthetic-demo.near,cex_hot_wallet,0.96,2025-05-30,2026-09-23,750,other,fixed-size withdrawals at regular intervals,yes
+w0594-ff1616.synthetic-demo.near,airdrop_farmer,0.98,2025-10-12,2026-09-24,1976,dex,many small claims from linked wallets,yes
+w0595-38260b.synthetic-demo.near,validator_operator,0.84,2024-06-24,2026-09-24,3767,other,reward claims every epoch,yes
+w0596-99c63f.synthetic-demo.near,validator_operator,0.83,2026-07-29,2026-09-24,1649,bridge,stake and unstake on a fixed cycle,yes
+w0597-f01063.synthetic-demo.near,lp_whale,0.57,2026-07-21,2026-09-24,3250,intents,large single-sided liquidity deposits,yes
+w0598-0f3725.synthetic-demo.near,bridge_user,0.94,2024-04-29,2026-09-24,2040,intents,round-number cross-chain deposits,yes
+w0599-4037b9.synthetic-demo.near,lp_whale,0.88,2026-05-17,2026-09-24,721,bridge,large single-sided liquidity deposits,yes
+w0600-83412a.synthetic-demo.near,nft_trader,0.98,2024-03-25,2026-09-24,395,lending,floor-price sweeps on collections,yes
+w0601-5e1502.synthetic-demo.near,nft_trader,0.73,2025-01-01,2026-09-24,2,liquid_staking,floor-price sweeps on collections,yes
+w0602-163a34.synthetic-demo.near,dao_treasury,0.88,2024-09-08,2026-09-24,4423,nft_market,multisig-style outgoing payments,yes
+w0603-d08457.synthetic-demo.near,nft_trader,0.79,2025-10-05,2026-09-24,2509,nft_market,bursts of mints followed by sales,yes
+w0604-2a2b3c.synthetic-demo.near,lp_whale,0.74,2024-12-09,2026-09-24,599,nft_market,repeated LP adds over 30d,yes
+w0605-9671f4.synthetic-demo.near,lp_whale,0.53,2024-02-11,2026-09-25,1092,other,large single-sided liquidity deposits,yes
+w0606-9f913d.synthetic-demo.near,bridge_user,0.61,2025-03-03,2026-09-25,3579,bridge,round-number cross-chain deposits,yes
+w0607-9d88b0.synthetic-demo.near,dao_treasury,0.77,2024-04-19,2026-09-25,668,liquid_staking,periodic grants to many recipients,yes
+w0608-8195bf.synthetic-demo.near,nft_trader,0.63,2024-06-03,2026-09-25,2870,lending,bursts of mints followed by sales,yes
+w0609-ec8e73.synthetic-demo.near,bridge_user,0.95,2025-07-24,2026-09-25,239,dex,round-number cross-chain deposits,yes
+w0610-bc224f.synthetic-demo.near,nft_trader,0.54,2024-01-03,2026-09-25,6,dex,bursts of mints followed by sales,yes
+w0611-0c6aca.synthetic-demo.near,dao_treasury,0.97,2024-02-12,2026-09-25,4794,dex,periodic grants to many recipients,yes
+w0612-d589da.synthetic-demo.near,arbitrage_bot,0.66,2025-08-21,2026-09-25,2167,dex,same-block round trips across two pools,yes
+w0613-b9ac0c.synthetic-demo.near,lp_whale,0.92,2024-03-28,2026-09-25,1,intents,repeated LP adds over 30d,yes
+w0614-1937a3.synthetic-demo.near,arbitrage_bot,0.70,2026-07-28,2026-09-25,816,liquid_staking,same-block round trips across two pools,yes
+w0615-353fa8.synthetic-demo.near,arbitrage_bot,0.89,2025-07-29,2026-09-25,3048,dex,sub-second arbitrage pattern,yes
+w0616-531e35.synthetic-demo.near,bridge_user,0.62,2026-06-21,2026-09-26,3887,intents,frequent in/out transfers via bridges,yes
+w0617-d7712c.synthetic-demo.near,lp_whale,0.63,2026-06-29,2026-09-26,526,other,repeated LP adds over 30d,yes
+w0618-c6a431.synthetic-demo.near,dao_treasury,0.57,2025-08-13,2026-09-26,3299,other,multisig-style outgoing payments,yes
+w0619-a07fc7.synthetic-demo.near,cex_hot_wallet,0.57,2024-12-29,2026-09-26,381,liquid_staking,fixed-size withdrawals at regular intervals,yes
+w0620-a03534.synthetic-demo.near,nft_trader,0.70,2026-01-25,2026-09-26,1,other,floor-price sweeps on collections,yes
+w0621-dcbb9b.synthetic-demo.near,bridge_user,0.98,2025-12-18,2026-09-26,1725,other,round-number cross-chain deposits,yes
+w0622-d8051e.synthetic-demo.near,nft_trader,0.81,2026-03-02,2026-09-26,9,other,bursts of mints followed by sales,yes
+w0623-7beed6.synthetic-demo.near,cex_hot_wallet,0.63,2025-03-15,2026-09-26,674,lending,deposit sweeps to one hot wallet,yes
+w0624-ee256d.synthetic-demo.near,validator_operator,0.79,2025-09-10,2026-09-26,264,bridge,reward claims every epoch,yes
+w0625-d7d3be.synthetic-demo.near,airdrop_farmer,0.59,2026-02-18,2026-09-26,69,other,many small claims from linked wallets,yes
+w0626-588cb6.synthetic-demo.near,nft_trader,0.75,2025-08-02,2026-09-26,278,lending,floor-price sweeps on collections,yes
+w0627-cad155.synthetic-demo.near,validator_operator,0.71,2025-03-20,2026-09-27,355,liquid_staking,reward claims every epoch,yes
+w0628-db76c5.synthetic-demo.near,airdrop_farmer,0.64,2026-03-16,2026-09-27,1,dex,many small claims from linked wallets,yes
+w0629-35132f.synthetic-demo.near,bridge_user,0.82,2025-12-07,2026-09-27,4954,nft_market,round-number cross-chain deposits,yes
+w0630-2ae151.synthetic-demo.near,lp_whale,0.65,2024-04-13,2026-09-27,201,bridge,large single-sided liquidity deposits,yes
+w0631-12a375.synthetic-demo.near,cex_hot_wallet,0.97,2024-02-19,2026-09-27,2766,other,deposit sweeps to one hot wallet,yes
+w0632-35784c.synthetic-demo.near,nft_trader,0.52,2024-03-22,2026-09-27,3822,liquid_staking,floor-price sweeps on collections,yes
+w0633-e48ec1.synthetic-demo.near,cex_hot_wallet,0.65,2026-04-24,2026-09-27,794,dex,deposit sweeps to one hot wallet,yes
+w0634-0f9815.synthetic-demo.near,airdrop_farmer,0.50,2025-12-11,2026-09-27,558,nft_market,many small claims from linked wallets,yes
+w0635-721607.synthetic-demo.near,arbitrage_bot,0.68,2026-01-10,2026-09-27,2525,liquid_staking,sub-second arbitrage pattern,yes
+w0636-450812.synthetic-demo.near,dao_treasury,0.88,2025-04-07,2026-09-27,548,nft_market,multisig-style outgoing payments,yes
+w0637-d289b9.synthetic-demo.near,cex_hot_wallet,0.70,2024-11-30,2026-09-27,1944,bridge,fixed-size withdrawals at regular intervals,yes
+w0638-190bca.synthetic-demo.near,bridge_user,0.64,2024-07-07,2026-09-28,9,bridge,frequent in/out transfers via bridges,yes
+w0639-c8e98a.synthetic-demo.near,arbitrage_bot,0.53,2024-10-19,2026-09-28,853,intents,same-block round trips across two pools,yes
+w0640-58463e.synthetic-demo.near,nft_trader,0.56,2025-07-13,2026-09-28,1037,intents,bursts of mints followed by sales,yes
+w0641-43a8e1.synthetic-demo.near,arbitrage_bot,0.85,2024-02-27,2026-09-28,17,liquid_staking,sub-second arbitrage pattern,yes
+w0642-6d8669.synthetic-demo.near,dao_treasury,0.95,2026-05-15,2026-09-28,1479,liquid_staking,periodic grants to many recipients,yes
+w0643-331414.synthetic-demo.near,bridge_user,0.58,2026-06-02,2026-09-28,798,liquid_staking,round-number cross-chain deposits,yes
+w0644-4641e4.synthetic-demo.near,lp_whale,0.91,2025-05-15,2026-09-28,346,nft_market,repeated LP adds over 30d,yes
+w0645-8f8477.synthetic-demo.near,bridge_user,0.98,2024-04-17,2026-09-28,4883,nft_market,frequent in/out transfers via bridges,yes
+w0646-343595.synthetic-demo.near,arbitrage_bot,0.73,2025-04-06,2026-09-28,634,nft_market,sub-second arbitrage pattern,yes
+w0647-f263a9.synthetic-demo.near,nft_trader,0.74,2024-09-01,2026-09-28,399,nft_market,bursts of mints followed by sales,yes
+w0648-568312.synthetic-demo.near,validator_operator,0.67,2026-06-20,2026-09-28,669,dex,reward claims every epoch,yes
+w0649-ede7e2.synthetic-demo.near,lp_whale,0.59,2026-02-06,2026-09-29,3091,liquid_staking,large single-sided liquidity deposits,yes
+w0650-64c37b.synthetic-demo.near,nft_trader,0.67,2025-10-02,2026-09-29,3934,intents,bursts of mints followed by sales,yes
+w0651-788ecb.synthetic-demo.near,airdrop_farmer,0.77,2025-02-12,2026-09-29,1563,nft_market,minimal activity before each snapshot,yes
+w0652-fe5680.synthetic-demo.near,cex_hot_wallet,0.96,2026-06-24,2026-09-29,4468,other,deposit sweeps to one hot wallet,yes
+w0653-ecb1b4.synthetic-demo.near,arbitrage_bot,0.60,2025-12-07,2026-09-29,1547,liquid_staking,same-block round trips across two pools,yes
+w0654-dbca92.synthetic-demo.near,arbitrage_bot,0.79,2025-03-14,2026-09-29,520,bridge,sub-second arbitrage pattern,yes
+w0655-e2cd29.synthetic-demo.near,arbitrage_bot,0.62,2026-04-20,2026-09-29,4958,nft_market,sub-second arbitrage pattern,yes
+w0656-c59736.synthetic-demo.near,cex_hot_wallet,0.64,2026-06-06,2026-09-29,1413,liquid_staking,fixed-size withdrawals at regular intervals,yes
+w0657-3e10a3.synthetic-demo.near,validator_operator,0.65,2025-05-08,2026-09-29,1251,lending,reward claims every epoch,yes
+w0658-583711.synthetic-demo.near,dao_treasury,0.90,2025-11-15,2026-09-29,3726,nft_market,multisig-style outgoing payments,yes
+w0659-e387f1.synthetic-demo.near,nft_trader,0.63,2024-01-14,2026-09-29,2810,liquid_staking,bursts of mints followed by sales,yes
+w0660-56031f.synthetic-demo.near,cex_hot_wallet,0.97,2024-01-14,2026-09-30,885,dex,deposit sweeps to one hot wallet,yes
+w0661-c5cf5a.synthetic-demo.near,arbitrage_bot,0.56,2025-10-08,2026-09-30,2531,lending,same-block round trips across two pools,yes
+w0662-ca39f0.synthetic-demo.near,nft_trader,0.90,2026-07-05,2026-09-30,3944,liquid_staking,floor-price sweeps on collections,yes
+w0663-c29f82.synthetic-demo.near,cex_hot_wallet,0.85,2024-03-18,2026-09-30,4560,liquid_staking,deposit sweeps to one hot wallet,yes
+w0664-e655ee.synthetic-demo.near,bridge_user,0.69,2026-06-14,2026-09-30,4698,bridge,round-number cross-chain deposits,yes
+w0665-98acf6.synthetic-demo.near,arbitrage_bot,0.96,2025-10-27,2026-09-30,4050,dex,same-block round trips across two pools,yes
+w0666-dfa5b5.synthetic-demo.near,nft_trader,0.79,2026-04-14,2026-09-30,380,bridge,bursts of mints followed by sales,yes
+w0667-a65130.synthetic-demo.near,dao_treasury,0.83,2024-08-26,2026-09-30,40,other,multisig-style outgoing payments,yes
+w0668-821691.synthetic-demo.near,lp_whale,0.61,2026-06-20,2026-09-30,381,lending,large single-sided liquidity deposits,yes
+w0669-d44592.synthetic-demo.near,lp_whale,0.73,2025-10-04,2026-09-30,1896,intents,large single-sided liquidity deposits,yes
+w0670-168bdb.synthetic-demo.near,bridge_user,0.96,2024-08-26,2026-09-30,46,dex,frequent in/out transfers via bridges,yes
+w0671-35aa72.synthetic-demo.near,airdrop_farmer,0.71,2025-05-21,2026-10-01,297,other,many small claims from linked wallets,yes
+w0672-40d538.synthetic-demo.near,validator_operator,0.87,2024-11-16,2026-10-01,4100,bridge,stake and unstake on a fixed cycle,yes
+w0673-8f62dc.synthetic-demo.near,lp_whale,0.66,2025-12-06,2026-10-01,280,dex,large single-sided liquidity deposits,yes
+w0674-49024d.synthetic-demo.near,dao_treasury,0.95,2024-04-20,2026-10-01,531,liquid_staking,multisig-style outgoing payments,yes
+w0675-eed189.synthetic-demo.near,arbitrage_bot,0.78,2025-01-20,2026-10-01,4538,nft_market,sub-second arbitrage pattern,yes
+w0676-3797e7.synthetic-demo.near,validator_operator,0.93,2024-08-03,2026-10-01,1060,other,stake and unstake on a fixed cycle,yes
+w0677-992f93.synthetic-demo.near,lp_whale,0.80,2024-02-18,2026-10-01,1621,other,large single-sided liquidity deposits,yes
+w0678-8a381e.synthetic-demo.near,cex_hot_wallet,0.74,2025-11-06,2026-10-01,440,nft_market,fixed-size withdrawals at regular intervals,yes
+w0679-440119.synthetic-demo.near,arbitrage_bot,0.92,2025-05-19,2026-10-01,4217,nft_market,same-block round trips across two pools,yes
+w0680-d4aeb7.synthetic-demo.near,airdrop_farmer,0.62,2025-07-24,2026-10-01,3746,lending,many small claims from linked wallets,yes
+w0681-97dbd3.synthetic-demo.near,lp_whale,0.93,2024-02-08,2026-10-01,1114,intents,repeated LP adds over 30d,yes
+w0682-91bb65.synthetic-demo.near,arbitrage_bot,0.87,2025-04-14,2026-10-02,578,dex,same-block round trips across two pools,yes
+w0683-c0312a.synthetic-demo.near,lp_whale,0.92,2025-03-10,2026-10-02,1697,nft_market,large single-sided liquidity deposits,yes
+w0684-2a9c9b.synthetic-demo.near,cex_hot_wallet,0.96,2025-09-08,2026-10-02,303,intents,deposit sweeps to one hot wallet,yes
+w0685-7ac397.synthetic-demo.near,arbitrage_bot,0.67,2025-06-27,2026-10-02,2583,dex,same-block round trips across two pools,yes
+w0686-3f598c.synthetic-demo.near,bridge_user,0.72,2025-04-20,2026-10-02,8,lending,round-number cross-chain deposits,yes
+w0687-1d38e8.synthetic-demo.near,validator_operator,0.61,2024-04-16,2026-10-02,4902,lending,stake and unstake on a fixed cycle,yes
+w0688-74b8ef.synthetic-demo.near,airdrop_farmer,0.70,2025-07-30,2026-10-02,2,bridge,many small claims from linked wallets,yes
+w0689-cfc4b7.synthetic-demo.near,cex_hot_wallet,0.82,2026-03-20,2026-10-02,1,nft_market,fixed-size withdrawals at regular intervals,yes
+w0690-3c0609.synthetic-demo.near,dao_treasury,0.99,2025-01-05,2026-10-02,177,nft_market,multisig-style outgoing payments,yes
+w0691-0587f3.synthetic-demo.near,lp_whale,0.90,2024-02-20,2026-10-02,3039,intents,large single-sided liquidity deposits,yes
+w0692-c5c3b9.synthetic-demo.near,dao_treasury,0.80,2026-01-07,2026-10-02,1639,nft_market,periodic grants to many recipients,yes
+w0693-8dade5.synthetic-demo.near,airdrop_farmer,0.84,2025-03-24,2026-10-03,2235,other,many small claims from linked wallets,yes
+w0694-dd0e92.synthetic-demo.near,dao_treasury,0.78,2025-07-05,2026-10-03,3248,liquid_staking,multisig-style outgoing payments,yes
+w0695-178ec7.synthetic-demo.near,arbitrage_bot,0.77,2025-07-07,2026-10-03,3147,nft_market,same-block round trips across two pools,yes
+w0696-59f8d1.synthetic-demo.near,bridge_user,0.84,2025-09-23,2026-10-03,328,dex,frequent in/out transfers via bridges,yes
+w0697-2ff346.synthetic-demo.near,dao_treasury,0.64,2025-09-17,2026-10-03,3756,other,periodic grants to many recipients,yes
+w0698-d13361.synthetic-demo.near,lp_whale,0.53,2026-05-31,2026-10-03,99,dex,large single-sided liquidity deposits,yes
+w0699-0ae168.synthetic-demo.near,nft_trader,0.62,2024-05-30,2026-10-03,4633,lending,floor-price sweeps on collections,yes
+w0700-7f727c.synthetic-demo.near,validator_operator,0.92,2024-12-31,2026-10-03,3069,nft_market,stake and unstake on a fixed cycle,yes
+w0701-0c6416.synthetic-demo.near,airdrop_farmer,0.90,2024-10-02,2026-10-03,1565,bridge,minimal activity before each snapshot,yes
+w0702-bf8793.synthetic-demo.near,validator_operator,0.80,2025-09-02,2026-10-03,1008,intents,stake and unstake on a fixed cycle,yes
+w0703-dac183.synthetic-demo.near,airdrop_farmer,0.71,2025-07-06,2026-10-03,2108,intents,minimal activity before each snapshot,yes
+w0704-08c064.synthetic-demo.near,dao_treasury,0.84,2024-12-04,2026-10-04,2325,lending,periodic grants to many recipients,yes
+w0705-7085ec.synthetic-demo.near,nft_trader,0.71,2025-05-17,2026-10-04,252,bridge,floor-price sweeps on collections,yes
+w0706-477be5.synthetic-demo.near,airdrop_farmer,0.71,2026-06-08,2026-10-04,4795,intents,minimal activity before each snapshot,yes
+w0707-3372ba.synthetic-demo.near,nft_trader,0.95,2025-06-25,2026-10-04,1339,intents,floor-price sweeps on collections,yes
+w0708-24563a.synthetic-demo.near,arbitrage_bot,0.97,2025-06-16,2026-10-04,341,bridge,sub-second arbitrage pattern,yes
+w0709-9c27bf.synthetic-demo.near,lp_whale,0.67,2025-03-24,2026-10-04,685,nft_market,repeated LP adds over 30d,yes
+w0710-6f9d0c.synthetic-demo.near,bridge_user,0.62,2026-07-22,2026-10-04,87,intents,round-number cross-chain deposits,yes
+w0711-8db8fd.synthetic-demo.near,cex_hot_wallet,0.96,2024-05-18,2026-10-04,10,dex,fixed-size withdrawals at regular intervals,yes
+w0712-895799.synthetic-demo.near,lp_whale,0.76,2024-03-09,2026-10-04,532,intents,repeated LP adds over 30d,yes
+w0713-b0f2e1.synthetic-demo.near,cex_hot_wallet,0.73,2026-07-02,2026-10-04,2689,other,deposit sweeps to one hot wallet,yes
+w0714-8eb0fb.synthetic-demo.near,validator_operator,0.76,2026-05-03,2026-10-04,17,intents,reward claims every epoch,yes
+w0715-428934.synthetic-demo.near,lp_whale,0.84,2024-09-20,2026-10-05,4286,dex,repeated LP adds over 30d,yes
+w0716-fc3d6c.synthetic-demo.near,bridge_user,0.81,2024-04-10,2026-10-05,2530,bridge,frequent in/out transfers via bridges,yes
+w0717-848c2e.synthetic-demo.near,lp_whale,0.79,2024-04-12,2026-10-05,1951,dex,large single-sided liquidity deposits,yes
+w0718-24172e.synthetic-demo.near,bridge_user,0.82,2026-03-18,2026-10-05,4253,other,round-number cross-chain deposits,yes
+w0719-d4a643.synthetic-demo.near,dao_treasury,0.71,2025-12-08,2026-10-05,289,liquid_staking,multisig-style outgoing payments,yes
+w0720-a7109a.synthetic-demo.near,nft_trader,0.67,2024-07-18,2026-10-05,1144,intents,bursts of mints followed by sales,yes
+w0721-dff4d5.synthetic-demo.near,cex_hot_wallet,0.96,2025-07-17,2026-10-05,1699,liquid_staking,deposit sweeps to one hot wallet,yes
+w0722-55fc32.synthetic-demo.near,lp_whale,0.72,2026-07-17,2026-10-05,1812,lending,repeated LP adds over 30d,yes
+w0723-d73e56.synthetic-demo.near,arbitrage_bot,0.82,2024-07-15,2026-10-05,108,bridge,same-block round trips across two pools,yes
+w0724-f26d3c.synthetic-demo.near,nft_trader,0.82,2024-06-09,2026-10-05,25,other,bursts of mints followed by sales,yes
+w0725-41279b.synthetic-demo.near,lp_whale,0.52,2024-05-01,2026-10-05,4690,intents,large single-sided liquidity deposits,yes
+w0726-4f097f.synthetic-demo.near,arbitrage_bot,0.58,2024-10-13,2026-10-06,4444,bridge,same-block round trips across two pools,yes
+w0727-089324.synthetic-demo.near,lp_whale,0.88,2024-02-25,2026-10-06,2744,intents,large single-sided liquidity deposits,yes
+w0728-4cd689.synthetic-demo.near,airdrop_farmer,0.92,2026-02-18,2026-10-06,3455,dex,many small claims from linked wallets,yes
+w0729-00cbed.synthetic-demo.near,airdrop_farmer,0.55,2025-04-28,2026-10-06,34,nft_market,minimal activity before each snapshot,yes
+w0730-f1101d.synthetic-demo.near,arbitrage_bot,0.97,2026-02-09,2026-10-06,3001,other,same-block round trips across two pools,yes
+w0731-6186c2.synthetic-demo.near,arbitrage_bot,0.61,2024-09-10,2026-10-06,108,bridge,same-block round trips across two pools,yes
+w0732-b6340f.synthetic-demo.near,bridge_user,0.92,2026-07-11,2026-10-06,92,dex,frequent in/out transfers via bridges,yes
+w0733-ad2eb1.synthetic-demo.near,airdrop_farmer,0.58,2026-03-18,2026-10-06,23,lending,many small claims from linked wallets,yes
+w0734-b3fd4f.synthetic-demo.near,bridge_user,0.61,2025-06-15,2026-10-06,349,lending,frequent in/out transfers via bridges,yes
+w0735-4f5e67.synthetic-demo.near,dao_treasury,0.97,2025-11-17,2026-10-06,783,liquid_staking,periodic grants to many recipients,yes
+w0736-8ffb5c.synthetic-demo.near,cex_hot_wallet,0.74,2024-02-07,2026-10-06,1075,bridge,fixed-size withdrawals at regular intervals,yes
+w0737-568181.synthetic-demo.near,dao_treasury,0.78,2025-09-04,2026-10-07,2213,liquid_staking,periodic grants to many recipients,yes
+w0738-5668dc.synthetic-demo.near,validator_operator,0.66,2024-06-01,2026-10-07,50,other,stake and unstake on a fixed cycle,yes
+w0739-2ca7dd.synthetic-demo.near,airdrop_farmer,0.59,2025-04-13,2026-10-07,90,intents,many small claims from linked wallets,yes
+w0740-876c58.synthetic-demo.near,cex_hot_wallet,0.78,2025-04-15,2026-10-07,3870,liquid_staking,fixed-size withdrawals at regular intervals,yes
+w0741-67989a.synthetic-demo.near,lp_whale,0.83,2025-03-08,2026-10-07,4683,nft_market,large single-sided liquidity deposits,yes
+w0742-13ba83.synthetic-demo.near,bridge_user,0.95,2024-08-30,2026-10-07,3705,lending,round-number cross-chain deposits,yes
+w0743-d72202.synthetic-demo.near,bridge_user,0.71,2026-01-21,2026-10-07,2980,liquid_staking,round-number cross-chain deposits,yes
+w0744-3b74cb.synthetic-demo.near,lp_whale,0.67,2026-07-24,2026-10-07,4954,intents,repeated LP adds over 30d,yes
+w0745-681773.synthetic-demo.near,dao_treasury,0.90,2026-03-25,2026-10-07,134,nft_market,multisig-style outgoing payments,yes
+w0746-7efdf4.synthetic-demo.near,cex_hot_wallet,0.88,2025-01-16,2026-10-07,1656,bridge,deposit sweeps to one hot wallet,yes
+w0747-c390d3.synthetic-demo.near,airdrop_farmer,0.86,2025-04-05,2026-10-07,4038,bridge,many small claims from linked wallets,yes
+w0748-869ca8.synthetic-demo.near,validator_operator,0.82,2024-04-30,2026-10-08,2895,dex,stake and unstake on a fixed cycle,yes
+w0749-bd5202.synthetic-demo.near,arbitrage_bot,0.74,2026-03-29,2026-10-08,10,liquid_staking,same-block round trips across two pools,yes
+w0750-28d302.synthetic-demo.near,airdrop_farmer,0.75,2025-09-06,2026-10-08,873,nft_market,minimal activity before each snapshot,yes
+w0751-35ccf2.synthetic-demo.near,validator_operator,0.60,2024-08-18,2026-10-08,2349,liquid_staking,stake and unstake on a fixed cycle,yes
+w0752-9cf830.synthetic-demo.near,lp_whale,0.55,2026-03-28,2026-10-08,3233,other,repeated LP adds over 30d,yes
+w0753-a7e669.synthetic-demo.near,arbitrage_bot,0.74,2025-11-03,2026-10-08,655,bridge,same-block round trips across two pools,yes
+w0754-61a524.synthetic-demo.near,arbitrage_bot,0.82,2024-08-27,2026-10-08,229,other,same-block round trips across two pools,yes
+w0755-c7488f.synthetic-demo.near,lp_whale,0.79,2026-03-17,2026-10-08,151,intents,large single-sided liquidity deposits,yes
+w0756-0520a4.synthetic-demo.near,arbitrage_bot,0.50,2024-02-18,2026-10-08,585,dex,sub-second arbitrage pattern,yes
+w0757-1b0eec.synthetic-demo.near,cex_hot_wallet,0.85,2024-05-24,2026-10-08,2427,nft_market,deposit sweeps to one hot wallet,yes
+w0758-79477a.synthetic-demo.near,arbitrage_bot,0.67,2026-07-17,2026-10-08,22,dex,sub-second arbitrage pattern,yes
+w0759-a454a2.synthetic-demo.near,bridge_user,0.76,2024-05-20,2026-10-09,2593,intents,frequent in/out transfers via bridges,yes
+w0760-30d1ca.synthetic-demo.near,arbitrage_bot,0.98,2024-10-04,2026-10-09,714,other,sub-second arbitrage pattern,yes
+w0761-f6f496.synthetic-demo.near,arbitrage_bot,0.58,2026-04-16,2026-10-09,4012,other,sub-second arbitrage pattern,yes
+w0762-cf96c2.synthetic-demo.near,nft_trader,0.83,2024-09-29,2026-10-09,2466,intents,bursts of mints followed by sales,yes
+w0763-e25f5a.synthetic-demo.near,arbitrage_bot,0.59,2025-11-19,2026-10-09,2169,lending,same-block round trips across two pools,yes
+w0764-3759f9.synthetic-demo.near,cex_hot_wallet,0.61,2024-12-10,2026-10-09,588,dex,fixed-size withdrawals at regular intervals,yes
+w0765-2a0065.synthetic-demo.near,airdrop_farmer,0.67,2024-12-16,2026-10-09,3913,bridge,minimal activity before each snapshot,yes
+w0766-3d48e3.synthetic-demo.near,validator_operator,0.62,2026-02-12,2026-10-09,3732,bridge,reward claims every epoch,yes
+w0767-a5d435.synthetic-demo.near,lp_whale,0.69,2024-07-23,2026-10-09,3413,lending,repeated LP adds over 30d,yes
+w0768-30136a.synthetic-demo.near,bridge_user,0.65,2025-09-19,2026-10-09,3251,other,frequent in/out transfers via bridges,yes
+w0769-35c2f2.synthetic-demo.near,airdrop_farmer,0.70,2025-02-13,2026-10-09,412,bridge,minimal activity before each snapshot,yes
+w0770-323762.synthetic-demo.near,lp_whale,0.63,2024-11-27,2026-10-10,1339,bridge,repeated LP adds over 30d,yes
+w0771-acec67.synthetic-demo.near,arbitrage_bot,0.92,2025-07-02,2026-10-10,20,other,same-block round trips across two pools,yes
+w0772-ebe9bc.synthetic-demo.near,bridge_user,0.60,2026-05-26,2026-10-10,2772,nft_market,round-number cross-chain deposits,yes
+w0773-3501eb.synthetic-demo.near,airdrop_farmer,0.61,2025-12-05,2026-10-10,4770,dex,minimal activity before each snapshot,yes
+w0774-64cebb.synthetic-demo.near,airdrop_farmer,0.85,2026-07-09,2026-10-10,34,other,minimal activity before each snapshot,yes
+w0775-0f6ff9.synthetic-demo.near,dao_treasury,0.82,2025-06-28,2026-10-10,2876,lending,multisig-style outgoing payments,yes
+w0776-a6b78a.synthetic-demo.near,cex_hot_wallet,0.79,2025-07-25,2026-10-10,3225,nft_market,fixed-size withdrawals at regular intervals,yes
+w0777-fa752d.synthetic-demo.near,lp_whale,0.55,2025-11-28,2026-10-10,318,bridge,repeated LP adds over 30d,yes
+w0778-60bb9f.synthetic-demo.near,bridge_user,0.75,2026-06-02,2026-10-10,3652,lending,round-number cross-chain deposits,yes
+w0779-cf9f7b.synthetic-demo.near,bridge_user,0.69,2024-08-01,2026-10-10,11,liquid_staking,round-number cross-chain deposits,yes
+w0780-ffc6a7.synthetic-demo.near,arbitrage_bot,0.88,2024-02-19,2026-10-10,1021,intents,sub-second arbitrage pattern,yes
+w0781-681ba9.synthetic-demo.near,cex_hot_wallet,0.53,2025-06-02,2026-10-11,1509,intents,fixed-size withdrawals at regular intervals,yes
+w0782-cfd1f2.synthetic-demo.near,bridge_user,0.84,2025-12-06,2026-10-11,4222,nft_market,frequent in/out transfers via bridges,yes
+w0783-f9564c.synthetic-demo.near,nft_trader,0.57,2025-12-29,2026-10-11,2634,liquid_staking,floor-price sweeps on collections,yes
+w0784-79d1ca.synthetic-demo.near,bridge_user,0.81,2025-01-01,2026-10-11,1561,liquid_staking,round-number cross-chain deposits,yes
+w0785-59c3c0.synthetic-demo.near,airdrop_farmer,0.71,2025-04-14,2026-10-11,1138,other,many small claims from linked wallets,yes
+w0786-de232a.synthetic-demo.near,airdrop_farmer,0.65,2024-06-16,2026-10-11,1834,dex,minimal activity before each snapshot,yes
+w0787-716d4b.synthetic-demo.near,arbitrage_bot,0.65,2025-07-23,2026-10-11,2277,lending,sub-second arbitrage pattern,yes
+w0788-d14f92.synthetic-demo.near,dao_treasury,0.50,2025-12-29,2026-10-11,10,other,periodic grants to many recipients,yes
+w0789-637d38.synthetic-demo.near,dao_treasury,0.86,2024-09-19,2026-10-11,1182,other,multisig-style outgoing payments,yes
+w0790-1fe0cb.synthetic-demo.near,cex_hot_wallet,0.58,2025-05-14,2026-10-11,1748,other,fixed-size withdrawals at regular intervals,yes
+w0791-2c35a7.synthetic-demo.near,lp_whale,0.77,2026-06-29,2026-10-11,114,lending,large single-sided liquidity deposits,yes
+w0792-0fc830.synthetic-demo.near,dao_treasury,0.84,2025-08-26,2026-10-12,3972,nft_market,periodic grants to many recipients,yes
+w0793-3b21f3.synthetic-demo.near,validator_operator,0.70,2025-07-13,2026-10-12,237,intents,stake and unstake on a fixed cycle,yes
+w0794-0507e9.synthetic-demo.near,lp_whale,0.89,2024-10-19,2026-10-12,31,intents,large single-sided liquidity deposits,yes
+w0795-3fb8aa.synthetic-demo.near,validator_operator,0.80,2024-07-17,2026-10-12,3969,dex,reward claims every epoch,yes
+w0796-1ca7e0.synthetic-demo.near,dao_treasury,0.86,2025-05-21,2026-10-12,437,other,periodic grants to many recipients,yes
+w0797-44df18.synthetic-demo.near,airdrop_farmer,0.54,2025-06-30,2026-10-12,22,lending,many small claims from linked wallets,yes
+w0798-37d4f2.synthetic-demo.near,airdrop_farmer,0.60,2024-08-16,2026-10-12,123,dex,minimal activity before each snapshot,yes
+w0799-81c28d.synthetic-demo.near,dao_treasury,0.88,2024-04-28,2026-10-12,4201,dex,periodic grants to many recipients,yes
+w0800-f90bce.synthetic-demo.near,arbitrage_bot,0.84,2025-11-10,2026-10-12,976,liquid_staking,same-block round trips across two pools,yes
+w0801-c43712.synthetic-demo.near,bridge_user,0.99,2025-12-17,2026-10-12,941,nft_market,round-number cross-chain deposits,yes
+w0802-5d79fd.synthetic-demo.near,dao_treasury,0.54,2024-07-14,2026-10-12,25,liquid_staking,periodic grants to many recipients,yes
+w0803-aebaa3.synthetic-demo.near,dao_treasury,0.78,2024-12-07,2026-10-13,57,lending,periodic grants to many recipients,yes
+w0804-ddfd23.synthetic-demo.near,cex_hot_wallet,0.53,2025-11-19,2026-10-13,18,intents,fixed-size withdrawals at regular intervals,yes
+w0805-36479a.synthetic-demo.near,bridge_user,0.64,2026-06-21,2026-10-13,461,nft_market,frequent in/out transfers via bridges,yes
+w0806-10f7b3.synthetic-demo.near,arbitrage_bot,0.95,2025-02-07,2026-10-13,3388,liquid_staking,sub-second arbitrage pattern,yes
+w0807-48e8a5.synthetic-demo.near,nft_trader,0.66,2025-09-14,2026-10-13,1119,dex,floor-price sweeps on collections,yes
+w0808-bc287a.synthetic-demo.near,bridge_user,0.72,2026-05-16,2026-10-13,2901,nft_market,frequent in/out transfers via bridges,yes
+w0809-26bc70.synthetic-demo.near,cex_hot_wallet,0.91,2025-04-18,2026-10-13,15,bridge,deposit sweeps to one hot wallet,yes
+w0810-df4c5d.synthetic-demo.near,arbitrage_bot,0.57,2024-12-26,2026-10-13,2687,other,sub-second arbitrage pattern,yes
+w0811-2ed690.synthetic-demo.near,dao_treasury,0.73,2024-06-15,2026-10-13,2355,bridge,periodic grants to many recipients,yes
+w0812-525055.synthetic-demo.near,validator_operator,0.65,2026-07-15,2026-10-13,717,liquid_staking,stake and unstake on a fixed cycle,yes
+w0813-33eebb.synthetic-demo.near,dao_treasury,0.70,2025-09-07,2026-10-13,1123,lending,multisig-style outgoing payments,yes
+w0814-fee0d7.synthetic-demo.near,arbitrage_bot,0.82,2024-02-26,2026-10-14,3642,other,sub-second arbitrage pattern,yes
+w0815-efdb07.synthetic-demo.near,bridge_user,0.90,2024-09-02,2026-10-14,214,dex,frequent in/out transfers via bridges,yes
+w0816-5e05c1.synthetic-demo.near,nft_trader,0.87,2024-08-01,2026-10-14,858,intents,bursts of mints followed by sales,yes
+w0817-e26f41.synthetic-demo.near,nft_trader,0.77,2026-02-09,2026-10-14,1811,lending,bursts of mints followed by sales,yes
+w0818-352f36.synthetic-demo.near,validator_operator,0.59,2025-04-07,2026-10-14,1445,nft_market,reward claims every epoch,yes
+w0819-c2cfdb.synthetic-demo.near,airdrop_farmer,0.70,2025-04-24,2026-10-14,298,dex,minimal activity before each snapshot,yes
+w0820-f2efa3.synthetic-demo.near,cex_hot_wallet,0.96,2025-08-16,2026-10-14,3962,intents,deposit sweeps to one hot wallet,yes
+w0821-00dc4c.synthetic-demo.near,bridge_user,0.90,2026-06-16,2026-10-14,3569,bridge,round-number cross-chain deposits,yes
+w0822-3b9de9.synthetic-demo.near,airdrop_farmer,0.59,2026-01-14,2026-10-14,2585,bridge,many small claims from linked wallets,yes
+w0823-a681f9.synthetic-demo.near,lp_whale,0.67,2024-02-24,2026-10-14,3263,liquid_staking,repeated LP adds over 30d,yes
+w0824-57ccea.synthetic-demo.near,dao_treasury,0.86,2025-05-02,2026-10-14,2207,liquid_staking,periodic grants to many recipients,yes
+w0825-9fd740.synthetic-demo.near,cex_hot_wallet,0.73,2024-09-02,2026-10-15,2974,other,deposit sweeps to one hot wallet,yes
+w0826-1a7c6d.synthetic-demo.near,cex_hot_wallet,0.91,2024-05-10,2026-10-15,284,nft_market,fixed-size withdrawals at regular intervals,yes
+w0827-f21f5b.synthetic-demo.near,nft_trader,0.67,2024-11-08,2026-10-15,3902,dex,floor-price sweeps on collections,yes
+w0828-e899fb.synthetic-demo.near,airdrop_farmer,0.74,2025-04-28,2026-10-15,48,intents,minimal activity before each snapshot,yes
+w0829-496abb.synthetic-demo.near,validator_operator,0.86,2026-06-22,2026-10-15,3822,liquid_staking,reward claims every epoch,yes
+w0830-b241e0.synthetic-demo.near,airdrop_farmer,0.95,2026-02-10,2026-10-15,975,intents,many small claims from linked wallets,yes
+w0831-3d2a9a.synthetic-demo.near,nft_trader,0.95,2025-06-23,2026-10-15,3117,other,bursts of mints followed by sales,yes
+w0832-f9d521.synthetic-demo.near,lp_whale,0.70,2025-01-07,2026-10-15,1504,liquid_staking,repeated LP adds over 30d,yes
+w0833-73db15.synthetic-demo.near,nft_trader,0.75,2024-07-06,2026-10-15,1667,liquid_staking,floor-price sweeps on collections,yes
+w0834-31fa72.synthetic-demo.near,arbitrage_bot,0.77,2026-03-18,2026-10-15,2006,other,same-block round trips across two pools,yes
+w0835-57c310.synthetic-demo.near,cex_hot_wallet,0.50,2025-12-25,2026-10-15,1889,nft_market,deposit sweeps to one hot wallet,yes
+w0836-494e15.synthetic-demo.near,validator_operator,0.80,2026-06-02,2026-10-16,124,bridge,reward claims every epoch,yes
+w0837-1bab0c.synthetic-demo.near,lp_whale,0.63,2026-06-14,2026-10-16,645,other,large single-sided liquidity deposits,yes
+w0838-ad273a.synthetic-demo.near,airdrop_farmer,0.63,2025-07-22,2026-10-16,1354,liquid_staking,many small claims from linked wallets,yes
+w0839-c996e3.synthetic-demo.near,cex_hot_wallet,0.95,2025-04-21,2026-10-16,534,dex,fixed-size withdrawals at regular intervals,yes
+w0840-f83497.synthetic-demo.near,airdrop_farmer,0.90,2026-07-22,2026-10-16,122,dex,many small claims from linked wallets,yes
+w0841-3e95cf.synthetic-demo.near,nft_trader,0.53,2025-08-10,2026-10-16,867,liquid_staking,floor-price sweeps on collections,yes
+w0842-9afb16.synthetic-demo.near,validator_operator,0.54,2025-06-06,2026-10-16,61,lending,stake and unstake on a fixed cycle,yes
+w0843-a0f700.synthetic-demo.near,validator_operator,0.84,2025-01-22,2026-10-16,3907,liquid_staking,stake and unstake on a fixed cycle,yes
+w0844-98a8a9.synthetic-demo.near,airdrop_farmer,0.68,2025-07-30,2026-10-16,2343,dex,many small claims from linked wallets,yes
+w0845-36a897.synthetic-demo.near,lp_whale,0.86,2024-02-20,2026-10-16,995,dex,large single-sided liquidity deposits,yes
+w0846-bd0274.synthetic-demo.near,cex_hot_wallet,0.75,2026-04-07,2026-10-16,1386,other,fixed-size withdrawals at regular intervals,yes
+w0847-26a77c.synthetic-demo.near,airdrop_farmer,0.55,2024-03-22,2026-10-17,86,dex,minimal activity before each snapshot,yes
+w0848-9aed92.synthetic-demo.near,arbitrage_bot,0.88,2024-12-08,2026-10-17,2748,other,sub-second arbitrage pattern,yes
+w0849-5fcadd.synthetic-demo.near,validator_operator,0.55,2025-05-06,2026-10-17,622,bridge,stake and unstake on a fixed cycle,yes
+w0850-b7376d.synthetic-demo.near,nft_trader,0.79,2025-07-07,2026-10-17,3,nft_market,bursts of mints followed by sales,yes
+w0851-b24b18.synthetic-demo.near,arbitrage_bot,0.92,2024-12-19,2026-10-17,2870,other,sub-second arbitrage pattern,yes
+w0852-b6384f.synthetic-demo.near,lp_whale,0.72,2025-03-16,2026-10-17,1605,bridge,repeated LP adds over 30d,yes
+w0853-df2345.synthetic-demo.near,cex_hot_wallet,0.53,2024-05-21,2026-10-17,677,bridge,fixed-size withdrawals at regular intervals,yes
+w0854-896348.synthetic-demo.near,airdrop_farmer,0.71,2024-07-11,2026-10-17,436,nft_market,many small claims from linked wallets,yes
+w0855-fef81d.synthetic-demo.near,cex_hot_wallet,0.79,2024-09-26,2026-10-17,1722,bridge,fixed-size withdrawals at regular intervals,yes
+w0856-81f49e.synthetic-demo.near,nft_trader,0.64,2026-03-16,2026-10-17,421,intents,floor-price sweeps on collections,yes
+w0857-d307f2.synthetic-demo.near,arbitrage_bot,0.88,2026-07-13,2026-10-17,4329,liquid_staking,same-block round trips across two pools,yes
+w0858-fc86f7.synthetic-demo.near,validator_operator,0.78,2024-07-19,2026-10-18,79,intents,reward claims every epoch,yes
+w0859-423425.synthetic-demo.near,nft_trader,0.77,2025-08-21,2026-10-18,111,dex,bursts of mints followed by sales,yes
+w0860-9dd0b1.synthetic-demo.near,lp_whale,0.76,2024-08-10,2026-10-18,2025,dex,repeated LP adds over 30d,yes
+w0861-3c3fdb.synthetic-demo.near,airdrop_farmer,0.60,2025-12-01,2026-10-18,786,other,many small claims from linked wallets,yes
+w0862-4fda74.synthetic-demo.near,cex_hot_wallet,0.75,2024-11-23,2026-10-18,2036,dex,deposit sweeps to one hot wallet,yes
+w0863-2f2298.synthetic-demo.near,lp_whale,0.65,2024-04-17,2026-10-18,84,bridge,large single-sided liquidity deposits,yes
+w0864-bf93bb.synthetic-demo.near,lp_whale,0.64,2025-04-10,2026-10-18,2838,nft_market,repeated LP adds over 30d,yes
+w0865-4bdc93.synthetic-demo.near,nft_trader,0.70,2025-10-12,2026-10-18,843,nft_market,floor-price sweeps on collections,yes
+w0866-acf487.synthetic-demo.near,validator_operator,0.71,2024-09-23,2026-10-18,2459,bridge,reward claims every epoch,yes
+w0867-9e8c37.synthetic-demo.near,airdrop_farmer,0.56,2025-08-01,2026-10-18,7,nft_market,minimal activity before each snapshot,yes
+w0868-6d9201.synthetic-demo.near,cex_hot_wallet,0.82,2024-05-19,2026-10-18,3521,intents,fixed-size withdrawals at regular intervals,yes
+w0869-b74e0e.synthetic-demo.near,airdrop_farmer,0.73,2025-10-16,2026-10-19,342,other,minimal activity before each snapshot,yes
+w0870-629183.synthetic-demo.near,arbitrage_bot,0.71,2026-03-22,2026-10-19,781,lending,same-block round trips across two pools,yes
+w0871-d24e68.synthetic-demo.near,cex_hot_wallet,0.62,2026-05-12,2026-10-19,1,other,fixed-size withdrawals at regular intervals,yes
+w0872-ebff47.synthetic-demo.near,validator_operator,0.65,2025-04-02,2026-10-19,4628,nft_market,reward claims every epoch,yes
+w0873-8419c3.synthetic-demo.near,validator_operator,0.95,2026-05-31,2026-10-19,1,nft_market,reward claims every epoch,yes
+w0874-37b217.synthetic-demo.near,dao_treasury,0.95,2026-02-11,2026-10-19,3671,dex,periodic grants to many recipients,yes
+w0875-94d529.synthetic-demo.near,cex_hot_wallet,0.60,2024-03-26,2026-10-19,1858,liquid_staking,fixed-size withdrawals at regular intervals,yes
+w0876-cd668b.synthetic-demo.near,arbitrage_bot,0.61,2024-10-07,2026-10-19,2384,nft_market,same-block round trips across two pools,yes
+w0877-110b98.synthetic-demo.near,validator_operator,0.67,2024-03-19,2026-10-19,4111,dex,stake and unstake on a fixed cycle,yes
+w0878-4662e6.synthetic-demo.near,nft_trader,0.52,2025-03-20,2026-10-19,613,dex,floor-price sweeps on collections,yes
+w0879-4ee398.synthetic-demo.near,lp_whale,0.63,2025-08-02,2026-10-19,40,nft_market,large single-sided liquidity deposits,yes
+w0880-8e2de5.synthetic-demo.near,arbitrage_bot,0.59,2025-11-15,2026-10-20,4226,nft_market,sub-second arbitrage pattern,yes
+w0881-5a0171.synthetic-demo.near,dao_treasury,0.52,2025-03-12,2026-10-20,3267,lending,multisig-style outgoing payments,yes
+w0882-7dbc81.synthetic-demo.near,bridge_user,0.69,2024-05-12,2026-10-20,2100,nft_market,round-number cross-chain deposits,yes
+w0883-4f8510.synthetic-demo.near,bridge_user,0.98,2024-02-09,2026-10-20,1632,intents,round-number cross-chain deposits,yes
+w0884-ed87bc.synthetic-demo.near,nft_trader,0.88,2026-06-05,2026-10-20,2241,dex,floor-price sweeps on collections,yes
+w0885-68cbd2.synthetic-demo.near,arbitrage_bot,0.51,2024-09-30,2026-10-20,469,liquid_staking,sub-second arbitrage pattern,yes
+w0886-438a08.synthetic-demo.near,nft_trader,0.91,2026-05-22,2026-10-20,133,other,bursts of mints followed by sales,yes
+w0887-1ea74a.synthetic-demo.near,cex_hot_wallet,0.66,2025-10-11,2026-10-20,28,liquid_staking,fixed-size withdrawals at regular intervals,yes
+w0888-78b1db.synthetic-demo.near,validator_operator,0.69,2026-04-12,2026-10-20,42,bridge,reward claims every epoch,yes
+w0889-b50b3a.synthetic-demo.near,bridge_user,0.73,2024-02-08,2026-10-20,1281,liquid_staking,round-number cross-chain deposits,yes
+w0890-985982.synthetic-demo.near,nft_trader,0.86,2024-01-18,2026-10-20,3434,other,floor-price sweeps on collections,yes
+w0891-a78eca.synthetic-demo.near,cex_hot_wallet,0.60,2024-08-15,2026-10-21,79,lending,deposit sweeps to one hot wallet,yes
+w0892-ac6cd9.synthetic-demo.near,cex_hot_wallet,0.85,2025-08-19,2026-10-21,2706,liquid_staking,deposit sweeps to one hot wallet,yes
+w0893-8dd992.synthetic-demo.near,lp_whale,0.50,2025-04-09,2026-10-21,3309,other,repeated LP adds over 30d,yes
+w0894-51b470.synthetic-demo.near,nft_trader,0.72,2026-01-26,2026-10-21,248,other,bursts of mints followed by sales,yes
+w0895-610a98.synthetic-demo.near,nft_trader,0.65,2024-05-30,2026-10-21,434,intents,bursts of mints followed by sales,yes
+w0896-2bb5f2.synthetic-demo.near,arbitrage_bot,0.53,2026-02-09,2026-10-21,3003,liquid_staking,sub-second arbitrage pattern,yes
+w0897-a36f1d.synthetic-demo.near,validator_operator,0.61,2025-09-27,2026-10-21,2898,lending,reward claims every epoch,yes
+w0898-87e6bf.synthetic-demo.near,bridge_user,0.69,2025-05-12,2026-10-21,1548,nft_market,round-number cross-chain deposits,yes
+w0899-4d9750.synthetic-demo.near,dao_treasury,0.88,2025-01-05,2026-10-21,649,lending,multisig-style outgoing payments,yes
+w0900-8a92c8.synthetic-demo.near,cex_hot_wallet,0.83,2025-05-25,2026-10-21,1182,dex,deposit sweeps to one hot wallet,yes
+w0901-c65357.synthetic-demo.near,bridge_user,0.74,2024-07-08,2026-10-21,258,liquid_staking,round-number cross-chain deposits,yes
+w0902-ea882b.synthetic-demo.near,lp_whale,0.77,2026-06-26,2026-10-22,1196,nft_market,repeated LP adds over 30d,yes
+w0903-f08f58.synthetic-demo.near,arbitrage_bot,0.71,2025-03-07,2026-10-22,2,other,same-block round trips across two pools,yes
+w0904-096173.synthetic-demo.near,airdrop_farmer,0.73,2024-05-25,2026-10-22,3429,liquid_staking,many small claims from linked wallets,yes
+w0905-8a3285.synthetic-demo.near,bridge_user,0.88,2025-08-23,2026-10-22,3899,bridge,frequent in/out transfers via bridges,yes
+w0906-4f7448.synthetic-demo.near,nft_trader,0.85,2024-07-28,2026-10-22,1836,liquid_staking,floor-price sweeps on collections,yes
+w0907-62af57.synthetic-demo.near,bridge_user,0.94,2026-07-09,2026-10-22,1902,other,round-number cross-chain deposits,yes
+w0908-3972f0.synthetic-demo.near,validator_operator,0.93,2024-10-01,2026-10-22,40,nft_market,reward claims every epoch,yes
+w0909-08cb81.synthetic-demo.near,lp_whale,0.80,2025-07-07,2026-10-22,133,bridge,repeated LP adds over 30d,yes
+w0910-d12a1a.synthetic-demo.near,nft_trader,0.81,2026-05-02,2026-10-22,135,nft_market,floor-price sweeps on collections,yes
+w0911-d12113.synthetic-demo.near,bridge_user,0.64,2026-03-28,2026-10-22,3957,intents,frequent in/out transfers via bridges,yes
+w0912-d1f6f7.synthetic-demo.near,dao_treasury,0.52,2025-06-05,2026-10-22,1629,bridge,periodic grants to many recipients,yes
+w0913-968968.synthetic-demo.near,airdrop_farmer,0.92,2024-01-11,2026-10-23,2801,liquid_staking,minimal activity before each snapshot,yes
+w0914-942df8.synthetic-demo.near,bridge_user,0.77,2026-03-20,2026-10-23,404,dex,round-number cross-chain deposits,yes
+w0915-54203b.synthetic-demo.near,airdrop_farmer,0.64,2026-07-01,2026-10-23,76,lending,minimal activity before each snapshot,yes
+w0916-148fcb.synthetic-demo.near,nft_trader,0.89,2025-01-03,2026-10-23,951,intents,floor-price sweeps on collections,yes
+w0917-3c69a9.synthetic-demo.near,nft_trader,0.83,2024-04-10,2026-10-23,239,intents,floor-price sweeps on collections,yes
+w0918-8e2404.synthetic-demo.near,cex_hot_wallet,0.52,2025-08-18,2026-10-23,794,bridge,fixed-size withdrawals at regular intervals,yes
+w0919-77eddd.synthetic-demo.near,lp_whale,0.76,2025-05-04,2026-10-23,3969,dex,large single-sided liquidity deposits,yes
+w0920-4e5929.synthetic-demo.near,arbitrage_bot,0.51,2025-06-29,2026-10-23,4832,bridge,same-block round trips across two pools,yes
+w0921-2c271f.synthetic-demo.near,nft_trader,0.81,2025-04-19,2026-10-23,2583,liquid_staking,floor-price sweeps on collections,yes
+w0922-101e1f.synthetic-demo.near,nft_trader,0.71,2025-12-13,2026-10-23,1518,lending,bursts of mints followed by sales,yes
+w0923-e9d953.synthetic-demo.near,bridge_user,0.91,2024-10-16,2026-10-23,4223,bridge,round-number cross-chain deposits,yes
+w0924-c39243.synthetic-demo.near,nft_trader,0.78,2026-05-21,2026-10-24,1455,other,bursts of mints followed by sales,yes
+w0925-36ba4b.synthetic-demo.near,dao_treasury,0.62,2025-01-23,2026-10-24,1065,nft_market,periodic grants to many recipients,yes
+w0926-db992a.synthetic-demo.near,dao_treasury,0.75,2026-01-30,2026-10-24,4691,lending,periodic grants to many recipients,yes
+w0927-845be2.synthetic-demo.near,lp_whale,0.81,2024-11-09,2026-10-24,126,bridge,repeated LP adds over 30d,yes
+w0928-383cb1.synthetic-demo.near,airdrop_farmer,0.86,2025-07-29,2026-10-24,4807,other,minimal activity before each snapshot,yes
+w0929-a3a571.synthetic-demo.near,lp_whale,0.82,2026-07-28,2026-10-24,111,lending,large single-sided liquidity deposits,yes
+w0930-d2d3aa.synthetic-demo.near,validator_operator,0.68,2024-09-18,2026-10-24,17,intents,stake and unstake on a fixed cycle,yes
+w0931-0ab914.synthetic-demo.near,arbitrage_bot,0.92,2025-06-20,2026-10-24,41,bridge,sub-second arbitrage pattern,yes
+w0932-34b830.synthetic-demo.near,cex_hot_wallet,0.61,2026-03-17,2026-10-24,3991,other,deposit sweeps to one hot wallet,yes
+w0933-6ce9c1.synthetic-demo.near,airdrop_farmer,0.88,2024-03-08,2026-10-24,2629,lending,minimal activity before each snapshot,yes
+w0934-ed016b.synthetic-demo.near,validator_operator,0.71,2026-04-29,2026-10-24,84,liquid_staking,reward claims every epoch,yes
+w0935-b97fb9.synthetic-demo.near,arbitrage_bot,0.83,2024-05-08,2026-10-25,403,other,same-block round trips across two pools,yes
+w0936-091cb6.synthetic-demo.near,validator_operator,0.76,2026-06-03,2026-10-25,1207,dex,reward claims every epoch,yes
+w0937-3e1cd2.synthetic-demo.near,lp_whale,0.61,2024-10-07,2026-10-25,3462,bridge,large single-sided liquidity deposits,yes
+w0938-a6b267.synthetic-demo.near,arbitrage_bot,0.84,2024-10-01,2026-10-25,4955,lending,same-block round trips across two pools,yes
+w0939-c487fa.synthetic-demo.near,dao_treasury,0.67,2024-02-24,2026-10-25,1747,lending,periodic grants to many recipients,yes
+w0940-0a0ae1.synthetic-demo.near,nft_trader,0.85,2025-02-09,2026-10-25,618,liquid_staking,bursts of mints followed by sales,yes
+w0941-9e6256.synthetic-demo.near,cex_hot_wallet,0.58,2025-12-26,2026-10-25,2380,bridge,deposit sweeps to one hot wallet,yes
+w0942-424e18.synthetic-demo.near,bridge_user,0.93,2024-07-29,2026-10-25,2705,liquid_staking,round-number cross-chain deposits,yes
+w0943-bb496d.synthetic-demo.near,cex_hot_wallet,0.77,2025-12-23,2026-10-25,456,other,deposit sweeps to one hot wallet,yes
+w0944-748010.synthetic-demo.near,arbitrage_bot,0.70,2024-03-31,2026-10-25,2359,dex,sub-second arbitrage pattern,yes
+w0945-381ebb.synthetic-demo.near,cex_hot_wallet,0.57,2025-04-06,2026-10-25,1333,other,fixed-size withdrawals at regular intervals,yes
+w0946-523808.synthetic-demo.near,lp_whale,0.63,2025-04-19,2026-10-26,11,liquid_staking,repeated LP adds over 30d,yes
+w0947-d02361.synthetic-demo.near,bridge_user,0.53,2026-03-25,2026-10-26,734,intents,frequent in/out transfers via bridges,yes
+w0948-92df18.synthetic-demo.near,validator_operator,0.76,2025-05-07,2026-10-26,1108,bridge,reward claims every epoch,yes
+w0949-126df1.synthetic-demo.near,airdrop_farmer,0.60,2025-10-22,2026-10-26,1,dex,many small claims from linked wallets,yes
+w0950-0ef6b5.synthetic-demo.near,bridge_user,0.88,2026-03-28,2026-10-26,5,intents,frequent in/out transfers via bridges,yes
+w0951-e3aaa4.synthetic-demo.near,dao_treasury,0.74,2024-08-11,2026-10-26,480,dex,multisig-style outgoing payments,yes
+w0952-369517.synthetic-demo.near,bridge_user,0.88,2026-01-30,2026-10-26,2237,dex,frequent in/out transfers via bridges,yes
+w0953-191482.synthetic-demo.near,nft_trader,0.76,2026-07-31,2026-10-26,134,lending,floor-price sweeps on collections,yes
+w0954-d63cbf.synthetic-demo.near,bridge_user,0.50,2025-07-19,2026-10-26,3738,dex,round-number cross-chain deposits,yes
+w0955-0afe1c.synthetic-demo.near,dao_treasury,0.91,2026-06-03,2026-10-26,324,dex,periodic grants to many recipients,yes
+w0956-fe8e97.synthetic-demo.near,airdrop_farmer,0.72,2026-01-18,2026-10-26,1509,lending,minimal activity before each snapshot,yes
+w0957-7f2841.synthetic-demo.near,arbitrage_bot,0.96,2026-01-30,2026-10-27,3222,bridge,same-block round trips across two pools,yes
+w0958-d7f255.synthetic-demo.near,cex_hot_wallet,0.54,2025-11-07,2026-10-27,917,intents,fixed-size withdrawals at regular intervals,yes
+w0959-8198cc.synthetic-demo.near,arbitrage_bot,0.92,2026-04-13,2026-10-27,797,nft_market,same-block round trips across two pools,yes
+w0960-984dba.synthetic-demo.near,lp_whale,0.74,2025-03-29,2026-10-27,996,nft_market,repeated LP adds over 30d,yes
+w0961-4f0966.synthetic-demo.near,airdrop_farmer,0.59,2024-05-04,2026-10-27,565,dex,minimal activity before each snapshot,yes
+w0962-a2c6cd.synthetic-demo.near,arbitrage_bot,0.82,2025-09-07,2026-10-27,2832,bridge,same-block round trips across two pools,yes
+w0963-f4f4b9.synthetic-demo.near,arbitrage_bot,0.69,2026-03-09,2026-10-27,3879,liquid_staking,sub-second arbitrage pattern,yes
+w0964-d3bf63.synthetic-demo.near,cex_hot_wallet,0.52,2026-05-29,2026-10-27,4020,other,deposit sweeps to one hot wallet,yes
+w0965-57d0cb.synthetic-demo.near,bridge_user,0.87,2025-02-20,2026-10-27,4,liquid_staking,frequent in/out transfers via bridges,yes
+w0966-3f6d8d.synthetic-demo.near,dao_treasury,0.54,2025-01-30,2026-10-27,425,nft_market,multisig-style outgoing payments,yes
+w0967-7acf86.synthetic-demo.near,arbitrage_bot,0.82,2024-02-28,2026-10-27,4157,intents,sub-second arbitrage pattern,yes
+w0968-90619a.synthetic-demo.near,lp_whale,0.65,2024-12-05,2026-10-28,1817,dex,large single-sided liquidity deposits,yes
+w0969-1638de.synthetic-demo.near,arbitrage_bot,0.69,2026-03-01,2026-10-28,270,other,same-block round trips across two pools,yes
+w0970-124d48.synthetic-demo.near,nft_trader,0.72,2025-08-04,2026-10-28,3494,dex,floor-price sweeps on collections,yes
+w0971-c84a84.synthetic-demo.near,airdrop_farmer,0.56,2025-02-25,2026-10-28,1512,other,minimal activity before each snapshot,yes
+w0972-e70160.synthetic-demo.near,bridge_user,0.92,2025-08-18,2026-10-28,6,liquid_staking,round-number cross-chain deposits,yes
+w0973-99a731.synthetic-demo.near,airdrop_farmer,0.77,2024-08-11,2026-10-28,3149,dex,many small claims from linked wallets,yes
+w0974-660e66.synthetic-demo.near,cex_hot_wallet,0.73,2025-04-19,2026-10-28,597,lending,fixed-size withdrawals at regular intervals,yes
+w0975-43de1c.synthetic-demo.near,bridge_user,0.72,2025-06-29,2026-10-28,700,lending,frequent in/out transfers via bridges,yes
+w0976-0c572d.synthetic-demo.near,cex_hot_wallet,0.89,2025-02-14,2026-10-28,132,nft_market,fixed-size withdrawals at regular intervals,yes
+w0977-3aa467.synthetic-demo.near,nft_trader,0.52,2024-07-17,2026-10-28,3237,nft_market,bursts of mints followed by sales,yes
+w0978-495322.synthetic-demo.near,dao_treasury,0.77,2024-02-18,2026-10-28,583,other,periodic grants to many recipients,yes
+w0979-f0e603.synthetic-demo.near,cex_hot_wallet,0.53,2025-03-30,2026-10-29,280,intents,deposit sweeps to one hot wallet,yes
+w0980-75800f.synthetic-demo.near,bridge_user,0.56,2025-12-24,2026-10-29,788,other,round-number cross-chain deposits,yes
+w0981-61bc99.synthetic-demo.near,dao_treasury,0.78,2024-11-07,2026-10-29,789,liquid_staking,multisig-style outgoing payments,yes
+w0982-eb7ac4.synthetic-demo.near,airdrop_farmer,0.58,2025-10-13,2026-10-29,3279,bridge,minimal activity before each snapshot,yes
+w0983-35c212.synthetic-demo.near,lp_whale,0.95,2024-06-12,2026-10-29,4989,other,large single-sided liquidity deposits,yes
+w0984-fcbac5.synthetic-demo.near,arbitrage_bot,0.97,2024-11-25,2026-10-29,4271,other,sub-second arbitrage pattern,yes
+w0985-0b73c0.synthetic-demo.near,validator_operator,0.59,2024-05-13,2026-10-29,271,intents,reward claims every epoch,yes
+w0986-85226e.synthetic-demo.near,lp_whale,0.92,2026-04-20,2026-10-29,4471,dex,large single-sided liquidity deposits,yes
+w0987-c93dd7.synthetic-demo.near,bridge_user,0.84,2026-06-10,2026-10-29,1261,liquid_staking,frequent in/out transfers via bridges,yes
+w0988-1aaf5e.synthetic-demo.near,cex_hot_wallet,0.95,2024-02-08,2026-10-29,277,bridge,fixed-size withdrawals at regular intervals,yes
+w0989-90c6fe.synthetic-demo.near,cex_hot_wallet,0.51,2025-10-09,2026-10-29,1151,intents,deposit sweeps to one hot wallet,yes
+w0990-3265d0.synthetic-demo.near,nft_trader,0.88,2024-01-25,2026-10-30,92,liquid_staking,bursts of mints followed by sales,yes
+w0991-f75492.synthetic-demo.near,cex_hot_wallet,0.68,2024-05-22,2026-10-30,682,nft_market,deposit sweeps to one hot wallet,yes
+w0992-c2cc00.synthetic-demo.near,cex_hot_wallet,0.57,2024-06-11,2026-10-30,456,dex,fixed-size withdrawals at regular intervals,yes
+w0993-bef4c7.synthetic-demo.near,airdrop_farmer,0.92,2024-07-05,2026-10-30,3404,intents,minimal activity before each snapshot,yes
+w0994-be25bb.synthetic-demo.near,cex_hot_wallet,0.82,2024-11-28,2026-10-30,1033,lending,fixed-size withdrawals at regular intervals,yes
+w0995-52a963.synthetic-demo.near,validator_operator,0.67,2024-01-17,2026-10-30,1452,intents,reward claims every epoch,yes
+w0996-44ee2e.synthetic-demo.near,bridge_user,0.95,2026-04-06,2026-10-30,1868,other,round-number cross-chain deposits,yes
+w0997-d0ce60.synthetic-demo.near,arbitrage_bot,0.51,2026-02-27,2026-10-30,1118,intents,sub-second arbitrage pattern,yes
+w0998-5d0ac1.synthetic-demo.near,airdrop_farmer,0.56,2026-03-19,2026-10-30,783,lending,many small claims from linked wallets,yes
+w0999-8bb675.synthetic-demo.near,airdrop_farmer,0.88,2024-11-11,2026-10-30,3484,other,many small claims from linked wallets,yes
+w1000-2e3d0f.synthetic-demo.near,validator_operator,0.77,2024-06-06,2026-10-31,1481,lending,reward claims every epoch,yes
