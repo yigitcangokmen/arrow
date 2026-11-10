@@ -39,18 +39,18 @@ wasmtime 50.0.1 (c307ec81d 2026-10-29)      # local test runtime only, not part 
 ## Inputs
 
 - `shasum -a 256 Cargo.lock`: `a152e5a294ed2dfdfe9db1ada90f86a8c8becace0e0d23e942beba12bc2a7c19`
-- Last commit that changed a wasm input: `1fbca5f` (perf(core): compute minhash permutations with u64 Mersenne folds)
+- Last commit that changed a wasm input: `3977c6b` (fix(core): scan every cell and pattern without early exit)
 - Embedded at compile time: `fixtures/minhash-params.json` (`include_str!` in `enclave/arrow-core/src/minhash.rs`). `fixtures/llm-request-example.json` is the byte-exact golden for the NEAR AI request the wasm builds; it freezes with the wasm.
 
 ## Expected sha256
 
 | | value |
 |---|---|
-| freeze candidate sha256 | `d5ea438cdd8b21d3fe556bfb43cd68c89a43564990f6ce579568d00a893c72bb` |
-| size | 1679198 bytes |
-| candidate source | main `273a317` |
-| candidate built (UTC) | 2026-11-10T12:57Z |
-| reproduced | two cold target dirs in one worktree, plus a clone at another path: same sha |
-| testnet rc (for comparison) | `73415b8fe952138e9d8345c9b717420ce638cb946f5fb5e3d1a247770d1f58d8` (before `1fbca5f`; `release/arrow-tee-rc.*`) |
+| freeze candidate sha256 | `5daa76fb67734999e56832da97097b4f0b681a8dd2aea644cc1268fb32134848` |
+| size | 1684884 bytes |
+| candidate source | main `600d5fb` (audit fixes merged) |
+| candidate built (UTC) | 2026-11-10T~20:00Z |
+| reproduced | main checkout and the ../arrow-int worktree: same sha |
+| testnet rc (for comparison) | same bytes as the candidate (`release/arrow-tee-rc.*`, rc2 on arrow-v2.arrowhq.testnet); the first rc `73415b8f…` and the earlier candidate `d5ea438c…` are void |
 | freeze commit | (filled at the freeze) |
 | freeze built (UTC) | (filled at the freeze) |
