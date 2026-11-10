@@ -1,0 +1,1 @@
+{"v":1,"required_columns":["block_height","block_ts","gas_used","utilization_pct","tx_count"],"min_rows":150,"text":"Per-block NEAR mainnet statistics for about a day: gas used and limit, utilization, transactions and receipts, to size how busy the network is.","min_fit":4,"min_novelty":3}

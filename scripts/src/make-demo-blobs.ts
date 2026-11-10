@@ -11,6 +11,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ArrowViews, b64, encryptFile, ListMsg, type Network, seal, sealedKPayload } from "@arrow/sdk";
 import { parseCsv } from "../../bench/src/gen/csv.ts";
+import { PUBLIC_DESC, TITLE } from "./collect-chain-stats.ts";
 
 export type DemoDataset = "unlock" | "labels" | "team-made";
 
@@ -33,8 +34,8 @@ export const SPECS: Record<DemoDataset, Spec> = {
   },
   "team-made": {
     file: "fixtures/team-made/near-chain-stats-2026-11.csv",
-    title: "[team-made] NEAR mainnet chain stats, Nov 2026 (computed from public RPC)",
-    public_desc: "Per-block NEAR mainnet statistics (gas used and limit, utilization, transactions and receipts across all shards), sampled every 600 blocks over about 48 hours. Computed by the Arrow team from public RPC. Real data, not synthetic.",
+    title: TITLE,
+    public_desc: PUBLIC_DESC,
     price: "1000000",
     eval_fee: "100000",
   },

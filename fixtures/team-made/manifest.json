@@ -1,0 +1,49 @@
+{
+  "v": 1,
+  "title": "[team-made] NEAR mainnet chain stats, Nov 2026 (computed from public RPC)",
+  "source": "NEAR mainnet public JSON-RPC (block and chunk queries)",
+  "endpoints": [
+    "https://rpc.mainnet.fastnear.com",
+    "https://archival-rpc.mainnet.fastnear.com"
+  ],
+  "methods": [
+    "block",
+    "chunk"
+  ],
+  "head": {
+    "height": 223898579,
+    "hash": "37Jscnh1DT3tT4Rkt1G8tVyekq18yQdWE5y9DvJTLX5R",
+    "timestamp_utc": "2026-11-10T09:41:01Z"
+  },
+  "stride": 600,
+  "rows": 200,
+  "first": {
+    "height": 223779179,
+    "ts_utc": "2026-11-09T14:24:42Z"
+  },
+  "last": {
+    "height": 223898579,
+    "ts_utc": "2026-11-10T09:41:01Z"
+  },
+  "skipped_heights": 0,
+  "requests": {
+    "total": 2739,
+    "block": 252,
+    "chunk": 2487,
+    "retries": 126,
+    "rate_limited": 127,
+    "by_endpoint": {
+      "https://rpc.mainnet.fastnear.com": 1651,
+      "https://archival-rpc.mainnet.fastnear.com": 1088
+    }
+  },
+  "collection": {
+    "started_utc": "2026-11-10T09:41:03Z",
+    "finished_utc": "2026-11-10T10:26:34Z"
+  },
+  "csv": {
+    "path": "fixtures/team-made/near-chain-stats-2026-11.csv",
+    "sha256": "9a282d2ca12cf76e6a3d854d8ff43dee88ee771f77197b97e10c43b6b1ca39e2",
+    "bytes": 18358
+  }
+}
