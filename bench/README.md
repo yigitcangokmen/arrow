@@ -7,9 +7,13 @@ Numbers come from runs, never from prose. Every synthetic dataset is labelled "s
 - `injection-room/`: the G5 room, 24 attacks + 2 controls (see its README).
 - `REVIEW.md`: one line per attack and listing for the human review; regenerate with `npm run bench:gen -- --review`.
 - `src/gen/`, `src/truth.ts`: seeded generators (`npm run bench:gen -- --suite room,leak,quality [--check]`) and the ground-truth predicates.
-- `src/live.ts` (`npm run bench:live`): runs against the testnet enclave with the same wasm hash as mainnet. Naive free-text preview and LLM-only baselines call NEAR AI directly with fictional data, and their signatures are recorded for `replay`.
-- `src/offline.ts` (`npm run bench:offline`): re-scores `results/*.json`. Free and needs no keys.
-- `results/`: raw outputs, committed.
+- `src/live.ts` (`npm run bench:live -- --dry | --preflight | --suite room,quality,leak | --resume`): runs against the testnet enclave with the same wasm hash as mainnet and appends one line per eval to `results/live/<suite>.jsonl`. `--dry` prints the plan (181 evals over 49 listings) and touches nothing.
+- `src/prepare.ts` (`npm run bench:prepare`): encrypts the 49 plaintexts into `blobs/` with `blobs/manifest.json`; the keys stay in `~/.config/arrow/bench-keys.json` (mode 0600), never in the repo.
+- `src/native.ts` (`npm run bench:native`): the deterministic gates (fit_rule, null counts, dates, novelty band) from the arrow-core example `bench_tool`, written to `results/native-gates.json`.
+- `src/baselines.ts` (`npm run bench:baselines`): the naive free-text preview and the LLM-only baseline (116 calls) go straight to NEAR AI with fictional data; raw request and response bytes and the signatures are recorded for `replay`.
+- `src/offline.ts` (`npm run bench:offline [-- --write | --check | --verify-chain] [--results <dir>]`): recomputes every number from `results/` with no keys and no network (only `--verify-chain` reads the chain). A table with no results prints "not run", never zeros.
+- `results/`: raw outputs, committed. `results/schema.json` is generated from `src/schema.ts`.
+- `test/fixtures/`: hand-made inputs for the unit tests. They are not results.
 
 **leak-bench** (55 attacks):
 - 10 verbatim requests

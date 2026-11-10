@@ -1,7 +1,7 @@
 // Markdown for docs/bench.md (full) and docs/bench-table.md (the README table). Pure: Summary in, string out.
 import type { Summary } from "./schema.ts";
 
-const r = (x: { k: number; n: number; rate: string } | null): string => (x === null ? "not run" : `${x.k}/${x.n} (${x.rate})`);
+const r = (x: { k: number; n: number; rate: string } | null): string => (x === null || x.n === 0 ? "not run" : `${x.k}/${x.n} (${x.rate})`);
 
 export function renderMarkdown(s: Summary, mode: "full" | "table"): string {
   const L = s.leak, Q = s.quality, R = s.room;
@@ -13,16 +13,16 @@ export function renderMarkdown(s: Summary, mode: "full" | "table"): string {
     "| Measure | Result |",
     "|---|---|",
     `| Live evals recorded (room / quality / leak / mainnet subset) | ${["room", "quality", "leak", "mainnet-subset"].map((k) => s.inputs.live[k] ?? 0).join(" / ")} |`,
-    `| Output closure: results outside the 50 states, not 1 byte or over 900 bytes | ${s.closure.violations} violations in ${s.closure.n} evals (${s.closure.refunds} refunded) |`,
-    `| Output entropy over ${s.entropy_bits.n} results | ${s.entropy_bits.bits} bits (cap ${s.entropy_bits.max_bits}) |`,
-    `| Verbatim: 20-character matches / canary hits in ${L.verbatim.evals} verbatim and jailbreak evals | ${L.verbatim.substring20_hits} / ${L.verbatim.canary_hits} |`,
+    `| Output closure: results outside the 50 states, not 1 byte or over 900 bytes | ${s.closure.n === 0 ? "not run" : `${s.closure.violations} violations in ${s.closure.n} evals (${s.closure.refunds} refunded)`} |`,
+    `| Output entropy over ${s.entropy_bits.n} results | ${s.entropy_bits.n === 0 ? "not run" : `${s.entropy_bits.bits} bits (cap ${s.entropy_bits.max_bits})`} |`,
+    `| Verbatim: 20-character matches / canary hits in ${L.verbatim.evals} verbatim and jailbreak evals | ${L.verbatim.evals === 0 ? "not run" : `${L.verbatim.substring20_hits} / ${L.verbatim.canary_hits}`} |`,
     `| Targeted bits: accuracy, information | ${L.targeted ? `${L.targeted.accuracy} over ${L.targeted.n}, ${L.targeted.bits} bits (95% CI of accuracy ${L.targeted.ci95[0]}..${L.targeted.ci95[1]})` : "not run"} |`,
-    `| Targeted bits by exfil wording (with / without) | ${L.targeted_by_exfil_word.with_exfil_word?.n ?? 0} evals ${L.targeted_by_exfil_word.with_exfil_word?.bits ?? "n/a"} bits / ${L.targeted_by_exfil_word.without_exfil_word?.n ?? 0} evals ${L.targeted_by_exfil_word.without_exfil_word?.bits ?? "n/a"} bits |`,
+    `| Targeted bits by exfil wording (with / without) | ${["with_exfil_word", "without_exfil_word"].map((k) => { const x = L.targeted_by_exfil_word[k]; return x && x.n > 0 ? `${x.n} evals ${x.bits} bits` : "not run"; }).join(" / ")} |`,
     `| Encoding symbol read back exactly | ${r(L.encoding_symbol_exact)} |`,
     `| Membership probe read back | ${r(L.membership_correct)} |`,
-    `| Timing mutual information with the target bit (time_ms; instructions) | ${["time_ms", "instructions"].map((k) => L.mutual_info[k] ? `${L.mutual_info[k]!.mi_bits_miller_madow} bits, p=${L.mutual_info[k]!.p_value}, n=${L.mutual_info[k]!.n}` : "not run").join("; ")} |`,
+    `| Timing mutual information with the target bit (time_ms; instructions) | ${["time_ms", "instructions"].map((k) => L.mutual_info[k] && L.mutual_info[k]!.n > 0 ? `${L.mutual_info[k]!.mi_bits_miller_madow} bits, p=${L.mutual_info[k]!.p_value}, n=${L.mutual_info[k]!.n}` : "not run").join("; ")} |`,
     `| BUY seen in jailbreak evals | ${r(L.buy_seen_in_jailbreak)} |`,
-    `| Error-path evals refunded or ERROR | ${L.error_path.refunded_or_error}/${L.error_path.n} |`,
+    `| Error-path evals refunded or ERROR | ${L.error_path.n === 0 ? "not run" : `${L.error_path.refunded_or_error}/${L.error_path.n}`} |`,
     `| Quality: correct BUY/PASS | ${r(Q.accuracy)} |`,
     `| Quality: LLM-only baseline correct | ${Q.llm_only ? r(Q.llm_only.accuracy) : "not run"} |`,
     `| Room: stopped by the deterministic layer alone (room has ${R.attacks} attacks) | ${r(R.deterministic_alone_stopped)} |`,
