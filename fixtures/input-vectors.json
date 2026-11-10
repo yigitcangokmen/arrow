@@ -10,9 +10,10 @@
         "action": "eval",
         "listing": {
           "id": 7,
+          "seller": "0x66a0dfed229e920feb17aa3186f87bd00e30844f",
           "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
           "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
-          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
           "mode": "scored",
           "columns": [
             "date",
@@ -37,9 +38,10 @@
         "action": "eval",
         "listing": {
           "id": 7,
+          "seller": "0x66a0dfed229e920feb17aa3186f87bd00e30844f",
           "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
           "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
-          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
           "mode": "verdict",
           "columns": [
             "date",
@@ -64,9 +66,10 @@
         "action": "release",
         "listing": {
           "id": 7,
+          "seller": "0x66a0dfed229e920feb17aa3186f87bd00e30844f",
           "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
           "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
-          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
           "mode": "scored",
           "columns": [
             "date",
@@ -98,9 +101,10 @@
         "action": "eval",
         "listing": {
           "id": 7,
+          "seller": "0x66a0dfed229e920feb17aa3186f87bd00e30844f",
           "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
           "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
-          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
           "mode": "scored",
           "columns": [
             "date",
@@ -126,9 +130,10 @@
         "action": "delete",
         "listing": {
           "id": 7,
+          "seller": "0x66a0dfed229e920feb17aa3186f87bd00e30844f",
           "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
           "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
-          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
           "mode": "scored",
           "columns": [
             "date",
@@ -154,9 +159,10 @@
         "action": "eval",
         "listing": {
           "id": 7,
+          "seller": "0x66a0dfed229e920feb17aa3186f87bd00e30844f",
           "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
           "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
-          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
           "mode": "scored",
           "columns": [
             "date",
@@ -181,9 +187,10 @@
         "action": "eval",
         "listing": {
           "id": 7,
+          "seller": "0x66a0dfed229e920feb17aa3186f87bd00e30844f",
           "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
           "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
-          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
           "mode": "scored",
           "columns": [
             "date",
@@ -209,9 +216,10 @@
         "action": "eval",
         "listing": {
           "id": 7,
+          "seller": "0x66a0dfed229e920feb17aa3186f87bd00e30844f",
           "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
           "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
-          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
           "mode": "scored",
           "columns": [
             "date",
@@ -237,9 +245,10 @@
         "action": "eval",
         "listing": {
           "id": 7,
+          "seller": "0x66a0dfed229e920feb17aa3186f87bd00e30844f",
           "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
           "blob_sha256": "95F1FF5FB1B4376AD09D0B81E36654955E583B852B3069831313C7C51BCDBEC2",
-          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
           "mode": "scored",
           "columns": [
             "date",
@@ -275,9 +284,10 @@
         "action": "release",
         "listing": {
           "id": 7,
+          "seller": "0x66a0dfed229e920feb17aa3186f87bd00e30844f",
           "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
           "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
-          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU0=",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
           "mode": "scored",
           "columns": [
             "date",
@@ -289,6 +299,32 @@
         },
         "release": {
           "id": 3
+        }
+      },
+      "expect": "ok_false"
+    },
+    {
+      "name": "release_listing_missing_seller",
+      "input": {
+        "v": 1,
+        "action": "release",
+        "listing": {
+          "id": 7,
+          "blob_url": "https://blobs.arrow.example/95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2.bin",
+          "blob_sha256": "95f1ff5fb1b4376ad09d0b81e36654955e583b852b3069831313c7c51bcdbec2",
+          "sealed_k": "AzDdzoMmBaQr6fxvKhwnu1dYHGXq/hSpTLCsQkghSCEpOcsZTsZy106S9WP7mkntBuul1iQhYqT1YWmHXaeSkWKQ0oWPOl8HswYaf+8iwflsBlPbhStJ9k5Kecf4O6Yhmj+1NCEKmKV3DsEiXWFhqR4WfCHQiHj55Q8pQ6bYcbbphEgWLG3wnzLUVSS+5nFgj6idy4afGpDEaigRXYn+dU2yHtOwwPGhOs2AKUCHTGUryX3Elf2awvXxqCdG7qTyoA==",
+          "mode": "scored",
+          "columns": [
+            "date",
+            "region",
+            "sku",
+            "units",
+            "price_usd"
+          ]
+        },
+        "release": {
+          "id": 3,
+          "buyer_pk": "040061dd42f8d26cfd6a95e45f25e5f31aa277b30791430ae63ea19c89d368637cd0c836cefaafabdbca2d43ac645de5f2f0f1bef88665e3a535409f9d7d857337"
         }
       },
       "expect": "ok_false"

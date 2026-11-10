@@ -6,7 +6,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
-import { bytesToHex, decryptFile, encryptFile, hexToBytes, publicKeyHex, scalarFromLabel, seal, sealedKPayload, sha256Hex, unseal } from "@arrow/sdk";
+import { bytesToHex, criteriaBind, decryptFile, encryptFile, hexToBytes, publicKeyHex, scalarFromLabel, seal, sealedKPayload, sha256Hex, unseal } from "@arrow/sdk";
 
 const FIXTURES = resolve(dirname(fileURLToPath(import.meta.url)), "../../fixtures");
 const ECIES_FILE = resolve(FIXTURES, "ecies-vectors.json");
@@ -27,12 +27,24 @@ function bytesOf(seed: string, n: number): Uint8Array {
   return out;
 }
 
+/** The sealed_criteria plaintext: criteriaBind(buyer_pk, listing_id) || criteria JSON. */
+function boundCriteria(buyerPk: string, listingId: number, json: Uint8Array): Uint8Array {
+  const out = new Uint8Array(32 + json.length);
+  out.set(criteriaBind(buyerPk, listingId), 0);
+  out.set(json, 32);
+  return out;
+}
+
 /** Criteria-shaped JSON of exactly n bytes. */
 function criteriaOfSize(n: number): Uint8Array {
   const head = '{"v":1,"text":"';
   const tail = '"}';
   return enc.encode(head + "a".repeat(n - head.length - tail.length) + tail);
 }
+
+/** Seller (idx4) and listing id (idx7) of the bound vectors; enclave/arrow-tee keys.rs recomputes both cases. */
+const BIND_SELLER = "seller.arrowhq.testnet";
+const BIND_LISTING_ID = 7;
 
 interface EciesCase { id: string; scalar_hex: string; pub_hex: string; plaintext_hex: string; ciphertext_hex: string }
 
@@ -43,9 +55,11 @@ function eciesPlaintexts(): { id: string; plaintext: Uint8Array }[] {
     { id: "idx1", plaintext: Uint8Array.of(0x31) },
     { id: "idx2", plaintext: Uint8Array.of(0x32) },
     { id: "idx3", plaintext: k },
-    { id: "idx4", plaintext: sealedKPayload(label("arrow:vector:ecies:idx4:k"), sha256Hex(label("arrow:vector:ecies:idx4:blob"))) },
+    { id: "idx4", plaintext: sealedKPayload(label("arrow:vector:ecies:idx4:k"), sha256Hex(label("arrow:vector:ecies:idx4:blob")), BIND_SELLER) },
     { id: "idx5", plaintext: criteriaOfSize(300) },
     { id: "idx6", plaintext: criteriaOfSize(2975) },
+    // bound to the case's own pub_hex, so the Rust side can recompute the bind from the vector alone
+    { id: "idx7", plaintext: boundCriteria(publicKeyHex(scalarFromLabel("arrow:vector:ecies:idx7:v1")), BIND_LISTING_ID, criteriaOfSize(300)) },
   ];
 }
 

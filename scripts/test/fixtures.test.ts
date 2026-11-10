@@ -47,8 +47,8 @@ describe("fixtures v1", () => {
     const valid = Object.fromEntries(m.valid.map((v: { name: string; msg: Record<string, unknown> }) => [v.name, v.msg]));
     for (const v of m.valid) {
       if (v.msg.op === "list") {
-        expect(v.msg.sealed_k).toHaveLength(216);
-        expect(Buffer.from(v.msg.sealed_k, "base64")).toHaveLength(161);
+        expect(v.msg.sealed_k).toHaveLength(260);
+        expect(Buffer.from(v.msg.sealed_k, "base64")).toHaveLength(193);
       } else {
         expect(v.msg.buyer_pk).toMatch(/^04[0-9a-f]{128}$/);
       }
@@ -59,7 +59,7 @@ describe("fixtures v1", () => {
     expect(max.columns).toHaveLength(64);
     for (const c of max.columns) expect(c).toHaveLength(40);
     expect(max.blob_url).toHaveLength(200);
-    expect(valid.eval_criteria_4096.sealed_criteria).toHaveLength(4096);
+    expect(valid.eval_criteria_4140.sealed_criteria).toHaveLength(4140);
     expect(valid.list_min_price_and_fee.price).toBe(m.limits.config_min_price);
     expect(valid.list_min_price_and_fee.eval_fee).toBe(m.limits.config_min_eval_fee);
   });

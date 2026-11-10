@@ -30,8 +30,10 @@ const pk = (name: string) => "04" + hex(name, 64);
 
 // ECIES profile eciesjs-0.4-default: 65 (ephemeral pk) + 16 (nonce) + 16 (tag) = 97 bytes overhead.
 export const SIZES = {
-  sealed_k_bytes: 161, // ECIES(K 32 || blob_sha256 32) = 97 + 64
-  sealed_k_b64: 216,
+  sealed_k_bytes: 193, // ECIES(K 32 || blob_sha256 32 || sha256(seller) 32) = 97 + 96
+  sealed_k_b64: 260,
+  sealed_criteria_max_bytes: 3104, // ECIES(bind 32 || criteria JSON <= 2975) = 97 + 32 + 2975
+  sealed_criteria_b64_max: 4140,
   r_bytes: 98, // ECIES(1-byte state index)
   r_b64: 132,
   k_bytes: 129, // ECIES(K 32)
@@ -43,6 +45,7 @@ const BLOB_URL = `https://blobs.arrow.example/${SHA}.bin`;
 const SEALED_K = b64("listing/sealed_k", SIZES.sealed_k_bytes);
 const BUYER_PK = pk("buyer_pk");
 const COLUMNS = ["date", "region", "sku", "units", "price_usd"];
+const SELLER = "0x66a0dfed229e920feb17aa3186f87bd00e30844f"; // the contract tests' seller()
 
 const listBase = (): Obj => ({
   op: "list",
@@ -94,7 +97,7 @@ function msgVectors(): Obj {
     { name: "list_max_evals_500", msg: withField(listBase(), "max_evals", 500) },
     { name: "list_min_price_and_fee", msg: { ...listBase(), price: "100000", eval_fee: "50000" } },
     { name: "eval_min", msg: evalBase() },
-    { name: "eval_criteria_4096", msg: withField(evalBase(), "sealed_criteria", b64("eval/sealed_criteria_max", 3072)) },
+    { name: "eval_criteria_4140", msg: withField(evalBase(), "sealed_criteria", b64("eval/sealed_criteria_max", SIZES.sealed_criteria_max_bytes)) },
     { name: "buy_min", msg: buyBase() },
   ];
   const inv = (name: string, msg: Obj, reason: string, stage = "parse"): Obj => ({ name, msg, reason, stage });
@@ -127,7 +130,7 @@ function msgVectors(): Obj {
     inv("buyer_pk_0x", withField(evalBase(), "buyer_pk", "0x" + BUYER_PK), "buyer_pk_format"),
     inv("buyer_pk_upper", withField(evalBase(), "buyer_pk", "04" + BUYER_PK.slice(2).toUpperCase()), "buyer_pk_format"),
     inv("buyer_pk_not_04", withField(evalBase(), "buyer_pk", "05" + BUYER_PK.slice(2)), "buyer_pk_format"),
-    inv("sealed_criteria_4097", withField(evalBase(), "sealed_criteria", b64("eval/sealed_criteria_max", 3072) + "A"), "sealed_criteria_too_long"),
+    inv("sealed_criteria_4141", withField(evalBase(), "sealed_criteria", b64("eval/sealed_criteria_max", SIZES.sealed_criteria_max_bytes) + "A"), "sealed_criteria_too_long"),
     inv("listing_id_negative", withField(buyBase(), "listing_id", -1), "listing_id_not_u64"),
     inv("listing_id_string", withField(buyBase(), "listing_id", "7"), "listing_id_not_u64"),
     inv("payout_bad", withField(listBase(), "payout", "Not A Valid!"), "payout_format"),
@@ -145,7 +148,7 @@ function msgVectors(): Obj {
       column_name_max_chars: 40,
       blob_url_max_chars: 200,
       sealed_k_b64_len: SIZES.sealed_k_b64,
-      sealed_criteria_b64_max: 4096,
+      sealed_criteria_b64_max: SIZES.sealed_criteria_b64_max,
       buyer_pk_hex_len: 130,
       max_evals_min: 1,
       max_evals_max: 500,
@@ -166,6 +169,7 @@ function msgVectors(): Obj {
 function inputVectors(): Obj {
   const listing = (mode: string): Obj => ({
     id: 7,
+    seller: SELLER,
     blob_url: BLOB_URL,
     blob_sha256: SHA,
     sealed_k: SEALED_K,
@@ -201,6 +205,7 @@ function inputVectors(): Obj {
       { name: "not_json", input_raw: '{"v":1,"action":', expect: "ok_false" },
       { name: "empty_input", input_raw: "", expect: "ok_false" },
       bad("release_missing_buyer_pk", { ...release(), release: { id: 3 } }),
+      bad("release_listing_missing_seller", { ...release(), listing: without(listing("scored"), "seller") }),
     ],
   };
 }
