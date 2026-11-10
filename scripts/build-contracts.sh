@@ -94,7 +94,9 @@ MD
   fi
   printf '| %s | %s | %s@%s | %s | %s | %s | %s |\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(git rev-parse HEAD)" \
     "$image" "$digest" "$(cargo near --version)" "$container_rustc" "$sha" "$code_hash" >> release/contracts/BUILD.md
-  npx tsx scripts/src/evidence-add.ts --network mainnet --set "contract_wasm_sha256=$sha"
+  # The evidence CLI runs from the main checkout (it has node_modules; worktrees usually do not).
+  main=$(git worktree list --porcelain | awk '/^worktree /{print $2; exit}')
+  (cd "$main" && npx tsx scripts/src/evidence-add.ts --network mainnet --set "contract_wasm_sha256=$sha")
   echo "reproducible: identical sha256 $sha (2 runs)"
   echo "code_hash $code_hash  release/contracts/arrow-mainnet.wasm"
   exit 0
