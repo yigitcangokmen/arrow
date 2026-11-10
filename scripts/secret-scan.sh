@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Usage: bash scripts/secret-scan.sh [--ci] [--no-gitleaks]
-# Exit 0 = clean. Prints the DECISIONS S-04 raw grep count for human review, fails only on real secret shapes.
+# Exit 0 = clean. Prints the raw grep count for human review, fails only on real secret shapes.
 # --ci runs the regexes only (the ts job has no gitleaks); the CI job "secrets" runs this script without --ci, with gitleaks installed.
+# Banned words: one ERE per line (blank lines and # comments ignored, matched case-insensitively) in
+# <git-common-dir>/info/banned-words. That file is local and never committed, so the words are never in the repo.
+# Any match in a tracked or untracked-not-ignored file fails the scan; --public also fails on a match in any commit
+# diff or message of any ref (run it before making the repo public).
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 CI=0; GL=1; for a in "$@"; do [ "$a" = --ci ] && { CI=1; GL=0; }; [ "$a" = --no-gitleaks ] && GL=0; done
@@ -14,6 +18,23 @@ echo "== strict patterns in history"; git log -p --all | grep -n -E "$STRICT" &&
 echo "== strict patterns in untracked, not ignored files"
 hits=$(git ls-files -o --exclude-standard -z | xargs -0 -r grep -n -E "$STRICT")
 [ -n "$hits" ] && { printf '%s\n' "$hits"; fail=1; }
+BW="$(git rev-parse --git-common-dir)/info/banned-words"
+if [ -f "$BW" ]; then
+  PAT=$(grep -v -E '^[[:space:]]*(#|$)' "$BW" | paste -sd'|' -)
+  if [ -n "$PAT" ]; then
+    echo "== banned words in the working tree (file:line only)"
+    # Print only file:line so a CI or terminal log never repeats the word.
+    hits=$(git grep -n -I -i -E -e "$PAT" --untracked --exclude-standard | cut -d: -f1,2)
+    [ -n "$hits" ] && { printf '%s\n' "$hits"; fail=1; }
+    for a in "$@"; do
+      if [ "$a" = --public ]; then
+        echo "== banned words in history, all refs (commit only)"
+        hist=$({ git log --all -i -G "$PAT" --format='diff %h'; git log --all -i -E --grep "$PAT" --format='message %h'; } | sort -u)
+        [ -n "$hist" ] && { printf '%s\n' "$hist"; fail=1; }
+      fi
+    done
+  fi
+fi
 if [ $GL = 1 ]; then echo "== gitleaks"; gitleaks git --no-banner --redact -v . || fail=1; fi
 [ $fail = 0 ] && echo "SECRET_SCAN: PASS" || echo "SECRET_SCAN: FAIL"
 exit $fail
