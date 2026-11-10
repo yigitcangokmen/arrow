@@ -5,7 +5,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { describe, expect, it } from "vitest";
 import {
   b64, bytesToHex, deriveViewingKeyEoa, DEMO_LABEL, demoViewingKey, hexToBytes, reduceToScalar, scalarFromLabel, seal,
-  SECP256K1_N, siteDomain, unseal, viewingKeyFromSignature, viewingKeyMessage,
+  SECP256K1_N, siteDomain, unseal, viewingKeyFromSignature, viewingKeyMessage, assertEoaSignature, NotAnEoa,
 } from "../src/index.ts";
 
 const account = privateKeyToAccount(`0x${scalarFromLabel("arrow:test:viewing:v1")}`);
@@ -62,6 +62,16 @@ describe("viewing key", () => {
     } };
     await expect(deriveViewingKeyEoa(flaky, "arrow-market.vercel.app", { twice: true })).rejects.toThrow(/different signature each time/);
     await expect(deriveViewingKeyEoa(account, "arrow-market.vercel.app", { twice: true })).resolves.toEqual(await deriveViewingKeyEoa(account, "arrow-market.vercel.app"));
+  });
+
+  it("x12-accounts:X12-1: a signature that does not recover to the wallet address (smart-contract wallet) is refused", async () => {
+    const other = privateKeyToAccount(`0x${scalarFromLabel("arrow:test:other:v1")}`);
+    const msg = viewingKeyMessage("arrow-market.vercel.app");
+    await expect(assertEoaSignature(account.address, msg, await account.signMessage({ message: msg }))).resolves.toBeUndefined();
+    await expect(assertEoaSignature(account.address, msg, await other.signMessage({ message: msg }))).rejects.toBeInstanceOf(NotAnEoa); // owner key of a Safe
+    await expect(assertEoaSignature(account.address, msg, `0x${"ab".repeat(200)}`)).rejects.toBeInstanceOf(NotAnEoa); // ERC-1271 blob
+    const smart = { address: account.address, signMessage: (a: { message: string }) => other.signMessage(a) };
+    await expect(deriveViewingKeyEoa(smart, "arrow-market.vercel.app")).rejects.toBeInstanceOf(NotAnEoa);
   });
 
   it("different_domain_different_key", async () => {

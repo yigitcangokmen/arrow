@@ -1,6 +1,7 @@
 // Viewing key (DEC J-05, J-06): the buyer's decrypt key is derived from a wallet signature, so no key is stored.
 // EOA only: the signature must be a plain 65-byte ECDSA one (EIP-1271 smart wallets are not supported).
 import { keccak_256 } from "@noble/hashes/sha3.js";
+import { recoverMessageAddress } from "viem";
 import { bytesToHex, hexToBytes, publicKeyHex, SECP256K1_N } from "./crypto.ts";
 
 export const DEMO_LABEL = "arrow:demo-buyer:public:v1";
@@ -59,17 +60,42 @@ export function viewingKeyFromSignature(sigHex: `0x${string}`): ViewingKey {
   return fromScalar(reduceToScalar(keccak_256(canonicalSignature(hexToBytes(sigHex.slice(2))))));
 }
 
+export class NotAnEoa extends Error {
+  constructor() {
+    super("This wallet is a smart-contract wallet (its signature does not recover to its address). NEAR Intents accepts plain EOA signatures only, so USDC sent to it there could never move: use an EOA wallet.");
+    this.name = "NotAnEoa";
+  }
+}
+
+/**
+ * x12-accounts:X12-1: intents.near has no ERC-1271 path, so a smart-contract wallet's Intents account can receive USDC but never
+ * sign it out. A personal_sign that is 65 bytes and recovers to `address` proves an EOA (an EIP-7702 account also passes, and it
+ * can sign). Callers check this before offering a top-up.
+ */
+export async function assertEoaSignature(address: string, message: string, sigHex: `0x${string}`): Promise<void> {
+  if (hexToBytes(sigHex.slice(2)).length !== 65) throw new NotAnEoa();
+  let recovered: string;
+  try {
+    recovered = await recoverMessageAddress({ message, signature: sigHex });
+  } catch {
+    throw new NotAnEoa();
+  }
+  if (recovered.toLowerCase() !== address.toLowerCase()) throw new NotAnEoa();
+}
+
 /**
  * `twice`: ask for the signature a second time and refuse when the two differ (X12-7: a threshold/MPC signer gives a new
  * valid signature each time, so a key derived from it could never be derived again to open a purchase).
  */
 export async function deriveViewingKeyEoa(
-  account: { signMessage(a: { message: string }): Promise<`0x${string}`> },
+  account: { address?: string; signMessage(a: { message: string }): Promise<`0x${string}`> },
   domain: string,
   o: { twice?: boolean } = {},
 ): Promise<ViewingKey> {
   const message = viewingKeyMessage(domain);
-  const key = viewingKeyFromSignature(await account.signMessage({ message }));
+  const sig = await account.signMessage({ message });
+  if (account.address) await assertEoaSignature(account.address, message, sig);
+  const key = viewingKeyFromSignature(sig);
   if (o.twice && viewingKeyFromSignature(await account.signMessage({ message })).scalarHex !== key.scalarHex) {
     throw new Error("this wallet gives a different signature each time, so its viewing key cannot be derived again later: use a standard EOA wallet");
   }
