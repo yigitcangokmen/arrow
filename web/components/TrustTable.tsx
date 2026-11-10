@@ -7,7 +7,7 @@ export function TrustTable() {
   return (
     <section id="trust" aria-labelledby="trust-title">
       <h2 id="trust-title">Trust table</h2>
-      <p className={styles.lead}>What you trust, what each part can see, and how to check it. Open risks are marked.</p>
+      <p className={styles.lead}>What you trust, what each part can see, and how to check it. Open risks are marked RISKY, claims we do not make NOT PROVEN, and proof still to come TODO.</p>
       <table className={styles.table}>
         <thead>
           <tr>

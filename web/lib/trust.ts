@@ -1,12 +1,13 @@
-// Trust table rows. Source of truth for the UI; WS-7 compares README.md against this array when it updates the README.
-// One row differs from the README on purpose: the 1Click row avoids a phrase that DEC R-03 forbids.
+// Trust table rows for the UI. The README table is the source of truth: part names and flags (RISKY, NOT PROVEN, TODO) must
+// match it, and web/test/trust.test.ts diffs them. One row differs in wording on purpose: the 1Click row avoids a phrase that
+// DEC R-03 forbids.
 export interface TrustRow {
   part: string;
   trust: string;
   sees: string;
   cannot: string;
   check: string;
-  flag?: "RISKY" | "NOT PROVEN";
+  flag?: "RISKY" | "NOT PROVEN" | "TODO";
 }
 
 export const TRUST_ROWS: readonly TrustRow[] = [
@@ -15,7 +16,8 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "Nobody (ciphertext; the host is untrusted)",
     sees: "—",
     cannot: "Decrypt",
-    check: "blob_sha256 is on chain and the enclave checks it",
+    check: "blob_sha256 is on chain and the enclave checks it before reading. Not yet shown on mainnet",
+    flag: "TODO",
   },
   {
     part: "Program key / PROTECTED_MASTER",
@@ -53,6 +55,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "—",
     cannot: "—",
     check: "Endpoint and model ID are fixed in the source",
+    flag: "RISKY",
   },
   {
     part: "OutLayer coordinator (closed source)",
@@ -62,7 +65,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     check: "If it fails, the callback gets null and the buyer is refunded: a purchase in full, an eval less the treasury's share of the fee",
   },
   {
-    part: "outlayer.near and intents.near contracts",
+    part: "outlayer.near, intents.near contracts",
     trust: "Their owners (both are upgradable); Arrow depends on them",
     sees: "—",
     cannot: "—",
@@ -73,43 +76,49 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     part: "Arrow operator",
     trust: "Relayer liveness and the gas tank",
     sees: "Encrypted blobs",
-    cannot: "Read data, take funds, or change the contract or wasm hash after the lock",
-    check: "No access keys after the lock transaction; the contract owns itself",
+    cannot: "The plan after the lock, not yet a fact: read data, take funds, or change the contract or wasm hash",
+    check: "Not locked yet: there is no lock transaction, and the mainnet market contract is not deployed. The contract is meant to own itself with no access keys; npm run verify (row R6) shows it once it is done",
+    flag: "TODO",
   },
   {
-    part: "NEAR AI API key (inside an OutLayer secret)",
+    part: "NEAR AI API key (inside the OutLayer secret)",
     trust: "Billing",
     sees: "Usage volume",
     cannot: "See content",
-    check: "—",
+    check:
+      "The mainnet inference key is the NEAR Builders hackathon key. It cannot be topped up and its expiry is not published; if it runs out, evals refund by design.",
+    flag: "RISKY",
   },
   {
-    part: "1Click / PoA bridge (Intents Technology)",
+    part: "1Click and the PoA bridge (Intents Technology)",
     trust: "Short custody during swaps. Users do not see a bridge step, but Base and Solana USDC arrive as omft.near bridged tokens",
     sees: "Swap transactions",
     cannot: "—",
-    check: "1Click /v0/status",
+    check: "1Click /v0/status. Paid inbound ran once on mainnet (2 USDC from Base); the outbound Solana withdrawal is a dry quote only. Custody is not shown",
+    flag: "NOT PROVEN",
   },
   {
     part: "Output channel",
     trust: "Schema and rule composition",
-    sees: "At most 5.67 bits per eval (scored), 1.58 (verdict)",
+    sees: "At most 5.67 bits per eval (scored), 1.58 (verdict), in successful verdicts and on this channel only; failures (Error channel) and instructions (Side channels) come on top",
     cannot: "Free text",
-    check: "cargo test, leak-bench",
+    check: "cargo test -p arrow-core: output_space_is_at_most_51_states, output_le_900_bytes",
   },
   {
     part: "Error channel",
-    trust: "One fixed error state, empty stderr",
-    sees: "1 state (counted in the bound)",
+    trust: "The enclave writes one fixed error output and nothing on stderr; a trap or out-of-fuel run leaves no output",
+    sees: "Two failure states on chain: ok:false (refund reason not_ok) and null. Scored mode has at least 52 outcomes and verdict mode 4 (2 bits); the 5.67 and 1.58 bits and the on-chain budget do not count null",
     cannot: "Carry data",
-    check: "no_stderr_on_any_error, leak-bench error path",
+    check:
+      "scripts/dev/stderr-harness.sh covers stderr and the fixed ok:false output. Seen locally, not a committed test: a 5 MB dataset with U+FDFA in the key column runs out of fuel when the buyer names it as key_column, so the buyer can steer between null and a verdict",
+    flag: "RISKY",
   },
   {
     part: "Side channels",
     trust: "Not closed",
-    sees: "time_ms and instructions on chain",
+    sees: "time_ms and instructions on chain. Instructions depend on the dataset size and on the buyer's choice of key_column and date_column, so they can reveal a chosen column's non-empty and distinct counts on each eval; they are not counted in the 5.67-bit bound or the budget",
     cannot: "—",
-    check: "Timing is measured in the leak bench; the number is published once measured",
+    check: "TODO: the leak-bench timing measurement has not run, so no timing number is published",
     flag: "RISKY",
   },
   {
@@ -117,7 +126,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "Structural gates and the LLM",
     sees: "—",
     cannot: "The LLM cannot produce BUY unless the structural gates pass",
-    check: "quality-bench. Semantic injection on structurally valid data is an open risk",
+    check: "llm_cannot_buy_without_structural_gates in cargo test -p arrow-core. The quality bench has not run (TODO). Semantic injection on structurally valid data is an open risk",
     flag: "RISKY",
   },
   {
@@ -126,6 +135,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "—",
     cannot: "—",
     check: "Any site that obtains the same signature can derive the key; an EOA is required (EIP-1271 wallets are not deterministic)",
+    flag: "RISKY",
   },
   {
     part: "After purchase",
@@ -133,6 +143,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "All data",
     cannot: "—",
     check: "Out of scope (resale is not prevented)",
+    flag: "NOT PROVEN",
   },
   {
     part: "Time guard",
@@ -140,13 +151,15 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "—",
     cannot: "—",
     check: "The enclave writes an error output when the block timestamp is more than 90 s (eval) or 60 s (release) old; the clock itself is not attested",
+    flag: "RISKY",
   },
   {
     part: "Leak budget",
     trust: "The contract counter",
     sees: "—",
     cannot: "—",
-    check: "evals_used rises inside mt_on_transfer and never falls, not even on a refund: a refunded eval still burns budget",
+    check: "evals_used rises inside mt_on_transfer and never falls, not even on a refund: a refunded eval still burns budget. A buyer can burn a listing's budget with failing evals",
+    flag: "RISKY",
   },
   {
     part: "OutLayer on mainnet",
@@ -157,18 +170,21 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     flag: "RISKY",
   },
   {
-    part: "Refunds",
+    part: "Refund destination",
     trust: "intents.near's own mt_resolve_transfer",
     sees: "—",
     cannot: "—",
-    check: "Refunded to your NEAR Intents balance. Moving it back to a Base wallet is a separate 1Click withdrawal",
+    check:
+      "Refunded to your NEAR Intents balance. Moving it back to a Base wallet is a separate 1Click withdrawal. Refunds by mt_resolve_transfer are shown on mainnet with a spike contract; a refund from the Arrow contract on mainnet is still to do",
+    flag: "TODO",
   },
   {
-    part: "x402-shaped 402 response",
+    part: "HTTP 402 wrapper",
     trust: "Nothing: it carries no payment",
     sees: "—",
     cannot: "Move funds",
-    check: "accepts is empty on purpose; payment goes through NEAR Intents",
+    check: "accepts is empty on purpose; payment goes through NEAR Intents. A live curl against the hosted site is still to do",
+    flag: "TODO",
   },
   {
     part: "40-row sample to NEAR AI",
@@ -176,13 +192,6 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "The sampled rows leave the enclave to the model TEE",
     cannot: "—",
     check: "Stated here and in the README; see the LLM row",
-  },
-  {
-    part: "Mainnet inference key",
-    trust: "NEAR AI billing account",
-    sees: "Usage volume",
-    cannot: "—",
-    check: "The key can be topped up but not rotated",
   },
   {
     part: "Program bytes",

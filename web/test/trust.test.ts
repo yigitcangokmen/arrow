@@ -1,0 +1,78 @@
+// F3: the home-page trust table must carry the README's RISKY, NOT PROVEN and TODO labels and must not state plans as facts.
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+import { TRUST_ROWS } from "../lib/trust.ts";
+
+const README = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "../../README.md"), "utf8");
+
+/** README trust table rows: part (backticks removed) and the weakest label in the last column. */
+function readmeRows(): { part: string; label: string; flag: "RISKY" | "NOT PROVEN" | "TODO" | undefined }[] {
+  const section = README.slice(README.indexOf("## Trust table"), README.indexOf("## Try it"));
+  return section
+    .split("\n")
+    .filter((l) => l.startsWith("| ") && !l.startsWith("| Part ") && !l.startsWith("|---"))
+    .map((l) => {
+      const cells = l.split(" | ").map((c) => c.replace(/^\| /, "").replace(/ \|$/, ""));
+      const label = cells[cells.length - 1]!;
+      const flag = /RISKY/.test(label) ? "RISKY" : /NOT PROVEN/.test(label) ? "NOT PROVEN" : /TODO/.test(label) ? "TODO" : undefined;
+      return { part: cells[0]!.replace(/`/g, ""), label, flag };
+    });
+}
+
+describe("trust table", () => {
+  const rows = readmeRows();
+
+  it("reads_the_readme_table", () => {
+    expect(rows.length).toBeGreaterThanOrEqual(20);
+    expect(rows.some((r) => r.flag === "TODO")).toBe(true);
+  });
+
+  it("every_readme_row_is_in_the_ui_with_the_same_flag", () => {
+    for (const r of rows) {
+      const ui = TRUST_ROWS.find((u) => u.part === r.part);
+      expect(ui, `README row "${r.part}" is missing from TRUST_ROWS`).toBeDefined();
+      expect(ui!.flag, `${r.part}: README label "${r.label}"`).toBe(r.flag);
+    }
+  });
+
+  it("part_names_are_unique", () => {
+    expect(new Set(TRUST_ROWS.map((r) => r.part)).size).toBe(TRUST_ROWS.length);
+  });
+
+  it("no_row_cites_a_bench_that_has_not_run", () => {
+    for (const r of TRUST_ROWS) {
+      const text = `${r.trust} ${r.sees} ${r.cannot} ${r.check}`;
+      if (/leak-bench|quality-bench|quality bench|leak bench/i.test(text)) expect(r.check, r.part).toMatch(/TODO|not run|has not run/);
+    }
+  });
+
+  it("the_operator_row_does_not_state_the_lock_as_a_fact", () => {
+    const op = TRUST_ROWS.find((r) => r.part === "Arrow operator")!;
+    expect(op.flag).toBe("TODO");
+    expect(op.check).toMatch(/not locked yet|not deployed/i);
+    expect(`${op.cannot} ${op.check}`).not.toMatch(/no access keys after the lock/i);
+  });
+
+  it("the_inference_key_row_says_it_cannot_be_topped_up", () => {
+    const k = TRUST_ROWS.find((r) => r.part.startsWith("NEAR AI API key"))!;
+    expect(k.flag).toBe("RISKY");
+    expect(k.check).toContain("NEAR Builders");
+    expect(k.check).toContain("cannot be topped up");
+    expect(k.check).toContain("expiry is not published");
+    expect(JSON.stringify(TRUST_ROWS)).not.toMatch(/can be topped up/);
+  });
+
+  it("the_bound_is_qualified_to_the_output_channel", () => {
+    const out = TRUST_ROWS.find((r) => r.part === "Output channel")!;
+    expect(out.sees).toContain("on this channel only");
+    const err = TRUST_ROWS.find((r) => r.part === "Error channel")!;
+    expect(err.sees).toMatch(/ok:false/);
+    expect(err.sees).toMatch(/null/);
+    expect(err.flag).toBe("RISKY");
+    const side = TRUST_ROWS.find((r) => r.part === "Side channels")!;
+    expect(side.sees).toMatch(/key_column/);
+    expect(side.sees).toMatch(/not counted/);
+  });
+});
