@@ -18,6 +18,7 @@
   "scripts": {
     "arrow": "tsx agent/src/cli.ts",
     "verify": "tsx scripts/src/verify.ts",
+    "check:judges": "tsx scripts/src/check-judges.ts",
     "try:testnet": "tsx scripts/src/try-testnet.ts",
     "replay": "tsx scripts/src/replay.ts",
     "md2jsonl": "tsx scripts/src/md-to-jsonl.ts",
