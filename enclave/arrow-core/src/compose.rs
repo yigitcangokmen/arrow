@@ -1,5 +1,7 @@
 //! Final score from the deterministic gates and the LLM vote (DEC I-08, I-15, I-16, I-18).
-//! The LLM can lower fit and can vote BUY, but BUY needs every structural gate.
+//! The LLM can lower fit and can vote BUY, but BUY needs every structural gate: fit_rule 5 (every
+//! hard criterion met; the LLM never sees min_rows, columns, dates or null rates, SCAM-1), fit ≥
+//! min_fit, novelty ≥ min_novelty, and no injection or exfil flag.
 
 use crate::llm::LlmOut;
 use crate::schema::{Score, Verdict, GUARD_SCORE};
@@ -21,7 +23,7 @@ pub fn compose(g: &Gates, llm: &LlmOut) -> Score {
     }
     let fit = llm.fit_llm.min(g.fit_rule).clamp(1, 5);
     let novelty = g.novelty.unwrap_or(3).clamp(1, 5);
-    let buy = llm.verdict == Verdict::Buy && fit >= g.min_fit && g.novelty.is_none_or(|n| n >= g.min_novelty);
+    let buy = llm.verdict == Verdict::Buy && g.fit_rule == 5 && fit >= g.min_fit && g.novelty.is_none_or(|n| n >= g.min_novelty);
     Score { verdict: if buy { Verdict::Buy } else { Verdict::Pass }, fit, novelty }
 }
 
@@ -47,6 +49,16 @@ mod tests {
         for (name, g, l) in broken {
             assert_eq!(compose(&g, &l).verdict, Verdict::Pass, "{name}");
         }
+    }
+
+    /// SCAM-1: an unmet hard criterion (fit_rule 4) at the default min_fit 4 is PASS even if the
+    /// LLM, which never sees min_rows or required_columns, votes BUY.
+    #[test]
+    fn unmet_hard_criterion_is_pass_at_default_min_fit() {
+        let s = compose(&Gates { fit_rule: 4, min_fit: 4, ..OPEN }, &LLM_BUY);
+        assert_eq!((s.verdict, s.fit), (Verdict::Pass, 4));
+        let s = compose(&Gates { fit_rule: 4, min_fit: 1, ..OPEN }, &LLM_BUY);
+        assert_eq!(s.verdict, Verdict::Pass);
     }
 
     #[test]
@@ -90,6 +102,7 @@ mod tests {
                                     assert!(idx <= 49);
                                     let gates_pass = flags == 0
                                         && verdict == Verdict::Buy
+                                        && fit_rule == 5
                                         && fit_llm.min(fit_rule) >= min_fit
                                         && novelty.is_none_or(|v| v >= min_novelty);
                                     assert_eq!(s.verdict == Verdict::Buy, gates_pass);
