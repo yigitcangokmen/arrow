@@ -14,6 +14,7 @@ pub mod paths;
 pub mod rail;
 pub mod types;
 pub mod validate;
+pub mod views;
 
 #[cfg(test)]
 mod testkit;
