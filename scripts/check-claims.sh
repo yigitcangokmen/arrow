@@ -56,7 +56,7 @@ evm-impossible ::: impossible on evm
 funds-never-leave ::: funds never leave
 refund-to-wallet ::: refunded to (your|the buyer.?s?) wallet|(came|comes|goes) back to (your|the) wallet|back to your wallet
 deterministic-llm ::: deterministic llm|temperature 0 gives
-npx-arrow ::: npx arrow([^-a-z]|$)
+npx-arrow ::: npx[ ]arrow([^-a-z]|$)
 pay-if ::: pay[-_]if
 tender-core ::: sealed[- ]bid|auction|(^|[^a-z])ckd([^a-z]|$)|identity-based encryption|(^|[^a-z])ibe([^a-z]|$)
 seal-until ::: conditional seal|seal until
