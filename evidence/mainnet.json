@@ -1,7 +1,7 @@
 {
   "network": "mainnet",
   "contract": "arrow-market.near",
-  "contract_wasm_sha256": "24fe374ac7b4410a6324bfd924bdcfa9a1dab50829dba21aaeea8c10876d4def",
+  "contract_wasm_sha256": "f59f35e7a454fe9377cc26d40c0830cb09a20797154cbeae4d35970af86e7b80",
   "program_wasm_sha256": null,
   "program_wasm_url": null,
   "lock": {
