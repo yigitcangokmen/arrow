@@ -244,11 +244,11 @@ flowchart TB
 
 ## Status
 
-As of 2026-11-11 19:50 UTC.
+As of 2026-11-11 20:20 UTC.
 
 - Testnet: contract `arrow-v2.arrowhq.testnet` runs the frozen program `6ad7fed4…` (tag `wasm-freeze`; set_program: run `deploy-testnet-set_program-freeze` in `evidence/testnet.json`; [build](#build-from-source)); end-to-end run on it: [K2](JUDGES.md#gates-already-run). It is not locked (the lock deletes the contract's access keys); pre-freeze listings: [J#57](JUDGES.md#claims).
 - Mainnet: the Arrow contract `arrow-market.near` is not deployed and the Arrow program has not run on mainnet; spike runs: [gates](JUDGES.md#gates-already-run).
-- Hosted demo: [arrow-market.vercel.app](https://arrow-market.vercel.app), on testnet against `arrow-v2.arrowhq.testnet`, built from `ba0e5d8` with the frozen program's sha embedded.
+- Hosted demo: [arrow-market.vercel.app](https://arrow-market.vercel.app), on testnet against `arrow-v2.arrowhq.testnet`, built from `8da1bc8` with the frozen program's sha embedded; its `/verify` shows the same rows as `npm run verify -- --network testnet`.
 - Not yet: the demo video (not recorded) and outside demand (no seller invitation sent; drafts in `docs/outreach/`).
 - Repository and CI: private until a human makes it public, so repository links (including the contract's NEP-330 source link) do not resolve yet. All five CI jobs are green; `tee` rebuilds the program natively on x86_64 Linux and in the pinned image and compares both with `release/sha256.txt` ([Build from source](#build-from-source)).
 
