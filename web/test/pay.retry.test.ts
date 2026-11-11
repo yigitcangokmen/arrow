@@ -101,6 +101,7 @@ describe("W2-4: every code the relay answers before it broadcasts frees the wall
   const relayCodes = [...src("../lib/server/relayHandler.ts").matchAll(/(?:apiError\(\d+, |rateLimited\([^,)]*, )"([A-Z_]+)"/g)].map((m) => m[1]);
   const blockerCodes = [...(src("../lib/blockers.ts").match(/code: "([A-Z_]+)"/g) ?? [])].map((m) => m.slice(7, -1));
   // A landed payload re-sent can also trip these chain-state refusals, so they never prove that nothing was sent (RELAY-3).
+  // payOnce's one send is the first of a payload signed a moment ago, so there they do.
   const chainState = ["ALREADY_BOUGHT", "NOTHING_TO_CHANGE", "REHOST_COOLDOWN"];
   const sentOrMaybe = new Set(["ALREADY_RELAYED", "RELAY_UNCLEAR", ...chainState]);
   it.each([...new Set([...relayCodes, ...blockerCodes, "BAD_REQUEST", "NOT_ARROW_INTENT", "RATE_LIMITED"])].filter((c) => !sentOrMaybe.has(c)))("%s", async (code) => {
@@ -109,11 +110,24 @@ describe("W2-4: every code the relay answers before it broadcasts frees the wall
     await expect(payOnce(h.deps, req)).rejects.not.toBeInstanceOf(PaymentUnclear);
     expect(h.deps.store.get("mainnet", SIGNER)).toBeNull();
   });
-  it.each(chainState)("%s keeps the payment unclear and the signed payload stored", async (code) => {
+  it.each(chainState)("%s on the first send of a fresh payload frees the wallet; on a re-send it proves nothing", async (code) => {
     expect(relayCodes).toContain(code);
     expect(provablyNotSent(new RelayRejected("x Nothing was sent.", 409, code))).toBe(false);
-    const h = harness({ relay: async () => { throw new RelayRejected("x Nothing was sent.", 409, code); } });
+    let n = 0;
+    const h = harness({ relay: async () => { if (++n === 1) throw new RelayRejected("x Nothing was sent.", 409, code); return { txHash: "TX2", signerId: "r.near" }; } });
+    const first = await payOnce(h.deps, req).catch((e) => e);
+    expect(first).toBeInstanceOf(RelayRejected);
+    expect(first.code).toBe(code);
+    expect(h.deps.store.get("mainnet", SIGNER)).toBeNull();
+    // the next payment from this wallet is signed and sent, not held as PaymentPending until the old deadline
+    await expect(payOnce(h.deps, req)).resolves.toMatchObject({ txHash: "TX2" });
+    expect(h.calls.sign).toBe(2);
+  });
+  it.each(chainState)("%s on a Check payment re-send leaves the payment pending while the nonce is unused (RELAY-3)", async (code) => {
+    let n = 0;
+    const h = harness({ relay: async () => { throw ++n === 1 ? unclear() : new RelayRejected("x Nothing was sent.", 409, code); } });
     await expect(payOnce(h.deps, req)).rejects.toBeInstanceOf(PaymentUnclear);
+    expect((await resumePending(h.deps, SIGNER)).state).toBe("waiting");
     expect(h.deps.store.get("mainnet", SIGNER)).not.toBeNull();
   });
   it("found the blocker codes", () => expect(blockerCodes).toEqual(expect.arrayContaining(["MARKET_PAUSED", "PROGRAM_KEY_MISSING", "LISTING_STALE", "TANK_LOW"])));

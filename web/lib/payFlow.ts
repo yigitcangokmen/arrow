@@ -47,6 +47,11 @@ const BEFORE_BROADCAST = new Set<string>([
 /** True only for an error that proves the relay sent nothing. A network error, RELAY_UNCLEAR and ALREADY_RELAYED do not. */
 export const provablyNotSent = (e: unknown): boolean => e instanceof RelayError && BEFORE_BROADCAST.has(e.code);
 
+/** Chain-state refusals the relay answers after it found the nonce unused. A landed payload re-sent can draw them too
+ *  (RELAY-3), so they stay out of BEFORE_BROADCAST; on the first send of a payload signed a moment ago nothing can have
+ *  landed, so payOnce frees the wallet on them. */
+const FIRST_SEND_REFUSED = new Set<string>(["ALREADY_BOUGHT", "NOTHING_TO_CHANGE", "REHOST_COOLDOWN"]);
+
 export function readPayload(mp: MultiPayload): { signerId: string; deadlineMs: number; nonce: string } {
   const p = JSON.parse(mp.payload) as { signer_id: string; deadline: string; nonce: string };
   return { signerId: p.signer_id.toLowerCase(), deadlineMs: Date.parse(p.deadline), nonce: p.nonce };
@@ -80,7 +85,7 @@ export async function payOnce(d: PayDeps, a: PayRequest): Promise<PaidTx & { at:
     d.history.add(d.network, signer, { v: 1, kind: a.kind, listingId: a.listingId ?? 0, tx: paid, resultId: null, at: pending.createdAt, ...(a.meta ? { meta: a.meta } : {}) });
     return { txHash: paid.txHash, signerId: paid.signerId, at: pending.createdAt };
   } catch (e) {
-    if (provablyNotSent(e)) {
+    if (provablyNotSent(e) || (e instanceof RelayError && FIRST_SEND_REFUSED.has(e.code))) {
       d.store.clear(d.network, signer);
       throw e;
     }
