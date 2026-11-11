@@ -37,6 +37,11 @@ describe("trust table", () => {
     }
   });
 
+  it("the_legend_tally_matches_the_rows", () => {
+    const n = (f: string | undefined) => rows.filter((r) => r.flag === f).length;
+    expect(README).toContain(`Each row counted under its weakest label: ${n(undefined)} PROVEN, ${n("RISKY")} RISKY, ${n("NOT PROVEN")} NOT PROVEN, ${n("TODO")} TODO.`);
+  });
+
   it("part_names_are_unique", () => {
     expect(new Set(TRUST_ROWS.map((r) => r.part)).size).toBe(TRUST_ROWS.length);
   });

@@ -49,4 +49,4 @@ Two cuts from one set of shots: **full** (YouTube, unlisted, at most 3:00) and *
 - `TODO(M7a-M12)` Every segment above needs the Arrow program and contract on mainnet (listing, eval, buy, refund). Until then the footage would be testnet and must carry "testnet re-run".
 - `TODO(M13)` F05 needs a real USDC withdrawal to Solana. Only a dry quote exists today. If it is not run, cut F05 and the Solana sentence and move its seconds to F04.
 - `TODO(M15a, M17)` S10 is recorded after the lock so the lock row of `verify` reads PROVEN.
-- Voice-over placeholders `{{EVAL_FEE}}`, `{{PASS_FIT}}`, `{{PASS_NOVELTY}}`, `{{BUY_FIT}}`, `{{BUY_NOVELTY}}`, `{{BUY_PRICE}}` come from the recorded runs (testnet values: [README example](../../README.md#how-it-works); mainnet fees are set at M7a-c).
+- Voice-over placeholders `{{EVAL_FEE}}`, `{{PASS_FIT}}`, `{{PASS_NOVELTY}}`, `{{BUY_FIT}}`, `{{BUY_NOVELTY}}`, `{{BUY_PRICE}}` come from the recorded runs (testnet values: [README story](../../README.md#how-it-works); mainnet fees are set at M7a-c).

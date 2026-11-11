@@ -127,9 +127,9 @@ describe("claims wording", () => {
       ["JUDGES row 41 (forced failures)", judgesRow(41)!.expected],
       ["JUDGES row 16", judgesRow(16)!.claim],
     ] as const) {
-      expect(text, name).toMatch(/README Money|\[Money\]\(#how-it-works\)/);
+      expect(text, name).toMatch(/README Money|\[Money\]\(#6-who-got-paid\)/);
     }
-    expect(readme.split("\n")[2]).toContain("[amounts](#how-it-works)");
+    expect(readme.split("\n")[2]).toContain("[amounts](#6-who-got-paid)");
     for (const [name, text] of [
       ["README Money", line("- **Money.**")],
       ["video F07", read("docs/video/script.md").split("\n").find((l) => l.startsWith("| F07"))!],

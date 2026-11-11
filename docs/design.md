@@ -47,6 +47,30 @@ From `enclave/arrow-tee/src/consts.rs` and `enclave/arrow-tee/src/http.rs`:
 
 ## Hash binding
 
+What the sealed key is bound to, and what a release does with it (`unseal_k` and `release` in `enclave/arrow-tee/src/flow.rs`):
+
+```mermaid
+flowchart TD
+  K["data key K"]
+  H["sha256 of the ciphertext"]
+  S["tag of the seller account"]
+  Seal["sealed_k: ECIES to program_pubkey"]
+  Open(["in the program: bound<br/>hash matches the listing,<br/>tag matches the seller?"])
+  Fetch(["on buy: the blob<br/>fetched now hashes<br/>to the bound hash?"])
+  Out["K re-sealed to<br/>the buyer's key"]
+  Zero["a zero key and h of<br/>the new blob: refund<br/>hash_mismatch"]
+  Err["error output: refund not_ok"]
+  K --> Seal
+  H --> Seal
+  S --> Seal
+  Seal --> Open
+  Open -->|"no"| Err
+  Open -->|"yes"| Fetch
+  Fetch -->|"no"| Zero
+  Fetch -->|"yes, and K opens it"| Out
+  Fetch -->|"yes, but K does not open it"| Err
+```
+
 - Every `ok` output carries `h`, the sha256 of the ciphertext the enclave downloaded.
 - On buy the enclave downloads the blob again. If it was swapped, `h` differs from the listing's `blob_sha256`, the key stays inside and the contract refunds with `arrow_refund{reason:"hash_mismatch"}`; if the blob is gone, the reason is `not_ok`. Release also checks that the key opens the blob it just downloaded.
 - On eval a swapped blob ends as `not_ok`: the enclave stops before scoring.
