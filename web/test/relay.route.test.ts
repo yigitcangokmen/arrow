@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RpcError } from "@arrow/sdk/rpc";
-import { handleRelay, realRelayDeps, type ChainPort, type RelayDeps, type RelayerPort } from "../lib/server/relayHandler.ts";
+import { REHOST_WINDOW_BLOCKS, handleRelay, realRelayDeps, type ChainPort, type RelayDeps, type RelayerPort } from "../lib/server/relayHandler.ts";
 import { RelayRuns } from "../lib/server/relayRuns.ts";
 import { keyedDaily, tokenBucket } from "../lib/ratelimit.ts";
-import { NOW, USDC, healthyMarket, listingFixture, makeMp, post } from "./helpers.ts";
+import { NOW, SIGNER, USDC, healthyMarket, listingFixture, makeMp, post } from "./helpers.ts";
 
 const URL_ = "http://localhost/api/relay";
 const outcome = { transaction: { hash: "TXHASH1", signer_id: "arrow-relayer.arrowhq.near" }, transaction_outcome: { outcome: { logs: [] } }, receipts_outcome: [] };
@@ -24,6 +24,9 @@ const chain = (over: Partial<ChainPort> = {}): ChainPort => ({
   listing: async () => listingFixture(), // eval_fee 250000, price 2000000, 3 of 50 evals used
   listingBond: async () => 100_000n,
   market: async () => healthyMarket,
+  purchaseByBuyer: async () => null,
+  blobUrlBefore: async () => listingFixture().blob_url,
+  nonceUsed: async () => false,
   ...over,
 });
 
@@ -237,6 +240,61 @@ describe("RELAY-3: the same signed payload gets the same answer and is executed 
     expect(b.error).toMatch(/Do not pay again/);
     expect(b.error).not.toMatch(/Arrow activity/);
     expect(r.calls).toHaveLength(0);
+  });
+
+  it("a landed payload re-sent to a fresh instance answers ALREADY_RELAYED, not the chain refusal it now trips", async () => {
+    // The buy landed (purchase done) and the rehost landed (the listing already has the new URL); the nonce is spent.
+    const rehostMp = makeMp("rehost");
+    const moved = listingFixture({ seller: SIGNER, blob_url: JSON.parse(JSON.parse(rehostMp.payload).intents[0].msg).blob_url });
+    const done = { id: 1, listing_id: 7, buyer: SIGNER, buyer_pk: "04", status: "done", sealed_k_buyer: null, h: null, refund_reason: null, settled_at_ns: null } as never;
+    for (const [mp, ch] of [
+      [makeMp("buy"), chain({ purchaseByBuyer: async () => done })],
+      [rehostMp, chain({ listing: async () => moved })],
+    ] as const) {
+      const r = relayer();
+      const nonceUsed = vi.fn(async () => true);
+      const res = await send(deps({ relayer: () => r.port, chain: { ...ch, nonceUsed } }), mp); // fresh RelayRuns: another instance
+      expect([res.status, (await res.json()).code]).toEqual([409, "ALREADY_RELAYED"]);
+      expect(nonceUsed).toHaveBeenCalledWith(SIGNER, "AAAA");
+      expect(r.calls).toHaveLength(0);
+    }
+  });
+
+  it("the real chain port asks intents.near is_nonce_used for the payload's signer and nonce", async () => {
+    fetchMock.mockResolvedValue(rpcOk({ result: [...new TextEncoder().encode("true")], logs: [] }));
+    expect(await realRelayDeps.chain.nonceUsed(SIGNER, "AAAA")).toBe(true);
+    const params = JSON.parse(fetchMock.mock.calls[0][1].body).params;
+    expect([params.account_id, params.method_name]).toEqual(["intents.near", "is_nonce_used"]);
+    expect(JSON.parse(Buffer.from(params.args_base64, "base64").toString())).toEqual({ account_id: SIGNER, nonce: "AAAA" });
+  });
+});
+
+describe("NEW-1: the rehost window read skips heights the RPC does not know", () => {
+  const unknownBlock = (h: number) =>
+    new Response(JSON.stringify({ jsonrpc: "2.0", id: "arrow", error: { name: "HANDLER_ERROR", cause: { name: "UNKNOWN_BLOCK", info: {} }, code: -32000, message: "Server error", data: `DB Not Found Error: BLOCK HEIGHT: ${h} \n Cause: Unknown` } }), { status: 200 });
+  const mockChain = (unknownUntil: number) => {
+    const heights: number[] = [];
+    fetchMock.mockImplementation(async (_url: string, init: { body: string }) => {
+      const { method, params } = JSON.parse(init.body);
+      if (method === "block") return rpcOk({ header: { height: 100_000 } });
+      heights.push(params.block_id);
+      if (params.block_id < unknownUntil) return unknownBlock(params.block_id);
+      return rpcOk({ result: [...new TextEncoder().encode(JSON.stringify({ blob_url: "https://old.example/x.bin" }))], logs: [] });
+    });
+    return heights;
+  };
+
+  it("an UNKNOWN_BLOCK at the window edge reads the next height instead", async () => {
+    const heights = mockChain(100_000 - REHOST_WINDOW_BLOCKS + 2);
+    expect(await realRelayDeps.chain.blobUrlBefore(7)).toBe("https://old.example/x.bin");
+    expect(heights).toEqual([0, 1, 2].map((i) => 100_000 - REHOST_WINDOW_BLOCKS + i));
+  });
+
+  it("a run of unknown heights fails closed after a bounded number of reads", async () => {
+    const heights = mockChain(Infinity);
+    await expect(realRelayDeps.chain.blobUrlBefore(7)).rejects.toThrow(/BLOCK HEIGHT/);
+    expect(heights.length).toBeGreaterThan(1);
+    expect(heights.length).toBeLessThanOrEqual(10);
   });
 });
 

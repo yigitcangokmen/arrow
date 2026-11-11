@@ -24,7 +24,14 @@ function relayer(over: Partial<RelayerPort> = {}) {
 }
 const market = (over: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) =>
   marketStateFrom({ paused: false, tank_available: "500000000000000000000000", payment_path: "notify", result_path: "chain", build: "mainnet", config: { tank_min: "50000000000000000000000", outlayer_deposit_eval: "20000000000000000000000", outlayer_deposit_release: "10000000000000000000000", program_wasm_hash: "aa", ...cfg }, ...over } as never, "04ab");
-const chain = (m = healthyMarket, l = listingFixture()): ChainPort => ({ listing: async () => l, listingBond: async () => 100_000n, market: async () => m });
+const chain = (m = healthyMarket, l = listingFixture()): ChainPort => ({
+  listing: async () => l,
+  listingBond: async () => 100_000n,
+  market: async () => m,
+  purchaseByBuyer: async () => null,
+  blobUrlBefore: async () => l.blob_url,
+  nonceUsed: async () => false,
+});
 
 function deps(over: Partial<RelayDeps> = {}): RelayDeps {
   return {
@@ -214,5 +221,60 @@ describe("WEB-11: body size and the client address", () => {
     expect(clientIp(req, { VERCEL: "1" })).toBe("1.2.3.4");
     expect(clientIp(req, { ARROW_TRUST_PROXY: "1" })).toBe("1.2.3.4");
     expect(clientIp(req, {})).toBe("unknown");
+  });
+});
+
+describe("NEW-1 / R2-7 / E22: a payment the contract returns in full never reaches the relayer twice", () => {
+  const seller = listingFixture({ seller: SIGNER });
+  const rehost = (n: string) => makeMp("rehost", { payload: { nonce: n } });
+
+  it("NEW-1: a rehost to the URL the listing already has is 409 NOTHING_TO_CHANGE, nothing sent", async () => {
+    const r = relayer();
+    const same = { ...JSON.parse((JSON.parse(makeMp("rehost").payload).intents[0] as { msg: string }).msg), blob_url: seller.blob_url };
+    const res = await send(deps({ relayer: () => r.port, chain: chain(healthyMarket, seller) }), makeMp("rehost", { msg: same }));
+    expect((await res.json()).code).toBe("NOTHING_TO_CHANGE");
+    expect(r.calls).toHaveLength(0);
+  });
+
+  it("NEW-1: a listing created or moved inside the window is 429 REHOST_COOLDOWN; unchanged for the window it is relayed", async () => {
+    for (const [before, code] of [[null, "REHOST_COOLDOWN"], ["https://old.example/x.bin", "REHOST_COOLDOWN"]] as const) {
+      const r = relayer();
+      const res = await send(deps({ relayer: () => r.port, chain: { ...chain(healthyMarket, seller), blobUrlBefore: async () => before } }), rehost("A"));
+      expect([res.status, (await res.json()).code]).toEqual([429, code]);
+      expect(r.calls).toHaveLength(0);
+    }
+  });
+
+  it("NEW-1: two server instances that share nothing but the chain relay one rehost per listing per window", async () => {
+    // One chain: the listing and its URL REHOST_WINDOW_BLOCKS ago. A relayed rehost moves the listing.
+    let listing = seller;
+    const urlBefore = seller.blob_url;
+    const shared: ChainPort = { ...chain(healthyMarket, seller), listing: async () => listing, blobUrlBefore: async () => urlBefore };
+    const r = relayer({
+      caller: () => ({
+        callFunction: async (a) => {
+          const mp = (a as { args: { signed: { payload: string }[] } }).args.signed[0];
+          listing = { ...listing, blob_url: JSON.parse(JSON.parse(mp.payload).intents[0].msg).blob_url };
+          return outcome;
+        },
+      }),
+    });
+    const a = deps({ relayer: () => r.port, chain: shared });
+    const b = deps({ relayer: () => r.port, chain: shared }); // its own RelayRuns and limiters: another instance
+    expect((await send(a, rehost("A"))).status).toBe(200);
+    const again = makeMp("rehost", { payload: { nonce: "B" }, msg: { op: "rehost", listing_id: 7, blob_url: "https://other.example/y.bin" } });
+    expect((await (await send(b, again)).json()).code).toBe("REHOST_COOLDOWN");
+    expect((await (await send(a, again)).json()).code).toBe("REHOST_COOLDOWN");
+  });
+
+  it("E22: a buy to a key this wallet already bought is 409 ALREADY_BOUGHT; after a refund it is relayed", async () => {
+    const r = relayer();
+    const bought = (status: string) => ({ ...chain(), purchaseByBuyer: async () => ({ id: 1, listing_id: 7, buyer: SIGNER, buyer_pk: "04", status, sealed_k_buyer: null, h: null, refund_reason: null, settled_at_ns: null }) as never });
+    for (const status of ["pending", "done"]) {
+      expect((await (await send(deps({ relayer: () => r.port, chain: bought(status) }), nonce("B" + status, undefined, "buy"))).json()).code).toBe("ALREADY_BOUGHT");
+    }
+    expect(r.calls).toHaveLength(0);
+    expect((await send(deps({ relayer: () => r.port, chain: bought("refunded") }), nonce("R", undefined, "buy"))).status).toBe(200);
+    expect(r.calls).toHaveLength(1);
   });
 });

@@ -100,12 +100,21 @@ describe("W2-4: every code the relay answers before it broadcasts frees the wall
   const src = (f: string) => readFileSync(new URL(f, import.meta.url), "utf8");
   const relayCodes = [...src("../lib/server/relayHandler.ts").matchAll(/(?:apiError\(\d+, |rateLimited\([^,)]*, )"([A-Z_]+)"/g)].map((m) => m[1]);
   const blockerCodes = [...(src("../lib/blockers.ts").match(/code: "([A-Z_]+)"/g) ?? [])].map((m) => m.slice(7, -1));
-  const sentOrMaybe = new Set(["ALREADY_RELAYED", "RELAY_UNCLEAR"]);
+  // A landed payload re-sent can also trip these chain-state refusals, so they never prove that nothing was sent (RELAY-3).
+  const chainState = ["ALREADY_BOUGHT", "NOTHING_TO_CHANGE", "REHOST_COOLDOWN"];
+  const sentOrMaybe = new Set(["ALREADY_RELAYED", "RELAY_UNCLEAR", ...chainState]);
   it.each([...new Set([...relayCodes, ...blockerCodes, "BAD_REQUEST", "NOT_ARROW_INTENT", "RATE_LIMITED"])].filter((c) => !sentOrMaybe.has(c)))("%s", async (code) => {
     expect(provablyNotSent(new RelayRejected("x Nothing was sent.", 409, code))).toBe(true);
     const h = harness({ relay: async () => { throw new RelayRejected("x Nothing was sent.", 409, code); } });
     await expect(payOnce(h.deps, req)).rejects.not.toBeInstanceOf(PaymentUnclear);
     expect(h.deps.store.get("mainnet", SIGNER)).toBeNull();
+  });
+  it.each(chainState)("%s keeps the payment unclear and the signed payload stored", async (code) => {
+    expect(relayCodes).toContain(code);
+    expect(provablyNotSent(new RelayRejected("x Nothing was sent.", 409, code))).toBe(false);
+    const h = harness({ relay: async () => { throw new RelayRejected("x Nothing was sent.", 409, code); } });
+    await expect(payOnce(h.deps, req)).rejects.toBeInstanceOf(PaymentUnclear);
+    expect(h.deps.store.get("mainnet", SIGNER)).not.toBeNull();
   });
   it("found the blocker codes", () => expect(blockerCodes).toEqual(expect.arrayContaining(["MARKET_PAUSED", "PROGRAM_KEY_MISSING", "LISTING_STALE", "TANK_LOW"])));
 });

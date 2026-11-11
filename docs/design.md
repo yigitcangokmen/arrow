@@ -74,7 +74,7 @@ flowchart TD
 - Every `ok` output carries `h`, the sha256 of the ciphertext the enclave downloaded.
 - On buy the enclave downloads the blob again. If it was swapped, `h` differs from the listing's `blob_sha256`, the key stays inside and the contract refunds with `arrow_refund{reason:"hash_mismatch"}`; if the blob is gone, the reason is `not_ok`. Release also checks that the key opens the blob it just downloaded.
 - On eval a swapped blob ends as `not_ok`: the enclave stops before scoring.
-- After a release nothing stops the seller from changing the hosted file. `op=rehost` (CLI only) points a listing at a new URL and keeps `blob_sha256`.
+- After a release nothing stops the seller from changing the hosted file. `op=rehost` (CLI only) points a listing at a new URL and keeps `blob_sha256`. A rehost returns its whole amount, so the hosted relay moves a listing only when its URL has not changed on chain for about 6 hours (`REHOST_COOLDOWN`); the seller can always send it to intents.near through any other relayer.
 
 ## Keys
 

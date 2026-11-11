@@ -20,7 +20,7 @@ function setup(path: "notify" | "escrow", logs: string[], escrow: boolean) {
     evalLimiter: tokenBucket({ capacity: 1000, refillEveryMs: 1 }),
     evalDaily: keyedDaily({ max: 1000 }),
     store: new RelayRuns(),
-    chain: { listing: async () => listingFixture(), listingBond: async () => 100_000n, market: async () => healthyMarket },
+    chain: { listing: async () => listingFixture(), listingBond: async () => 100_000n, market: async () => healthyMarket, purchaseByBuyer: async () => null, blobUrlBefore: async () => listingFixture().blob_url, nonceUsed: async () => false },
     waitMs: 1_000,
     cfg: { contract: "arrow-market.near", usdcToken: USDC, now: NOW },
     relayer: () => ({

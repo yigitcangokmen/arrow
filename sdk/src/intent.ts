@@ -17,11 +17,22 @@ const NONCE_GRACE_MS = 60_000; // the sdk's own factory lets the nonce outlive t
 
 /** A transfer to the market contract; a `msg` makes intents.near call mt_on_transfer with at least min_gas. */
 export function arrowTransferIntent(p: { receiverId: string; tokenId: string; amount: string; msg?: string; minGas?: string }): IntentTransfer {
+  // R2-7: the contract refuses a payout to itself (E04) only after the transfer was sent, so the gas is already spent.
+  if (p.msg !== undefined && payoutOf(p.msg) === p.receiverId) throw new Error("payout must not be the market contract");
   const intent: IntentTransfer = { intent: "transfer", receiver_id: p.receiverId, tokens: { [p.tokenId]: p.amount } };
   if (p.msg !== undefined) intent.msg = p.msg;
   const minGas = p.minGas ?? (p.msg !== undefined ? MIN_GAS_NOTIFY : undefined);
   if (minGas !== undefined) intent.min_gas = minGas;
   return intent;
+}
+
+function payoutOf(msg: string): unknown {
+  try {
+    const m = JSON.parse(msg);
+    return m?.op === "list" ? m.payout : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 // The builder alone, not `new IntentsSDK(...)`: the full client wires every bridge route, which drags near-api-js 4/5 into

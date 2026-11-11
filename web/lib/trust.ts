@@ -97,7 +97,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "The intents it relays: signer, msg, IP",
     cannot: "Spend or move user funds: the relayer holds none",
     check:
-      "The server's relayer key is a function-call key limited to execute_intents on intents.near. The same account also holds a FullAccess key; whoever holds it can drain the relayer's gas or stop /api/relay. The lock of the market contract does not cover this account",
+      "The server's relayer key is a function-call key limited to execute_intents on intents.near. The same account also holds a FullAccess key; whoever holds it can drain the relayer's gas or stop /api/relay. The lock of the market contract does not cover this account. The relay's rate limits are per server instance and protect only the relayer's gas: across instances the worst case is about 0.34 NEAR of gas (its balance down to the 0.65 NEAR floor, then the hosted relay pauses) and no user funds; a signed payment still runs once on intents.near",
     flag: "RISKY",
   },
   {

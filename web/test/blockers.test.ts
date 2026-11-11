@@ -23,9 +23,10 @@ describe("blockersFor", () => {
     expect(blockersFor("eval", ok, { program_hash_at_list: "old" }).map((b) => b.code)).toEqual(["LISTING_STALE"]);
     expect(blockersFor("eval", marketStateFrom(cv({ tank_available: "60000000000000000000000" }), "04ab"), { program_hash_at_list: "aa" }).map((b) => b.code)).toEqual(["TANK_LOW"]);
   });
-  it("the tank check adds the OutLayer deposit of that op, and none for list", () => {
+  it("the tank check adds the OutLayer deposit of that op; a list needs ten evals plus its storage left (C-02)", () => {
     const s = marketStateFrom(cv({ tank_available: "65000000000000000000000" }), "04ab"); // tank_min 0.05 + 0.015 NEAR
-    expect(blockersFor("list", s)).toEqual([]);
+    expect(blockersFor("list", s).map((b) => b.code)).toEqual(["TANK_LOW"]);
+    expect(blockersFor("list", marketStateFrom(cv({ tank_available: "300000000000000000000000" }), "04ab"))).toEqual([]); // 0.05 + 10 x 0.02 + 0.05
     expect(blockersFor("buy", s, { program_hash_at_list: "aa" })).toEqual([]);
     expect(blockersFor("eval", s, { program_hash_at_list: "aa" }).map((b) => b.code)).toEqual(["TANK_LOW"]);
   });

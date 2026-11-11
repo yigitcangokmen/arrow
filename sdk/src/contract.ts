@@ -50,6 +50,9 @@ export class ArrowViews {
   purchase(id: number | string) {
     return this.maybe(Purchase, "get_purchase", { purchase_id: Number(id) });
   }
+  purchaseByBuyer(listingId: number | string, buyer: string, buyerPk: string) {
+    return this.maybe(Purchase, "get_purchase_by_buyer", { listing_id: Number(listingId), buyer, buyer_pk: buyerPk });
+  }
   leakBudget(listingId: number | string) {
     return this.maybe(LeakBudget, "leak_budget", { listing_id: Number(listingId) });
   }

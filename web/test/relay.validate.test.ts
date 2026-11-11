@@ -6,7 +6,12 @@ const cfg = { contract: "arrow-market.near", usdcToken: USDC, now: NOW };
 
 describe("validateArrowMultipayload", () => {
   it.each(["list", "eval", "buy"] as const)("accepts a valid %s", (op) => {
-    expect(validateArrowMultipayload(makeMp(op), cfg)).toEqual({ ok: true, signerId: SIGNER, op, amount: 2_000_000n, listingId: op === "list" ? null : 7 });
+    expect(validateArrowMultipayload(makeMp(op), cfg)).toMatchObject({ ok: true, signerId: SIGNER, op, amount: 2_000_000n, listingId: op === "list" ? null : 7 });
+  });
+
+  it("R2-7: a list whose payout is the market contract is refused (the contract would panic E04 after the gas is spent)", () => {
+    const msg = { ...JSON.parse((JSON.parse(makeMp("list").payload).intents[0] as { msg: string }).msg), payout: "arrow-market.near" };
+    expect(validateArrowMultipayload(makeMp("list", { msg }), cfg)).toMatchObject({ ok: false, status: 400, code: "BAD_REQUEST" });
   });
 
   it.each([

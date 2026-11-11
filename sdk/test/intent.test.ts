@@ -129,3 +129,12 @@ describe("X12-T06: deadlines from chain time", () => {
     }
   });
 });
+
+describe("R2-7: no list intent pays out to the market contract", () => {
+  it("throws before signing when payout is the receiver; another payout is fine", () => {
+    const msg = (payout: string) => JSON.stringify({ op: "list", payout });
+    const p = { receiverId: NETWORKS.mainnet.contract, tokenId: NETWORKS.mainnet.usdcToken, amount: "100000" };
+    expect(() => arrowTransferIntent({ ...p, msg: msg(NETWORKS.mainnet.contract) })).toThrow(/payout/);
+    expect(arrowTransferIntent({ ...p, msg: msg("seller.near") }).receiver_id).toBe(NETWORKS.mainnet.contract);
+  });
+});
