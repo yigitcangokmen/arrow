@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { type ReactNode, Suspense } from "react";
 import { Footer } from "../components/Footer.tsx";
 import { Nav } from "../components/Nav.tsx";
@@ -16,11 +17,12 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 // Runs before the page is painted: ?theme=light|dark, then localStorage["arrow-theme"], else the system setting.
 const THEME_SCRIPT = `(function(){try{var t=new URLSearchParams(location.search).get("theme");if(t!=="light"&&t!=="dark"){try{t=localStorage.getItem("arrow-theme")}catch(e){t=null}}if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})();`;
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
         <a className="skip-link" href="#main">Skip to content</a>

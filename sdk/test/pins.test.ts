@@ -21,6 +21,11 @@ describe("exact dependency versions", () => {
     expect(loose).toEqual([]);
   });
 
+  it("the web app pins the Node major of .nvmrc, so Vercel does not build it on another one", () => {
+    const major = readFileSync(resolve(ROOT, ".nvmrc"), "utf8").trim().replace(/^v/, "").split(".")[0];
+    expect(JSON.parse(readFileSync(resolve(ROOT, "web/package.json"), "utf8")).engines?.node).toBe(`${major}.x`);
+  });
+
   it("eciesjs is the K0 interop version", () => {
     expect(JSON.parse(readFileSync(resolve(ROOT, "sdk/package.json"), "utf8")).dependencies.eciesjs).toBe("0.4.18");
   });

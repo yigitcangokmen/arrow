@@ -2,6 +2,9 @@
 // fixtures/ as the Rust side. Encoding rules: fixtures/README.md.
 import { z } from "zod";
 
+// No compiled parsers: the probe for them runs `new Function("")`, which the web CSP (no unsafe-eval) reports as a violation.
+z.config({ jitless: true });
+
 const cpLen = (s: string) => [...s].length; // Rust counts chars, not UTF-16 units
 const chars = (min: number, max: number) =>
   z.string().refine((s) => cpLen(s) >= min && cpLen(s) <= max, { message: `${min}..${max} characters` });

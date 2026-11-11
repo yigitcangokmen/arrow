@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 // No page may be framed (a framed /seller or /buy is a clickjacking target for a wallet prompt), no plugin content, no <base> rewrite,
-// forms post only to this site. A script-src needs a nonce setup that has to be checked in a real browser, so it is not set here.
+// forms post only to this site. script-src is set per request with a nonce in proxy.ts; this static header covers the routes the proxy skips (api, static files).
 const CSP = "frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'self'";
 
 const config: NextConfig = {
