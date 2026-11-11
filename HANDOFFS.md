@@ -377,7 +377,7 @@ Preconditions: WS3-T06 merged to main: DONE 17:34 GMT+7 (main a391c51, 7220e24; 
 Run exactly (in the repo root, ≈15 min):
     cargo run -q -p arrow-core --example explain -- --list-patterns
     cargo test -p arrow-core --test injection_room -- --nocapture 2>&1 | grep "room:"
-Expected: the pattern table (11 English + 16 for 8 languages + 1 exfil) and "room: 19/19 regex_expected flagged, 0/5 bypass-by-design also flagged, …".
+Expected: the pattern table (11 English + 16 for 8 languages + 1 exfil) and "room: 20/20 regex_expected flagged, 0/4 bypass-by-design also flagged, …".
 Write result to: Result line below: "OK" or the list of patterns to change. The agent applies changes before the freeze (12 Kas 18:00).
 If it fails / no answer by 12 Kas 12:00: the patterns stay as they are; the freeze goes ahead.
 Result (human fills):
