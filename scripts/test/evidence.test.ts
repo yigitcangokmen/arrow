@@ -87,6 +87,22 @@ describe("evidence-add", { timeout: 20_000 }, () => {
     expect(r.stderr).toContain("--sender");
   });
 
+  it("STATE-2: a run carries the market contract and, for the file's contract, the file's current program", () => {
+    const sha = "6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1";
+    expect(cli("--network", "testnet", "--set", "contract=arrow-v2.arrowhq.testnet", "--set", `program_wasm_sha256=${sha}`).status).toBe(0);
+    const run = (id: string, env: Record<string, string>) =>
+      spawnSync(TSX, [join(ROOT, "scripts/src/evidence-add.ts"), "--network", "testnet", "--run", JSON.stringify({ ...RUN, id })], {
+        env: { ...process.env, ARROW_EVIDENCE_DIR: dir, ARROW_ENV_PATH: join(dir, "no.env"), ...env },
+        encoding: "utf8",
+      });
+    expect(run("same", { ARROW_CONTRACT_TESTNET: "arrow-v2.arrowhq.testnet" }).status).toBe(0);
+    expect(run("other", { ARROW_CONTRACT_TESTNET: "arrow.arrowhq.testnet" }).status).toBe(0);
+    const [same, other] = testnet().runs;
+    expect(same).toMatchObject({ id: "same", contract: "arrow-v2.arrowhq.testnet", program_wasm_sha256: sha });
+    expect(other).toMatchObject({ id: "other", contract: "arrow.arrowhq.testnet" });
+    expect(other.program_wasm_sha256).toBeUndefined();
+  });
+
   it("--account and --set merge into the top level", () => {
     expect(cli("--network", "testnet", "--account", "parent=arrowhq.testnet", "--account", "spike=spike.arrowhq.testnet").status).toBe(0);
     expect(cli("--network", "testnet", "--account", "token=arrow-usd.arrowhq.testnet", "--set", "program_wasm_url=https://x/y.wasm").status).toBe(0);

@@ -4,7 +4,7 @@ import { execFileSync } from "node:child_process";
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { EvidenceFile, EvidenceRun } from "@arrow/sdk/schemas";
-import { NETWORKS } from "@arrow/sdk";
+import { NETWORKS, resolveNetwork } from "@arrow/sdk";
 import { mainCheckout, repoRoot } from "./env.ts";
 
 export type EvidenceNetwork = "testnet" | "mainnet";
@@ -79,10 +79,17 @@ export function readEvidence(network: EvidenceNetwork): EvidenceFile {
   return existsSync(f) ? EvidenceFile.parse(JSON.parse(readFileSync(f, "utf8"))) : structuredClone(SKELETON[network]);
 }
 
+/**
+ * STATE-2: each run names the market it ran against (ARROW_CONTRACT_<NET>, else the SDK default) and, when that is the
+ * file's contract, the program the file records as current (set with `evidence-add --set program_wasm_sha256` at every
+ * set_program). A run may pass either field itself. Verify skips runs of another contract.
+ */
 export function appendRun(network: EvidenceNetwork, run: EvidenceRunInput): void {
-  const full = EvidenceRun.parse({ commit: gitCommit(), timestamp_utc: new Date().toISOString(), ...run });
+  const contract = resolveNetwork(network, process.env).contract;
   withLock(() => {
     const ev = readEvidence(network);
+    const program = ev.contract === contract && ev.program_wasm_sha256 ? { program_wasm_sha256: ev.program_wasm_sha256 } : {};
+    const full = EvidenceRun.parse({ commit: gitCommit(), timestamp_utc: new Date().toISOString(), contract, ...program, ...run });
     if (ev.runs.some((r) => r.id === full.id)) throw new Error(`evidence run id ${full.id} already exists (append-only)`);
     ev.runs.push(full);
     writeAtomic(fileFor(network), ev);
