@@ -62,7 +62,7 @@ As of 2026-11-11 02:10 UTC.
 - Testnet: contract `arrow-v2.arrowhq.testnet` runs the frozen program `6ad7fed4…` (set_program: run `deploy-testnet-set_program-freeze` in `evidence/testnet.json`; [build](#build-from-source)); end-to-end run on it: [K2](JUDGES.md#gates-already-run). It is not locked (the lock deletes the contract's access keys); pre-freeze listings: [J#57](JUDGES.md#claims).
 - Mainnet: the Arrow contract `arrow-market.near` is not deployed and the Arrow program has not run on mainnet; spike runs: [gates](JUDGES.md#gates-already-run).
 - Not yet: a hosted demo (not deployed), the demo video (not recorded) and outside demand (no seller invitation sent; drafts in `docs/outreach/`).
-- Repository and CI: private until a human makes it public, so repository links (including the contract's NEP-330 source link) do not resolve yet. CI job `tee` rebuilds the program natively on x86_64 Linux and in the pinned image and compares both with `release/sha256.txt` ([Build from source](#build-from-source)).
+- Repository and CI: private until a human makes it public, so repository links (including the contract's NEP-330 source link) do not resolve yet. All five CI jobs are green; `tee` rebuilds the program natively on x86_64 Linux and in the pinned image and compares both with `release/sha256.txt` ([Build from source](#build-from-source)).
 
 ## How it works
 
@@ -275,7 +275,7 @@ Node 22.22.2 or later (tested on 24.15.0) and Rust 1.97.1, which `rust-toolchain
 9. `npm run verify -- --network testnet` (network, about a minute).
    - See: `[PROVEN]` on I2, I3, I4 and I5, and the last line `verify: 0/5 REQUIRED PROVEN · exit 1`. Why the other rows fail: `evidence/testnet.json` still holds the runs of the first testnet contract, which predate the field that names a run's contract, so verify reads them against `arrow-v2` (J#12, J#13-16, J#48).
 10. `npm run try:testnet` (network).
-    - See: what it runs on the frozen program: J#30.
+    - See (about 2 minutes): `account arrow-judge-<id>.testnet faucet` (or `sponsor`; `reused` on a later run), the PASS scene `PASS · fit 2/5 · novelty 1/5 · out 5.67 bits`, the BUY scene `BUY · fit 5/5 · novelty 4/5 · out 5.67 bits`, `bought listing #14`, `sha256 match ✔ (3 checks)`, and `spent about 2.5 aUSD of test money; nothing real moved` (J#30).
 
 ## If something fails
 
