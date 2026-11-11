@@ -17,84 +17,11 @@ flowchart LR
   Judge -.-> Back
 ```
 
-*The story in [How it works](#how-it-works) follows one recorded testnet run; the two names are illustrative, and both accounts are the team's. **Noor**, an on-chain analyst, sells a token unlock schedule and a file of labelled wallets, plus a third listing broken on purpose. **Kai**, research lead at a small fund, already tracks 412 token contracts and 1,000 wallets and will not pay for a file he cannot see. State of the build: [Status](#status).*
-
-**[The story](#how-it-works) · [Try it](#try-it-do-x-see-y) · [Evidence ledger](JUDGES.md) · [Pending mainnet steps](JUDGES.md#pending-ledger) · [Testnet contract](https://testnet.nearblocks.io/address/arrow-v2.arrowhq.testnet) · [Design notes](docs/design.md)**
-
-## Trust table
-
-**PROVEN**: a command or transaction shows it today; the parenthesis says where. **RISKY**: true, and a weakness. **NOT PROVEN**: we do not claim it. **TODO**: waits for a [Pending ledger](JUDGES.md#pending-ledger) step. `J#n` is row n of [JUDGES.md](JUDGES.md). Each row counted under its weakest label: 3 PROVEN, 14 RISKY, 4 NOT PROVEN, 4 TODO.
-
-| Part | Who you trust | Can see | Cannot | How to check | Label |
-|---|---|---|---|---|---|
-| Seller data at rest | Nobody (ciphertext; the blob host is untrusted) | The blob host: the ciphertext and each downloader's IP and user agent. Anyone: the exact plaintext size, column names, row count and the seller's `0x…` account | Decrypt | [Hash binding](docs/design.md#hash-binding); J#14, J#55; Pending M7a-c. Once deployed, the hosted site keeps web sellers' ciphertext in a Vercel Blob store only while the hosted demo runs (at least until 2026-11-18, planned until 2026-11-25) | TODO (mainnet run) |
-| Program key / `PROTECTED_MASTER` | OutLayer keystore (TDX) and the shared OutLayer master | Inside the TEE | Release to a non-Arrow caller or (untested) to an unpinned wasm | `WasmHash` + `Predecessor` access condition; negative tests: J#11, J#45. Before the lock the owner can move the rule that ties the key to the wasm hash, and no verify row checks it | PROVEN (`Predecessor`: testnet echo program, mainnet spike program), NOT PROVEN (`WasmHash`) |
-| OutLayer keystore DAO | Can export keys on "cessation" | Potentially everything, including the buyer's sealed criteria, whose MinHash sketch is unkeyed: up to 128 members of the buyer's list can be recovered | n/a | J#40, J#50 | RISKY |
-| Evaluation | Intel TDX (OutLayer worker) | Plaintext inside the TEE | Emit anything outside the schema | J#1-3. Attestation binding: [S1-b](JUDGES.md#gates-already-run) (echo program); J#13, J#48 (Arrow program). The TDX quote is not verified on chain (J#38) | PROVEN (schema: native test) |
-| LLM | NEAR AI gateway (TDX) and model TEE (TDX + NVIDIA CC) | Each eval's prompt: the sample, whole-file aggregates and the criteria ([NEAR AI call](docs/design.md#near-ai-call)) | Retain data (NEAR AI's zero-data-retention claim is a trust assumption) | J#37, J#49 | NOT PROVEN |
-| Wasm to NEAR AI | TLS (not E2EE) | n/a | n/a | [NEAR AI call](docs/design.md#near-ai-call) | RISKY |
-| Time guard | The TDX clock, which the host provides | n/a | n/a | [Limits](docs/design.md#timeouts); J#19. A release refused as late still leaves its `k`, sealed to the buyer, public while the buyer keeps the refund | RISKY |
-| OutLayer coordinator (closed source) | Liveness | Encrypted input | Read secrets (OutLayer's design, a trust assumption) | J#16 | PROVEN (refund on `null`: sandbox) |
-| `outlayer.near`, `intents.near` contracts | Their owners (both are upgradable); Arrow depends on them | n/a | n/a | Code-hash history: J#39 | RISKY |
-| Program bytes | Whoever serves the wasm URL | The wasm | Change it unnoticed (hash-pinned) | Served from testnet FastFS (`test.fastfs.io/arrowhq.testnet/outlayer.testnet/6ad7fed4….wasm`); mainnet OutLayer fetched a program from testnet FastFS in the S3c spike | RISKY |
-| Output channel | Schema and rule composition | At most 5.68 bits per eval (scored), 1.59 (verdict-only), on this channel only ([derivation](docs/design.md#leak-bound)) | Free text | J#1-3 | PROVEN |
-| Error channel | The enclave: one fixed error output, nothing on stderr | The failure states on chain ([leak bound](docs/design.md#leak-bound)) | Carry data | J#4, J#43 | RISKY (stderr and the fixed output: PROVEN, native harness) |
-| Side channels | Not closed | `time_ms` and `instructions` on chain, counted in neither the bound nor the budget. `instructions` follows the work: the dataset size, the content of the sampled rows ([seed](docs/design.md#near-ai-call)), the criteria text, the buyer's `key_column` and `date_column` (so it can reveal a chosen column's non-empty and distinct counts) and, on a failed run, the step where it stopped | n/a | J#35; [measured values](docs/perf.md) | RISKY |
-| Leak budget | The contract counter | n/a | n/a | [Rules](docs/design.md#leak-budget); J#15, J#41 | RISKY |
-| Decision correctness | Structural gates and the LLM | n/a | Override a failed structural gate | J#5 (gates); J#9, J#53 (semantics) | PROVEN (gates), RISKY (semantics) |
-| 1Click and the PoA bridge (Intents Technology) | Short custody during swaps | Swap transactions | n/a | Base USDC (other 1Click origins are untested) arrives as a bridged token (`omft.near`) that 1Click swaps into native NEAR USDC, the only token the market accepts; J#24, J#25 | NOT PROVEN (custody), PROVEN (one inbound) |
-| Refund destination | `intents.near` | n/a | n/a | Moving a refund back to Base is a separate 1Click withdrawal; J#17; Pending M12 | PROVEN (mainnet, spike contract); TODO (Arrow contract) |
-| NEAR AI API key (inside the OutLayer secret) | Billing | Usage volume | See content | If it runs out, evals fail; J#44 | RISKY |
-| Gas tank | The operator (tops it up) and OutLayer's NEAR charge | n/a | n/a | `fund_tank` refills it; J#46; [cost, runway and E10](docs/perf.md#gas-tank) | RISKY |
-| Relayer account | Whoever holds the keys of `arrow-relayer.arrowhq.near` (the team) | The intents it relays: signer, `msg`, IP | Spend or move user funds: the relayer holds none | Whoever holds its FullAccess key can drain the relayer's gas or stop `/api/relay`; J#47. The relay's rate limits are per server instance and protect only the relayer's gas: across instances the worst case is about 0.34 NEAR of gas (its balance down to the 0.65 NEAR floor, then the hosted relay pauses) and no user funds; a signed payment still runs once (J#56) | RISKY |
-| Arrow operator | Relayer liveness, gas tank | The ciphertext blobs it hosts; the IP, `0x…` address and listing of every payment relayed through `/api/relay`; relay idempotency entries and rate counters | Decrypt the blobs it hosts (the site it serves can: Arrow web app row); take funds or change the contract or wasm hash after the lock | J#21, J#56; Pending M15a | TODO |
-| Arrow web app (served JavaScript) | Whoever deploys the site (a modified deploy is not detectable from the page) | Everything the page handles: the file and its key, the criteria and the viewing-key signature, which derives every verdict key of that wallet | n/a | The CSP sets no `script-src`. For sensitive data use the CLI; J#52, J#54 | RISKY |
-| Buyer viewing key | The buyer's EOA signature ([derivation](docs/design.md#keys)) | Anyone: buyer and seller `0x…` accounts are their EVM (Base) addresses, and `get_eval` shows which account inspected which listing, when, and what it paid | n/a | Any site that obtains the same signature can derive the key; J#51 | RISKY |
-| HTTP 402 wrapper | Nothing | n/a | Move funds | [For agents](#for-agents-cli-mcp-http-402); J#27; Pending M16 | TODO |
-| After purchase | The buyer | All data | n/a | J#42 | NOT PROVEN |
-
-**Tracks.** Privacy: the buyer gets the verdict, not the rows (trust rows Output channel, LLM, Buyer viewing key). Agents: MCP tools with spend caps that only the operator sets ([For agents](#for-agents-cli-mcp-http-402)). Security: the LLM cannot produce BUY unless the structural gates pass (trust row Decision correctness; the injection room is [Try it](#try-it-do-x-see-y) step 3).
-
-## Status
-
-As of 2026-11-11 02:10 UTC.
-
-- Testnet: contract `arrow-v2.arrowhq.testnet` runs the frozen program `6ad7fed4…` (set_program: run `deploy-testnet-set_program-freeze` in `evidence/testnet.json`; [build](#build-from-source)); end-to-end run on it: [K2](JUDGES.md#gates-already-run). It is not locked (the lock deletes the contract's access keys); pre-freeze listings: [J#57](JUDGES.md#claims).
-- Mainnet: the Arrow contract `arrow-market.near` is not deployed and the Arrow program has not run on mainnet; spike runs: [gates](JUDGES.md#gates-already-run).
-- Not yet: a hosted demo (not deployed), the demo video (not recorded) and outside demand (no seller invitation sent; drafts in `docs/outreach/`).
-- Repository and CI: private until a human makes it public, so repository links (including the contract's NEP-330 source link) do not resolve yet. All five CI jobs are green; `tee` rebuilds the program natively on x86_64 Linux and in the pinned image and compares both with `release/sha256.txt` ([Build from source](#build-from-source)).
+**[The story](#how-it-works) · [Trust table](#trust-table) · [Try it](#try-it-do-x-see-y) · [Hosted demo (testnet)](https://arrow-market.vercel.app) · [Evidence ledger](JUDGES.md) · [Pending mainnet steps](JUDGES.md#pending-ledger) · [Testnet contract](https://testnet.nearblocks.io/address/arrow-v2.arrowhq.testnet) · [Design notes](docs/design.md)**
 
 ## How it works
 
-```mermaid
-flowchart TB
-  Buyer["Buyer<br/>0x… account,<br/>USDC from Base"]
-  Seller["Seller<br/>0x… account"]
-  Intents["NEAR Intents<br/>intents.near"]
-  Host[("Blob host<br/>untrusted")]
-  Market["Arrow contract"]
-  subgraph TDX["Intel TDX (OutLayer)"]
-    Program["Arrow program"]
-  end
-  subgraph AI["TEE (NEAR AI Cloud)"]
-    Model["reader model"]
-  end
-  Buyer -->|"inspect or buy"| Intents
-  Seller -->|"listing, sealed key"| Intents
-  Seller -->|"ciphertext"| Host
-  Intents -->|"mt_on_transfer"| Market
-  Market -->|"request_execution"| Program
-  Host -->|"ciphertext"| Program
-  Program -->|"sample and criteria,<br/>over TLS"| Model
-  Program -.->|"fixed-schema result"| Market
-  Market -.->|"payouts, refunds"| Intents
-```
-
-*The mainnet design; deployment state: [Status](#status).*
-
-- **TEE:** a trusted execution environment, a processor-isolated machine built so that its host cannot read its memory, and able to prove which code it runs. Arrow uses two: OutLayer's Intel TDX for the Arrow program, and NEAR AI Cloud's for the reader model.
-- **OutLayer** holds the program key and returns the program's result to the contract through `request_execution` yield and resume.
-- **NEAR Intents:** `intents.near` calls the contract with `mt_on_transfer`, and refunds go back through its `mt_resolve_transfer` ([If something fails](#if-something-fails)). Buyer and seller need no NEAR account; they sign from EVM wallets (trust row Buyer viewing key; [standards](docs/design.md#standards)).
+**Noor**, an on-chain analyst, sells a token unlock schedule and a file of labelled wallets, plus a third listing broken on purpose. **Kai**, research lead at a small fund, already tracks 412 token contracts and 1,000 wallets and will not pay for a file he cannot see. The two names are illustrative, and both accounts are the team's. What each part is trusted with: [Trust table](#trust-table), right after the story; state of the build: [Status](#status).
 
 **The run.** Everything below is one recorded run on NEAR testnet, gate [K2](JUDGES.md#gates-already-run) of 2026-11-11 on `arrow-v2.arrowhq.testnet`, with synthetic data ([fixtures/demo](fixtures/demo/README.md)), driven by `scripts/src/e2e-testnet.ts` through the CLI's own commands. Noor is `e2e-seller.arrowhq.testnet` and Kai is `e2e-buyer.arrowhq.testnet`. Testnet has no `intents.near` or 1Click, so the money is the test token `arrow-usd` (aUSD, the testnet stand-in for USDC), sent straight to the contract; every amount below is in aUSD.
 
@@ -249,6 +176,82 @@ Kai's net spend is 2.525: one file he wanted, and an answer that kept 2.00 in hi
 
 Check it yourself: each transaction above opens on testnet nearblocks; the `get_eval` command is in J#51.
 
+### The parts
+
+```mermaid
+flowchart TB
+  Buyer["Buyer<br/>0x… account,<br/>USDC from Base"]
+  Seller["Seller<br/>0x… account"]
+  Intents["NEAR Intents<br/>intents.near"]
+  Host[("Blob host<br/>untrusted")]
+  Market["Arrow contract"]
+  subgraph TDX["Intel TDX (OutLayer)"]
+    Program["Arrow program"]
+  end
+  subgraph AI["TEE (NEAR AI Cloud)"]
+    Model["reader model"]
+  end
+  Buyer -->|"inspect or buy"| Intents
+  Seller -->|"listing, sealed key"| Intents
+  Seller -->|"ciphertext"| Host
+  Intents -->|"mt_on_transfer"| Market
+  Market -->|"request_execution"| Program
+  Host -->|"ciphertext"| Program
+  Program -->|"sample and criteria,<br/>over TLS"| Model
+  Program -.->|"fixed-schema result"| Market
+  Market -.->|"payouts, refunds"| Intents
+```
+
+*The mainnet design; deployment state: [Status](#status).*
+
+- **TEE:** a trusted execution environment, a processor-isolated machine built so that its host cannot read its memory, and able to prove which code it runs. Arrow uses two: OutLayer's Intel TDX for the Arrow program, and NEAR AI Cloud's for the reader model.
+- **OutLayer** holds the program key and returns the program's result to the contract through `request_execution` yield and resume.
+- **NEAR Intents:** `intents.near` calls the contract with `mt_on_transfer`, and refunds go back through its `mt_resolve_transfer` ([If something fails](#if-something-fails)). Buyer and seller need no NEAR account; they sign from EVM wallets (trust row Buyer viewing key; [standards](docs/design.md#standards)).
+
+## Trust table
+
+**PROVEN**: a command or transaction shows it today; the parenthesis says where. **RISKY**: true, and a weakness. **NOT PROVEN**: we do not claim it. **TODO**: waits for a [Pending ledger](JUDGES.md#pending-ledger) step. `J#n` is row n of [JUDGES.md](JUDGES.md). Each row counted under its weakest label: 3 PROVEN, 14 RISKY, 4 NOT PROVEN, 4 TODO.
+
+| Part | Who you trust | Can see | Cannot | How to check | Label |
+|---|---|---|---|---|---|
+| Seller data at rest | Nobody (ciphertext; the blob host is untrusted) | The blob host: the ciphertext and each downloader's IP and user agent. Anyone: the exact plaintext size, column names, row count and the seller's `0x…` account | Decrypt | [Hash binding](docs/design.md#hash-binding); J#14, J#55; Pending M7a-c. The hosted site keeps web sellers' ciphertext in a Vercel Blob store only while the hosted demo runs (at least until 2026-11-18, planned until 2026-11-25); a daily job deletes a stored ciphertext that no Arrow listing points to, 24 hours after upload | TODO (mainnet run) |
+| Program key / `PROTECTED_MASTER` | OutLayer keystore (TDX) and the shared OutLayer master | Inside the TEE | Release to a non-Arrow caller or (untested) to an unpinned wasm | `WasmHash` + `Predecessor` access condition; negative tests: J#11, J#45. Before the lock the owner can move the rule that ties the key to the wasm hash, and no verify row checks it | PROVEN (`Predecessor`: testnet echo program, mainnet spike program), NOT PROVEN (`WasmHash`) |
+| OutLayer keystore DAO | Can export keys on "cessation" | Potentially everything, including the buyer's sealed criteria, whose MinHash sketch is unkeyed: up to 128 members of the buyer's list can be recovered | n/a | J#40, J#50 | RISKY |
+| Evaluation | Intel TDX (OutLayer worker) | Plaintext inside the TEE | Emit anything outside the schema | J#1-3. Attestation binding: [S1-b](JUDGES.md#gates-already-run) (echo program); J#13, J#48 (Arrow program). The TDX quote is not verified on chain (J#38) | PROVEN (schema: native test) |
+| LLM | NEAR AI gateway (TDX) and model TEE (TDX + NVIDIA CC) | Each eval's prompt: the sample, whole-file aggregates and the criteria ([NEAR AI call](docs/design.md#near-ai-call)) | Retain data (NEAR AI's zero-data-retention claim is a trust assumption) | J#37, J#49 | NOT PROVEN |
+| Wasm to NEAR AI | TLS (not E2EE) | n/a | n/a | [NEAR AI call](docs/design.md#near-ai-call) | RISKY |
+| Time guard | The TDX clock, which the host provides | n/a | n/a | [Limits](docs/design.md#timeouts); J#19. A release refused as late still leaves its `k`, sealed to the buyer, public while the buyer keeps the refund | RISKY |
+| OutLayer coordinator (closed source) | Liveness | Encrypted input | Read secrets (OutLayer's design, a trust assumption) | J#16 | PROVEN (refund on `null`: sandbox) |
+| `outlayer.near`, `intents.near` contracts | Their owners (both are upgradable); Arrow depends on them | n/a | n/a | Code-hash history: J#39 | RISKY |
+| Program bytes | Whoever serves the wasm URL | The wasm | Change it unnoticed (hash-pinned) | Served from testnet FastFS (`test.fastfs.io/arrowhq.testnet/outlayer.testnet/6ad7fed4….wasm`); mainnet OutLayer fetched a program from testnet FastFS in the S3c spike | RISKY |
+| Output channel | Schema and rule composition | At most 5.68 bits per eval (scored), 1.59 (verdict-only), on this channel only ([derivation](docs/design.md#leak-bound)) | Free text | J#1-3 | PROVEN |
+| Error channel | The enclave: one fixed error output, nothing on stderr | The failure states on chain ([leak bound](docs/design.md#leak-bound)) | Carry data | J#4, J#43 | RISKY (stderr and the fixed output: PROVEN, native harness) |
+| Side channels | Not closed | `time_ms` and `instructions` on chain, counted in neither the bound nor the budget. `instructions` follows the work: the dataset size, the content of the sampled rows ([seed](docs/design.md#near-ai-call)), the criteria text, the buyer's `key_column` and `date_column` (so it can reveal a chosen column's non-empty and distinct counts) and, on a failed run, the step where it stopped | n/a | J#35; [measured values](docs/perf.md) | RISKY |
+| Leak budget | The contract counter | n/a | n/a | [Rules](docs/design.md#leak-budget); J#15, J#41 | RISKY |
+| Decision correctness | Structural gates and the LLM | n/a | Override a failed structural gate | J#5 (gates); J#9, J#53 (semantics) | PROVEN (gates), RISKY (semantics) |
+| 1Click and the PoA bridge (Intents Technology) | Short custody during swaps | Swap transactions | n/a | Base USDC (other 1Click origins are untested) arrives as a bridged token (`omft.near`) that 1Click swaps into native NEAR USDC, the only token the market accepts; J#24, J#25 | NOT PROVEN (custody), PROVEN (one inbound) |
+| Refund destination | `intents.near` | n/a | n/a | Moving a refund back to Base is a separate 1Click withdrawal; J#17; Pending M12 | PROVEN (mainnet, spike contract); TODO (Arrow contract) |
+| NEAR AI API key (inside the OutLayer secret) | Billing | Usage volume | See content | If it runs out, evals fail; J#44 | RISKY |
+| Gas tank | The operator (tops it up) and OutLayer's NEAR charge | n/a | n/a | `fund_tank` refills it; J#46; [cost, runway and E10](docs/perf.md#gas-tank) | RISKY |
+| Relayer account | Whoever holds the keys of `arrow-relayer.arrowhq.near` (the team) | The intents it relays: signer, `msg`, IP | Spend or move user funds: the relayer holds none | The relay server signs only with a function-call key limited to `execute_intents` on `intents.near`. The account's FullAccess key stays offline with the team, to revoke a leaked server key; whoever holds it can drain the relayer's gas or stop `/api/relay`; J#47. The relay's rate limits are per server instance and protect only the relayer's gas: across instances the worst case is about 0.34 NEAR of gas (its balance down to the 0.65 NEAR floor, then the hosted relay pauses) and no user funds; a signed payment still runs once (J#56) | RISKY |
+| Arrow operator | Relayer liveness, gas tank | The ciphertext blobs it hosts; the IP, `0x…` address and listing of every payment relayed through `/api/relay`; relay idempotency entries and rate counters | Decrypt the blobs it hosts (the site it serves can: Arrow web app row); take funds or change the contract or wasm hash after the lock | J#21, J#56; Pending M15a | TODO |
+| Arrow web app (served JavaScript) | Whoever deploys the site (a modified deploy is not detectable from the page) | Everything the page handles: the file and its key, the criteria and the viewing-key signature, which derives every verdict key of that wallet | n/a | The CSP runs only scripts that carry the page's per-request nonce (`'strict-dynamic'`, no `'unsafe-inline'` or `'unsafe-eval'`; `curl -sI https://arrow-market.vercel.app/`): that stops an injected script, not a modified deploy. For sensitive data use the CLI; J#52, J#54 | RISKY |
+| Buyer viewing key | The buyer's EOA signature ([derivation](docs/design.md#keys)) | Anyone: buyer and seller `0x…` accounts are their EVM (Base) addresses, and `get_eval` shows which account inspected which listing, when, and what it paid | n/a | Any site that obtains the same signature can derive the key; J#51 | RISKY |
+| HTTP 402 wrapper | Nothing | n/a | Move funds | [For agents](#for-agents-cli-mcp-http-402); J#27; Pending M16 | TODO |
+| After purchase | The buyer | All data | n/a | J#42 | NOT PROVEN |
+
+**Tracks.** Privacy: the buyer gets the verdict, not the rows (trust rows Output channel, LLM, Buyer viewing key). Agents: MCP tools with spend caps that only the operator sets ([For agents](#for-agents-cli-mcp-http-402)). Security: the LLM cannot produce BUY unless the structural gates pass (trust row Decision correctness; the injection room is [Try it](#try-it-do-x-see-y) step 3).
+
+## Status
+
+As of 2026-11-11 19:50 UTC.
+
+- Testnet: contract `arrow-v2.arrowhq.testnet` runs the frozen program `6ad7fed4…` (tag `wasm-freeze`; set_program: run `deploy-testnet-set_program-freeze` in `evidence/testnet.json`; [build](#build-from-source)); end-to-end run on it: [K2](JUDGES.md#gates-already-run). It is not locked (the lock deletes the contract's access keys); pre-freeze listings: [J#57](JUDGES.md#claims).
+- Mainnet: the Arrow contract `arrow-market.near` is not deployed and the Arrow program has not run on mainnet; spike runs: [gates](JUDGES.md#gates-already-run).
+- Hosted demo: [arrow-market.vercel.app](https://arrow-market.vercel.app), on testnet against `arrow-v2.arrowhq.testnet`, built from `ba0e5d8` with the frozen program's sha embedded.
+- Not yet: the demo video (not recorded) and outside demand (no seller invitation sent; drafts in `docs/outreach/`).
+- Repository and CI: private until a human makes it public, so repository links (including the contract's NEP-330 source link) do not resolve yet. All five CI jobs are green; `tee` rebuilds the program natively on x86_64 Linux and in the pinned image and compares both with `release/sha256.txt` ([Build from source](#build-from-source)).
+
 ## Try it (do X, see Y)
 
 Node 22.22.2 or later (tested on 24.15.0) and Rust 1.97.1, which `rust-toolchain.toml` pins and rustup installs on the first `cargo` call. No keys, funds, wallet or browser. "(network)" marks a step that needs internet; step 2, the first `cargo` call, also needs it once (rustup and crates.io).
@@ -357,9 +360,9 @@ The variables, all prefixed `ARROW_MCP_`: `ALLOW_MAINNET` and `ALLOW_BUY` are of
 
 ## Build from source
 
-**Enclave.** `bash scripts/build-tee-docker.sh` (Docker; it builds the committed `HEAD` in a pinned linux/amd64 image, about 1.5 min on Apple silicon after the image pull) prints `6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1`, the value in `release/sha256.txt`, the contract's `program_wasm_hash` and the attested `wasm_hash`. Without Docker, `bash scripts/build-tee.sh` gives the same sha on x86_64 Linux only: Cargo mixes the build machine's target triple into the hash of every crate that has a build script or a proc-macro dependency, so another host gives other bytes (macOS arm64: `2d2dc4d0…`, which ran on testnet as rc4 before the freeze). Proof of the cause: on a Mac, `RUSTC=scripts/dev/rustc-fixed-host.sh bash scripts/build-tee.sh target/rel-tee-shim` changes only the host line Cargo sees and prints the canonical sha. Flags, toolchain and the proof: [release/BUILD.md](release/BUILD.md).
+**Enclave.** `bash scripts/build-tee-docker.sh` (Docker; it builds the committed `HEAD` in a pinned linux/amd64 image, about 1.5 min on Apple silicon after the image pull) prints `6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1`, the value in `release/sha256.txt`, the contract's `program_wasm_hash` and the attested `wasm_hash`. Without Docker, `bash scripts/build-tee.sh` gives the same sha only on `x86_64-unknown-linux-gnu` with rustup: Cargo mixes the build machine's target triple into the hash of every crate that has a build script or a proc-macro dependency, so another host gives other bytes (macOS arm64: `2d2dc4d0…`, which ran on testnet as rc4 before the freeze). Proof of the cause: on a Mac, `RUSTC=scripts/dev/rustc-fixed-host.sh bash scripts/build-tee.sh target/rel-tee-shim` changes only the host line Cargo sees and prints the canonical sha. Flags, toolchain and the proof: [release/BUILD.md](release/BUILD.md).
 
-**Contracts.** `cargo near build reproducible-wasm`, then compare with the code hash of `arrow-market.near` once it is deployed (Pending M2). The committed `release/contracts/arrow-mainnet.wasm` predates the fixes, and `bash scripts/deploy/mainnet-check.sh wasm` prints `FAIL contract_wasm_stale` until it is rebuilt.
+**Contracts.** `cargo near build reproducible-wasm`, then compare with the code hash of `arrow-market.near` once it is deployed (Pending M2). The committed `release/contracts/arrow-mainnet.wasm` is that build at `6ae732d` (sha256 `f59f35e7…`, code hash `HXohArFy…`; [release/contracts/BUILD.md](release/contracts/BUILD.md)), and `bash scripts/deploy/mainnet-check.sh wasm` prints `PASS contract_wasm_sha256` and `PASS contract_wasm_fresh`.
 
 ## Hackathon rules
 

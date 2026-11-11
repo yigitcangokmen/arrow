@@ -4,7 +4,7 @@ Measured 2026-11-10 between 18:46 and 19:20 GMT+7, except the main `211bc63` col
 
 ## Testnet
 
-- Real evals on `arrow.arrowhq.testnet`, the first market contract, running program rc `73415b8f…` (pre-binding: built before the MinHash change below and before the binding fixes). rc4, which contains both, has not been re-measured.
+- Real evals on `arrow.arrowhq.testnet`, the first market contract, running program rc `73415b8f…` (pre-binding: built before the MinHash change below and before the binding fixes). The frozen program `6ad7fed4…`, which contains both (the rc4 source, built on the canonical host), has not been re-measured.
 - Listings: seller `spike.arrowhq.testnet` listed both scored demo datasets. The blobs are on testnet FastFS.
   - Listing 8 is the unlock scene: https://testnet.nearblocks.io/txns/5TUZURcuV2RPWcy2GtH6W4K7nGUSXDCqgN1gv4WEZGGf
   - Listing 9 is the labels scene: https://testnet.nearblocks.io/txns/HTa2E87jTyR3poTtfUpTTCbWEmtonHJrJVQ3typwhhAE
