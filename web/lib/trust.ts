@@ -129,14 +129,14 @@ export const TRUST_ROWS: readonly TrustRow[] = [
   {
     part: "Output channel",
     trust: "Schema and rule composition",
-    sees: "At most 5.67 bits per eval (scored), 1.58 (verdict), in successful verdicts and on this channel only; failures (Error channel) and instructions (Side channels) come on top",
+    sees: "At most 5.68 bits per eval (scored), 1.59 (verdict), counting the one error output, on this channel only; null (Error channel) and instructions (Side channels) come on top",
     cannot: "Free text",
     check: "cargo test -p arrow-core: output_space_is_at_most_51_states, output_le_900_bytes",
   },
   {
     part: "Error channel",
     trust: "The enclave writes one fixed error output and nothing on stderr; a trap or out-of-fuel run leaves no output",
-    sees: "Two failure states on chain: ok:false (refund reason not_ok) and null. Scored mode has at least 52 outcomes and verdict mode 4 (2 bits); the 5.67 and 1.58 bits and the on-chain budget do not count null",
+    sees: "Two failure states on chain: ok:false (refund reason not_ok) and null. Scored mode has at least 52 outcomes and verdict mode 4 (2 bits); the 5.68 and 1.59 bits and the on-chain budget do not count null",
     cannot: "Carry data",
     check:
       "scripts/dev/stderr-harness.sh covers stderr, the fixed ok:false output and out-of-memory. A key column that expands under normalization (U+FDFA) ends as ok:false, not out of fuel (key_column_normalization_is_capped), and the injection scan reads only the cell prefix the prompt shows. null still comes from OutLayer or worker failures",

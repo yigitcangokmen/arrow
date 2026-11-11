@@ -33,7 +33,8 @@ describe("claims wording", () => {
       expect(text).not.toMatch(/nobody can look|reading the data inside the enclave|reads the (sealed )?data inside (a|the) (tee|enclave)/i);
     }
     expect(line("You cannot sell information")).toMatch(/NEAR AI's TEE/);
-    expect(line("You cannot sell information")).toMatch(/over TLS/);
+    // the TLS hop has one home, the trust row
+    expect(row("Wasm to NEAR AI")).toMatch(/TLS \(not E2EE\)/);
   });
 
   it("clm2_invites_promise_no_markdown_and_no_solana", () => {
@@ -57,19 +58,20 @@ describe("claims wording", () => {
   });
 
   it("clm6_wasm_hash_condition_is_not_claimed_as_tested", () => {
-    const r = row("Program key");
-    expect(r).toMatch(/`Predecessor` condition only/);
-    expect(r).toMatch(/NOT PROVEN \(`WasmHash`/);
+    expect(row("Program key")).toMatch(/NOT PROVEN \(`WasmHash`/);
     expect(judgesRow(11)!.label).toMatch(/Predecessor/);
+    // the WasmHash row is the one home of what the negative tests check
     const wasm = judges.find((j) => /WasmHash/.test(j.claim));
     expect(wasm?.label).toBe("NOT PROVEN");
+    expect(wasm?.expected).toMatch(/`Predecessor` condition only/);
   });
 
   it("clm7_mainnet_refund_sample_is_the_spikes_forced_refund", () => {
     const refundRow = jline("**S3c** refund");
     expect(refundRow).toContain("outlayer_refund");
     expect(refundRow).not.toMatch(/decided by the program/);
-    expect(judgesRow(18)!.expected).toContain("outlayer_refund");
+    // row 18 points at the gate, the only home of the forced-refund caveat and its timing
+    expect(judgesRow(18)!.expected).toContain("Gate **S3c** refund");
     expect(readme).not.toMatch(/before the program gives up and the refund starts/);
   });
 
@@ -84,7 +86,6 @@ describe("claims wording", () => {
     const refund = secs("spike-s3c-outlayer_refund");
     expect(jline("**S3c** keep")).toContain(`${keep} s`);
     expect(jline("**S3c** refund")).toContain(`${refund} s`);
-    expect(judgesRow(18)!.expected).toContain(`${refund} s`);
     expect(`${readme}\n${read("JUDGES.md")}`).not.toMatch(/\b(10\.0|38\.0) s/);
   });
 
@@ -97,7 +98,6 @@ describe("claims wording", () => {
     const r = row("Relayer account");
     expect(r).toMatch(/FullAccess/);
     expect(r).toMatch(/\| RISKY \|$/);
-    expect(line("Security-track pieces")).toMatch(/FullAccess key/);
     expect(judges.find((j) => /relayer account/i.test(j.claim))?.expected).toMatch(/FullAccess/);
   });
 
@@ -107,8 +107,11 @@ describe("claims wording", () => {
     expect(step5).toContain(`ecies ts->rs: ${cases("ecies-vectors.json")}/${cases("ecies-vectors.json")}`);
     expect(step5).toContain(`xchacha ts->rs: ${cases("xchacha-vectors.json")}/${cases("xchacha-vectors.json")}`);
     expect(step5).toContain(`minhash ts->rs: ${cases("minhash-vectors.json")}/${cases("minhash-vectors.json")}`);
+    // JUDGES row 32 states only the rs->ts direction and points at step 5 for the rest
     const s4b = judgesRow(32)!.expected;
-    expect(s4b).toContain(`ECIES ${cases("ecies-vectors.json")}/${cases("ecies-vectors.json")} and ${cases("ecies-vectors-rs.json")}/${cases("ecies-vectors-rs.json")}`);
+    expect(s4b).toContain("step 5");
+    expect(s4b).toContain(`ecies rs->ts: ${cases("ecies-vectors-rs.json")}/${cases("ecies-vectors-rs.json")}`);
+    expect(s4b).toContain(`xchacha rs->ts: ${cases("xchacha-vectors-rs.json")}/${cases("xchacha-vectors-rs.json")}`);
     // no exact unit-test count: it goes stale with every new test
     expect(readme).not.toMatch(/\d+ unit tests/);
     expect(read("JUDGES.md")).not.toMatch(/no_stderr_on_any_error: \d+\/\d+ PASS/);
@@ -118,20 +121,25 @@ describe("claims wording", () => {
     const init = JSON.parse(read("scripts/deploy/init-mainnet.json")) as { fee_bps_eval: number };
     const pct = `${init.fee_bps_eval / 100}%`;
     expect(pct).toBe("10%");
+    // README Money is the only README/JUDGES home of the 10%; the rows that promise a refund point at it
     for (const [name, text] of [
-      ["README opening", readme.split("\n")[2]!],
-      ["README KU-11 row", row("NEAR AI API key")],
-      ["README leak budget row", row("Leak budget")],
+      ["README failure table", line("`arrow_refund{reason:\"not_ok\"}`")],
+      ["JUDGES row 41 (forced failures)", judgesRow(41)!.expected],
+      ["JUDGES row 16", judgesRow(16)!.claim],
+    ] as const) {
+      expect(text, name).toMatch(/README Money|\[Money\]\(#how-it-works\)/);
+    }
+    expect(readme.split("\n")[2]).toContain("[amounts](#how-it-works)");
+    for (const [name, text] of [
+      ["README Money", line("- **Money.**")],
       ["video F07", read("docs/video/script.md").split("\n").find((l) => l.startsWith("| F07"))!],
       ["video X06", read("docs/video/script.md").split("\n").find((l) => l.startsWith("| X06"))!],
       ["idea.txt", read("docs/submission/idea.txt")],
-      ["JUDGES row 16", JSON.stringify(judgesRow(16))],
-      ["JUDGES row 44", JSON.stringify(judgesRow(44))],
       ["web BuyFlow", read("web/app/buy/[id]/BuyFlow.tsx")],
     ] as const) {
       expect(text, name).toMatch(/10%|ten percent/);
     }
-    // the S2 gate no longer describes the sandbox refund itself; it points at row 16, which states the 10% charge
+    // the S2 gate no longer describes the sandbox refund itself; it points at row 16, which points at the README intro
     expect(jline("**S2**")).toContain("row 16");
     expect(row("Gas tank")).toMatch(/\| RISKY \|$/);
     expect(read("web/lib/trust.ts")).toContain('part: "Gas tank"');

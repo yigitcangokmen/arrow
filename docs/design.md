@@ -1,7 +1,5 @@
 # Arrow design notes
 
-Constants are quoted from the source files named in each section.
-
 ## NEAR AI call
 
 - Endpoint `https://cloud-api.near.ai/v1/chat/completions`, model `Qwen/Qwen3.8-27B`, both fixed in `enclave/arrow-tee/src/consts.rs`. The enclave checks that the response names the same model.
@@ -20,10 +18,10 @@ Constants are quoted from the source files named in each section.
 
 ## Leak bound
 
-- Scored mode: 2 verdicts × 5 fit × 5 novelty + 1 error output = 51 states. log2 51 ≈ 5.672, written "at most 5.68 bits". Verdict-only mode: 3 states, log2 3 ≈ 1.585, written "at most 1.59". The contract stores the bound as `bits_per_eval_milli` 5673 (scored) and 1585 (verdict), rounded up to the next milli-bit. The CLI, the web pages and the recorded evidence show these as 5.67 and 1.58 (two decimals of the milli-bit values); the bench line "results outside the 50 states" counts the 50 success states, the error output being the 51st.
+- Scored mode: 2 verdicts × 5 fit × 5 novelty + 1 error output = 51 states, log2 51 ≈ 5.672. Verdict-only mode: 3 states, log2 3 ≈ 1.585. The contract stores them as `bits_per_eval_milli` 5673 and 1585, rounded up to the next milli-bit. Every surface that states the bound rounds up, "at most 5.68 bits" and "at most 1.59"; the per-eval charge lines of the CLI and `/buy` round to the nearest hundredth (`formatBits`, `sdk/src/bits.ts`: 5.67), and `/sell`'s budget preview shows milli-bits. The bench line "results outside the 50 states" counts the success states only.
 - With `null` (a trap, an out-of-fuel run or an OutLayer failure) on chain as a second failure state, scored mode has at least 52 outcomes (≈ 5.70 bits) and verdict mode 4 (2 bits). Neither the bound nor the budget counts `null`.
 - The contract's classifier (`contracts/arrow/src/eval.rs`) has two more refund reasons: `bad_output` (an output it cannot parse) and `hash_mismatch` ([hash binding](#hash-binding)). On eval the Arrow program writes neither, but an OutLayer fault could return `bad_output`.
-- The output is at most 900 bytes (`MAX_OUTPUT_BYTES`, OutLayer's blockchain-mode limit); Arrow targets 400 ([measured size](perf.md)).
+- The output is at most 900 bytes (`MAX_OUTPUT_BYTES`, OutLayer's blockchain-mode limit; [measured size and target](perf.md#decisions-card-rules-set-in-advance)).
 
 ## Leak budget
 
@@ -40,7 +38,7 @@ From `enclave/arrow-tee/src/consts.rs` and `enclave/arrow-tee/src/http.rs`:
 |---|---|
 | NEAR AI chat call | 35 s to first byte and in total (10 s to connect) |
 | Blob fetch | 25 s in total (15 s to first byte) |
-| `T_PAD`: every eval the enclave runs is padded to at least | 45 s |
+| `T_PAD`: an eval is padded to at least | 45 s |
 | Eval guard: error output when the request block is older than | 90 s |
 | Release guard | 45 s |
 | NEAR yield window before the contract times out and refunds | 200 blocks |
@@ -52,12 +50,12 @@ From `enclave/arrow-tee/src/consts.rs` and `enclave/arrow-tee/src/http.rs`:
 - Every `ok` output carries `h`, the sha256 of the ciphertext the enclave downloaded.
 - On buy the enclave downloads the blob again. If it was swapped, `h` differs from the listing's `blob_sha256`, the key stays inside and the contract refunds with `arrow_refund{reason:"hash_mismatch"}`; if the blob is gone, the reason is `not_ok`. Release also checks that the key opens the blob it just downloaded.
 - On eval a swapped blob ends as `not_ok`: the enclave stops before scoring.
-- After a release nothing stops the seller from changing the hosted file. `op=rehost` points a listing at a new URL and keeps `blob_sha256`.
+- After a release nothing stops the seller from changing the hosted file. `op=rehost` (CLI only) points a listing at a new URL and keeps `blob_sha256`.
 
 ## Keys
 
-- File: XChaCha20-Poly1305 with a random 32-byte key K, encrypted in the browser or the CLI (`sdk/src/crypto.ts`).
-- Listing: K sealed with ECIES to the program's secp256k1 public key (`program_pubkey`), derived inside the enclave from the OutLayer secret `PROTECTED_MASTER` with HKDF info `arrow/program/v1`. Changing the program changes the key, so listings sealed to an older program answer E13.
+- File: XChaCha20-Poly1305 with a 32-byte key K (`sdk/src/crypto.ts`). The browser draws K and the nonce at random. The CLI derives both as an HMAC-SHA256 of a random local seller secret over the network, contract, program key and the plaintext's sha256 (`agent/src/commands.ts`), so the same file listed twice on the same market gets the same K and the same ciphertext.
+- Listing: K sealed with ECIES to the program's secp256k1 public key (`program_pubkey`), derived inside the enclave from the OutLayer secret `PROTECTED_MASTER` with HKDF info `arrow/program/v1`. Changing the program changes the key ([J#57](../JUDGES.md#claims)).
 - Purchase: the enclave re-seals K to the buyer's public key from the `op=buy` msg. Eval results are sealed to the buyer's key too.
 - Viewing key (web): derived from the buyer's EOA signature over `Arrow viewing key v1`, the site domain and a warning (`sdk/src/viewingKey.ts`). EIP-1271 contract wallets are refused: their signature does not recover to their address, and `intents.near` has no ERC-1271 path, so USDC credited to such an account could never be signed out (`web/lib/wallet.ts`).
 

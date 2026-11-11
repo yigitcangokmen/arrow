@@ -8,7 +8,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: { default: "Arrow", template: "%s · Arrow" }, // each page names itself, so tabs and history entries tell apart (WCAG 2.4.2)
   description:
-    "Inspect before you pay: a fixed model in NEAR AI's TEE reads a 40-row sample of the sealed data, and only a capped verdict (≤5.67 bits on the output channel) comes back to the buyer.",
+    "Inspect before you pay: a fixed model in NEAR AI's TEE reads a 40-row sample of the sealed data, and only a capped verdict (≤5.68 bits on the output channel) comes back to the buyer.",
 };
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1 };

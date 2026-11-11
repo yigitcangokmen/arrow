@@ -1,6 +1,6 @@
 # web/ (Next.js 16.4.6)
 
-Hosted on Vercel and kept up until at least 2026-11-18, ideally 2026-11-25 (HACKATHON.md Q-012).
+Hosted on Vercel; how long: [README trust table](../README.md#trust-table), row Seller data at rest.
 
 Pages:
 - `/sell`: encrypt in the browser, upload to Vercel Blob, seal K, sign `op=list`.

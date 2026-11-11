@@ -498,8 +498,8 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
             <div className={form.field}>
               <label htmlFor="mode">Answer</label>
               <select id="mode" value={mode} onChange={(e) => setMode(e.target.value as "scored" | "verdict")}>
-                <option value="scored">BUY/PASS with fit and novelty (5.67 bits per inspection on the output channel)</option>
-                <option value="verdict">BUY/PASS only (1.59 bits per inspection on the output channel)</option>
+                <option value="scored">BUY/PASS with fit and novelty (at most 5.68 bits per inspection on the output channel)</option>
+                <option value="verdict">BUY/PASS only (at most 1.59 bits per inspection on the output channel)</option>
               </select>
             </div>
             <div className={form.field}>
