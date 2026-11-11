@@ -38,7 +38,7 @@
       "expect": "arrow-usd deployed at arrow-usd.arrowhq.testnet",
       "observed": "ft_metadata: {\"symbol\":\"aUSD\",\"decimals\":6}",
       "script": "spikes/s2/run-testnet.sh",
-      "commit": "2510d4ea3bb03a06c6ab4c374b70d21738e9d6da"
+      "commit": "f4cfd19098ef41f24c35c6e4a0f6add1d559d0c7"
     },
     {
       "id": "s2-002",
@@ -54,7 +54,7 @@
       "expect": "s2 receiver deployed at s2.arrowhq.testnet",
       "observed": "deployed",
       "script": "spikes/s2/run-testnet.sh",
-      "commit": "2510d4ea3bb03a06c6ab4c374b70d21738e9d6da"
+      "commit": "f4cfd19098ef41f24c35c6e4a0f6add1d559d0c7"
     },
     {
       "id": "s2-003",
@@ -70,7 +70,7 @@
       "expect": "mint: buyer +10000000",
       "observed": "buyer 0 -> 10000000",
       "script": "spikes/s2/run-testnet.sh",
-      "commit": "2510d4ea3bb03a06c6ab4c374b70d21738e9d6da"
+      "commit": "f4cfd19098ef41f24c35c6e4a0f6add1d559d0c7"
     },
     {
       "id": "s2-004",
@@ -86,7 +86,7 @@
       "expect": "mint_cap: mint 10000001 rejected with 'mint cap'",
       "observed": "rejected: Arrow-USD: mint cap is 10 USDC per call",
       "script": "spikes/s2/run-testnet.sh",
-      "commit": "2510d4ea3bb03a06c6ab4c374b70d21738e9d6da"
+      "commit": "f4cfd19098ef41f24c35c6e4a0f6add1d559d0c7"
     },
     {
       "id": "s2-005",
@@ -102,7 +102,7 @@
       "expect": "refund_all: buyer and receiver unchanged",
       "observed": "buyer 10000000 -> 10000000, receiver 0 -> 0",
       "script": "spikes/s2/run-testnet.sh",
-      "commit": "2510d4ea3bb03a06c6ab4c374b70d21738e9d6da"
+      "commit": "f4cfd19098ef41f24c35c6e4a0f6add1d559d0c7"
     },
     {
       "id": "s2-006",
@@ -118,7 +118,7 @@
       "expect": "keep: buyer -100000, receiver +100000",
       "observed": "buyer 10000000 -> 9900000, receiver 0 -> 100000",
       "script": "spikes/s2/run-testnet.sh",
-      "commit": "2510d4ea3bb03a06c6ab4c374b70d21738e9d6da"
+      "commit": "f4cfd19098ef41f24c35c6e4a0f6add1d559d0c7"
     },
     {
       "id": "deploy-testnet-topup-20261110T112651Z",
@@ -134,7 +134,7 @@
       "expect": "9 NEAR to arrow.arrowhq.testnet",
       "observed": "sent",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "87f92d6321293941a300e4aca0b5ab227096a617"
+      "commit": "60c4c7d4fec9f5ecb071815237bd3ffbf7c164f2"
     },
     {
       "id": "deploy-testnet-deploy-20261110T112703Z",
@@ -150,7 +150,7 @@
       "expect": "deploy + new(cfg) code 7h3FKPR2g5dE4ATLoSZTGW1zo8NtFKcsVPjVHkDwkMAC",
       "observed": "init ok, code_hash 7h3FKPR2g5dE4ATLoSZTGW1zo8NtFKcsVPjVHkDwkMAC",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "87f92d6321293941a300e4aca0b5ab227096a617"
+      "commit": "60c4c7d4fec9f5ecb071815237bd3ffbf7c164f2"
     },
     {
       "id": "deploy-testnet-pubkey-20261110T112801Z",
@@ -166,7 +166,7 @@
       "expect": "program_pubkey 04+128 hex",
       "observed": "program_pubkey 04161f9ce9… (130 hex)",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "87f92d6321293941a300e4aca0b5ab227096a617"
+      "commit": "60c4c7d4fec9f5ecb071815237bd3ffbf7c164f2"
     },
     {
       "id": "deploy-testnet-pubkey-20261110T112851Z",
@@ -182,7 +182,7 @@
       "expect": "program_pubkey 04+128 hex",
       "observed": "program_pubkey 04161f9ce9… (130 hex)",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "87f92d6321293941a300e4aca0b5ab227096a617"
+      "commit": "60c4c7d4fec9f5ecb071815237bd3ffbf7c164f2"
     },
     {
       "id": "e2e-20261110T113933Z-mint-e2e-seller",
@@ -774,7 +774,7 @@
       "expect": "S1-b echo run via spike.arrowhq.testnet: ok:true, pred=spike, < 90 s",
       "observed": "S1B_RESULT ok, chain 8900 ms, pred spike.arrowhq.testnet, sender arrowhq.testnet, skew 5575 ms, ai_status n/a, ai_ms n/a, attestation 27715 wasm/tx/input/output hash match",
       "script": "spikes/s1/run.sh",
-      "commit": "94b037a49ba016746eaac4c6a6547bfb30936bba"
+      "commit": "8516538c1ae7321c9dc1a4b8bd3ae53cc5657c74"
     },
     {
       "id": "s1b-pos2",
@@ -790,7 +790,7 @@
       "expect": "S1-b echo run via spike.arrowhq.testnet: ok:true, pred=spike, < 90 s",
       "observed": "S1B_RESULT ok, chain 6917 ms, pred spike.arrowhq.testnet, sender arrowhq.testnet, skew 3519 ms, ai_status n/a, ai_ms n/a, attestation 27717 wasm/tx/input/output hash match",
       "script": "spikes/s1/run.sh",
-      "commit": "94b037a49ba016746eaac4c6a6547bfb30936bba"
+      "commit": "8516538c1ae7321c9dc1a4b8bd3ae53cc5657c74"
     },
     {
       "id": "s1b-pos3",
@@ -806,7 +806,7 @@
       "expect": "S1-b echo run via spike.arrowhq.testnet: ok:true, pred=spike, < 90 s",
       "observed": "S1B_RESULT ok, chain 6875 ms, pred spike.arrowhq.testnet, sender arrowhq.testnet, skew 3335 ms, ai_status n/a, ai_ms n/a, attestation 27719 wasm/tx/input/output hash match",
       "script": "spikes/s1/run.sh",
-      "commit": "94b037a49ba016746eaac4c6a6547bfb30936bba"
+      "commit": "8516538c1ae7321c9dc1a4b8bd3ae53cc5657c74"
     },
     {
       "id": "s1b-pos4",
@@ -822,7 +822,7 @@
       "expect": "S1-b echo+ai run via spike.arrowhq.testnet: ok:true, pred=spike, < 90 s",
       "observed": "S1B_RESULT ok, chain 8217 ms, pred spike.arrowhq.testnet, sender arrowhq.testnet, skew 3955 ms, ai_status 200, ai_ms 741, attestation 31890 wasm/tx/input/output hash match",
       "script": "spikes/s1/run.sh",
-      "commit": "94b037a49ba016746eaac4c6a6547bfb30936bba"
+      "commit": "8516538c1ae7321c9dc1a4b8bd3ae53cc5657c74"
     },
     {
       "id": "s1b-pos5",
@@ -838,7 +838,7 @@
       "expect": "S1-b echo+ai run via spike.arrowhq.testnet: ok:true, pred=spike, < 90 s",
       "observed": "S1B_RESULT ok, chain 7853 ms, pred spike.arrowhq.testnet, sender arrowhq.testnet, skew 3480 ms, ai_status 200, ai_ms 721, attestation 31896 wasm/tx/input/output hash match",
       "script": "spikes/s1/run.sh",
-      "commit": "94b037a49ba016746eaac4c6a6547bfb30936bba"
+      "commit": "8516538c1ae7321c9dc1a4b8bd3ae53cc5657c74"
     },
     {
       "id": "s1b-pos6",
@@ -854,7 +854,7 @@
       "expect": "S1-b echo+ai run via spike.arrowhq.testnet: ok:true, pred=spike, < 90 s",
       "observed": "S1B_RESULT ok, chain 7831 ms, pred spike.arrowhq.testnet, sender arrowhq.testnet, skew 3511 ms, ai_status 200, ai_ms 730, attestation 31902 wasm/tx/input/output hash match",
       "script": "spikes/s1/run.sh",
-      "commit": "94b037a49ba016746eaac4c6a6547bfb30936bba"
+      "commit": "8516538c1ae7321c9dc1a4b8bd3ae53cc5657c74"
     },
     {
       "id": "s1b-neg",
@@ -870,7 +870,7 @@
       "expect": "S1-b(4) attacker calls outlayer.testnet directly with the spike secrets_ref: secret access denied",
       "observed": "execution_completed success:false, Access denied by access condition, instructions 0, final value null",
       "script": "spikes/s1/run.sh",
-      "commit": "94b037a49ba016746eaac4c6a6547bfb30936bba"
+      "commit": "8516538c1ae7321c9dc1a4b8bd3ae53cc5657c74"
     },
     {
       "id": "e2e-dry-20261110T180013Z-list-L1-17",
@@ -934,7 +934,7 @@
       "expect": "9 NEAR to arrow-v2.arrowhq.testnet",
       "observed": "sent",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "deploy-testnet-deploy-20261110T200306Z",
@@ -950,7 +950,7 @@
       "expect": "deploy + new(cfg) code 89tt21tWzCbeM4JbDPsYNmxgxC8n5m4XeXBU6BJJovZp",
       "observed": "init ok, code_hash 89tt21tWzCbeM4JbDPsYNmxgxC8n5m4XeXBU6BJJovZp",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "deploy-testnet-pubkey-20261110T200353Z",
@@ -966,7 +966,7 @@
       "expect": "program_pubkey 04+128 hex",
       "observed": "program_pubkey 04c65bf22d… (130 hex)",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "e2e-20261110T200427Z-mint-e2e-buyer",
@@ -982,7 +982,7 @@
       "expect": "mint: 10 aUSD to e2e-buyer.arrowhq.testnet",
       "observed": "balance 0.25 -> 10.25",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "e2e-20261110T200427Z-list-L1-1",
@@ -998,7 +998,7 @@
       "expect": "listing created, blob hash on chain",
       "observed": "listed #1 (ciphertext served) sha256 1db4b740dd55…",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "e2e-20261110T200427Z-list-L2-2",
@@ -1014,7 +1014,7 @@
       "expect": "listing created, blob hash on chain",
       "observed": "listed #2 (ciphertext served) sha256 b9710eb96555…",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "e2e-20261110T200427Z-list-L3-3",
@@ -1030,7 +1030,7 @@
       "expect": "listing created, blob hash on chain",
       "observed": "listed #3 (broken host on purpose) sha256 b9710eb96555…",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "e2e-20261110T200427Z-eval-testnet-1",
@@ -1046,7 +1046,7 @@
       "expect": "capped verdict returned",
       "observed": "PASS · fit 2/5 · novelty 1/5 · out 5.67 bits · budget left 277.98/283.65 bits · eval #1 · tx https://testnet.nearblocks.io/txns/EAMRKtwErxQSQkSCwd1cXPVTB5AyYw2YiRHnCmPEctcX",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "e2e-20261110T200427Z-eval-testnet-2",
@@ -1062,7 +1062,7 @@
       "expect": "capped verdict returned",
       "observed": "BUY · fit 5/5 · novelty 4/5 · out 5.67 bits · budget left 277.98/283.65 bits · eval #2 · tx https://testnet.nearblocks.io/txns/CU54nJo2sRJzjMxCzkZCcEaTi5q9giMGJNavec27Hx9z",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "e2e-20261110T200427Z-buy-testnet-1",
@@ -1078,7 +1078,7 @@
       "expect": "key released, hashes equal",
       "observed": "hashes equal, decrypted",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "e2e-20261110T200427Z-eval-testnet-3",
@@ -1094,7 +1094,7 @@
       "expect": "eval fee refunded on failure",
       "observed": "refunded (not_ok)",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "d971b45587f358c8195897b62eadf8be41409efc"
+      "commit": "4e934b15f3202857ceb2a16862e33f62c27260e7"
     },
     {
       "id": "deploy-testnet-token-20261110T224147Z",
@@ -1110,7 +1110,7 @@
       "expect": "arrow-usd code FBGdejH4Pk7tfDEjWfBpG86rbyJpsuKWYLoTJQusL3C8",
       "observed": "deployed (was 69X7dhq3p5JZvYA6YZrQrHtHRQWzoDQ5NYEqXd8rzHen)",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "deploy-testnet-redeploy-20261110T224159Z",
@@ -1126,7 +1126,7 @@
       "expect": "code 8J4Ga9NvS3UrSka6jN6R65VNJsBKnM8NxgWF5UhatQLD, state kept",
       "observed": "redeployed (was 89tt21tWzCbeM4JbDPsYNmxgxC8n5m4XeXBU6BJJovZp)",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "deploy-testnet-set_program-20261110T224229Z",
@@ -1142,7 +1142,7 @@
       "expect": "set_program rc3 b2786f85bf91573423577b027019cfc7d7acae620ed38cba7a50db3e5eaef298",
       "observed": "program set b2786f85bf91573423577b027019cfc7d7acae620ed38cba7a50db3e5eaef298, program_pubkey cleared",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "deploy-testnet-set_config-20261110T224233Z",
@@ -1158,7 +1158,7 @@
       "expect": "set_config limits_release 4e9, exempt arrow-judge",
       "observed": "config patched",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "deploy-testnet-pubkey-20261110T224324Z",
@@ -1174,7 +1174,7 @@
       "expect": "program_pubkey 04+128 hex",
       "observed": "program_pubkey 04a49c1491… (130 hex)",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "e2e-20261110T224403Z-list-L1-4",
@@ -1190,7 +1190,7 @@
       "expect": "listing created, blob hash on chain",
       "observed": "listed #4 (ciphertext served) sha256 01011c49d473…",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "e2e-20261110T224403Z-list-L2-5",
@@ -1206,7 +1206,7 @@
       "expect": "listing created, blob hash on chain",
       "observed": "listed #5 (ciphertext served) sha256 8e71f334faec…",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "e2e-20261110T224403Z-list-L3-6",
@@ -1222,7 +1222,7 @@
       "expect": "listing created, blob hash on chain",
       "observed": "listed #6 (broken host on purpose) sha256 8e71f334faec…",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "e2e-20261110T224403Z-eval-testnet-4",
@@ -1238,7 +1238,7 @@
       "expect": "capped verdict returned",
       "observed": "PASS · fit 2/5 · novelty 1/5 · out 5.67 bits · budget left 277.98/283.65 bits · eval #4 · tx https://testnet.nearblocks.io/txns/Gwb8FeVU2RzaBFGp65ZZZPHJ5XmSLvrRbmHgb6ZHyzrd",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "e2e-20261110T224403Z-eval-testnet-5",
@@ -1254,7 +1254,7 @@
       "expect": "capped verdict returned",
       "observed": "BUY · fit 5/5 · novelty 4/5 · out 5.67 bits · budget left 277.98/283.65 bits · eval #5 · tx https://testnet.nearblocks.io/txns/ELHxN12XwnPNfvgCd33eDN6CY3cCeC2Uh6zX1PywC7Gc",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "e2e-20261110T224403Z-buy-testnet-2",
@@ -1270,7 +1270,7 @@
       "expect": "key released, hashes equal",
       "observed": "hashes equal, decrypted",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "e2e-20261110T224403Z-eval-testnet-6",
@@ -1286,7 +1286,7 @@
       "expect": "eval fee refunded on failure",
       "observed": "refunded (not_ok)",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "45ddc38daa5ecaf6ff0962d0e73e57ef45586c6c"
+      "commit": "e8cb0a7c89a7351c07dfac38f1d6cf31e1152edd"
     },
     {
       "id": "deploy-testnet-redeploy-20261111T000444Z",
@@ -1302,7 +1302,7 @@
       "expect": "code 6qM8y2pHyk3bBoH8MrLDGjGD5AWdMd7jvQ5dxf4DbFqR, state kept",
       "observed": "redeployed (was 8J4Ga9NvS3UrSka6jN6R65VNJsBKnM8NxgWF5UhatQLD)",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "3d841ead493c14622af84659b2ef08ca564da769"
+      "commit": "e48fbdcd75920ca7edd3973c587e27f9d8faebfb"
     },
     {
       "id": "deploy-testnet-set_program-rc4",
@@ -1318,7 +1318,7 @@
       "expect": "set_program rc4 2d2dc4d0c6aff708105f208d8afd9b71081cea9a7fe400a4b7eec2927ef38ee1",
       "observed": "program set, program_pubkey cleared",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "3d841ead493c14622af84659b2ef08ca564da769"
+      "commit": "e48fbdcd75920ca7edd3973c587e27f9d8faebfb"
     },
     {
       "id": "deploy-testnet-pubkey-20261111T000545Z",
@@ -1334,7 +1334,7 @@
       "expect": "program_pubkey 04+128 hex",
       "observed": "program_pubkey 0408d960de… (130 hex)",
       "script": "scripts/deploy/testnet.sh",
-      "commit": "3d841ead493c14622af84659b2ef08ca564da769"
+      "commit": "e48fbdcd75920ca7edd3973c587e27f9d8faebfb"
     },
     {
       "id": "e2e-20261111T000620Z-list-L1-7",
@@ -1350,7 +1350,7 @@
       "expect": "listing created, blob hash on chain",
       "observed": "listed #7 (ciphertext served) sha256 01011c49d473…",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "3d841ead493c14622af84659b2ef08ca564da769"
+      "commit": "e48fbdcd75920ca7edd3973c587e27f9d8faebfb"
     },
     {
       "id": "e2e-20261111T000620Z-list-L2-8",
@@ -1366,7 +1366,7 @@
       "expect": "listing created, blob hash on chain",
       "observed": "listed #8 (ciphertext served) sha256 8e71f334faec…",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "3d841ead493c14622af84659b2ef08ca564da769"
+      "commit": "e48fbdcd75920ca7edd3973c587e27f9d8faebfb"
     },
     {
       "id": "e2e-20261111T000620Z-list-L3-9",
@@ -1382,7 +1382,7 @@
       "expect": "listing created, blob hash on chain",
       "observed": "listed #9 (broken host on purpose) sha256 8e71f334faec…",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "3d841ead493c14622af84659b2ef08ca564da769"
+      "commit": "e48fbdcd75920ca7edd3973c587e27f9d8faebfb"
     },
     {
       "id": "e2e-20261111T000620Z-eval-testnet-7",
@@ -1398,7 +1398,7 @@
       "expect": "capped verdict returned",
       "observed": "PASS · fit 2/5 · novelty 1/5 · out 5.67 bits · budget left 277.98/283.65 bits · eval #7 · tx https://testnet.nearblocks.io/txns/LwYzQ9gTWhCHxW36G8aFrx8D3vfzLuAbkeRzb91qsev",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "3d841ead493c14622af84659b2ef08ca564da769"
+      "commit": "e48fbdcd75920ca7edd3973c587e27f9d8faebfb"
     },
     {
       "id": "e2e-20261111T000620Z-eval-testnet-8",
@@ -1414,7 +1414,7 @@
       "expect": "capped verdict returned",
       "observed": "BUY · fit 5/5 · novelty 4/5 · out 5.67 bits · budget left 277.98/283.65 bits · eval #8 · tx https://testnet.nearblocks.io/txns/3w8N1z7GMYrR8vy5C9Ts5m9sW7FU45JnX4LSZ6qinrVC",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "3d841ead493c14622af84659b2ef08ca564da769"
+      "commit": "e48fbdcd75920ca7edd3973c587e27f9d8faebfb"
     },
     {
       "id": "e2e-20261111T000620Z-buy-testnet-3",
@@ -1430,7 +1430,7 @@
       "expect": "key released, hashes equal",
       "observed": "hashes equal, decrypted",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "3d841ead493c14622af84659b2ef08ca564da769"
+      "commit": "e48fbdcd75920ca7edd3973c587e27f9d8faebfb"
     },
     {
       "id": "e2e-20261111T000620Z-eval-testnet-9",
@@ -1446,7 +1446,7 @@
       "expect": "eval fee refunded on failure",
       "observed": "refunded (not_ok)",
       "script": "scripts/src/e2e-testnet.ts",
-      "commit": "3d841ead493c14622af84659b2ef08ca564da769"
+      "commit": "e48fbdcd75920ca7edd3973c587e27f9d8faebfb"
     }
   ],
   "corrections": []

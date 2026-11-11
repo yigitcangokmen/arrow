@@ -446,8 +446,8 @@ async fn max_listings_cannot_starve_evals() -> R<()> {
 }
 
 /// STATE-1 / X12-6 (storage): redeploying this build over the code that runs on
-/// arrow-v2.arrowhq.testnet (main bfae9c3, testnet build) keeps the state readable and usable.
-/// Needs that wasm: build it from bfae9c3 and run with
+/// arrow-v2.arrowhq.testnet (main cb07c18, testnet build) keeps the state readable and usable.
+/// Needs that wasm: build it from cb07c18 and run with
 /// `ARROW_PREV_WASM=<path> cargo test -p arrow --test sandbox upgrade_keeps_state -- --ignored`.
 #[tokio::test]
 #[ignore]

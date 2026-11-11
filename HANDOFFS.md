@@ -11,7 +11,7 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | 10 Kas 16:49 [09:49Z] (was 08:00) | H-01a | WS-1 T02 | WS1-T06 (S1-a), S1-b NEAR AI call, bench | DONE 18:35 (key in .env; testnet OutLayer secret updated 18:37; X Premium: no) |
 | 10 Kas 17:49 [10:49Z] (was 09:00; latest 20:49 [13:49Z]) | H-02 | WS-1 T09 | H-07, all mainnet gates | DONE (arrowhq.near created, tx 8n1EmZZ2gkkybgv3bhGjtMayjREip4ABVDQAWkThGqUP, 10.3 NEAR, full-access key in the macOS keychain; read-only RPC 21:46 → 10.3 NEAR, 1 FullAccess key) |
 | 10 Kas 17:49 [10:49Z] (was 09:00) | H-03 | WS-4 T08 | H-08a (S4-a) | DONE (Arrow Buyer 0xB5ef…8387 on Base: 15.1 USDC + 0.0016 ETH, orchestrator RPC 21:40, agent `s4a-inbound.ts --dry` 21:47 same; MetaMask import of Arrow Buyer + Arrow Seller 20:51) |
-| 10 Kas 18:49 [11:49Z] (was 10:00) | H-05 | WS-1 T04 | raw GitHub WasmUrl (S-02 primary); push DONE by agent 15:08 (origin/main 6c7b4d37, K-02) | OPEN (public step only; not approved, K-03) |
+| 10 Kas 18:49 [11:49Z] (was 10:00) | H-05 | WS-1 T04 | raw GitHub WasmUrl (S-02 primary); push DONE by agent 15:08 (origin/main a2438115, K-02) | OPEN (public step only; not approved, K-03) |
 | 10 Kas 20:49 [13:49Z] (was 12:00) | H-04 | WS-4 T05 | S4-a Solana dry quote | DONE (Arrow Sol AUcC…WahVj in .env SOLANA_PAYOUT_ADDRESS; 3.3 USDC + 0.002 SOL, USDC ATA exists; agent dry quote 21:45 → 200, 3 USDC in → 2.989698 out, no ATA error) |
 | 10 Kas 20:49 [13:49Z] (was 12:00) | H-06 | WS-5 T10 | WS5-T10 hosted deploy | OPEN |
 | 10 Kas 21:19 [14:19Z] (was 12:30) | H-07 | WS-1 T09 + WS-4 T09 (relayer key part) | H-08, H-12 | DONE 21:49-22:05 (arrow-market.near 4XThFxSV…, arrow-market-v2.near 8yyb9GYX…, arrow-relayer.arrowhq.near GrVY6srV…, arrow-spike.arrowhq.near 5o1oxf7j…, relayer FC key HxFJxjiz…; setup-relayer --check OK) |
@@ -32,7 +32,7 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | 12 Kas 10:00 [03:00Z] (latest 21:00 [14:00Z]) | H-13a | WS-5 T04 | `/sell` blob upload | DONE 11 Kas ~02:00: store arrow-blobs (store_hJvfN8WAsLpJYjIp, public, iad1) linked to arrow-market for prod/preview/dev; BLOB_READ_WRITE_TOKEN in .env and .env.local |
 | 12 Kas 12:00 [05:00Z] | H-01b | WS-1 T02 | H-12 mainnet secret | DONE by decision (DEC §K KU-11): no paid key; NEARAI_API_KEY_MAINNET = the NEAR Builders key |
 | 12 Kas 18:10 [11:10Z] | H-11 | WS-1 T16 | freeze push; agent pushes (K-02) | N/A as human step: agent pushes (K-02) |
-| 12 Kas 18:30-20:30 [11:30-13:30Z] | H-12 | WS-1 T17 | mainnet deploy, H-14 | BLOCKED until K3 freeze + H-01b (lines ready and twin-rehearsed 22:50, block below; runbook scripts/deploy/mainnet.md on main 5081eca) |
+| 12 Kas 18:30-20:30 [11:30-13:30Z] | H-12 | WS-1 T17 | mainnet deploy, H-14 | BLOCKED until K3 freeze + H-01b (lines ready and twin-rehearsed 22:50, block below; runbook scripts/deploy/mainnet.md on main ea83520) |
 | 12 Kas 19:30 [12:30Z] | H-W6a | WS-6 T05 | bench blob push (only if triggered) | N/A unless triggered |
 | 12 Kas 21:00 [14:00Z] | H-13b | WS-5 T10 | hosted relay/sponsor routes | OPEN |
 | 12 Kas 21:00-23:00 [14:00-16:00Z] | H-14 | WS-1 T18 + WS-4 T15 | K4 | OPEN |
@@ -175,7 +175,7 @@ Preconditions (ajan çıktısı, 2026-11-10 15:07-15:08 GMT+7):
     - `bash scripts/secret-scan.sh` → `SECRET_SCAN: PASS` (raw S-04 grep 17 eşleşme, hepsi boş env adı ya da doküman satırı; strict kalıp yok; gitleaks "no leaks found", 3 commit).
     - Plan belgeleri takipte değil: `git ls-files | grep -E "KICKOFF|DECISIONS|PLAN|OPEN-QUESTIONS|^tasks/"` → boş (DEC S-01, W-17). The local maintainer notes file is gitignored.
     - Takip edilen dosyalarda ve geçmişte yasak kelime yok: `bash scripts/secret-scan.sh --public` → `SECRET_SCAN: PASS` (kelimeler `.git/info/banned-words` içinde, takipte değil)
-    - Push DONE (ajan, K-02): `git push -u origin main` → `origin/main = 6c7b4d37` (42595fc bootstrap, aa012ce scaffold + fixtures v1, 6c7b4d3 ledger sync). `gh repo view yigitcangokmen/arrow --json visibility` → `PRIVATE`.
+    - Push DONE (ajan, K-02): `git push -u origin main` → `origin/main = a2438115` (8ae64ef bootstrap, 17294b7 scaffold + fixtures v1, a243811 ledger sync). `gh repo view yigitcangokmen/arrow --json visibility` → `PRIVATE`.
     - Not: `STATUS.md` henüz commit edilmedi (Workstreams tablosu oturum model adlarını içeriyor, DEC K-04); public'ten önce entegratör bu satırları temizleyip commit eder ya da defteri yerel tutar.
 Run exactly (ONLY if the user approves making the repo public):
     cd ~/Desktop/hackathon/near-builds/arrow
@@ -296,7 +296,7 @@ If it fails: DeleteAccountWithLargeState is not expected (small state); any othe
 Result (human fills): DONE 22:15 GMT+7. mt_transfer 20000 → arrowhq.near 7pQZRaHXD9HYMR1uCwFHnttyPr4KgJM6pUmao7giGfQ1 · delete-account 6DBnU8naQHNNdb9XV28boP8RiZcSt3z9mHfnkxAfkMRd. Read-only 22:16: arrow-spike.arrowhq.near UNKNOWN_ACCOUNT, arrowhq.near 9.0611 NEAR and Intents USDC 20000.
 
 ## H-12 · Mainnet deploy + secret + init_program_key · due 12 Kas 18:30-20:30 GMT+7 [11:30-13:30Z] · status: BLOCKED until K3 freeze (12 Kas 18:00) + H-01b
-Purpose: deploy the market to arrow-market.near, not locked (DEC B-06); arrow-market-v2.near stays a reserve with no deploy (DEC D-07). Rewritten 22:50 by S-α (WS1-T17) as single lines in run order; full runbook with expected output and each step's testnet twin: `scripts/deploy/mainnet.md` (ws/1-gates 5081eca, on main after the next merge).
+Purpose: deploy the market to arrow-market.near, not locked (DEC B-06); arrow-market-v2.near stays a reserve with no deploy (DEC D-07). Rewritten 22:50 by S-α (WS1-T17) as single lines in run order; full runbook with expected output and each step's testnet twin: `scripts/deploy/mainnet.md` (ws/1-gates ea83520, on main after the next merge).
 Preconditions: K3 PASS (release/sha256.txt written; `.env` PROGRAM_WASM_URL / PROGRAM_WASM_SHA256 = frozen values); H-01b DONE (`.env` NEARAI_API_KEY_MAINNET filled); step 0 prints PASS on every row. Agent read-only 22:45: arrow-market.near exists, 0.1 NEAR, no code; arrowhq.near 9.0611 NEAR (needs ≥ the step 0 deposit + 0.5 + gas); outlayer not logged in on mainnet; contract wasm = SHA256SUMS and fresh (WS2-T13 reproducible rebuild at the final commit is a hard precondition; `mainnet-check.sh wasm` → PASS contract_wasm_fresh); storage-estimate prints the deposit. Today step 0 FAILs exactly on `program_frozen` and `nearai_key_mainnet`. Each `sign-with-keychain` may show a macOS Keychain prompt: allow it.
 Twin: every signing line ran 22:30-22:44 on testnet against mainnet-dryrun.arrowhq.testnet with the same wasm, the same init JSON and the same `sign-with-keychain` form (create Eb6sXMQM…, storage EVTKMY4N…, deploy+init 29RhuCrm…, tank C5vnSJfF…, secret set + logout/restore OK, init_program_key DD4Q6MX8… → "derive failed: null" because outlayer.near does not exist on testnet, self-only check frrHwP7u… → E14, account deleted 2wU5urgX…). Finding: `new` only accepts the mainnet init JSON on arrow-market.near (secrets_ref must be the contract itself; first twin try FM8kHR3y… → E15 secrets_ref), so the twin rendered its own name there.
 Run exactly (one line per step, in this order):
@@ -342,7 +342,7 @@ Write result to: Result satırı
 If it fails: NEAR DevHub Telegram (https://t.me/neardev) faucet kanalı; ajan bu arada sandbox testleriyle devam eder
 Result (human fills):
 
-## H-14 · e2e-mainnet run · due 12 Kas 21:00-23:00 GMT+7 [14:00-16:00Z] · status: OPEN (block written 11 Kas 01:10 by S-δ, WS4-T15; script on main 11f2d58, merged round 7)
+## H-14 · e2e-mainnet run · due 12 Kas 21:00-23:00 GMT+7 [14:00-16:00Z] · status: OPEN (block written 11 Kas 01:10 by S-δ, WS4-T15; script on main 25061e7, merged round 7)
 Purpose: one real mainnet pass of the full flow; produces K4 evidence (evidence/mainnet.json). Spends about $5 plus gas; the spend plan is printed first and nothing moves until you type y.
 Preconditions:
     - H-12 done and K3 freeze pushed: `npx tsx scripts/src/e2e-mainnet.ts --network mainnet --dry-plan` prints preflight all OK (today it FAILs on `CodeDoesNotExist arrow-market.near`, as expected before H-12)
@@ -358,7 +358,7 @@ Write result to: evidence/mainnet.json (the script writes it); paste the last 30
 If it fails: do not re-run from scratch; paste the output. The agent names the exact `--from-step N` command (earlier listing and eval ids are read back from evidence, so money is not spent twice).
 Result (human fills):
 
-## H-20 · Submission · due 14 Kas 21:00-22:00 GMT+7 [14:00-15:00Z] (absolute 15 Kas 06:00) · status: OPEN (block written 11 Kas 01:10 by S-δ, WS4-T17; script on main b0e39b5, merged round 7)
+## H-20 · Submission · due 14 Kas 21:00-22:00 GMT+7 [14:00-15:00Z] (absolute 15 Kas 06:00) · status: OPEN (block written 11 Kas 01:10 by S-δ, WS4-T17; script on main 4fa0e2b, merged round 7)
 Purpose: one submission for Arrow, sent by the human only. The script never sends; it validates and prints the curl command.
 Preconditions: repo public (H-05/H-17), X post live (H-19x) so `demoUrl` is known, Q-015 check done (H-19), `docs/submission/idea.txt` final (WS7-T07). `~/.config/arrow/submission-inputs.json` exists with placeholders in `<...>`: replace each one yourself (leadName, email, size, nearAddress, and set q015Approved true after H-19). Add `"demoUrl": "<x post url>"` after H-19x or pass `--demo-url`. Keep the file outside the repo; never paste its contents into chat or git.
 Run exactly:
@@ -373,7 +373,7 @@ Result (human fills):
 
 ## H-21 (WS-3 part) · G5 pattern review · due 11 Kas 15:00 GMT+7 [08:00Z] · status: OPEN
 Purpose: a human reads the injection and exfil patterns once before the wasm freeze (WS3-T06 card). Block written by S-β 2026-11-10 16:10 GMT+7 [09:10Z].
-Preconditions: WS3-T06 merged to main: DONE 17:34 GMT+7 (main a13f3a2, e7e615f; was ws/3-enclave 3158151).
+Preconditions: WS3-T06 merged to main: DONE 17:34 GMT+7 (main a391c51, 7220e24; was ws/3-enclave 3158151).
 Run exactly (in the repo root, ≈15 min):
     cargo run -q -p arrow-core --example explain -- --list-patterns
     cargo test -p arrow-core --test injection_room -- --nocapture 2>&1 | grep "room:"
@@ -384,7 +384,7 @@ Result (human fills):
 
 ## H-21 (WS-6 part) · Bench criteria review (15 min) · due 11 Kas 15:00 GMT+7 [08:00Z] (an 11 Kas time, not shifted by Δ) · status: OPEN
 Purpose: DEC C-12. The bench attacks and criteria are agent-written; a human reads them once so the README may say "human-reviewed". Until then bench/README.md says "human review: not done". Block written by S-epsilon, WS6-T04, 2026-11-10 16:55 GMT+7 [09:55Z].
-Preconditions: the review list exists: `~/Desktop/hackathon/near-builds/arrow/bench/REVIEW.md` (115 lines; merged to main 17:45 GMT+7 as bc10ea6, was ws/6-data 56687e1).
+Preconditions: the review list exists: `~/Desktop/hackathon/near-builds/arrow/bench/REVIEW.md` (115 lines; merged to main 17:45 GMT+7 as 7a9fc43, was ws/6-data 56687e1).
 Run exactly:
     open ~/Desktop/hackathon/near-builds/arrow/bench/REVIEW.md
     # optional: open ~/Desktop/hackathon/near-builds/arrow/bench/injection-room/README.md

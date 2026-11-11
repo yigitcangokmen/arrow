@@ -244,7 +244,7 @@ mod tests {
     }
 
     /// STATE-1 / X12-6 (storage): the state layout deployed on arrow-v2.arrowhq.testnet (main
-    /// bfae9c3, code hash 89tt21…) must still deserialize after a code-only redeploy, and the
+    /// cb07c18, code hash 89tt21…) must still deserialize after a code-only redeploy, and the
     /// storage prefixes of the existing maps must not move. A new struct field or a reordered
     /// StorageKey fails here; new maps are opened on demand under appended prefixes instead.
     #[test]

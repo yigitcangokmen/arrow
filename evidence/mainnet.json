@@ -28,7 +28,7 @@
       "expect": "SUCCESS < 120 s, +~1.99 USDC on the Intents account",
       "observed": "status SUCCESS in 30 s; intents USDC 0 -> 1.999596 (+1.999596)",
       "script": "spikes/s4/s4a-inbound.ts",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "spike-s3b-refund_all",
@@ -44,7 +44,7 @@
       "expect": "buyer and spike unchanged; S3_NOTIFY with sender and msg",
       "observed": "buyer 1999596 -> 1999596, spike 0 -> 0; log ok; PASS",
       "script": "spikes/s3/s3b-notify.ts",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "spike-s3b-keep",
@@ -60,7 +60,7 @@
       "expect": "buyer -10000, spike +10000; S3_NOTIFY with sender and msg",
       "observed": "buyer 1999596 -> 1989596, spike 0 -> 10000; log ok; PASS",
       "script": "spikes/s3/s3b-notify.ts",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "spike-s3c-outlayer",
@@ -76,7 +76,7 @@
       "expect": "decision keep < 90 s, balances match the decision, attestation 200",
       "observed": "decision keep, 10957 ms to last receipt, buyer 1989596 -> 1979596, spike 10000 -> 20000, request_id 2917, attestation 200; PASS",
       "script": "spikes/s3/s3c-outlayer.ts",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "spike-s3c-outlayer_refund",
@@ -92,7 +92,7 @@
       "expect": "decision refund < 90 s, balances match the decision, attestation 200",
       "observed": "decision refund, 39088 ms to last receipt, buyer 1979596 -> 1979596, spike 20000 -> 20000, request_id 2918, attestation 200; PASS",
       "script": "spikes/s3/s3c-outlayer.ts",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "h07-arrow-market",
@@ -108,7 +108,7 @@
       "expect": "H-07 step 1: create arrow-market.near via the near linkdrop, 0.1 NEAR, one full-access key",
       "observed": "tx SuccessValue(true) (signer arrowhq.near, receiver near); view_account 22:16 GMT+7: arrow-market.near 0.1 NEAR, no code",
       "script": "HANDOFFS.md H-07 step 1 (near-cli-rs 0.31.1, human)",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "h07-arrow-market-v2",
@@ -124,7 +124,7 @@
       "expect": "H-07 step 2: create arrow-market-v2.near via the near linkdrop, 0.1 NEAR reserve (DEC D-07)",
       "observed": "tx SuccessValue(true) (signer arrowhq.near, receiver near); view_account 22:16 GMT+7: arrow-market-v2.near 0.1 NEAR, no code",
       "script": "HANDOFFS.md H-07 step 2 (near-cli-rs 0.31.1, human)",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "h07-arrow-relayer",
@@ -140,7 +140,7 @@
       "expect": "H-07 step 3: create arrow-relayer.arrowhq.near, 1.0 NEAR (gas only, DEC D-04/K-04)",
       "observed": "tx SuccessValue (signer arrowhq.near); view_account 22:16 GMT+7: 0.9936 NEAR after the S3b/S3c execute_intents gas",
       "script": "HANDOFFS.md H-07 step 3 (near-cli-rs 0.31.1, human)",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "h07-arrow-spike",
@@ -156,7 +156,7 @@
       "expect": "H-07 step 4: create arrow-spike.arrowhq.near, 1.7 NEAR (returned at H-08e, DEC D-06)",
       "observed": "tx SuccessValue (signer arrowhq.near); account deleted at H-08e (6DBnU8na...), view_account 22:16 GMT+7: UNKNOWN_ACCOUNT",
       "script": "HANDOFFS.md H-07 step 4 (near-cli-rs 0.31.1, human)",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "spike-s3c-b5-negative",
@@ -172,7 +172,7 @@
       "expect": "B5: arrowhq.near calls outlayer.near request_execution directly with the spike's secrets_ref; OutLayer returns null or pm is null",
       "observed": "request_id 2919, execution_completed failed: Access denied by access condition (signer arrowhq.near, called from arrowhq.near), instructions 0, 0.019 NEAR refunded, final value null, attestation 404 (no execution); s3c-b5-negative --read: B5: PASS",
       "script": "spikes/s3/s3c-b5-negative.ts",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "h07-relayer-fc-key",
@@ -188,7 +188,7 @@
       "expect": "H-07 step 5: FunctionCall key ed25519:3666zm...Kq1x on arrow-relayer.arrowhq.near, receiver intents.near, method execute_intents, allowance unlimited",
       "observed": "AddKey FunctionCall {allowance null, receiver intents.near, methods [execute_intents]} SuccessValue; view_access_key_list 22:16 GMT+7 shows it next to one FullAccess key; setup-relayer --check OK",
       "script": "HANDOFFS.md H-07 step 5 + scripts/src/setup-relayer.ts --check",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "spike-deploy",
@@ -204,7 +204,7 @@
       "expect": "H-08c step 1: deploy spike.wasm (sha256 e8d455c9...f265, 150703 B) to arrow-spike.arrowhq.near with init new(init-mainnet.json)",
       "observed": "DeployContract + FunctionCall new, SuccessValue",
       "script": "HANDOFFS.md H-08c step 1 (near-cli-rs 0.31.1, human)",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "spike-cleanup-usdc",
@@ -220,7 +220,7 @@
       "expect": "H-08e: move the spike's Intents USDC (20000) to arrowhq.near",
       "observed": "mt_transfer arrow-spike.arrowhq.near -> arrowhq.near SuccessValue; mt_balance_of 22:16 GMT+7: arrowhq.near 20000, arrow-spike.arrowhq.near 0",
       "script": "HANDOFFS.md H-08e (near-cli-rs 0.31.1, human)",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     },
     {
       "id": "spike-cleanup-delete",
@@ -236,7 +236,7 @@
       "expect": "H-08e: delete arrow-spike.arrowhq.near, beneficiary arrowhq.near",
       "observed": "DeleteAccount SuccessValue; view_account 22:16 GMT+7: arrow-spike.arrowhq.near UNKNOWN_ACCOUNT, arrowhq.near 9.0611 NEAR",
       "script": "HANDOFFS.md H-08e (near-cli-rs 0.31.1, human)",
-      "commit": "c1dbcab79317a3e9100d9114cd9a8b962d4ed956"
+      "commit": "1c5e543fa33cf818d60115ec2f0f6e49a5126914"
     }
   ],
   "corrections": []

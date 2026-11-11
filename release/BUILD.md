@@ -40,7 +40,7 @@ wasmtime 50.0.1 (c307ec81d 2026-10-29)      # local test runtime only, not part 
 ## Inputs
 
 - `shasum -a 256 Cargo.lock`: `a152e5a294ed2dfdfe9db1ada90f86a8c8becace0e0d23e942beba12bc2a7c19`
-- Last commit that changed a wasm input: `6e232f8` (fix(enclave): delete invisible characters before NFKC when normalizing MinHash keys)
+- Last commit that changed a wasm input: `6b5eead` (fix(enclave): delete invisible characters before NFKC when normalizing MinHash keys)
 - Embedded at compile time: `fixtures/minhash-params.json` (`include_str!` in `enclave/arrow-core/src/minhash.rs`). `fixtures/llm-request-example.json` is the byte-exact golden for the NEAR AI request the wasm builds; it freezes with the wasm.
 
 ## Expected sha256
@@ -49,7 +49,7 @@ wasmtime 50.0.1 (c307ec81d 2026-10-29)      # local test runtime only, not part 
 |---|---|
 | freeze candidate sha256 | `2d2dc4d0c6aff708105f208d8afd9b71081cea9a7fe400a4b7eec2927ef38ee1` (macOS arm64 build host) |
 | size | 1696881 bytes |
-| candidate source | main `3d841ea` (round-2 delta fixes merged; MinHash key normalization changed in `6e232f8`) |
+| candidate source | main `e48fbdc` (round-2 delta fixes merged; MinHash key normalization changed in `6b5eead`) |
 | candidate built (UTC) | 2026-11-11T00:00Z |
 | reproduced | main checkout and the fix2/round2 worktree: same sha |
 | testnet rc (for comparison) | same bytes as the candidate (`release/arrow-tee-rc.*`, rc4 on arrow-v2.arrowhq.testnet); rc3 `b2786f85…`, rc2 `5daa76fb…`, the first rc `73415b8f…` and the earlier candidate `d5ea438c…` are void |
