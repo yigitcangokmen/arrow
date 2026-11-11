@@ -36,7 +36,7 @@ flowchart LR
 | Time guard | The TDX clock, which the host provides | n/a | n/a | [Limits](docs/design.md#timeouts); J#19. A release refused as late still leaves its `k`, sealed to the buyer, public while the buyer keeps the refund | RISKY |
 | OutLayer coordinator (closed source) | Liveness | Encrypted input | Read secrets (OutLayer's design, a trust assumption) | J#16 | PROVEN (refund on `null`: sandbox) |
 | `outlayer.near`, `intents.near` contracts | Their owners (both are upgradable); Arrow depends on them | n/a | n/a | Code-hash history: J#39 | RISKY |
-| Program bytes | Whoever serves the wasm URL | The wasm | Change it unnoticed (hash-pinned) | Served from testnet FastFS today; the mainnet host is set at the freeze (Pending F1) | RISKY |
+| Program bytes | Whoever serves the wasm URL | The wasm | Change it unnoticed (hash-pinned) | Served from testnet FastFS (`test.fastfs.io/arrowhq.testnet/outlayer.testnet/6ad7fed4….wasm`); mainnet OutLayer fetched a program from testnet FastFS in the S3c spike | RISKY |
 | Output channel | Schema and rule composition | At most 5.68 bits per eval (scored), 1.59 (verdict-only), on this channel only ([derivation](docs/design.md#leak-bound)) | Free text | J#1-3 | PROVEN |
 | Error channel | The enclave: one fixed error output, nothing on stderr | The failure states on chain ([leak bound](docs/design.md#leak-bound)) | Carry data | J#4, J#43 | RISKY (stderr and the fixed output: PROVEN, native harness) |
 | Side channels | Not closed | `time_ms` and `instructions` on chain, counted in neither the bound nor the budget. `instructions` follows the work: the dataset size, the content of the sampled rows ([seed](docs/design.md#near-ai-call)), the criteria text, the buyer's `key_column` and `date_column` (so it can reveal a chosen column's non-empty and distinct counts) and, on a failed run, the step where it stopped | n/a | J#35; [measured values](docs/perf.md) | RISKY |
@@ -59,10 +59,10 @@ flowchart LR
 
 As of 2026-11-11 02:10 UTC.
 
-- Testnet: contract `arrow-v2.arrowhq.testnet` runs release candidate rc4 `2d2dc4d0…` ([build](#build-from-source)); end-to-end run: [K2](JUDGES.md#gates-already-run). It is not frozen (the freeze fixes the final enclave build and its hash) and not locked (the lock deletes the contract's access keys); pre-freeze listings: [J#57](JUDGES.md#claims).
+- Testnet: contract `arrow-v2.arrowhq.testnet` runs the frozen program `6ad7fed4…` (set_program: run `deploy-testnet-set_program-freeze` in `evidence/testnet.json`; [build](#build-from-source)); end-to-end run on it: [K2](JUDGES.md#gates-already-run). It is not locked (the lock deletes the contract's access keys); pre-freeze listings: [J#57](JUDGES.md#claims).
 - Mainnet: the Arrow contract `arrow-market.near` is not deployed and the Arrow program has not run on mainnet; spike runs: [gates](JUDGES.md#gates-already-run).
 - Not yet: a hosted demo (not deployed), the demo video (not recorded) and outside demand (no seller invitation sent; drafts in `docs/outreach/`).
-- Repository and CI: private until a human makes it public, so repository links (including the contract's NEP-330 source link) do not resolve yet. CI jobs `ts`, `rust`, `web` and `secrets` are green; `tee` is red ([Build from source](#build-from-source)).
+- Repository and CI: private until a human makes it public, so repository links (including the contract's NEP-330 source link) do not resolve yet. CI job `tee` rebuilds the program natively on x86_64 Linux and in the pinned image and compares both with `release/sha256.txt` ([Build from source](#build-from-source)).
 
 ## How it works
 
@@ -272,12 +272,10 @@ Node 22.22.2 or later (tested on 24.15.0) and Rust 1.97.1, which `rust-toolchain
 8. `npx tsx spikes/s3/s3a-simulate.ts` (network: a free mainnet `simulate_intents` view, signed with a throwaway key; nothing is sent).
    - See: `class: SIGNATURE_OK_BALANCE_ERROR` (J#26).
 
-**Steps 9 and 10 stop on purpose until the enclave build is frozen (Pending F1).** Each says what you see today.
-
 9. `npm run verify -- --network testnet` (network, about a minute).
-   - See: `[PROVEN]` on I2, I3 and I4, and the last line `verify: 0/5 REQUIRED PROVEN · exit 1`. Why the other rows fail: J#12 (R1), J#13-16 (R2, R3, R5, R8), J#48 (I1).
+   - See: `[PROVEN]` on I2, I3, I4 and I5, and the last line `verify: 0/5 REQUIRED PROVEN · exit 1`. Why the other rows fail: `evidence/testnet.json` still holds the runs of the first testnet contract, which predate the field that names a run's contract, so verify reads them against `arrow-v2` (J#12, J#13-16, J#48).
 10. `npm run try:testnet` (network).
-    - See today: it stops before any faucet call with `…/fixtures/testnet-listings.json is missing: the team publishes the demo listings with e2e-testnet --publish-demo` (exit 1). Nothing was spent. What it runs after the freeze: J#30.
+    - See: what it runs on the frozen program: J#30.
 
 ## If something fails
 
@@ -359,14 +357,7 @@ The variables, all prefixed `ARROW_MCP_`: `ALLOW_MAINNET` and `ALLOW_BUY` are of
 
 ## Build from source
 
-**Enclave.** `bash scripts/build-tee.sh target/rel-tee` prints the sha256 of `arrow-tee.wasm`; flags and toolchain are in [release/BUILD.md](release/BUILD.md). The two build hosts measured so far give different shas from the same source; other hosts are untested:
-
-| Build host | sha256 of `arrow-tee.wasm` (rc4) |
-|---|---|
-| macOS arm64 (`aarch64-apple-darwin`, rustc 1.97.1) | `2d2dc4d0c6aff708105f208d8afd9b71081cea9a7fe400a4b7eec2927ef38ee1` (1 696 881 bytes; `release/arrow-tee-rc.sha256`) |
-| Linux x86_64 (GitHub `ubuntu-24.04`, rustc 1.97.1, CI run 42934861136, job `tee`) | `6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1` |
-
-Suspected cause, not confirmed: crates with a build script get a host-dependent crate disambiguator. The team picks the canonical build host before the freeze (Pending F1).
+**Enclave.** `bash scripts/build-tee-docker.sh` (Docker; it builds the committed `HEAD` in a pinned linux/amd64 image, about 1.5 min on Apple silicon after the image pull) prints `6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1`, the value in `release/sha256.txt`, the contract's `program_wasm_hash` and the attested `wasm_hash`. Without Docker, `bash scripts/build-tee.sh` gives the same sha on x86_64 Linux only: Cargo mixes the build machine's target triple into the hash of every crate that has a build script or a proc-macro dependency, so another host gives other bytes (macOS arm64: `2d2dc4d0…`, which ran on testnet as rc4 before the freeze). Proof of the cause: on a Mac, `RUSTC=scripts/dev/rustc-fixed-host.sh bash scripts/build-tee.sh target/rel-tee-shim` changes only the host line Cargo sees and prints the canonical sha. Flags, toolchain and the proof: [release/BUILD.md](release/BUILD.md).
 
 **Contracts.** `cargo near build reproducible-wasm`, then compare with the code hash of `arrow-market.near` once it is deployed (Pending M2). The committed `release/contracts/arrow-mainnet.wasm` predates the fixes, and `bash scripts/deploy/mainnet-check.sh wasm` prints `FAIL contract_wasm_stale` until it is rebuilt.
 

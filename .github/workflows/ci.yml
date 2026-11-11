@@ -48,14 +48,14 @@ jobs:
       - run: cargo test -p arrow-tee --bins
       # Native x86_64 Linux build from a CARGO_HOME outside HOME (X12-2, CI-6): same host triple as the canonical image, same sha.
       - run: |
-          if [ -f release/sha256.txt ]; then want=$(tr -d ' \n' < release/sha256.txt); else want=$(tr -d ' \n' < release/arrow-tee-rc.sha256); fi
+          want=$(tr -d ' \n' < release/sha256.txt)
           got=$(CARGO_HOME="$RUNNER_TEMP/ch" bash scripts/build-tee.sh)
           echo "want $want"; echo "got  $got"
           [ "$got" = "$want" ]
           ! strings target/rel-tee/wasm32-wasip2/release/arrow-tee.wasm | grep -E "/home/|/Users/|$RUNNER_TEMP"
       # The canonical build a judge runs (release/BUILD.md): the pinned linux/amd64 image on the committed tree, same sha.
       - run: |
-          if [ -f release/sha256.txt ]; then want=$(tr -d ' \n' < release/sha256.txt); else want=$(tr -d ' \n' < release/arrow-tee-rc.sha256); fi
+          want=$(tr -d ' \n' < release/sha256.txt)
           got=$(bash scripts/build-tee-docker.sh)
           echo "want $want"; echo "got  $got"
           [ "$got" = "$want" ]

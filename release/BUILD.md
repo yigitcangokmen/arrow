@@ -1,6 +1,6 @@
-# release/BUILD.md: arrow-tee build record (DRAFT, freeze candidate)
+# release/BUILD.md: arrow-tee build record (frozen)
 
-Status: **freeze candidate, not frozen.** The freeze (planned 2026-11-12 18:00 GMT+7 [11:00Z], only on the team's go) rebuilds from the freeze commit with `bash scripts/build-tee-docker.sh`, writes `release/arrow-tee.wasm` and `release/sha256.txt`, and fills in the two "freeze" lines below. If anything under `enclave/`, `fixtures/minhash-params.json`, `Cargo.lock`, `Cargo.toml` or `rust-toolchain.toml` changes before then, the expected sha changes and this candidate is void.
+Status: **frozen.** `release/arrow-tee.wasm` and `release/sha256.txt` are the output of `bash scripts/build-tee-docker.sh` at the source commit below (two clean runs, byte-identical). The same bytes are served at `https://test.fastfs.io/arrowhq.testnet/outlayer.testnet/6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1.wasm` and are the `program_wasm_hash` of arrow-v2.arrowhq.testnet. Any change under `enclave/`, `fixtures/minhash-params.json`, `Cargo.lock`, `Cargo.toml` or `rust-toolchain.toml` now means a new sha, a new OutLayer secret row and re-listing.
 
 ## Build command (canonical)
 
@@ -50,10 +50,10 @@ cargo 1.97.1 (c980f4866 2026-06-30)
 
 | | value |
 |---|---|
-| freeze candidate sha256 | `6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1` (canonical: `scripts/build-tee-docker.sh`, `x86_64-unknown-linux-gnu`) |
+| frozen sha256 | `6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1` (canonical: `scripts/build-tee-docker.sh`, `x86_64-unknown-linux-gnu`) |
 | size | 1698528 bytes |
 | candidate source | main `e48fbdc` (round-2 delta fixes merged; MinHash key normalization changed in `6b5eead`); no wasm input changed since |
 | reproduced | the image on macOS arm64 (OrbStack, Rosetta), twice; `rust:1.97.1` linux/amd64; GitHub `ubuntu-24.04` native (CI run 42934861136, job `tee`): same sha |
-| testnet rc (until the freeze) | rc4 `2d2dc4d0c6aff708105f208d8afd9b71081cea9a7fe400a4b7eec2927ef38ee1` (1696881 bytes, `release/arrow-tee-rc.*`) on arrow-v2.arrowhq.testnet: the same source built on a macOS arm64 host, so not canonical. rc3 `b2786f85…`, rc2 `5daa76fb…`, the first rc `73415b8f…` and the earlier candidate `d5ea438c…` are void |
-| freeze commit | (filled at the freeze) |
-| freeze built (UTC) | (filled at the freeze) |
+| testnet rc (before the freeze) | rc4 `2d2dc4d0c6aff708105f208d8afd9b71081cea9a7fe400a4b7eec2927ef38ee1` (1696881 bytes) ran on arrow-v2.arrowhq.testnet until the freeze: the same source built on a macOS arm64 host, so not canonical. rc3 `b2786f85…`, rc2 `5daa76fb…`, the first rc `73415b8f…` and the earlier candidate `d5ea438c…` are void |
+| freeze commit | source `e30036d` (the tree `build-tee-docker.sh` archived; no wasm input changed after `6b5eead`) |
+| freeze built (UTC) | 2026-11-11T18:13:00Z (second of two runs; the first, 18:12:24Z, gave the same bytes) |
