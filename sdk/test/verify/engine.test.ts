@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { formatReport, runVerify, SUMMARY_RE, type VerifyOptions } from "../../src/verify/index.ts";
 import { base58ToHex } from "../../src/verify/links.ts";
+import type { EvidenceRun } from "../../src/index.ts";
 import { buildWorld, fakeFetch, fixture, makeAttestation, secretRow, sha, type World } from "./world.ts";
 
 const run = (w: World, extra: Partial<VerifyOptions> = {}) =>
@@ -224,7 +225,7 @@ describe("failures", () => {
     const realWorld = (att: unknown = fixture("attestation-15850.json")) => {
       const w = buildWorld("testnet");
       w.contract = w.evidence.contract = "arrow.arrowhq.testnet"; // the market these records came from, whatever the default is
-      w.evidence.runs = w.evidence.runs.filter((x) => x.id === "e1").map((x) => ({ ...x, tx: REAL_TX }));
+      w.evidence.runs = w.evidence.runs.filter((x) => x.id === "e1").map((x) => ({ ...x, tx: REAL_TX, contract: w.contract }));
       w.txs = { [REAL_TX]: fixture("tx-eval-15850.json") };
       w.attestations = { 15850: att };
       return w;
@@ -498,6 +499,25 @@ describe("STATE-2: R1 after set_program", () => {
     expect(row(r, "R1").label).toBe("NOT PROVEN");
     expect(row(r, "R3").label).toBe("NOT PROVEN");
     w.evidence.runs.forEach((x) => (x.contract = w.contract));
+    expect((await run(w)).required).toEqual({ proven: 5, total: 5 });
+  });
+
+  it("runs that name no contract are not read: their listing, eval and purchase ids may be an earlier market's", async () => {
+    const w = buildWorld("testnet");
+    // The 2026-11-10 runs predate the field. One is a first-contract eval (its real tx and OutLayer record) whose ids
+    // arrow-v2 reuses; the others name a purchase and a refund tx this market does not have.
+    const REAL_TX = "4RzSuxeo1coQZangy4inXt4yhVf9ta7G8eWFJ3M7fS2j";
+    w.txs[REAL_TX] = fixture("tx-eval-15850.json");
+    w.attestations[15850] = fixture("attestation-15850.json");
+    const unnamed = (o: Partial<EvidenceRun>): EvidenceRun => {
+      const { contract: _, ...r } = { ...w.evidence.runs[0], ...o };
+      return r;
+    };
+    w.evidence.runs.push(
+      unnamed({ id: "old-e", kind: "eval", tx: REAL_TX, listing_id: 1, eval_id: 4 }),
+      unnamed({ id: "old-b", kind: "buy", tx: "OLDBUY", listing_id: 1, purchase_id: 2 }),
+      unnamed({ id: "old-f", kind: "refund", tx: "OLDREFUND", listing_id: 1, eval_id: 5 }),
+    );
     expect((await run(w)).required).toEqual({ proven: 5, total: 5 });
   });
 

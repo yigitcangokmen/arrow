@@ -122,7 +122,7 @@ export function buildWorld(network: Network = "testnet"): World {
 
   const run = (o: Partial<EvidenceRun> & Pick<EvidenceRun, "id" | "kind">): EvidenceRun => ({
     tx: null, chain: "near", block_height: null, timestamp_utc: "2026-11-12T13:00:00.000Z", listing_id: null, eval_id: null, purchase_id: null,
-    oneclick_deposit: null, expect: "", observed: "", script: "test", commit: "test", ...o,
+    oneclick_deposit: null, expect: "", observed: "", script: "test", commit: "test", contract, ...o,
   });
   const runs: EvidenceRun[] = [
     run({ id: "l1", kind: "list", tx: "LIST1", listing_id: 1 }),

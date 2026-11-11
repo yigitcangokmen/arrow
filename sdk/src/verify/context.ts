@@ -9,6 +9,9 @@ import type { VerifyOptions } from "./types.ts";
 
 export type EvidenceKind = EvidenceRun["kind"];
 
+/** Kinds whose listing, eval and purchase ids are the market contract's own. */
+const PER_MARKET: EvidenceKind[] = ["list", "eval", "buy", "refund"];
+
 export interface EvalFacts {
   run: EvidenceRun;
   tx: any | null;
@@ -88,9 +91,16 @@ export class VerifyCtx {
     return p;
   }
 
-  /** Runs of these kinds on this contract (STATE-2: a run that names another contract reads that contract's ids, not ours). */
+  /**
+   * Runs of these kinds on this contract (STATE-2: a run that names another contract reads that contract's ids, not ours).
+   * A list, eval, buy or refund run carries the market's own listing, eval and purchase ids, so it is read only when it
+   * names this contract: the runs that predate the field (2026-11-10) include a first testnet market whose ids arrow-v2
+   * reuses. Other kinds (deploy, inbound, ...) are matched by their tx contents and still count without the field.
+   */
   runs(...kinds: EvidenceKind[]): EvidenceRun[] {
-    return this.evidence.runs.filter((r) => kinds.includes(r.kind) && (r.contract === undefined || r.contract === this.contract));
+    return this.evidence.runs.filter(
+      (r) => kinds.includes(r.kind) && (r.contract === this.contract || (r.contract === undefined && !PER_MARKET.includes(r.kind))),
+    );
   }
 
   config() {

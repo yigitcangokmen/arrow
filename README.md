@@ -276,7 +276,7 @@ Node 22.22.2 or later (tested on 24.15.0) and Rust 1.97.1, which `rust-toolchain
    - See: `class: SIGNATURE_OK_BALANCE_ERROR` (J#26).
 
 9. `npm run verify -- --network testnet` (network, about a minute).
-   - See: `[PROVEN]` on I2, I3, I4 and I5, and the last line `verify: 0/5 REQUIRED PROVEN · exit 1`. Why the other rows fail: `evidence/testnet.json` still holds the runs of the first testnet contract, which predate the field that names a run's contract, so verify reads them against `arrow-v2` (J#12, J#13-16, J#48).
+   - See: `[PROVEN]` on R1, R2, R3, R5, R8 and I1-I5, and the last line `verify: 5/5 REQUIRED PROVEN · exit 0`. Every proof is a run on `arrow-v2.arrowhq.testnet` with the frozen program: Gate K2 and the J#30 run. Verify reads a list, eval, buy or refund run only when the run names this contract. The 2026-11-10 runs predate that field, and some used the first testnet contract `arrow.arrowhq.testnet`, whose ids `arrow-v2` reuses, so verify skips them (J#12-16, J#48).
 10. `npm run try:testnet` (network).
     - See (about 2 minutes): `account arrow-judge-<id>.testnet faucet` (or `sponsor`; `reused` on a later run), the PASS scene `PASS · fit 2/5 · novelty 1/5 · out 5.67 bits`, the BUY scene `BUY · fit 5/5 · novelty 4/5 · out 5.67 bits`, `bought listing #14`, `sha256 match ✔ (3 checks)`, and `spent about 2.5 aUSD of test money; nothing real moved` (J#30).
 
