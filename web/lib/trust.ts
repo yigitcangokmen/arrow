@@ -16,7 +16,8 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "Nobody (ciphertext; the host is untrusted)",
     sees: "Whoever hosts the file sees each downloader's IP address and user agent. The exact plaintext size is public (ciphertext length minus 40 bytes), as are the column names and the row count",
     cannot: "Decrypt",
-    check: "blob_sha256 is on chain and the enclave checks it before reading. Not yet shown on mainnet",
+    check:
+      "blob_sha256 is on chain and the enclave checks it before reading. Not yet shown on mainnet. This site keeps sellers' ciphertext in its blob store only while the hosted demo runs; a daily job deletes a stored ciphertext that no Arrow listing points to, 24 hours after upload",
     flag: "TODO",
   },
   {
@@ -88,7 +89,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "Everything the page handles: the file you encrypt and its key, your criteria, your own list's keys, and the signature that derives your viewing key",
     cannot: "—",
     check:
-      "One viewing-key signature derives every past and future verdict key of that wallet for the domain, so served JavaScript that captures it reads them all. No script policy is set on the pages (frames, plugins and base tags are blocked). For sensitive data use the CLI",
+      "One viewing-key signature derives every past and future verdict key of that wallet for the domain, so served JavaScript that captures it reads them all. The pages run only scripts that carry the page's per-request nonce ('strict-dynamic', no 'unsafe-inline' or 'unsafe-eval'): that stops an injected script, not a modified deploy. For sensitive data use the CLI",
     flag: "RISKY",
   },
   {
@@ -213,8 +214,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "Nothing: it carries no payment",
     sees: "—",
     cannot: "Move funds",
-    check: "accepts is empty on purpose; payment goes through NEAR Intents. A live curl against the hosted site is still to do",
-    flag: "TODO",
+    check: "accepts is empty on purpose; payment goes through NEAR Intents. curl -i https://arrow-market.vercel.app/api/x402/13 answers 402 with X-Arrow-Listing and an empty accepts",
   },
   {
     part: "40-row sample to NEAR AI",

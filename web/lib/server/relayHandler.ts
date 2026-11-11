@@ -216,7 +216,7 @@ async function checkAgainstChain(v: Extract<ReturnType<typeof validateArrowMulti
       if (v.blobUrl === l.blob_url) return apiError(409, "NOTHING_TO_CHANGE", "The listing already points at this URL. Nothing was sent.");
       // NEW-1: free for the seller, so at most one hosted move per listing per window.
       if ((await chain.blobUrlBefore(v.listingId!)) !== l.blob_url) {
-        // 409, not 429: relayHosted turns every 429 into RATE_LIMITED, which would lose this code and this text.
+        // 409, not 429: a conflict with the listing's chain state, not a request rate.
         return apiError(409, "REHOST_COOLDOWN", "This listing was created or moved in the last 6 hours, so the hosted relay will not move it yet. Nothing was sent; try later, or relay it yourself.", { fallback: SELF_RELAY, retryAfterSec: 3600 });
       }
       return null;
@@ -315,7 +315,7 @@ async function relay(mp: Parameters<typeof relayDirect>[1], v: Extract<ReturnTyp
     const g = d.evalLimiter.take("all");
     if (!g.ok) {
       d.evalDaily.giveBack(v.signerId);
-      return before(rateLimited(g.retryAfterSec, "EVAL_RATE_LIMITED"));
+      return before(apiError(429, "EVAL_RATE_LIMITED", `The hosted relay has reached its hourly inspection limit, shared by all wallets. Nothing was sent; try again in ${g.retryAfterSec} s, or relay it yourself.`, { fallback: SELF_RELAY, retryAfterSec: g.retryAfterSec }));
     }
   }
 

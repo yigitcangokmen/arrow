@@ -16,8 +16,8 @@ export function apiError(
   return json(status, { error, code, ...rest }, retryAfterSec !== undefined ? { "retry-after": String(retryAfterSec) } : {});
 }
 
-export const rateLimited = (retryAfterSec: number, code = "RATE_LIMITED") =>
-  apiError(429, code, "Too many requests. Wait and try again.", { retryAfterSec });
+export const rateLimited = (retryAfterSec: number) =>
+  apiError(429, "RATE_LIMITED", "Too many requests. Wait and try again.", { retryAfterSec });
 
 /**
  * Reads a JSON body of at most `max` bytes. The content-length header is not trusted: the stream is counted and cancelled

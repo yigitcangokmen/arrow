@@ -102,6 +102,13 @@ describe("audit wording of the UI table", () => {
     expect(`${w.sees} ${w.check}`).toMatch(/viewing-key signature/);
     expect(`${w.sees} ${w.check}`).toMatch(/use the CLI/i);
   });
+  it("WEB-8: the web app row names the per-request nonce CSP, and the seller data row the daily blob GC", () => {
+    const w = row("Arrow web app (served JavaScript)");
+    expect(w.check).toMatch(/per-request nonce/);
+    expect(w.check).toMatch(/'strict-dynamic'/);
+    expect(w.check).not.toMatch(/No script policy is set/i);
+    expect(row("Seller data at rest").check).toMatch(/daily job deletes a stored ciphertext that no Arrow listing points to, 24 hours after upload/);
+  });
   it("PRIV-8: the blob host sees the downloader and the exact size is public", () => {
     const d = row("Seller data at rest");
     expect(d.sees).toMatch(/IP address/);

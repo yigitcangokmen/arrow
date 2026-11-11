@@ -13,9 +13,10 @@ export class RelayError extends Error {
     this.name = "RelayError";
   }
 }
+/** A 429. `code` is the relay's own: RATE_LIMITED (this IP or signer), EVAL_DAILY_CAP (this wallet today), EVAL_RATE_LIMITED (all wallets). */
 export class RelayRateLimited extends RelayError {
-  constructor(message: string, public readonly retryAfter: number | null) {
-    super(message, 429, "RATE_LIMITED");
+  constructor(message: string, public readonly retryAfter: number | null, code = "RATE_LIMITED") {
+    super(message, 429, code);
     this.name = "RelayRateLimited";
   }
 }
@@ -83,7 +84,7 @@ export async function relayHosted(baseUrl: string, multipayload: MultiPayload, f
   if (code === "RELAY_UNCLEAR") throw new RelayUnclear(error, res.status);
   if (res.status === 429) {
     const raw = res.headers.get("retry-after");
-    throw new RelayRateLimited(error, raw !== null && Number.isFinite(Number(raw)) ? Number(raw) : null);
+    throw new RelayRateLimited(error, raw !== null && Number.isFinite(Number(raw)) ? Number(raw) : null, code);
   }
   if (res.status === 503) throw new RelayUnavailable(error, fallback, code);
   if (res.status === 422) throw new SimulateFailed(error, detail);

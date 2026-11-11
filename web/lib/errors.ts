@@ -20,6 +20,8 @@ export function describeError(e: unknown): Described {
   }
   if (hasName(e, "NoWalletError")) return { message: text };
   if (hasName(e, "RelayRateLimited")) {
+    // EVAL_DAILY_CAP counts this wallet's day and EVAL_RATE_LIMITED all wallets: the relay's own text says which, not "this network".
+    if ((e as unknown as { code?: string }).code !== "RATE_LIMITED") return { message: text.slice(0, 240) };
     const s = (e as unknown as { retryAfter: number | null }).retryAfter;
     return { message: `Too many requests from this network. Try again${s ? ` in ${s} s` : " in a minute"}.` };
   }

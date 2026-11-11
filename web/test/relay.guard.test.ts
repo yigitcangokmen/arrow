@@ -290,6 +290,22 @@ describe("NEW-1 / R2-7 / E22: a payment the contract returns in full never reach
     }
   });
 
+  it("the client reads EVAL_DAILY_CAP and EVAL_RATE_LIMITED off the real wire with their own code and text, never as this network's RATE_LIMITED", async () => {
+    const cases = [
+      ["EVAL_DAILY_CAP", deps({ evalDaily: keyedDaily({ max: 0 }) }), /inspections for today.*Try again tomorrow/],
+      ["EVAL_RATE_LIMITED", deps({ evalLimiter: tokenBucket({ capacity: 0, refillEveryMs: 60_000 }) }), /shared by all wallets.*try again in 60 s/],
+    ] as const;
+    for (const [code, d, text] of cases) {
+      const wire = (async (url: string, init: RequestInit) => handleRelay(new Request(url, init), d)) as typeof fetch;
+      const err = await relayHosted("http://localhost", nonce(`Q-${code}`), wire).catch((e) => e);
+      expect(err.status, code).toBe(429);
+      expect(err.code).toBe(code);
+      expect(provablyNotSent(err)).toBe(true); // both are answered before anything is broadcast
+      expect(describeError(err).message).toMatch(text);
+      expect(describeError(err).message).not.toMatch(/from this network/);
+    }
+  });
+
   it("E22: ALREADY_BOUGHT does not point at Check payment, which has nothing to check once the wallet is freed", async () => {
     const bought = { ...chain(), purchaseByBuyer: async () => ({ id: 1, listing_id: 7, buyer: SIGNER, buyer_pk: "04", status: "done", sealed_k_buyer: null, h: null, refund_reason: null, settled_at_ns: null }) as never };
     const body = await (await send(deps({ chain: bought }), nonce("W4", undefined, "buy"))).json();
