@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { formatReport, runVerify, SUMMARY_RE, type VerifyOptions } from "../../src/verify/index.ts";
 import { base58ToHex } from "../../src/verify/links.ts";
-import { buildWorld, fakeFetch, fixture, makeAttestation, sha, type World } from "./world.ts";
+import { buildWorld, fakeFetch, fixture, makeAttestation, secretRow, sha, type World } from "./world.ts";
 
 const run = (w: World, extra: Partial<VerifyOptions> = {}) =>
   runVerify({ network: w.network, evidence: w.evidence, releaseSha256: w.releaseSha256, fetchImpl: fakeFetch(w), now: new Date("2026-11-12T13:00:00Z"), ...extra });
@@ -107,7 +107,7 @@ describe("testnet", () => {
     const r = await run(buildWorld("testnet"), { only: ["g1"] });
     expect(r.rows.map((x) => x.id)).toEqual(["R8"]);
     expect(formatReport(r).at(-1)).toBe("verify: 1/1 REQUIRED PROVEN · exit 0");
-    expect((await run(buildWorld("testnet"), { only: ["wasm"] })).rows.map((x) => x.id)).toEqual(["R1", "I3"]);
+    expect((await run(buildWorld("testnet"), { only: ["wasm"] })).rows.map((x) => x.id)).toEqual(["R1", "I3", "I5"]);
   });
 });
 
@@ -505,5 +505,67 @@ describe("STATE-2: R1 after set_program", () => {
     const r1 = row(await run(moved(false)), "R1");
     expect(r1.label).toBe("NOT PROVEN");
     expect(r1.detail).toContain("no eval under the current program yet");
+  });
+});
+
+describe("I5 (CRY-4): the program secret row", () => {
+  const i5 = async (w: World) => row(await run(w), "I5");
+
+  it("is PROVEN for one row tied to this wasm and this contract, never moved, created after the set_program, and never REQUIRED", async () => {
+    for (const network of ["testnet", "mainnet"] as const) {
+      const w = buildWorld(network);
+      const r = await run(w, network === "mainnet" ? { preLock: true } : {});
+      expect(row(r, "I5"), `${network}: ${row(r, "I5")?.detail}`).toMatchObject({ label: "PROVEN", required: false });
+      expect(r.required.proven).toBe(r.required.total);
+    }
+  });
+
+  it("a moved row (updated_at after created_at) is NOT PROVEN", async () => {
+    const w = buildWorld();
+    w.secrets[0].updated_at = 1763000200000000000;
+    expect(await i5(w)).toMatchObject({ label: "NOT PROVEN", required: false });
+    expect((await i5(w)).detail).toContain("updated_at");
+  });
+
+  it("an access rule that names another wasm, drops the caller rule or names another caller is NOT PROVEN", async () => {
+    const hash = buildWorld().config.config.program_wasm_hash;
+    for (const access of [
+      { Logic: { operator: "And", conditions: [{ WasmHash: { hash: "0".repeat(64) } }, { Predecessor: { condition: { Whitelist: { accounts: ["arrow-v2.arrowhq.testnet"] } } } }] } },
+      { WasmHash: { hash } },
+      { Logic: { operator: "Or", conditions: [{ WasmHash: { hash } }, { Predecessor: { condition: { Whitelist: { accounts: ["arrow-v2.arrowhq.testnet"] } } } }] } },
+      { Logic: { operator: "And", conditions: [{ WasmHash: { hash } }, { Predecessor: { condition: { Whitelist: { accounts: ["arrow-v2.arrowhq.testnet", "evil.testnet"] } } } }] } },
+      "AllowAll",
+    ]) {
+      const w = buildWorld();
+      w.secrets[0].access = access;
+      expect(await i5(w), JSON.stringify(access)).toMatchObject({ label: "NOT PROVEN", required: false });
+    }
+  });
+
+  it("no row, or two rows for the current wasm, is NOT PROVEN; a row for an older wasm is ignored", async () => {
+    const w = buildWorld();
+    const { contract } = w;
+    w.secrets = [];
+    expect((await i5(w)).label).toBe("NOT PROVEN");
+    w.secrets = [secretRow(w.config.config.program_wasm_hash, contract), secretRow(w.config.config.program_wasm_hash, contract)];
+    expect((await i5(w)).label).toBe("NOT PROVEN");
+    w.secrets = [secretRow("ab".repeat(32), contract, { created_at: 1, updated_at: 2 }), secretRow(w.config.config.program_wasm_hash, contract)];
+    expect((await i5(w)).label).toBe("PROVEN");
+  });
+
+  it("a row created before the last set_program of this wasm is NOT PROVEN", async () => {
+    const w = buildWorld();
+    w.secrets[0] = secretRow(w.config.config.program_wasm_hash, w.contract, { created_at: 1762999999000000000, updated_at: 1762999999000000000 });
+    expect(await i5(w)).toMatchObject({ label: "NOT PROVEN" });
+    expect((await i5(w)).detail).toContain("set_program");
+  });
+
+  it("without a recorded set_program of this wasm it is NOT PROVEN", async () => {
+    const w = buildWorld();
+    w.evidence.runs = w.evidence.runs.filter((r) => r.kind !== "deploy");
+    expect((await i5(w)).label).toBe("NOT PROVEN");
+    const v = buildWorld();
+    v.txs.SETPROG1.transaction.actions[0].FunctionCall.args = Buffer.from(JSON.stringify({ url: "x", hash: "cd".repeat(32) })).toString("base64");
+    expect((await i5(v)).label).toBe("NOT PROVEN");
   });
 });

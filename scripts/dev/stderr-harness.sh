@@ -3,6 +3,7 @@
 # Builds the release and dev-endpoints arrow-tee wasm, starts the fake blob/NEAR AI server on
 # 127.0.0.1:8787 and runs enclave/arrow-tee/tests/stderr.rs (no_stderr_on_any_error, WS3-T10).
 # Needs wasmtime on PATH. Eval cases are padded to 45 s, 8 run in parallel: about 5 minutes.
+# ARROW_WASM_REL=<file> runs the release cases on that wasm instead (the canonical target/tee-docker/arrow-tee.wasm).
 if [ -s "$HOME/.nvm/nvm.sh" ]; then . "$HOME/.nvm/nvm.sh" && nvm use --silent >/dev/null 2>&1; fi
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
@@ -26,7 +27,7 @@ done
 grep -q listening "$tmp/server.out" || { cat "$tmp/server.out"; echo "fake-nearai did not start" >&2; exit 1; }
 
 rc=0
-WASM_REL="$PWD"/target/rel-tee/wasm32-wasip2/release/arrow-tee.wasm \
+WASM_REL="${ARROW_WASM_REL:-$PWD/target/rel-tee/wasm32-wasip2/release/arrow-tee.wasm}" \
 WASM_DEV="$PWD"/target/dev-tee/wasm32-wasip2/release/arrow-tee.wasm \
 FAKE_URL=http://127.0.0.1:8787 FAKE_BLOB_DIR="$tmp/blobs" ARROW_ONLY="$only" \
   cargo test -q -p arrow-tee --test stderr -- --nocapture || rc=$?

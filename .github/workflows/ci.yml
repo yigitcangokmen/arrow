@@ -46,14 +46,20 @@ jobs:
       - run: cargo clippy -p arrow-core -- -D warnings
       - run: cargo clippy -p arrow-tee --target wasm32-wasip2 -- -D warnings
       - run: cargo test -p arrow-tee --bins
-      # Reproducibility from a CARGO_HOME outside HOME, on another host than the one that wrote the expected sha (X12-2, CI-6).
+      # Native x86_64 Linux build from a CARGO_HOME outside HOME (X12-2, CI-6): same host triple as the canonical image, same sha.
       - run: |
-          want=$(tr -d ' \n' < release/arrow-tee-rc.sha256)
-          [ -f release/sha256.txt ] && want=$(tr -d ' \n' < release/sha256.txt)
+          if [ -f release/sha256.txt ]; then want=$(tr -d ' \n' < release/sha256.txt); else want=$(tr -d ' \n' < release/arrow-tee-rc.sha256); fi
           got=$(CARGO_HOME="$RUNNER_TEMP/ch" bash scripts/build-tee.sh)
           echo "want $want"; echo "got  $got"
           [ "$got" = "$want" ]
           ! strings target/rel-tee/wasm32-wasip2/release/arrow-tee.wasm | grep -E "/home/|/Users/|$RUNNER_TEMP"
+      # The canonical build a judge runs (release/BUILD.md): the pinned linux/amd64 image on the committed tree, same sha.
+      - run: |
+          if [ -f release/sha256.txt ]; then want=$(tr -d ' \n' < release/sha256.txt); else want=$(tr -d ' \n' < release/arrow-tee-rc.sha256); fi
+          got=$(bash scripts/build-tee-docker.sh)
+          echo "want $want"; echo "got  $got"
+          [ "$got" = "$want" ]
+          ! strings target/tee-docker/arrow-tee.wasm | grep -E "/home/|/Users/|/tmp/w"
   secrets:
     runs-on: ubuntu-24.04
     steps:

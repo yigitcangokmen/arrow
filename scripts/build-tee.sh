@@ -3,7 +3,9 @@
 # The one build for the rc, the freeze candidate and the freeze (W1-11). The remaps keep absolute paths
 # out of the wasm, so the same source gives the same sha256 in any checkout, worktree or CARGO_HOME.
 set -euo pipefail
-ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
+# No git: build-tee-docker.sh runs this on a git archive. pwd -P: ROOT, the target dir and the $ROOT remap below all name
+# the physical checkout, also when the script is reached through a symlink (macOS /tmp is /private/tmp).
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"; cd "$ROOT"
 OUT="${1:-target/rel-tee}"; case "$OUT" in /*) echo "target dir must be relative to the repo" >&2; exit 2;; esac
 # CARGO_ENCODED_RUSTFLAGS beats RUSTFLAGS and CARGO_PROFILE_RELEASE_* beats the release profile; either would change the sha silently.
 unset CARGO_ENCODED_RUSTFLAGS

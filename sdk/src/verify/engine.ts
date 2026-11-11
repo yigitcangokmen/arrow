@@ -7,6 +7,7 @@ import { i1, TITLE as T_I1 } from "./rows/i1.ts";
 import { i2, TITLE as T_I2 } from "./rows/i2.ts";
 import { i3, TITLE as T_I3 } from "./rows/i3.ts";
 import { i4, TITLE as T_I4 } from "./rows/i4.ts";
+import { i5, TITLE as T_I5 } from "./rows/i5.ts";
 import { riskyRows } from "./rows/k.ts";
 import { n1, n2 } from "./rows/n.ts";
 import { r1, TITLE as T_R1 } from "./rows/r1.ts";
@@ -50,6 +51,7 @@ const DEFS: RowDef[] = [
   { id: "I2", title: T_I2, required: never, kinds: ["attestation"], run: i2 },
   { id: "I3", title: T_I3, required: never, kinds: ["wasm"], run: i3 },
   { id: "I4", title: T_I4, required: never, kinds: ["e2e"], run: i4 },
+  { id: "I5", title: T_I5, required: never, kinds: ["wasm"], run: i5 },
   { id: "N1", title: "model attestation at eval time", required: never, kinds: ["attestation"], run: n1 },
   { id: "N2", title: "TDX quote is not verified on chain", required: never, kinds: ["attestation"], run: async () => n2() },
   { id: "K", title: "known risks", required: never, kinds: [], run: riskyRows },

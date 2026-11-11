@@ -45,6 +45,8 @@ export interface World {
   accessKeys: unknown[];
   /** intents.near public_keys_of(contract) */
   intentsKeys: string[];
+  /** OutLayer list_user_secrets(contract) */
+  secrets: any[];
   codeHash: string;
   evidence: EvidenceFile;
   /** every RPC call: [url, method] */
@@ -110,6 +112,12 @@ export function buildWorld(network: Network = "testnet"): World {
     status: { SuccessValue: "" },
   };
   const buyTx = { transaction: { hash: "BUY1", signer_id: relayer, receiver_id: contract, actions: [] }, transaction_outcome: { id: "BUY1", outcome: { logs: [], executor_id: relayer } }, receipts: [], receipts_outcome: [], status: { SuccessValue: "" } };
+  // set_program of the current hash in block SETBLOCK (the fake block timestamp is 1763000000000000000 ns)
+  const setProgramTx = {
+    transaction: { hash: "SETPROG1", signer_id: contract, receiver_id: contract, actions: [{ FunctionCall: { method_name: "set_program", args: b64.enc(new TextEncoder().encode(JSON.stringify({ url: "https://wasm.test/arrow-tee.wasm", hash: wasmHash }))) } }] },
+    transaction_outcome: { id: "SETPROG1", block_hash: "SETBLOCK", outcome: { logs: [], executor_id: contract } },
+    receipts: [], receipts_outcome: [], status: { SuccessValue: "" },
+  };
   const lockTx = { transaction: { hash: "LOCK1", signer_id: contract, receiver_id: contract, actions: [{ DeleteKey: { public_key: "ed25519:x" } }] }, transaction_outcome: { id: "LOCK1", outcome: { logs: [], executor_id: contract } }, receipts: [], receipts_outcome: [], status: { SuccessValue: "" } };
 
   const run = (o: Partial<EvidenceRun> & Pick<EvidenceRun, "id" | "kind">): EvidenceRun => ({
@@ -122,6 +130,7 @@ export function buildWorld(network: Network = "testnet"): World {
     run({ id: "e2", kind: "eval", tx: "EVAL2", listing_id: 1, eval_id: 2, observed: "BUY fit 5 novelty 4" }),
     run({ id: "f1", kind: "refund", tx: "REFUND1", listing_id: 1, eval_id: 3 }),
     run({ id: "b1", kind: "buy", tx: "BUY1", listing_id: 1, purchase_id: 1, observed: "hashes equal, decrypted (demo:true)" }),
+    run({ id: "d1", kind: "deploy", tx: "SETPROG1", expect: `set_program ${wasmHash}` }),
     ...(mainnet
       ? [
           run({ id: "in1", kind: "inbound", tx: "0xbase1", chain: "base", oneclick_deposit: "dep-in" }),
@@ -143,14 +152,25 @@ export function buildWorld(network: Network = "testnet"): World {
     config: { config: { program_wasm_url: "https://wasm.test/arrow-tee.wasm", program_wasm_hash: wasmHash, outlayer: cfg.outlayer, usdc_token_id: cfg.usdcToken }, paused: false, tank_available: "1", payment_path: "notify", result_path: "chain", build: network },
     listings: [listing], evals, purchases,
     leak: { 1: { listing_id: 1, bits_per_eval_milli: 5673, max_evals: 50, evals_used: 3, budget_milli: 283650, spent_milli: 17019, left_milli: 266631 } },
-    txs: { EVAL1: evalTx("EVAL1", 4001, 1), EVAL2: evalTx("EVAL2", 4002, 2), REFUND1: refundTx, BUY1: buyTx, LOCK1: lockTx },
+    txs: { EVAL1: evalTx("EVAL1", 4001, 1), EVAL2: evalTx("EVAL2", 4002, 2), REFUND1: refundTx, BUY1: buyTx, LOCK1: lockTx, SETPROG1: setProgramTx },
     attestations: { 4001: att("EVAL1", 4001, 1, e12[0]), 4002: att("EVAL2", 4002, 2, e12[1]) },
     files: { [BLOB_URL]: blob, "https://wasm.test/arrow-tee.wasm": wasm },
     oneclick: {
       "dep-in": { status: "SUCCESS", updatedAt: "x", swapDetails: { originChainTxHashes: [{ hash: "0xbase1", explorerUrl: "https://basescan.org/tx/0xbase1" }], destinationChainTxHashes: [] } },
       "dep-out": { status: "SUCCESS", updatedAt: "x", swapDetails: { originChainTxHashes: [], destinationChainTxHashes: [{ hash: "solsig1", explorerUrl: "https://solscan.io/tx/solsig1" }] } },
     },
-    accessKeys: [], intentsKeys: [], codeHash: "BnQQU2PY3ngVwf1KixcYbxCVnYqzrwBAMk6eku5BKpMh", evidence, calls: [],
+    accessKeys: [], intentsKeys: [],
+    secrets: [secretRow(wasmHash, contract)],
+    codeHash: "BnQQU2PY3ngVwf1KixcYbxCVnYqzrwBAMk6eku5BKpMh", evidence, calls: [],
+  };
+}
+
+/** An OutLayer secret row as list_user_secrets returns it, created after the world's set_program block. */
+export function secretRow(hash: string, contract: string, over: Record<string, unknown> = {}) {
+  return {
+    accessor: { WasmHash: { hash } }, profile: "arrow", created_at: 1763000100000000000, updated_at: 1763000100000000000, storage_deposit: "7460000000000000000000",
+    access: { Logic: { operator: "And", conditions: [{ WasmHash: { hash } }, { Predecessor: { condition: { Whitelist: { accounts: [contract] } } } }] } },
+    ...over,
   };
 }
 
@@ -171,6 +191,7 @@ export function fakeFetch(w: World): typeof fetch {
       case "get_purchase": return w.purchases.find((p) => p.id === args.purchase_id) ?? null;
       case "leak_budget": return w.leak[args.listing_id] ?? null;
       case "public_keys_of": return w.intentsKeys;
+      case "list_user_secrets": return w.secrets;
       default: throw new Error(`unexpected view ${name}`);
     }
   };
