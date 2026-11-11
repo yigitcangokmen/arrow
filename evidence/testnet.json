@@ -1773,5 +1773,17 @@
       "program_wasm_sha256": "6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1"
     }
   ],
-  "corrections": []
+  "corrections": [
+    {
+      "runs": [
+        "deploy-testnet-fastfs-freeze-chunk1",
+        "deploy-testnet-fastfs-freeze-chunk2"
+      ],
+      "field": "program_wasm_sha256",
+      "recorded": "6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1",
+      "correct": "2d2dc4d0c6aff708105f208d8afd9b71081cea9a7fe400a4b7eec2927ef38ee1",
+      "reason": "appendRun copied the file top-level program, which the freeze ceremony set before set_program. arrow-v2.arrowhq.testnet get_config program_wasm_hash at blocks 277251280 and 277251282 (archival RPC) is the rc4 2d2dc4d0…; it reads 6ad7fed4… from set_program block 277251354. appendRun no longer fills program_wasm_sha256 on deploy runs.",
+      "timestamp_utc": "2026-11-11T19:36:02.921Z"
+    }
+  ]
 }
