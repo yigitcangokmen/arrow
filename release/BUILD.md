@@ -40,18 +40,18 @@ wasmtime 50.0.1 (c307ec81d 2026-10-29)      # local test runtime only, not part 
 ## Inputs
 
 - `shasum -a 256 Cargo.lock`: `a152e5a294ed2dfdfe9db1ada90f86a8c8becace0e0d23e942beba12bc2a7c19`
-- Last commit that changed a wasm input: `7412dfd` (fix(enclave): abort silently when an allocation fails)
+- Last commit that changed a wasm input: `6e232f8` (fix(enclave): delete invisible characters before NFKC when normalizing MinHash keys)
 - Embedded at compile time: `fixtures/minhash-params.json` (`include_str!` in `enclave/arrow-core/src/minhash.rs`). `fixtures/llm-request-example.json` is the byte-exact golden for the NEAR AI request the wasm builds; it freezes with the wasm.
 
 ## Expected sha256
 
 | | value |
 |---|---|
-| freeze candidate sha256 | `b2786f85bf91573423577b027019cfc7d7acae620ed38cba7a50db3e5eaef298` |
-| size | 1688094 bytes |
-| candidate source | main `45ddc38` (second audit fix round merged; wasm inputs unchanged since `7412dfd`) |
-| candidate built (UTC) | 2026-11-10T22:34Z |
-| reproduced | main checkout and a second worktree: same sha |
-| testnet rc (for comparison) | same bytes as the candidate (`release/arrow-tee-rc.*`, rc3 on arrow-v2.arrowhq.testnet); rc2 `5daa76fb…`, the first rc `73415b8f…` and the earlier candidate `d5ea438c…` are void |
+| freeze candidate sha256 | `2d2dc4d0c6aff708105f208d8afd9b71081cea9a7fe400a4b7eec2927ef38ee1` (macOS arm64 build host) |
+| size | 1696881 bytes |
+| candidate source | main `3d841ea` (round-2 delta fixes merged; MinHash key normalization changed in `6e232f8`) |
+| candidate built (UTC) | 2026-11-11T00:00Z |
+| reproduced | main checkout and the fix2/round2 worktree: same sha |
+| testnet rc (for comparison) | same bytes as the candidate (`release/arrow-tee-rc.*`, rc4 on arrow-v2.arrowhq.testnet); rc3 `b2786f85…`, rc2 `5daa76fb…`, the first rc `73415b8f…` and the earlier candidate `d5ea438c…` are void |
 | freeze commit | (filled at the freeze) |
 | freeze built (UTC) | (filled at the freeze) |
