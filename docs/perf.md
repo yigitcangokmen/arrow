@@ -1,10 +1,10 @@
-# Enclave performance (WS3-T11b)
+# Enclave performance
 
-Measured 2026-11-10 between 18:46 and 19:20 GMT+7. All data is the synthetic demo data (`fixtures/demo/`, labelled synthetic). Percentiles are nearest-rank over 10 runs, so p95 is the slowest run.
+Measured 2026-11-10 between 18:46 and 19:20 GMT+7, except the main `211bc63` column of the instruction table (2026-11-11). All data is the synthetic demo data (`fixtures/demo/`, labelled synthetic). Percentiles are nearest-rank over 10 runs, so p95 is the slowest run.
 
 ## Testnet
 
-- Contract: `arrow.arrowhq.testnet` running program rc `73415b8f…` (the testnet rc, built before the minhash change below) and before the binding fixes. The current testnet market `arrow-v2.arrowhq.testnet` runs rc4 `2d2dc4d0…` and has not been re-measured.
+- Real evals on `arrow.arrowhq.testnet`, the first market contract, running program rc `73415b8f…` (pre-binding: built before the MinHash change below and before the binding fixes). rc4, which contains both, has not been re-measured.
 - Listings: seller `spike.arrowhq.testnet` listed both scored demo datasets. The blobs are on testnet FastFS.
   - Listing 8 is the unlock scene: https://testnet.nearblocks.io/txns/5TUZURcuV2RPWcy2GtH6W4K7nGUSXDCqgN1gv4WEZGGf
   - Listing 9 is the labels scene: https://testnet.nearblocks.io/txns/HTa2E87jTyR3poTtfUpTTCbWEmtonHJrJVQ3typwhhAE
@@ -33,17 +33,14 @@ Columns:
 
 Summary:
 - All 10 runs settled with a verdict. There was no refund.
-- Both scenes gave the expected result:
-  - Listing 8 gave PASS with novelty 1.
-  - Listing 9 gave BUY·5·4, and the model agreed on all 5 runs.
+- The model gave the same verdict on all 5 runs of each listing.
 - `wall_ms` p50 = 58 976 and p95 = 71 154.
 - `chain_ms` p50 = 53 708 and p95 = 59 735.
-- OutLayer `time_ms` p50 = 47 024 and p95 = 47 084. The spread is 46 896-47 084, so T_PAD (45 s) hides the real work time.
+- OutLayer `time_ms` p50 = 47 024 and p95 = 47 084. The spread is 46 896-47 084: [T_PAD](design.md#timeouts) hid the real work time.
 - `instructions`:
   - 2.67e8 on the unlock listing (412 rows)
   - 4.02e8 on the labels listing (1 000 rows)
   - Runs on the same listing are within 0.4 % of each other.
-- Output is 227 B in every run.
 - OutLayer did not report `compile_time_ms` for these runs. Its log says "Cached WASM"; the field only appeared on the first, freshly compiled run (the program-key derive).
 
 ## Local
@@ -67,26 +64,28 @@ Summary:
 | 9 | local | labels | 4.23 | 227 | BUY·5·4 |
 | 10 | local | labels | 3.07 | 227 | BUY·5·4 |
 
-Local work time: **p50 = 3.23 s, p95 = 4.43 s.** Almost all of it is the NEAR AI round trip. With the fake model the same runs take 0.03-0.08 s.
+Local work time: **p50 = 3.22 s, p95 = 4.43 s.** Almost all of it is the NEAR AI round trip. With the fake model the same runs take 0.03-0.08 s.
 
 ## Instruction count and max case
 
 wasmtime fuel and OutLayer instructions are the same measure. The rc's program-key derive needs 4.49e6 fuel locally (bisection, ±1 %), and OutLayer reported 4 370 742 instructions for it (https://testnet.nearblocks.io/txns/C99mZHgRb6Lme6eBGYCEsKDtFxcogBvuqmeo373Xzxeh). The fuel figures below come from bisecting the smallest fuel that still finishes, to ±2 %. They use the fake model, because fuel does not depend on the model's answer.
 
-The max case (DEC I-13) is 200 000 rows and 4 columns (`k,d,v,t`, key column `k`):
+The max case is 200 000 rows and 4 columns (`k,d,v,t`, key column `k`):
 - Size: 5 000 008 B of plaintext, which becomes a 5 000 048 B blob (MAX_BLOB is 5 242 880).
 - Criteria: a 128-value MinHash signature over 20 000 buyer keys, 10 000 of which overlap with the seller's.
 - Limits: run under `-W fuel=20000000000 -W max-memory-size=536870912`, the testnet `limits_eval`.
 
-| case | rc 73415b8f code | after e0c00d6 (u64 minhash) |
-|---|---|---|
-| demo unlock, 412 rows | 2.67e8 (testnet) | 2.38e8 |
-| demo labels, 1 000 rows | 4.02e8 (testnet) | 3.25e8 |
-| max case, 200 000 rows | **out of fuel at 2.0e10 (trap)** | **1.33e10**, ok:true, 227 B, 0.71 s without fuel metering, peak RSS of the wasmtime process 27 MiB |
+| case | rc 73415b8f code | after e0c00d6 (u64 minhash) | main 211bc63 (rc4 enclave code), 2026-11-11 |
+|---|---|---|---|
+| demo unlock, 412 rows | 2.67e8 (testnet) | 2.38e8 | 2.63e8 |
+| demo labels, 1 000 rows | 4.02e8 (testnet) | 3.25e8 | 3.58e8 |
+| max case, 200 000 rows | **out of fuel at 2.0e10 (trap)** | 1.33e10, ok:true, 227 B, 0.71 s without fuel metering, peak RSS of the wasmtime process 27 MiB | **1.38e10**, ok:true, 227 B, 0.64 s without fuel metering, peak RSS 27 MiB |
 
-What changed: `minhash::perm` used u128 `checked_rem`. On wasm32 that is a software division, and it cost about 950 instructions per permutation (128 permutations per distinct key). It now folds by 2^61 ≡ 1 mod P in u64. The value is the same: `perm_fold_equals_u128_rem` checks 200 000 random inputs and the edges around P against u128 `%`, and the TS/Rust MinHash vectors still pass. `no_stderr_on_any_error` passes 47/47 (positives 6/6) on this code.
+The last column is `bash scripts/dev/perf-local.sh --llm fake --runs 1` on main; it adds the key-normalization budget and the deletion of default-ignorable characters to the e0c00d6 code.
 
-Where the remaining 1.33e10 goes at 200 000 rows (from runs at 10 000 rows):
+What changed: `minhash::perm` used u128 `checked_rem`. On wasm32 that is a software division, and it cost about 950 instructions per permutation (128 permutations per distinct key). It now folds by 2^61 ≡ 1 mod P in u64. The value is the same: `perm_fold_equals_u128_rem` checks 200 000 random inputs and the edges around P against u128 `%`, and the TS/Rust MinHash vectors still pass.
+
+Where the e0c00d6 figure of 1.33e10 goes at 200 000 rows (from runs at 10 000 rows):
 
 | Part | Instructions |
 |---|---|
@@ -99,19 +98,23 @@ Where the remaining 1.33e10 goes at 200 000 rows (from runs at 10 000 rows):
 
 | Rule | Measured | Decision |
 |---|---|---|
-| Local work p95 > 25 s → SAMPLE_ROWS = 20 | 4.43 s | SAMPLE_ROWS stays 40 (DEC I-06) |
-| Local work p95 > 45 s → T_PAD has no effect | 4.43 s | T_PAD works: OutLayer `time_ms` is 47.0 ± 0.1 s for both datasets |
-| Testnet `wall_ms` p95 > 85 000 → guard margin is thin | 71 154 (`chain_ms` p95 59 735) | No change. The eval guard is 90 s from the request block. Block-to-settle was at most 59.7 s, so the margin is about 30 s |
-| `instructions` > 15e9 → RISK | 4.02e8 (testnet max) · 1.33e10 (local max case after the fix) | No RISK row. The max case uses 66 % of the 20e9 limit. H-W3-2 is not triggered |
-| Max case fails at the fuel or memory limit → optimize first, then H-W3-2 | It failed on the rc code. After optimization it passes | Optimized (e0c00d6). Limits are unchanged (5 MB, 200k rows) |
+| Local work p95 > 25 s → SAMPLE_ROWS = 20 | 4.43 s | SAMPLE_ROWS stays 40 |
+| Local work p95 > 45 s → T_PAD has no effect | 4.43 s | T_PAD works (Summary above) |
+| Testnet `wall_ms` p95 > 85 000 → guard margin is thin | 71 154 (`chain_ms` p95 59 735) | No change. Block-to-settle was at most 59.7 s, about 30 s inside the [eval guard](design.md#timeouts) |
+| `instructions` > 15e9 → RISK | 4.02e8 (testnet max) · 1.38e10 (local max case on main) | No RISK row. The max case uses 69 % of the 20e9 limit |
+| Max case fails at the fuel or memory limit → optimize first, then raise the limits | It failed on the rc code. After optimization it passes | Optimized (e0c00d6). Limits are unchanged (5 MB, 200k rows) |
 | Output ≤ 900 B, target ≤ 400 | 227 B in all 20 runs | OK |
 
 ## Notes
 
-- The minhash change is not in the testnet rc. It changes the wasm hash, so it ships with the freeze candidate (WS3-T12). The testnet program key and listings stay valid until then.
-- `time_ms` and `instructions` are public on chain:
-  - T_PAD makes `time_ms` the same for every input.
-  - `instructions` does not stay the same. It tracks the dataset size (2.67e8 against 4.02e8 here), and between runs on one listing it varies by less than 0.4 %. It also depends on the buyer's choice of `key_column` (with MinHash) and `date_column`, which add per-cell and per-distinct-key work, so the buyer steers it and it is not counted in the leak budget. This is the side channel the trust table already lists ("instruction and time_ms are public on chain").
-- Cost: OutLayer charged 0.00570 NEAR for one eval (run 8, `Cost: 5702040000000000000000 yoctoNEAR`), and the rest of the 0.02 NEAR deposit came back as a refund. Most of the charge is the 47 s of `time_ms`. The contract's tank pays it.
+- `time_ms` and `instructions` are public on chain; what they reveal and what the buyer can steer is the [README trust table](../README.md#trust-table), Side channels row. A run that outlasts T_PAD, for example a stalled NEAR AI call plus a slow blob fetch, shows its real time.
 - Not measured on testnet: the 5 MB max case. That would need a 5 MB FastFS upload, and the card measures the max case locally.
 - FastFS: a newly uploaded file returned 404 for about 2.5 minutes before test.fastfs.io served it. `perf-testnet.ts` waits up to 10 minutes for it.
+
+## Gas tank
+
+The contract's NEAR balance (the tank) pays for every eval, whether or not the eval succeeds:
+
+- OutLayer charge: 0.00570 NEAR for one eval (testnet run 8 above, rc `73415b8f…`, `Cost: 5702040000000000000000 yoctoNEAR`; the mainnet charge is not measured yet, Pending M8 in [JUDGES.md](../JUDGES.md#pending-ledger)); the rest of the 0.02 NEAR deposit comes back.
+- Storage: a settled eval record takes about 580 bytes of contract state, about 0.0058 NEAR at 10^19 yoctoNEAR per byte. A failed eval writes the record too.
+- Together: about 0.0115 NEAR per eval. A tank funded with 0.5 NEAR, less the 0.05 NEAR `tank_min` and one 0.02 NEAR deposit, covers about 37 evals before `op=eval` is refused with E10.

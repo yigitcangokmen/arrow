@@ -1,6 +1,6 @@
 # release/BUILD.md: arrow-tee build record (DRAFT, freeze candidate)
 
-Status: **freeze candidate, not frozen.** The freeze (K3, 2026-11-12 18:00 GMT+7 [11:00Z]) rebuilds from the freeze commit with the same command, writes `release/arrow-tee.wasm` and `release/sha256.txt`, and fills in the two "freeze" lines below. If anything under `enclave/`, `fixtures/minhash-params.json`, `Cargo.lock`, `Cargo.toml` or `rust-toolchain.toml` changes before then, the expected sha changes and this candidate is void.
+Status: **freeze candidate, not frozen.** The freeze (planned 2026-11-12 18:00 GMT+7 [11:00Z], only on the team's go) rebuilds from the freeze commit with the same command, writes `release/arrow-tee.wasm` and `release/sha256.txt`, and fills in the two "freeze" lines below. If anything under `enclave/`, `fixtures/minhash-params.json`, `Cargo.lock`, `Cargo.toml` or `rust-toolchain.toml` changes before then, the expected sha changes and this candidate is void.
 
 ## Build command
 
@@ -51,7 +51,7 @@ wasmtime 50.0.1 (c307ec81d 2026-10-29)      # local test runtime only, not part 
 | size | 1696881 bytes |
 | candidate source | main `e48fbdc` (round-2 delta fixes merged; MinHash key normalization changed in `6b5eead`) |
 | candidate built (UTC) | 2026-11-11T00:00Z |
-| reproduced | main checkout and the fix2/round2 worktree: same sha |
+| reproduced | two checkouts on the same macOS arm64 host: same sha. Per-host values and why CI `tee` is red: [README Build from source](../README.md#build-from-source) |
 | testnet rc (for comparison) | same bytes as the candidate (`release/arrow-tee-rc.*`, rc4 on arrow-v2.arrowhq.testnet); rc3 `b2786f85…`, rc2 `5daa76fb…`, the first rc `73415b8f…` and the earlier candidate `d5ea438c…` are void |
 | freeze commit | (filled at the freeze) |
 | freeze built (UTC) | (filled at the freeze) |

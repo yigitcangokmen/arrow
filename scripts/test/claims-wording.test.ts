@@ -16,6 +16,8 @@ const evidence = (n: string) => JSON.parse(read(`evidence/${n}.json`)) as { cont
 /** The README line that starts with `| <first cell>` (a table row) or the first line that contains `needle`. */
 const row = (first: string) => readme.split("\n").find((l) => l.startsWith(`| ${first}`)) ?? "";
 const line = (needle: string) => readme.split("\n").find((l) => l.includes(needle)) ?? "";
+/** The JUDGES.md line that starts with `| <first cell>` (the gate rows moved there from the README). */
+const jline = (first: string) => read("JUDGES.md").split("\n").find((l) => l.startsWith(`| ${first}`)) ?? "";
 const judgesRow = (n: number) => judges.find((r) => r.n === n);
 const cases = (f: string) => (JSON.parse(read(`fixtures/${f}`)) as { cases: unknown[] }).cases.length;
 
@@ -45,11 +47,11 @@ describe("claims wording", () => {
     expect(ev.contract).toBe("arrow-v2.arrowhq.testnet");
     expect(line("- Testnet: contract")).toContain(ev.contract!);
     expect(line("- Testnet: contract")).toContain(ev.program_wasm_sha256!.slice(0, 8));
-    // the perf table was measured on the first contract and says so
-    expect(line("Real evals on `arrow.arrowhq.testnet`")).toMatch(/pre-binding/);
+    // the perf table was measured on the first contract and says so (docs/perf.md is the home of the timings)
+    expect(read("docs/perf.md").split("\n").find((l) => l.includes("Real evals on `arrow.arrowhq.testnet`")) ?? "").toMatch(/pre-binding/);
     // no row counts that go stale every time the evidence file grows
-    expect(row("**K2**")).not.toMatch(/\d+ listings, \d+ evals/);
-    expect(row("**K2**")).toContain("arrow-v2.arrowhq.testnet");
+    expect(jline("**K2**")).not.toMatch(/\d+ listings, \d+ evals/);
+    expect(jline("**K2**")).toContain("arrow-v2.arrowhq.testnet");
     expect(judgesRow(30)!.expected).toContain(ev.contract);
     expect(judgesRow(31)!.claim).toMatch(/current market contract/);
   });
@@ -64,7 +66,7 @@ describe("claims wording", () => {
   });
 
   it("clm7_mainnet_refund_sample_is_the_spikes_forced_refund", () => {
-    const refundRow = row("**S3c** refund");
+    const refundRow = jline("**S3c** refund");
     expect(refundRow).toContain("outlayer_refund");
     expect(refundRow).not.toMatch(/decided by the program/);
     expect(judgesRow(18)!.expected).toContain("outlayer_refund");
@@ -80,9 +82,8 @@ describe("claims wording", () => {
     };
     const keep = secs("spike-s3c-outlayer");
     const refund = secs("spike-s3c-outlayer_refund");
-    expect(row("**S3c** OutLayer composition")).toContain(`keep in ${keep} s, refund in ${refund} s`);
-    expect(row("**S3c** keep")).toContain(`${keep} s`);
-    expect(row("**S3c** refund")).toContain(`${refund} s`);
+    expect(jline("**S3c** keep")).toContain(`${keep} s`);
+    expect(jline("**S3c** refund")).toContain(`${refund} s`);
     expect(judgesRow(18)!.expected).toContain(`${refund} s`);
     expect(`${readme}\n${read("JUDGES.md")}`).not.toMatch(/\b(10\.0|38\.0) s/);
   });
@@ -106,7 +107,7 @@ describe("claims wording", () => {
     expect(step5).toContain(`ecies ts->rs: ${cases("ecies-vectors.json")}/${cases("ecies-vectors.json")}`);
     expect(step5).toContain(`xchacha ts->rs: ${cases("xchacha-vectors.json")}/${cases("xchacha-vectors.json")}`);
     expect(step5).toContain(`minhash ts->rs: ${cases("minhash-vectors.json")}/${cases("minhash-vectors.json")}`);
-    const s4b = row("**S4-b**");
+    const s4b = judgesRow(32)!.expected;
     expect(s4b).toContain(`ECIES ${cases("ecies-vectors.json")}/${cases("ecies-vectors.json")} and ${cases("ecies-vectors-rs.json")}/${cases("ecies-vectors-rs.json")}`);
     // no exact unit-test count: it goes stale with every new test
     expect(readme).not.toMatch(/\d+ unit tests/);
@@ -119,7 +120,6 @@ describe("claims wording", () => {
     expect(pct).toBe("10%");
     for (const [name, text] of [
       ["README opening", readme.split("\n")[2]!],
-      ["README S2 row", row("**S2**")],
       ["README KU-11 row", row("NEAR AI API key")],
       ["README leak budget row", row("Leak budget")],
       ["video F07", read("docs/video/script.md").split("\n").find((l) => l.startsWith("| F07"))!],
@@ -131,6 +131,8 @@ describe("claims wording", () => {
     ] as const) {
       expect(text, name).toMatch(/10%|ten percent/);
     }
+    // the S2 gate no longer describes the sandbox refund itself; it points at row 16, which states the 10% charge
+    expect(jline("**S2**")).toContain("row 16");
     expect(row("Gas tank")).toMatch(/\| RISKY \|$/);
     expect(read("web/lib/trust.ts")).toContain('part: "Gas tank"');
   });
