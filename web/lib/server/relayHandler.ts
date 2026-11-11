@@ -216,7 +216,8 @@ async function checkAgainstChain(v: Extract<ReturnType<typeof validateArrowMulti
       if (v.blobUrl === l.blob_url) return apiError(409, "NOTHING_TO_CHANGE", "The listing already points at this URL. Nothing was sent.");
       // NEW-1: free for the seller, so at most one hosted move per listing per window.
       if ((await chain.blobUrlBefore(v.listingId!)) !== l.blob_url) {
-        return apiError(429, "REHOST_COOLDOWN", "This listing was created or moved in the last 6 hours, so the hosted relay will not move it yet. Nothing was sent; try later, or relay it yourself.", { fallback: SELF_RELAY, retryAfterSec: 3600 });
+        // 409, not 429: relayHosted turns every 429 into RATE_LIMITED, which would lose this code and this text.
+        return apiError(409, "REHOST_COOLDOWN", "This listing was created or moved in the last 6 hours, so the hosted relay will not move it yet. Nothing was sent; try later, or relay it yourself.", { fallback: SELF_RELAY, retryAfterSec: 3600 });
       }
       return null;
     }
@@ -229,7 +230,7 @@ async function checkAgainstChain(v: Extract<ReturnType<typeof validateArrowMulti
     if (v.op === "buy") {
       // E22: a second purchase to the same key panics after the relayer paid the gas, and the price comes back in full.
       const prev = await chain.purchaseByBuyer(v.listingId!, v.signerId, v.buyerPk!);
-      if (prev && prev.status !== "refunded") return apiError(409, "ALREADY_BOUGHT", "This wallet already bought this listing to this key. Nothing was sent: open it from Check payment.");
+      if (prev && prev.status !== "refunded") return apiError(409, "ALREADY_BOUGHT", "This wallet already bought this listing with this viewing key. Nothing was sent: open that purchase under \"Your earlier payments on this listing\" in the browser that made it, or with npm run arrow -- decrypt <purchase id>.");
     }
     if (v.op === "eval" && market.tankAvailable < market.tankMin + market.depositEval * EVAL_TANK_RESERVE) {
       return apiError(409, "TANK_LOW", "The market keeps its last gas for purchases, so new inspections are paused until the tank is topped up. Nothing was sent.");

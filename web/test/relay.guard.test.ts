@@ -1,10 +1,13 @@
 // Relay guards: the contract's own refusals (E05, E06, E10, E13), the free-eval drain, the relayer's 0.6 NEAR lock, the key type.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { RelayRejected, relayHosted } from "@arrow/sdk/relay";
 import { marketStateFrom } from "../lib/blockers.ts";
+import { describeError } from "../lib/errors.ts";
 import { clientIp } from "../lib/ip.ts";
 import { keyedDaily, tokenBucket } from "../lib/ratelimit.ts";
 import { handleRelay, type ChainPort, type RelayDeps, type RelayerPort } from "../lib/server/relayHandler.ts";
 import { RelayRuns } from "../lib/server/relayRuns.ts";
+import { provablyNotSent } from "../lib/payFlow.ts";
 import { NOW, SIGNER, USDC, healthyMarket, listingFixture, makeMp, post } from "./helpers.ts";
 
 const outcome = { transaction: { hash: "TX", signer_id: "r.near" }, transaction_outcome: { outcome: { logs: [] } }, receipts_outcome: [] };
@@ -236,11 +239,11 @@ describe("NEW-1 / R2-7 / E22: a payment the contract returns in full never reach
     expect(r.calls).toHaveLength(0);
   });
 
-  it("NEW-1: a listing created or moved inside the window is 429 REHOST_COOLDOWN; unchanged for the window it is relayed", async () => {
+  it("NEW-1: a listing created or moved inside the window is 409 REHOST_COOLDOWN; unchanged for the window it is relayed", async () => {
     for (const [before, code] of [[null, "REHOST_COOLDOWN"], ["https://old.example/x.bin", "REHOST_COOLDOWN"]] as const) {
       const r = relayer();
       const res = await send(deps({ relayer: () => r.port, chain: { ...chain(healthyMarket, seller), blobUrlBefore: async () => before } }), rehost("A"));
-      expect([res.status, (await res.json()).code]).toEqual([429, code]);
+      expect([res.status, (await res.json()).code]).toEqual([409, code]);
       expect(r.calls).toHaveLength(0);
     }
   });
@@ -265,6 +268,34 @@ describe("NEW-1 / R2-7 / E22: a payment the contract returns in full never reach
     const again = makeMp("rehost", { payload: { nonce: "B" }, msg: { op: "rehost", listing_id: 7, blob_url: "https://other.example/y.bin" } });
     expect((await (await send(b, again)).json()).code).toBe("REHOST_COOLDOWN");
     expect((await (await send(a, again)).json()).code).toBe("REHOST_COOLDOWN");
+  });
+
+  it("the client reads each chain-state refusal off the real wire with its own code and text, never as RATE_LIMITED", async () => {
+    const purchased = async () => ({ id: 1, listing_id: 7, buyer: SIGNER, buyer_pk: "04", status: "done", sealed_k_buyer: null, h: null, refund_reason: null, settled_at_ns: null }) as never;
+    const same = { ...JSON.parse((JSON.parse(makeMp("rehost").payload).intents[0] as { msg: string }).msg), blob_url: seller.blob_url };
+    const cases = [
+      ["REHOST_COOLDOWN", { ...chain(healthyMarket, seller), blobUrlBefore: async () => null }, rehost("W1"), /6 hours/],
+      ["NOTHING_TO_CHANGE", chain(healthyMarket, seller), makeMp("rehost", { msg: same }), /already points at this URL/],
+      ["ALREADY_BOUGHT", { ...chain(), purchaseByBuyer: purchased }, nonce("W3", undefined, "buy"), /already bought this listing/],
+    ] as const;
+    for (const [code, c, mp, text] of cases) {
+      const d = deps({ relayer: () => relayer().port, chain: c });
+      const wire = (async (url: string, init: RequestInit) => handleRelay(new Request(url, init), d)) as typeof fetch;
+      const err = await relayHosted("http://localhost", mp, wire).catch((e) => e);
+      expect(err, code).toBeInstanceOf(RelayRejected);
+      expect(err.code).toBe(code);
+      // A re-send of a landed payload can draw these too (RELAY-3), so on their own they never prove nothing was sent.
+      expect(provablyNotSent(err)).toBe(false);
+      expect(describeError(err).message).toMatch(text);
+    }
+  });
+
+  it("E22: ALREADY_BOUGHT does not point at Check payment, which has nothing to check once the wallet is freed", async () => {
+    const bought = { ...chain(), purchaseByBuyer: async () => ({ id: 1, listing_id: 7, buyer: SIGNER, buyer_pk: "04", status: "done", sealed_k_buyer: null, h: null, refund_reason: null, settled_at_ns: null }) as never };
+    const body = await (await send(deps({ chain: bought }), nonce("W4", undefined, "buy"))).json();
+    expect(body.code).toBe("ALREADY_BOUGHT");
+    expect(body.error).toMatch(/Nothing was sent/);
+    expect(body.error).not.toMatch(/Check payment/);
   });
 
   it("E22: a buy to a key this wallet already bought is 409 ALREADY_BOUGHT; after a refund it is relayed", async () => {
