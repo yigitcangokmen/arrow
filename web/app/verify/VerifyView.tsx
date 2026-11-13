@@ -1,16 +1,21 @@
+import Link from "next/link";
 import type { Row } from "@arrow/sdk/verify";
 import type { ReactNode } from "react";
 import { ProofPill } from "../../components/ProofPill.tsx";
-import { groupRows, linkText, safeHref } from "../../lib/verifyView.ts";
+import { couldNotRun, GROUP_PLAIN, groupRows, linkText, PLAIN, safeHref } from "../../lib/verifyView.ts";
 import styles from "./verify.module.css";
 
-/** The rows of a report, grouped. Labels are printed as text and the engine's wording is shown unchanged. */
+/**
+ * The rows of a report, grouped. Each row opens with one plain sentence; the engine's label and wording follow unchanged, so the
+ * page never says more than `npm run verify` does.
+ */
 export function VerifyRows({ rows, after }: { rows: readonly Row[]; after?: Record<string, ReactNode> }) {
   return (
     <>
       {groupRows(rows).map((g) => (
         <section key={g.key} className={styles.group} aria-labelledby={`g-${g.key}`}>
-          <h2 id={`g-${g.key}`}>{g.title}</h2>
+          <p className={styles.eyebrow}>{g.title}</p>
+          <h2 id={`g-${g.key}`} className={styles.groupTitle}>{GROUP_PLAIN[g.key]}</h2>
           <p className={styles.note}>{g.note}</p>
           <table className={styles.table}>
             <thead>
@@ -30,24 +35,45 @@ export function VerifyRows({ rows, after }: { rows: readonly Row[]; after?: Reco
 
 function RowLine({ row, extra }: { row: Row; extra?: ReactNode }) {
   const links = row.links.map(safeHref).filter((h): h is string => h !== null);
+  const plain = PLAIN[row.id];
+  const failedToRun = couldNotRun(row.detail);
   return (
-    <>
-      <tr>
-        <td data-label="Result"><ProofPill label={row.label} />{row.required ? <span className={styles.req}>REQUIRED</span> : null}</td>
-        <td data-label="Row" className={styles.id}>{row.id}</td>
-        <td data-label="Claim and evidence">
-          {row.title}
-          {row.detail ? <p className={styles.detail}>{row.detail}</p> : null}
-          {links.length > 0 ? (
-            <ul className={styles.links}>
-              {links.map((h) => (
-                <li key={h}><a className="mono" href={h} target="_blank" rel="noopener noreferrer">{linkText(h)}</a></li>
-              ))}
-            </ul>
-          ) : null}
-        </td>
-      </tr>
-      {extra ? <tr><td colSpan={3}>{extra}</td></tr> : null}
-    </>
+    <tr>
+      <td className={styles.result}><ProofPill label={row.label} />{row.required ? <span className={styles.req}>required</span> : null}</td>
+      <td className={styles.id}>{row.id}</td>
+      <td>
+        {plain ? <p className={styles.plain}>{plain}</p> : null}
+        <p className={styles.engine}>{row.title}</p>
+        {failedToRun ? (
+          <div className={styles.retry}>
+            <p>Could not check right now: the archive node did not answer. Reload the page in a few minutes to run the check again; until then it counts as NOT PROVEN.</p>
+            <details>
+              <summary>The error</summary>
+              <p className="mono">{row.detail}</p>
+            </details>
+          </div>
+        ) : row.detail ? (
+          <p className={styles.detail}>{row.detail}</p>
+        ) : null}
+        {links.length > 0 ? (
+          <ul className={styles.links}>
+            {links.map((h) => (
+              <li key={h}><a className="mono" href={h} target="_blank" rel="noopener noreferrer">{linkText(h)}<span className="sr-only"> (opens in a new tab)</span></a></li>
+            ))}
+          </ul>
+        ) : null}
+        {extra ? <div className={styles.extra}>{extra}</div> : null}
+      </td>
+    </tr>
+  );
+}
+
+/** The next step after reading the proof: run it. */
+export function TryNext() {
+  return (
+    <div className={styles.next}>
+      <p><b>See it happen.</b> The free demo runs a listing, an inspection and a purchase on testnet with a throwaway account, in about 3 minutes.</p>
+      <Link className={styles.go} href="/try">Run the demo, free</Link>
+    </div>
   );
 }

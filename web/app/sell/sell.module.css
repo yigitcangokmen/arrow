@@ -2,3 +2,15 @@
 .steps { margin: 0 0 16px; }
 .file { font-size: 0.9rem; }
 .success a { overflow-wrap: anywhere; }
+.noteAction { margin-top: var(--sp-3) !important; }
+.demo { display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: var(--r-sm); background: var(--accent); color: var(--accent-ink); font-weight: 600; text-decoration: none; }
+.demo:hover { text-decoration: underline; }
+.picker { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.fileInput { position: absolute; inset: 0; width: 1px !important; height: 1px; min-height: 0 !important; padding: 0 !important; opacity: 0; overflow: hidden; }
+.fileButton { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--control-border); border-radius: var(--r-sm); background: var(--surface); color: var(--text); font-weight: 600; font-size: 15px; cursor: pointer; }
+.fileInput:focus-visible + .fileButton { outline: 2px solid var(--focus); outline-offset: 2px; }
+.fileInput:disabled + .fileButton { background: var(--sunken); color: var(--muted); border-style: dashed; cursor: not-allowed; }
+.fileName { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.summary { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--sunken); padding: var(--sp-4); margin: var(--sp-2) 0 var(--sp-4); display: grid; gap: 6px; }
+.summary p { margin: 0; }
+.summaryTitle { font-weight: 600; }

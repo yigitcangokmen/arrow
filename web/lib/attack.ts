@@ -239,3 +239,10 @@ export function mainnetView(i: Pick<AttackInputs, "room" | "native" | "mainnetLi
 export function lemonAmounts(l: { price: string; eval_fee: string } | null, fmt: (base: string) => string): { price: string; fee: string } | null {
   return l ? { price: fmt(l.price), fee: fmt(l.eval_fee) } : null;
 }
+
+/** Room attacks the deterministic rule layer stops on its own in the native replay (regex flag set): `{ k, n }`, or null without both files. */
+export function nativeStopped(i: Pick<AttackInputs, "room" | "native">): { k: number; n: number } | null {
+  if (!i.room || !i.native) return null;
+  const native = i.native;
+  return { k: i.room.attacks.filter((a) => native[a.id]?.regex_flag === true).length, n: i.room.attacks.length };
+}

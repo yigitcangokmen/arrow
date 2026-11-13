@@ -1,13 +1,22 @@
-.lead { color: var(--muted); }
-.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-.table th, .table td { text-align: left; vertical-align: top; padding: 8px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.title { font-size: 20px; margin: var(--sp-5) 0 var(--sp-2); }
+.lead { color: var(--muted); max-width: 72ch; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; table-layout: fixed; }
+.table th, .table td { text-align: left; vertical-align: top; padding: 10px 8px; border-bottom: 1px solid var(--border); overflow-wrap: break-word; hyphens: manual; }
+.table tr { scroll-margin-top: 88px; }
+.table tr:target { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .table thead th { color: var(--muted); font-weight: 600; }
 .table tbody th { font-weight: 600; }
+.table th:nth-child(1) { width: 17%; }
+.table th:nth-child(2) { width: 18%; }
+.table th:nth-child(3) { width: 21%; }
+.table th:nth-child(4) { width: 18%; }
+.table th:nth-child(5) { width: 26%; }
 
-@media (max-width: 640px) {
-  .table, .table tbody, .table tr, .table th, .table td { display: block; width: 100%; }
+/* Below 1000 px five columns get too narrow to read: one card per row. */
+@media (max-width: 1000px) {
+  .table, .table tbody, .table tr, .table th, .table td { display: block; width: 100% !important; }
   .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .table tr { margin: 0 0 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .table tr { margin: 0 0 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
   .table th, .table td { border-bottom: 0; padding: 6px 12px; }
   .table td::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
 }

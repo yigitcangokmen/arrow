@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadInputs, summarize } from "../../bench/src/offline.ts";
-import { categoryTitle, GROUP_ORDER, leakLines, lemonAmounts, mainnetView, qualityRows, readAttackInputs, roomView, verdictOf, type LiveRow } from "../lib/attack.ts";
+import { categoryTitle, GROUP_ORDER, leakLines, lemonAmounts, mainnetView, nativeStopped, qualityRows, readAttackInputs, roomView, verdictOf, type LiveRow } from "../lib/attack.ts";
 
 const root = new URL("../../", import.meta.url);
 const json = (p: string) => JSON.parse(readFileSync(new URL(p, root), "utf8"));
@@ -49,6 +49,11 @@ describe("missing results", () => {
     expect(v.rows.find((r) => r.id === "R-E1")!.scanner).toBe("flagged: ignore_prev");
     expect(v.rows.find((r) => r.id === "R-E2")!.scanner).toBe("not flagged");
     for (const g of GROUP_ORDER) expect(v.rows.filter((r) => r.group === g)).toHaveLength(6);
+  });
+
+  it("the rule-layer count on the home page and /attack is counted from native-gates.json, and is null without it", () => {
+    expect(nativeStopped(inputs())).toEqual({ k: 20, n: 24 });
+    expect(nativeStopped({ ...inputs(), native: null })).toBeNull();
   });
 
   it("without native gates the scanner column says n/a, not 'not flagged'", () => {

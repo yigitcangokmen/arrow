@@ -1,6 +1,10 @@
+/* Geist and Geist Mono, self-hosted (OFL, see fonts/OFL.txt). font-src 'self' already allows them. */
+@font-face { font-family: "Geist"; src: url("./fonts/Geist-Variable.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url("./fonts/GeistMono-Variable.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+
 *, *::before, *::after { box-sizing: border-box; }
 
-html { color-scheme: light dark; }
+html { color-scheme: light dark; scroll-padding-top: 64px; }
 :root[data-theme="light"] { color-scheme: light; }
 :root[data-theme="dark"] { color-scheme: dark; }
 
@@ -10,22 +14,30 @@ body {
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
 }
 
-main {
-  max-width: 1080px;
+/* Every page's root element gets the page column; the home page opts out with its own full-width bands. */
+:where(main > *) {
+  max-width: var(--maxw);
   margin: 0 auto;
-  padding: 24px var(--gutter) 48px;
+  padding: var(--sp-6) var(--sp-6) var(--sp-9);
+}
+@media (max-width: 720px) {
+  :where(main > *) { padding: var(--sp-5) var(--gutter) var(--sp-8); }
 }
 
-h1, h2, h3 { line-height: 1.2; margin: 0 0 12px; }
-h1 { font-size: clamp(1.5rem, 4vw, 2.25rem); }
-h2 { font-size: 1.25rem; }
+h1, h2, h3 { line-height: 1.2; margin: 0 0 12px; font-weight: 600; letter-spacing: -0.015em; }
+h1 { font-size: clamp(30px, 4vw, 44px); line-height: 1.08; letter-spacing: -0.03em; text-wrap: balance; }
+h2 { font-size: 20px; }
+h3 { font-size: 17px; }
 p { margin: 0 0 12px; }
 
-a { color: var(--accent); text-underline-offset: 2px; }
+a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
 
 code, pre, .mono { font-family: var(--font-mono); font-size: 0.9em; }
 code, .mono { overflow-wrap: anywhere; }
@@ -34,13 +46,24 @@ button {
   font: inherit;
   color: var(--text);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 8px 14px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-sm);
+  padding: 8px 16px;
   min-height: 40px;
   cursor: pointer;
 }
-button:disabled, button[aria-disabled="true"] { opacity: 0.6; cursor: not-allowed; }
+/* One disabled look everywhere: neutral fill, dashed edge, text kept above 4.5:1 (no opacity fade). */
+button:disabled, button[aria-disabled="true"] { background: var(--sunken); color: var(--muted); border: 1px dashed var(--control-border); cursor: not-allowed; }
+input:disabled, select:disabled, textarea:disabled { background: var(--sunken) !important; color: var(--muted) !important; border-style: dashed !important; cursor: not-allowed; }
+
+/* One chevron for every disclosure on the site (the nav menu turns it off). */
+summary { cursor: pointer; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before {
+  content: ""; display: inline-block; width: 7px; height: 7px; margin: 0 10px 0 2px; vertical-align: 0.18em;
+  border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform 0.15s ease;
+}
+details[open] > summary::before { transform: rotate(45deg); vertical-align: 0.3em; }
 
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
@@ -50,7 +73,7 @@ button:disabled, button[aria-disabled="true"] { opacity: 0.6; cursor: not-allowe
   top: 0;
   background: var(--surface);
   padding: 8px 12px;
-  z-index: 10;
+  z-index: 30;
 }
 .skip-link:focus { left: var(--gutter); }
 
@@ -61,4 +84,8 @@ button:disabled, button[aria-disabled="true"] { opacity: 0.6; cursor: not-allowe
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }

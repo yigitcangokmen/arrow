@@ -31,3 +31,21 @@ describe("toListingView budget", () => {
     expect(toListingView(base({ id: 2, max_evals: 2, evals_used: 2 }), team).budget.leftBits).toBe(0);
   });
 });
+
+describe("groupHomeListings", () => {
+  it("features live team listings only; e2e runs, /try accounts, outside sellers and stale listings go into more, in order", async () => {
+    const { groupHomeListings, markStale } = await import("../lib/server/listingsPage.ts");
+    const t = ["arrowhq.testnet"];
+    const views = markStale([
+      toListingView(base({ id: 1, seller: "e2e-seller.arrowhq.testnet", title: "[synthetic] e2e unlock schedule", program_hash_at_list: "aa" }), t),
+      toListingView(base({ id: 13, seller: "e2e-seller.arrowhq.testnet", title: "[synthetic] Q1 2027 token unlock schedule (412 rows)", program_hash_at_list: "aa" }), t),
+      toListingView(base({ id: 14, seller: "e2e-seller.arrowhq.testnet", title: "[synthetic] NEAR DeFi wallet labels (1,000 rows)", program_hash_at_list: "aa" }), t),
+      toListingView(base({ id: 15, seller: "trya1819d7109.testnet", title: "[synthetic] NEAR DeFi wallet labels (1,000 rows)", program_hash_at_list: "aa" }), t),
+      toListingView(base({ id: 16, seller: "someone.testnet", title: "Sales", program_hash_at_list: "aa" }), t),
+      toListingView(base({ id: 17, seller: "arrowhq.testnet", title: "[team-made] Old", program_hash_at_list: "old" }), t),
+    ], "aa");
+    const { featured, more } = groupHomeListings(views, t);
+    expect(featured.map((v) => v.id)).toEqual([13, 14]);
+    expect(more.map((v) => v.id)).toEqual([1, 15, 16, 17]);
+  });
+});

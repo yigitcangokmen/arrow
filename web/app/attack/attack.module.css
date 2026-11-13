@@ -1,25 +1,50 @@
-.lead { max-width: 64ch; color: var(--muted); }
-.section { margin: 0 0 40px; }
-.note { color: var(--muted); font-size: 0.9rem; margin: 0 0 8px; max-width: 72ch; }
-.src { color: var(--muted); font-size: 0.85rem; margin: 0 0 12px; overflow-wrap: anywhere; }
+.section { margin: 0 0 var(--sp-8); }
+.eyebrow { margin: 0 0 6px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.h2 { margin: 0 0 var(--sp-3); font-size: clamp(22px, 2.4vw, 28px); letter-spacing: -0.02em; }
+.note { color: var(--muted); font-size: 0.95rem; margin: 0 0 8px; max-width: 72ch; }
+.small { font-size: 0.95rem; }
+.src { color: var(--muted); font-size: 0.85rem; margin: 0 0 var(--sp-4); overflow-wrap: anywhere; }
 .headline { font-family: var(--font-mono); font-size: clamp(1.4rem, 5vw, 2rem); font-weight: 700; margin: 8px 0; overflow-wrap: anywhere; }
-.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: var(--sp-2) 0 var(--sp-3); }
 .table th, .table td { text-align: left; vertical-align: top; padding: 8px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
 .table thead th { color: var(--muted); font-weight: 600; }
 .table tbody th { font-weight: 600; }
 .id { font-family: var(--font-mono); white-space: nowrap; }
+.caught { color: var(--proven); font-weight: 600; }
+.missed { color: var(--risky); font-weight: 600; }
 .buy { color: var(--danger); font-weight: 700; }
 .pass { font-weight: 700; }
-.live { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--surface); }
+.top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-4); margin: 0 0 var(--sp-8); }
+.figure { border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-5); background: var(--sunken); }
+.figure p { margin: 0 0 var(--sp-2); color: var(--muted); }
+.big { font-family: var(--font-mono); font-size: clamp(44px, 6vw, 64px) !important; font-weight: 600; letter-spacing: -0.03em; line-height: 1; color: var(--text) !important; margin-bottom: var(--sp-3) !important; }
+.live { border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-5); background: var(--surface); box-shadow: var(--shadow-1); }
+.live h2 { margin-top: 0; }
 .live p { margin: 4px 0 8px; }
-.lemon { border-left: 4px solid var(--border); padding: 4px 16px; margin: 0; }
+.cli { font-size: 0.9rem; color: var(--muted); }
+.cli summary { padding: 4px 0; }
+.lemon { border-left: 4px solid var(--border); padding: 4px 16px; margin: 0 0 var(--sp-3); }
 .cmd { font-family: var(--font-mono); font-size: 0.85rem; overflow-wrap: anywhere; }
-.button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: var(--radius); text-decoration: none; font-weight: 600; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); }
+.button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: var(--r-sm); text-decoration: none; font-weight: 600; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); }
+.status { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
+.status li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.ran { font-family: var(--font-mono); font-size: 0.9rem; font-weight: 600; color: var(--proven); }
+.notrun { color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
+.group { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); padding: 0 var(--sp-4); margin: 0 0 var(--sp-3); }
+.group > summary { padding: var(--sp-3) 0; }
+.group[open] { padding-bottom: var(--sp-2); }
+.groupCount { color: var(--muted); font-size: 0.9rem; margin-left: 8px; }
 
+@media (max-width: 860px) { .top { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
   .table, .table tbody, .table tr, .table th, .table td { display: block; width: 100%; }
   .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .table tr { margin: 0 0 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-  .table th, .table td { border-bottom: 0; padding: 6px 12px; }
+  .table tr { margin: 0 0 8px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg); padding: 4px 0; }
+  .table th, .table td { border-bottom: 0; padding: 4px 12px; }
   .table td::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
+  .group { padding: 0 var(--sp-3); }
+  .groupCount { display: block; margin: 2px 0 0 19px; }
 }
+.cmds { margin: var(--sp-2) 0 0; padding-left: 1.1em; display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.cmds .mono { overflow-wrap: anywhere; }
+.nowrap { white-space: nowrap; }

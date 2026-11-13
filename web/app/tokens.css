@@ -11,10 +11,31 @@
   --risky: #a23b00;
   --danger: #b3261e;
   --focus: #1b5fd6;
+  --sunken: #f1f1ed; /* mock panels, tiles, the counter line */
+  --accent-ink: #ffffff; /* text on the filled button */
+  --ink: #16181d; /* the "Who sees what" band */
+  --ink-text: #f2f3f5;
+  --ink-muted: #a6abb6;
+  --ink-line: #2f333b;
   --radius: 8px;
+  --r-sm: 12px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-pill: 999px;
+  --shadow-1: 0 1px 2px rgba(16, 18, 24, 0.06);
   --gutter: 16px;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --maxw: 1200px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,6 +52,13 @@
     --risky: #ff9a62;
     --danger: #ff7d73;
     --focus: #7aa7ff;
+    --sunken: #1d2129;
+    --accent-ink: #0f1115;
+    --ink: #222731;
+    --ink-text: #e8eaee;
+    --ink-muted: #9aa1ae;
+    --ink-line: #3b4250;
+    --shadow-1: none;
   }
 }
 
@@ -47,4 +75,11 @@
   --risky: #ff9a62;
   --danger: #ff7d73;
   --focus: #7aa7ff;
+  --sunken: #1d2129;
+  --accent-ink: #0f1115;
+  --ink: #222731;
+  --ink-text: #e8eaee;
+  --ink-muted: #9aa1ae;
+  --ink-line: #3b4250;
+  --shadow-1: none;
 }

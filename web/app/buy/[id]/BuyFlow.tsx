@@ -13,7 +13,8 @@ import { Countdown } from "../../../components/Countdown.tsx";
 import { CopyEvidence } from "../../../components/CopyEvidence.tsx";
 import { ErrorBox } from "../../../components/ErrorBox.tsx";
 import { HashTriple } from "../../../components/HashTriple.tsx";
-import { StepList, type Step } from "../../../components/StepList.tsx";
+import { MeaningTiles } from "../../../components/MeaningTiles.tsx";
+import type { Step } from "../../../components/StepList.tsx";
 import { TopUp } from "../../../components/TopUp.tsx";
 import { TxLink } from "../../../components/TxLink.tsx";
 import { WalletButton } from "../../../components/WalletButton.tsx";
@@ -23,7 +24,7 @@ import { announceText, buyGate, neededFor, showBuy, whyNotInspect } from "../../
 import { CONTRACTS, SITE_DOMAIN, type Network } from "../../../lib/config.ts";
 import { describeError, type Described } from "../../../lib/errors.ts";
 import { formatBits, formatUsdc, REFUND_LINE, stateLine } from "../../../lib/format.ts";
-import { addressUrl } from "../../../lib/links.ts";
+import { addressUrl, listingLinks } from "../../../lib/links.ts";
 import { locateLatest } from "../../../lib/locate.ts";
 import { checkPayment, paidHistory, payWithIntent, pendingPayment, PaymentPending, PaymentUnclear, setPaidResult, type PaidTx } from "../../../lib/pay.ts";
 import type { PaidRecord, PendingPayment } from "../../../lib/pending.ts";
@@ -48,13 +49,15 @@ interface Delivery {
 const STEP_LABELS = ["Wallet and viewing key", "Balance", "Your criteria", "Inspect", "Result", "Buy", "Download and verify"] as const;
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
-export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
+export function BuyFlow({ network, listing, programPk, readOnly, blockers, team = false }: {
   network: Network;
   listing: ListingView;
   programPk: string | null;
   readOnly: boolean;
   /** Why the contract would refuse an inspection or a purchase right now (paused, stale program, low tank), read on the server. */
   blockers: { inspect: string[]; buy: string[] };
+  /** The seller is a team account: the summary names the team instead of a shortened account id. */
+  team?: boolean;
 }) {
   const evalFee = BigInt(listing.eval_fee);
   const price = BigInt(listing.price);
@@ -162,6 +165,23 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
     { label: STEP_LABELS[5], state: buyTx || delivery ? "done" : busy === "buy" ? "doing" : "todo" },
     { label: STEP_LABELS[6], state: delivery?.saveUrl ? "done" : busy === "download" ? "doing" : "todo" },
   ];
+
+  // The step cards: done = a check in the corner, the first open step = accent outline, later ones = muted (presentation only).
+  // The number lives in each heading ("1. Wallet and viewing key"), so the card does not repeat it.
+  const current = steps.findIndex((s) => s.state !== "done");
+  const stepClass = (i: number) =>
+    `${form.panel} ${styles.step} ${steps[i]!.state === "done" ? styles.done : i === current && !locked ? styles.now : steps[i]!.state === "failed" ? styles.failed : styles.later}`;
+  const mark = (i: number) => (
+    steps[i]!.state === "done" ? <span className={styles.num} aria-hidden="true">✓</span> : null
+  );
+  /** A step whose section is not shown yet: its number, its name and what it will do. */
+  const upcoming = (i: number, sub: string) => (
+    <div className={`${form.panel} ${styles.step} ${styles.later}`}>
+      {mark(i)}
+      <p className={styles.upTitle}>{i + 1}. {STEP_LABELS[i]}</p>
+      <p className={styles.sub}>{sub}</p>
+    </div>
+  );
 
   async function deriveKey() {
     if (!eoa) return;
@@ -429,33 +449,71 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
   return (
     <fieldset disabled={readOnly} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       <Announcer text={announce} />
-      <section className={form.panel} aria-labelledby="listing-title">
-        <div className={styles.head}>
-          <h1 id="listing-title" style={{ margin: 0 }}><bdi>{listing.displayTitle}</bdi></h1>
-          <Badge kind={listing.label} />
+      <div className={styles.layout}>
+      <aside className={styles.aside}>
+        <section className={styles.summary} aria-labelledby="listing-title">
+          <div className={styles.top}>
+            <Badge kind={listing.label} />
+            <span className="mono">listing #{listingId}</span>
+          </div>
+          <h1 id="listing-title" className={styles.title}><bdi>{listing.displayTitle}</bdi></h1>
+          <p className={form.hint}>
+            Seller{" "}
+            {team ? (
+              <a href={addressUrl(listing.seller, network)} target="_blank" rel="noopener noreferrer" title={listing.seller}>the Arrow team<span className="sr-only"> (account {listing.seller}, opens in a new tab)</span></a>
+            ) : (
+              <a href={addressUrl(listing.seller, network)} target="_blank" rel="noopener noreferrer" className="mono" title={listing.seller}>{short(listing.seller)}</a>
+            )}
+          </p>
+          {listing.public_desc ? <p className={styles.desc}><bdi>{listing.public_desc}</bdi></p> : null}
+          <div className={styles.prices}>
+            <div><span>Inspect</span><b>${formatUsdc(evalFee)} <small>USDC</small></b></div>
+            <div><span>Buy</span><b>${formatUsdc(price)} <small>USDC</small></b></div>
+          </div>
+          <p className={styles.facts}>
+            ~{Number(listing.rows_claimed).toLocaleString("en-US")} rows claimed by the seller · {listing.columns.length} columns · {listing.mode} mode
+          </p>
+          {exhausted ? <p className={form.error}>No inspection is possible any more: you would be buying blind.</p> : null}
+          {programPk === null && !readOnly ? <p className={form.error}>The enclave key is not published yet, so inspections are closed.</p> : null}
+          {[...new Set([...blockers.inspect, ...blockers.buy])].map((b) => (
+            <p key={b} className={form.error}>{b}</p>
+          ))}
+        </section>
+        <details className={styles.disc}>
+          <summary>Columns in this file ({listing.columns.length})</summary>
+          <p className="mono"><bdi>{listing.columns.join(", ")}</bdi></p>
+        </details>
+        <details className={styles.disc}>
+          <summary>What one inspection can reveal</summary>
+          <p>
+            One inspection answers with one of a fixed set of verdicts: at most {formatBits(listing.bits_per_eval_milli)} bits, and {formatBits(budgetMilli)} bits over
+            all {listing.max_evals} inspections of this listing.
+          </p>
+          <div title="Counts every eval, including refunded ones." className={styles.counter}>
+            <BitCounter spentBits={spentMilli / 1000} budgetBits={budgetMilli / 1000} />
+          </div>
+          <p>The AI reads a 40-row sample. Run time and instruction count are public too and are not counted here.</p>
+        </details>
+        <details className={styles.disc} id="agents">
+          <summary>For agents: 402 endpoint</summary>
+          <p>
+            <a className="mono" href={listingLinks(listing.id, network).x402}>{listingLinks(listing.id, network).x402}</a> answers HTTP 402 with this listing&apos;s
+            id; payment goes through NEAR Intents. CLI: <span className="mono">npm run arrow -- eval --help</span>
+          </p>
+        </details>
+        <div className={styles.who}>
+          <p className={styles.whoTitle}>Who sees what on this page</p>
+          <ul>
+            <li>Your criteria: the enclave and the AI, not the seller. This page&apos;s JavaScript, served by Arrow, handles them too, and the group that governs OutLayer&apos;s keystore could unseal them.</li>
+            <li>Your viewing key: the step 1 signature makes it, and anyone who gets that same signature can make it too. Sign it only on this site.</li>
+            <li>Your 0x address and what you paid: public on chain.</li>
+            <li>The rows: the AI, in its own sealed hardware, reads a 40-row sample; you see none until you buy.</li>
+          </ul>
+          <a href="/#trust-table">Full trust table →</a>
         </div>
-        <p className={form.hint}>
-          Seller <a href={addressUrl(listing.seller, network)} target="_blank" rel="noopener noreferrer" className="mono" title={listing.seller}>{short(listing.seller)}</a>
-        </p>
-        {listing.public_desc ? <p><bdi>{listing.public_desc}</bdi></p> : null}
-        <p className={styles.facts}>
-          {listing.columns.length} columns: <bdi className="mono">{listing.columns.join(", ")}</bdi>
-          <br />~{String(listing.rows_claimed)} rows claimed by the seller · {listing.mode} mode · Inspect ${formatUsdc(evalFee)} · Buy ${formatUsdc(price)}
-        </p>
-        <div title="Counts every eval, including refunded ones.">
-          <BitCounter spentBits={spentMilli / 1000} budgetBits={budgetMilli / 1000} />
-        </div>
-        {exhausted ? <p className={form.error}>No inspection is possible any more: you would be buying blind.</p> : null}
-        {programPk === null && !readOnly ? <p className={form.error}>The enclave key is not published yet, so inspections are closed.</p> : null}
-        {[...new Set([...blockers.inspect, ...blockers.buy])].map((b) => (
-          <p key={b} className={form.error}>{b}</p>
-        ))}
-      </section>
+      </aside>
 
       <div className={styles.steps}>
-        <StepList steps={steps} />
-      </div>
-
       {pending ? (
         <section className={form.panel} aria-labelledby="pend">
           <h2 id="pend">A payment is waiting for confirmation</h2>
@@ -473,8 +531,10 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
         <p role="status" className={form.band}>{payNote}</p>
       ) : null}
 
-      <section className={form.panel} aria-labelledby="b1">
+      <section className={stepClass(0)} aria-labelledby="b1">
+        {mark(0)}
         <h2 id="b1">1. Wallet and viewing key</h2>
+        <p className={styles.sub}>Connect an Ethereum-style wallet such as MetaMask (it pays with USDC from Base; no NEAR account needed), then sign once. The signature makes your private viewing key, the key that opens your verdicts; no money moves.</p>
         <WalletButton eoa={eoa} balance={balance} onConnect={setEoa} onBalance={setBalance} onReset={resetWallet} refreshKey={balanceKey} />
         {wrongDomain ? <p className={form.error} role="alert">Viewing keys are bound to {SITE_DOMAIN || "the site domain, which is not set"}. Open Arrow there.</p> : null}
         <p className={styles.sign}>
@@ -483,12 +543,14 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
         <button type="button" disabled={!eoa || vk !== null || busy !== null || wrongDomain || locked} onClick={() => void deriveKey()}>
           {vk ? "Viewing key ready" : busy === "key" ? "Waiting for your wallet…" : "Sign to derive my viewing key"}
         </button>
-        <p className={form.hint}>EOA required; smart-contract wallets (EIP-1271) are not supported.</p>
+        <p className={form.hint}>A regular wallet account is needed; smart-contract wallets (EIP-1271) are not supported. The same signature always makes the same key, so sign it only on this site.</p>
       </section>
 
-      <section className={form.panel} aria-labelledby="b2">
+      <section className={stepClass(1)} aria-labelledby="b2">
+        {mark(1)}
         <h2 id="b2">2. Balance</h2>
-        <label>
+        <p className={styles.sub}>What you can spend from your NEAR Intents balance, a USDC balance held for your wallet on NEAR. Top it up from Base USDC if needed.{balance !== null ? <> Now: <span className="mono">{formatUsdc(balance)} USDC</span>.</> : null}</p>
+        <label className={styles.check}>
           <input type="checkbox" checked={mayBuy} onChange={(e) => setMayBuy(e.target.checked)} /> I may buy after inspecting (plan for ${formatUsdc(price)} more)
         </label>
         {lowBalance && eoa ? (
@@ -498,15 +560,19 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
         )}
       </section>
 
-      <section className={form.panel} aria-labelledby="b3">
+      <section className={stepClass(2)} aria-labelledby="b3">
+        {mark(2)}
         <h2 id="b3">3. Your criteria</h2>
+        <p className={styles.sub}>Say what you need in one or two sentences. The seller cannot read it.</p>
         <CriteriaForm columns={listing.columns} value={criteria} onChange={setCriteria} />
       </section>
 
-      <section className={form.panel} aria-labelledby="b4">
+      <section className={stepClass(3)} aria-labelledby="b4">
+        {mark(3)}
         <h2 id="b4">4. Inspect for ${formatUsdc(evalFee)}</h2>
+        <p className={styles.sub}>In sealed hardware, Arrow&apos;s program opens the file and sends a 40-row sample to an AI, in its own sealed hardware, that judges it against your criteria. 45 to 120 seconds.</p>
         <p className={styles.sign} id="b4-sign">
-          Signature 2 of 2: this signs a payment of ${formatUsdc(evalFee)} USDC from your Intents balance to {CONTRACTS[network]}. Your wallet shows the intent as JSON.
+          Signature 2 of 2: this signs a payment of ${formatUsdc(evalFee)} USDC from your Intents balance to {CONTRACTS[network]}. Your wallet shows the payment as a JSON message: check the receiver and the amount.
         </p>
         <button
           type="button"
@@ -520,7 +586,7 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
           {busy === "eval" ? "Inspecting…" : `Inspect · $${formatUsdc(evalFee)}`}
         </button>
         {!canInspect ? (
-          <ul id="b4-why" className={form.hint}>
+          <ul id="b4-why" className={`${form.hint} ${form.why}`}>
             {inspectWhy.map((w) => (
               <li key={w}>{w}</li>
             ))}
@@ -555,13 +621,15 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
       ) : null}
 
       {outcome ? (
-        <section className={form.panel} aria-labelledby="b5">
+        <section className={stepClass(4)} aria-labelledby="b5">
+          {mark(4)}
           <h2 id="b5" tabIndex={-1} ref={resultHeading}>5. Result</h2>
           {outcome.kind === "verdict" ? (
             <>
               <p className={`${styles.verdict} ${verdictClass}`}>{lineOf(outcome)}</p>
               <p className="mono">out: {formatBits(listing.bits_per_eval_milli)} bits / budget {formatBits(budgetMilli)} bits</p>
-              <p className={form.hint}>The LLM cannot produce BUY unless the structural gates pass.</p>
+              <MeaningTiles />
+              <p className={form.hint}>A PASS means walk away: you spent the fee and nothing else. The LLM cannot produce BUY unless the structural gates pass.</p>
               {evalTx ? (
                 <CopyEvidence
                   run={{
@@ -590,9 +658,13 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
         </section>
       ) : null}
 
+      {outcome ? null : upcoming(4, "BUY or PASS, with fit and novelty from 1 to 5 if the seller allows scores, decrypted here with your viewing key.")}
+
       {buyVisible ? (
-        <section className={form.panel} aria-labelledby="b6">
+        <section className={stepClass(5)} aria-labelledby="b6">
+          {mark(5)}
           <h2 id="b6">6. Buy for ${formatUsdc(price)}</h2>
+          <p className={styles.sub}>The program checks the file is the one it inspected, then seals its key to you.</p>
           {confirmBuy ? (
             <div role="group" aria-labelledby="b6-confirm">
               <p id="b6-confirm">
@@ -626,9 +698,13 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
         </section>
       ) : null}
 
+      {buyVisible ? null : upcoming(5, "Opens once your wallet is connected and signed (step 1). Buying after a PASS, or without a verdict, asks you to confirm first.")}
+
       {buyTx || delivery || refund ? (
-        <section className={form.panel} aria-labelledby="b7">
+        <section className={stepClass(6)} aria-labelledby="b7">
+          {mark(6)}
           <h2 id="b7" tabIndex={-1} ref={deliveryHeading}>7. Download and verify</h2>
+          <p className={styles.sub}>Your browser downloads the sealed file, checks its fingerprint and decrypts it with your key. Open a CSV in a text editor first.</p>
           <p>
             {buyTx ? <>Payment <TxLink chain="near" network={network} hash={buyTx.txHash} /></> : "Purchase found on chain"}
             {waitingSince !== null && busy === "buy" ? <> · <Countdown startedAt={waitingSince} label="waiting for the key" /></> : null}
@@ -679,11 +755,15 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers }: {
         </section>
       ) : null}
 
+      {buyTx || delivery || refund ? null : upcoming(6, "Your browser downloads the sealed file, checks its fingerprint and decrypts it with your key.")}
+
       {error ? (
         <ErrorBox title="That step did not finish" fallback={error.fallback}>
           <p>{error.message}</p>
         </ErrorBox>
       ) : null}
+      </div>
+      </div>
     </fieldset>
   );
 }

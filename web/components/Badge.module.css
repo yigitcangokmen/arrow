@@ -1,14 +1,19 @@
 .badge {
   display: inline-block;
-  padding: 1px 8px;
-  border: 1px solid var(--border);
+  padding: 2px 9px;
+  border: 1px solid var(--control-border);
   border-radius: 999px;
-  font-size: 0.8rem;
-  line-height: 1.5;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.6;
   color: var(--muted);
+  background: var(--sunken);
   white-space: nowrap;
 }
 .synthetic, .team, .external, .unlabelled { color: var(--text); }
 .prelock { color: var(--notproven); border-color: var(--notproven); }
 .mainnet { color: var(--proven); border-color: var(--proven); }
 .testnet { color: var(--notproven); border-color: var(--notproven); }
+.testnet::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--notproven); vertical-align: 1px; }

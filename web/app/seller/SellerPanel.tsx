@@ -140,6 +140,7 @@ export function SellerPanel({ network, readOnly }: { network: Network; readOnly:
       <section className={form.panel} aria-labelledby="p1">
         <h2 id="p1">Wallet</h2>
         <WalletButton eoa={eoa} balance={balance} onConnect={setEoa} onBalance={setBalance} onReset={resetWallet} refreshKey={balanceKey} />
+        {readOnly ? <p className={form.hint}><b>Connecting is switched off on this network</b>, because payouts run on mainnet, which is not deployed yet.</p> : null}
       </section>
 
       <section className={form.panel} aria-labelledby="p2">
@@ -171,7 +172,7 @@ export function SellerPanel({ network, readOnly }: { network: Network; readOnly:
       </section>
 
       <section className={form.panel} aria-labelledby="p3">
-        <h2 id="p3">Withdraw to Solana</h2>
+        <h2 id="p3">Withdraw to Solana <span className={styles.chip}>not yet run on mainnet</span></h2>
         <p className={form.hint}>
           This signs a withdrawal from your NEAR Intents balance to a Solana address. You receive USDC on Solana; 1Click may take a few minutes.
         </p>

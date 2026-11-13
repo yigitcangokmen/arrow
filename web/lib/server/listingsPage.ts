@@ -1,5 +1,6 @@
 // Listings for server-rendered pages: same source and 30 s cache as /api/listings, read in-process (no HTTP hop).
 import { ArrowViews } from "@arrow/sdk/contract";
+import { isTeamAccount } from "@arrow/sdk/team";
 import { CONTRACTS, type Network } from "../config.ts";
 import { toListingView, ttlCache, type ListingView } from "./listingsCache.ts";
 import { pageAllListings } from "./pageAll.ts";
@@ -20,6 +21,21 @@ export function sortListingViews(views: readonly ListingView[]): ListingView[] {
     const t = BigInt(b.created_at_ns) - BigInt(a.created_at_ns);
     return t > 0n ? 1 : t < 0n ? -1 : Number(b.id) - Number(a.id);
   });
+}
+
+/**
+ * The home page's split: a listing is featured when it can still be inspected, a team account made it, its shown title does not
+ * start with "e2e" (end-to-end test runs) and its seller is not a throwaway /try account. Everything else goes into `more`, in the
+ * order it came in.
+ */
+export function groupHomeListings(views: readonly ListingView[], teamAccounts: readonly string[]): { featured: ListingView[]; more: ListingView[] } {
+  const featured: ListingView[] = [];
+  const more: ListingView[] = [];
+  for (const v of views) {
+    const ok = v.stale !== true && isTeamAccount(v.seller, teamAccounts) && !/^e2e/i.test(v.displayTitle.trim()) && !/^try/i.test(v.seller);
+    (ok ? featured : more).push(v);
+  }
+  return { featured, more };
 }
 
 const cached = ttlCache<ListingView[]>(30_000);

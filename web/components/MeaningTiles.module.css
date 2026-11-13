@@ -1,0 +1,3 @@
+.tiles { list-style: none; margin: var(--sp-3) 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); gap: var(--sp-3); }
+.tiles li { background: var(--sunken); border-radius: var(--r-sm); padding: var(--sp-3) var(--sp-4); font-size: 14px; color: var(--muted); line-height: 1.5; }
+.tiles b { display: block; margin-bottom: 2px; font-family: var(--font-mono); font-size: 13px; color: var(--text); }

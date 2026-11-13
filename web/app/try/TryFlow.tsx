@@ -1,26 +1,56 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Announcer } from "../../components/Announcer.tsx";
 import { Countdown } from "../../components/Countdown.tsx";
 import { ErrorBox } from "../../components/ErrorBox.tsx";
 import { HashTriple } from "../../components/HashTriple.tsx";
+import { MeaningTiles } from "../../components/MeaningTiles.tsx";
 import { StepList, type Step, type StepState } from "../../components/StepList.tsx";
 import { TxLink } from "../../components/TxLink.tsx";
 import form from "../../components/form.module.css";
 import { stateLine } from "../../lib/format.ts";
+import { RECORDED_EVAL } from "../../lib/links.ts";
 import { realDeps, runTry, TRY_STEPS, TryError, type StepInfo, type TryConfig, type TryCriteria, type TryResult, type TryStep } from "../../lib/try/tryFlow.ts";
 import styles from "./try.module.css";
 
 const LABELS: Record<TryStep, string> = {
   account: "Create a throwaway testnet account",
-  mint: "Mint test USDC",
+  mint: "Get free test dollars (test USDC)",
   list: "List a synthetic file (encrypted here)",
   eval: "Pay the inspection fee",
-  result: "Read the verdict inside the enclave",
-  buy: "Buy",
-  decrypt: "Download, check the hashes and decrypt",
+  result: "Get the AI's verdict",
+  buy: "Buy the file",
+  decrypt: "Download the file and check it is the same one",
 };
 
 type Tx = { step: TryStep; hash: string };
+
+const NEXT: { scene: TryCriteria | null; href: string; title: string; text: string }[] = [
+  { scene: "demo", href: "/try?criteria=demo", title: "Run the PASS scene", text: "The unlock schedule does not fit the buyer's need: watch it say PASS." },
+  { scene: "demo-buy", href: "/try?criteria=demo-buy", title: "Run the BUY scene", text: "Wallet labels that fit: it says BUY, buys and checks the file." },
+  { scene: "print-row-1", href: "/try?criteria=print-row-1", title: "Ask it to print row 1", text: "A buyer tries to make the AI read out data. The answer is still one of the 51 verdicts." },
+  { scene: null, href: "/verify", title: "Check the recorded proof", text: "Your fresh run is not in the recorded evidence; its transactions are above." },
+  { scene: null, href: "/#trust", title: "Who sees what", text: "What each part can see, and the limits, in plain words." },
+];
+
+/** The two ways on after a failed run: run it again here, or open a recorded run that finished. */
+function Recover({ onRetry }: { onRetry(): void }) {
+  return (
+    <div className={styles.recover}>
+      <button type="button" className={form.primary} onClick={onRetry}>Run it again</button>
+      <Link href={`/verify/${RECORDED_EVAL}`}>See a recorded run that finished, checked from the chain →</Link>
+    </div>
+  );
+}
+
+/** The heading of a finished run, from what actually happened, not from the scene's expectation. */
+function headline(r: TryResult, scene: TryCriteria): string {
+  if (r.purchaseId !== undefined && r.hashes?.match) return "It said BUY. You bought it. The file matches.";
+  if (scene === "print-row-1") return `No row came back: the answer was ${stateLine(r.state, "scored")}, one of the 51 fixed answers.`;
+  if (r.state.verdict === "PASS") return "It said PASS. Nothing was bought.";
+  return `It said ${r.state.verdict}.`;
+}
 
 export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCriteria; config: TryConfig; evidence: unknown; criteria: Record<string, unknown> }) {
   const deps = useMemo(() => realDeps({ evidence, criteria }), [evidence, criteria]);
@@ -71,49 +101,144 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
     detail: states[s] === "skipped" ? `skipped: ${details[s] ?? "not needed in this scene"}` : details[s],
   }));
   const totalSec = result ? Math.round(result.elapsedMs / 1000) : null;
+  const finished = TRY_STEPS.filter((s) => states[s] === "done" || states[s] === "skipped").length;
+  const stepNo = Math.min(TRY_STEPS.length, finished + (running ? 1 : 0));
+  const doing = TRY_STEPS.find((s) => states[s] === "doing");
+  // Step changes, the result and a failure are read out through the one always-mounted live region.
+  const announce = result ? headline(result, scene) : error ? "The run stopped. The reason and the next steps are below." : running && doing ? `Step ${stepNo} of ${TRY_STEPS.length}: ${LABELS[doing]}` : "";
 
   return (
-    <section className={form.panel} aria-labelledby="try-title">
-      <h2 id="try-title">Run it</h2>
-      <p className={styles.help}>This testnet key lives only in this tab. Nothing here costs money, and the data is synthetic.</p>
-      <div className={form.actions}>
-        <button type="button" className={form.primary} disabled={running} onClick={() => void start()}>
-          {running ? "Running…" : result || error ? "Run again" : "Start"}
-        </button>
-        {running && startedAt !== null ? <Countdown startedAt={startedAt} label="elapsed" /> : null}
-      </div>
+    <>
+      <section className={styles.run} aria-labelledby="try-title">
+        <h2 id="try-title" className="sr-only">Run it</h2>
+        <div className={styles.runbar}>
+          <div className={styles.runButtons}>
+            <button type="button" className={`${form.primary} ${styles.go}`} disabled={running} onClick={() => void start()}>
+              {running ? "Running…" : result || error ? "Run it again" : "Run the demo"}
+            </button>
+            {running ? <button type="button" onClick={() => abort.current?.abort()}>Cancel</button> : null}
+          </div>
+          <p className={styles.runInfo}>
+            <span className="mono">{stepNo === 0 ? `${TRY_STEPS.length} steps` : `Step ${stepNo} of ${TRY_STEPS.length}`}</span>
+            {running && startedAt !== null ? <> · <Countdown startedAt={startedAt} label="elapsed" /></> : totalSec !== null ? <> · <span className="mono">{totalSec} s in total</span></> : null}
+            {" "}· about 3 minutes · nothing here costs money
+          </p>
+        </div>
 
-      {running || result || error ? <StepList steps={steps} /> : null}
-      {txs.length > 0 ? (
-        <ul className={styles.txs} aria-label="Transactions">
-          {txs.map((t) => (
-            <li key={t.hash}>{t.step}: <TxLink chain="near" network="testnet" hash={t.hash} /></li>
-          ))}
-        </ul>
-      ) : null}
+        <Announcer text={announce} />
+        <StepList steps={steps} />
+        {txs.length > 0 ? (
+          <ul id="try-txs" className={styles.txs} aria-label="Transactions">
+            {txs.map((t) => (
+              <li key={t.hash}>{t.step}: <TxLink chain="near" network="testnet" hash={t.hash} /></li>
+            ))}
+          </ul>
+        ) : null}
 
-      {error ? (
-        <ErrorBox title="The run stopped" fallback={error instanceof TryError && error.code === "ACCOUNT_FAILED" ? undefined : "You can run it again, or use the terminal: npm run try:testnet"}>
-          <p>{error.message}</p>
-          {error instanceof TryError && error.code === "ACCOUNT_FAILED" ? <p><a href="https://near-faucet.io" target="_blank" rel="noopener noreferrer">near-faucet.io</a></p> : null}
-        </ErrorBox>
-      ) : null}
+        {error instanceof TryError && error.code === "REFUNDED" ? (
+          <ErrorBox title={error.step === "buy" ? "The purchase did not finish, so it was refunded" : "The AI check did not finish, so the inspection was refunded"}>
+            <p>
+              {error.step === "buy"
+                ? "The test money for the purchase went back to the throwaway account in full."
+                : "The test money went back to the throwaway account, less Arrow's 10% share of the fee."}{" "}
+              The run in sealed hardware failed or took too long. When that happens the contract sends the money back on its own: this is the
+              refund rule working, not a lost payment.
+            </p>
+            {txs.filter((t) => t.step === "eval" || t.step === "buy").map((t) => (
+              <p key={t.hash}>The {t.step === "eval" ? "inspection" : "purchase"} transaction, with the refund: <TxLink chain="near" network="testnet" hash={t.hash} /></p>
+            ))}
+            <Recover onRetry={() => void start()} />
+            <details>
+              <summary>Details</summary>
+              <p className="mono">{error.message}</p>
+            </details>
+          </ErrorBox>
+        ) : error ? (
+          <ErrorBox title="The run stopped">
+            <p>{error.message}</p>
+            {error instanceof TryError && error.code === "ACCOUNT_FAILED" ? <p><a href="https://near-faucet.io" target="_blank" rel="noopener noreferrer">near-faucet.io</a></p> : null}
+            <Recover onRetry={() => void start()} />
+            <details>
+              <summary>Run it from a terminal instead</summary>
+              <p className="mono">npm run try:testnet</p>
+            </details>
+          </ErrorBox>
+        ) : null}
+      </section>
 
       {result ? (
-        <div aria-live="polite">
+        <section className={styles.result} aria-labelledby="try-result">
+          <h2 id="try-result" className={styles.headline}>{headline(result, scene)}</h2>
           <p className={styles.verdict}>{stateLine(result.state, "scored")}</p>
           <p className={form.hint}>
             Account <span className="mono">{result.accountId}</span> · listing #{result.listingId}{result.usedDemoListing ? " (pre-listed demo listing)" : ""} · eval #{result.evalId}
             {result.purchaseId !== undefined ? ` · purchase #${result.purchaseId}` : ""}{totalSec !== null ? ` · ${totalSec} s in total` : ""}
           </p>
+          <MeaningTiles withAnswers />
           {result.hashInput ? (
-            <HashTriple onChain={result.hashInput.onChain} enclave={result.hashInput.evalH} release={result.hashInput.releaseH} downloaded={result.hashInput.downloaded} />
+            <div className={styles.hashes}>
+              <p className={styles.match}>
+                {result.hashes?.match ? "4 fingerprints match ✓ The file you saved is the file the enclave inspected and then released." : "The fingerprints did not all match."}
+              </p>
+              <details>
+                <summary>Show the four sha256 values</summary>
+                <HashTriple onChain={result.hashInput.onChain} enclave={result.hashInput.evalH} release={result.hashInput.releaseH} downloaded={result.hashInput.downloaded} />
+              </details>
+            </div>
           ) : (
             <p className={form.hint}>This scene shows the verdict only; nothing was bought.</p>
           )}
-          {saveUrl && result.file ? <p><a href={saveUrl} download={result.file.name}>Save {result.file.name}</a></p> : null}
-        </div>
+          <div className={form.actions}>
+            {saveUrl && result.file ? <a className={styles.save} href={saveUrl} download={result.file.name}>Save {result.file.name}</a> : null}
+            {txs.length > 0 ? <a href="#try-txs">Open the transactions</a> : null}
+          </div>
+          {saveUrl ? (
+            <p className={form.hint}>Open this file in a text editor first. A spreadsheet runs formulas (cells starting with =, +, - or @).</p>
+          ) : null}
+        </section>
       ) : null}
-    </section>
+
+      <div className={styles.while}>
+        <div>
+          <h3>{running ? "What is happening right now." : "What happens during a run."}</h3>
+          <p>
+            Your fee goes to the market, which starts Arrow&apos;s program in sealed hardware; the program asks an AI about a sample and writes
+            back a short answer.
+          </p>
+          <details className={styles.more}>
+            <summary>In detail</summary>
+            <p>
+            The payment reaches the market contract, which asks OutLayer to run Arrow&apos;s program inside an Intel TDX enclave. The program
+            downloads the encrypted file, checks its fingerprint against the chain, decrypts it, samples 40 rows and sends them with the
+            buyer&apos;s criteria to NEAR AI&apos;s model, which runs in its own sealed hardware. The verdict comes back and the contract writes
+            it on chain, sealed to the buyer&apos;s key.
+            </p>
+          </details>
+        </div>
+        <div>
+          <h3>Why the verdict is so small.</h3>
+          <p>
+            To keep what an answer can carry about the data small. The program can only write one of 51 fixed answers: BUY or PASS, fit 1–5, novelty 1–5,
+            no free text. Measured as information (one bit is one yes/no answer), that is at most 5.67 bits per
+            inspection, and at most 283.65 bits over a listing&apos;s 50 inspections. A failed run shows on chain as one of two more outcomes (an
+            error output, or no output). Run time and instruction count are public and are not counted in that figure.{" "}
+            <a href="/#trust">Who sees what</a>.
+          </p>
+        </div>
+      </div>
+
+      {result ? (
+        <nav className={styles.next} aria-labelledby="try-next">
+          <h2 id="try-next">Next.</h2>
+          <ul>
+            {NEXT.filter((n) => n.scene !== scene).map((n) => (
+              <li key={n.href}>
+                <Link href={n.href}><b>{n.title}</b><span>{n.text}</span></Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ) : null}
+    </>
   );
 }

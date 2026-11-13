@@ -6,7 +6,8 @@ import { ArrowViews } from "@arrow/sdk/contract";
 import { encryptFile } from "@arrow/sdk/crypto";
 import { fetchAndCheckBlob } from "@arrow/sdk/flows";
 import { isTeamAccount } from "@arrow/sdk/team";
-import { formatUsdc, net } from "../../lib/format.ts";
+import { BITS_PER_EVAL_MILLI } from "@arrow/sdk/bits";
+import { formatBits, formatUsdc, net } from "../../lib/format.ts";
 import { parseUsdc } from "@arrow/sdk/usdc";
 import { CONTRACTS, type Network } from "../../lib/config.ts";
 import { describeError } from "../../lib/errors.ts";
@@ -404,6 +405,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
   const resumable = listMsg !== null || paidTx !== null || pending !== null;
   const canStart = ready && !busy && !inProgress && !resumable;
   const why = [
+    readOnly ? "This page is read-only on this network: listing needs mainnet, which is not deployed yet. The free demo lists a file for you." : null,
     !eoa ? "Connect a wallet (section 1)." : null,
     eoa && !picked ? "Choose a file (section 2)." : null,
     needTopUp ? "Add USDC for the listing bond (section 1)." : null,
@@ -433,6 +435,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
       <section className={form.panel} aria-labelledby="s1">
         <h2 id="s1">1. Wallet and listing bond</h2>
         <WalletButton eoa={eoa} balance={balance} onConnect={setEoa} onBalance={setBalance} onReset={resetWallet} refreshKey={balanceKey} />
+        {readOnly ? <p className={form.hint}><b>Connecting is switched off on this network</b>, because listing needs mainnet. Everything below is shown so you can see what a seller fills in.</p> : null}
         <p className={form.hint}>
           The listing bond is {formatUsdc(bondUnits)} USDC, paid from your NEAR Intents balance with one signature. Your wallet shows the
           intent as JSON: check that the receiver is the market contract and the amount is {formatUsdc(bondUnits)} USDC.
@@ -443,8 +446,12 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
       <section className={form.panel} aria-labelledby="s2">
         <h2 id="s2">2. Your file</h2>
         <div className={form.field}>
-          <label htmlFor="file">CSV or JSONL file (up to {Math.floor(MAX_PLAINTEXT_BYTES / 1_000_000 * 10) / 10} MB)</label>
-          <input id="file" type="file" accept=".csv,.jsonl" aria-describedby="file-hint" disabled={inProgress} onChange={(e) => void onFile(e.target.files?.[0])} {...invalid("file")} />
+          <span id="file-type" className={form.legend}>CSV or JSONL file (up to {Math.floor(MAX_PLAINTEXT_BYTES / 1_000_000 * 10) / 10} MB)</span>
+          <div className={styles.picker}>
+            <input id="file" className={styles.fileInput} type="file" accept=".csv,.jsonl" aria-describedby="file-type file-hint" disabled={inProgress} onChange={(e) => void onFile(e.target.files?.[0])} {...invalid("file")} />
+            <label htmlFor="file" className={styles.fileButton}>Choose a file</label>
+            <span className={styles.fileName} aria-hidden="true">{picked ? picked.name : "No file chosen"}</span>
+          </div>
           <p id="file-hint" className={form.hint}>The file is read here and encrypted here. Row data is in no request: only the ciphertext is uploaded. Column names, the row count and the exact file size are public.</p>
         </div>
         {picked ? (
@@ -481,36 +488,52 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
           <div className={form.grid2}>
             <div className={form.field}>
               <label htmlFor="rows">Rows (claimed)</label>
-              <input id="rows" inputMode="numeric" value={rows} onChange={(e) => setRows(e.target.value)} {...invalid("rows")} />
+              <input id="rows" inputMode="numeric" value={rows} onChange={(e) => setRows(e.target.value)} aria-describedby="rows-hint" {...invalid("rows")} />
+              <p id="rows-hint" className={form.hint}>Shown to buyers as your claim</p>
             </div>
             <div className={form.field}>
-              <label htmlFor="price">Price to buy (USDC, at least {formatUsdc(BigInt(limits.minPrice))})</label>
-              <input id="price" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} {...invalid("price")} />
+              <label htmlFor="price">Price to buy (USDC)</label>
+              <input id="price" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} aria-describedby="price-hint" {...invalid("price")} />
+              <p id="price-hint" className={form.hint}>At least {formatUsdc(BigInt(limits.minPrice))}</p>
             </div>
             <div className={form.field}>
-              <label htmlFor="fee">Inspection fee (USDC, at least {formatUsdc(BigInt(limits.minEvalFee))})</label>
-              <input id="fee" inputMode="decimal" value={evalFee} onChange={(e) => setEvalFee(e.target.value)} {...invalid("fee")} />
+              <label htmlFor="fee">Inspection fee (USDC)</label>
+              <input id="fee" inputMode="decimal" value={evalFee} onChange={(e) => setEvalFee(e.target.value)} aria-describedby="fee-hint" {...invalid("fee")} />
+              <p id="fee-hint" className={form.hint}>At least {formatUsdc(BigInt(limits.minEvalFee))}</p>
             </div>
             <div className={form.field}>
-              <label htmlFor="max">Max inspections (1 to {maxEvalsCap})</label>
-              <input id="max" inputMode="numeric" value={maxEvals} onChange={(e) => setMaxEvals(e.target.value)} {...invalid("max")} />
+              <label htmlFor="max">Max inspections</label>
+              <input id="max" inputMode="numeric" value={maxEvals} onChange={(e) => setMaxEvals(e.target.value)} aria-describedby="max-hint" {...invalid("max")} />
+              <p id="max-hint" className={form.hint}>1 to {maxEvalsCap}; each answer tells buyers a little about the file</p>
             </div>
             <div className={form.field}>
               <label htmlFor="mode">Answer</label>
-              <select id="mode" value={mode} onChange={(e) => setMode(e.target.value as "scored" | "verdict")}>
-                <option value="scored">BUY/PASS with fit and novelty (at most 5.68 bits per inspection on the output channel)</option>
-                <option value="verdict">BUY/PASS only (at most 1.59 bits per inspection on the output channel)</option>
+              <select id="mode" value={mode} aria-describedby="mode-hint" onChange={(e) => setMode(e.target.value as "scored" | "verdict")}>
+                <option value="scored">BUY/PASS + scores</option>
+                <option value="verdict">BUY/PASS only</option>
               </select>
+              <p id="mode-hint" className={form.hint}>
+                {mode === "scored" ? "At most 5.67 bits per inspection (51 answers; 5.68 counting the error output)" : "At most 1.59 bits per inspection (3 answers)"}
+              </p>
             </div>
             <div className={form.field}>
               <label htmlFor="payout">Payout address (optional)</label>
-              <input id="payout" value={payout} onChange={(e) => setPayout(e.target.value)} placeholder="0x… or a NEAR account; default: this wallet" {...invalid("payout")} />
+              <input id="payout" value={payout} onChange={(e) => setPayout(e.target.value)} placeholder="0x… or name.near" aria-describedby="payout-hint" {...invalid("payout")} />
+              <p id="payout-hint" className={form.hint}>Leave empty to be paid to this wallet</p>
             </div>
           </div>
-          <p className={form.hint}>
-            The most the verdicts let out for this listing (run time and instruction count are public too): {budgetPreview(Number.isInteger(Number(maxEvals)) && Number(maxEvals) > 0 ? Number(maxEvals) : 0, mode)}.
-          </p>
-          <p className={form.hint} id="take-rate">{takeRate(price, evalFee, feeBps, bondUnits)}</p>
+          <div className={styles.summary}>
+            <p className={styles.summaryTitle}>What buyers can learn, and what you earn</p>
+            <p>
+              The verdicts can tell buyers at most{" "}
+              <b className="mono">{formatBits((Number.isInteger(Number(maxEvals)) && Number(maxEvals) > 0 ? Number(maxEvals) : 0) * BITS_PER_EVAL_MILLI[mode])} bits</b>{" "}
+              about this file over all inspections; run time, instruction count, column names, row count and size are public on top of that.
+            </p>
+            <p className={form.hint}>
+              The most the verdicts let out for this listing (run time and instruction count are public too): {budgetPreview(Number.isInteger(Number(maxEvals)) && Number(maxEvals) > 0 ? Number(maxEvals) : 0, mode)}.
+            </p>
+            <p className={form.hint} id="take-rate">{takeRate(price, evalFee, feeBps, bondUnits)}</p>
+          </div>
           <div className={form.field}>
             <label>
               <input type="checkbox" checked={selfHost} onChange={(e) => setSelfHost(e.target.checked)} /> I host the encrypted file myself (an https URL I paste)
@@ -541,7 +564,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
         {pending && !busy ? <button type="button" className={form.primary} onClick={() => void checkPay()}>Check payment</button> : null}
       </div>
       {!canStart && why.length > 0 && !done ? (
-        <ul id="sell-why" className={form.hint}>
+        <ul id="sell-why" className={`${form.hint} ${form.why}`}>
           {why.map((w) => (
             <li key={w}>{w}</li>
           ))}

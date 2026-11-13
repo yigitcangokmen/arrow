@@ -4,11 +4,15 @@ import { ArrowViews } from "@arrow/sdk/contract";
 import type { Listing } from "@arrow/sdk/schemas";
 import type { Metadata } from "next";
 import { ErrorBox } from "../../../components/ErrorBox.tsx";
+import { isTeamAccount } from "@arrow/sdk/team";
 import { teamAccounts } from "../../../generated/data.ts";
 import { blockersFor, marketStateFrom } from "../../../lib/blockers.ts";
 import { CONTRACTS, parseNetwork } from "../../../lib/config.ts";
 import { toListingView } from "../../../lib/server/listingsCache.ts";
-import form from "../../../components/form.module.css";
+import { OpenOnHash } from "../../../components/OpenOnHash.tsx";
+import { Note } from "../../../components/Section.tsx";
+import { withNetwork } from "../../../lib/links.ts";
+import styles from "./buy.module.css";
 import { BuyFlow } from "./BuyFlow.tsx";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -35,27 +39,44 @@ export default async function BuyPage({ params, searchParams }: { params: Promis
 
   return (
     <div data-ready="true">
+      <Link href={`${withNetwork("/", net)}#listings`} className={styles.back}>← All listings</Link>
       {net === "testnet" ? (
-        <div className={form.band} role="note">
-          Payments run on mainnet; use <Link href="/try">/try</Link> for the free testnet flow. This page is read-only on testnet.
-        </div>
+        <Note>
+          <p>
+            <b>Real purchases are not live yet.</b> This page shows the seven steps a buyer takes, with the buttons switched off. The free
+            demo runs the same steps for you on testnet with a throwaway account.
+          </p>
+          <p className={styles.noteAction}><Link className={styles.demo} href="/try">Run the demo, free</Link></p>
+        </Note>
       ) : null}
       {failure || !listing ? (
-        <ErrorBox title={`Could not read listing ${id} on ${net}`} fallback="Reload in a minute, or inspect it from the CLI: npm run arrow -- eval --help">
-          <p className="mono">{failure}</p>
-        </ErrorBox>
+        <>
+          <h1>Listing #{id}</h1>
+          {failure && /CodeDoesNotExist/.test(failure) ? (
+            <ErrorBox title={`The ${net} market is not deployed yet`} fallback={`The demo listings live on testnet: ${withNetwork(`/buy/${id}`, "testnet")}`}>
+              <p>There is no market contract on {net} yet, so this listing cannot exist there.</p>
+              <details><summary>The error</summary><p className="mono">{failure}</p></details>
+            </ErrorBox>
+          ) : (
+            <ErrorBox title={`Could not read listing ${id} on ${net}`} fallback="Reload in a minute, or inspect it from the CLI: npm run arrow -- eval --help">
+              <p className="mono">{failure}</p>
+            </ErrorBox>
+          )}
+        </>
       ) : (
         <BuyFlow
           network={net}
           listing={toListingView(listing, teamAccounts)}
           programPk={programPk}
           readOnly={net !== "mainnet"}
+          team={isTeamAccount(listing.seller, teamAccounts)}
           blockers={{
             inspect: blockersFor("eval", marketStateFrom(config!, programPk), listing).map((b) => b.message),
             buy: blockersFor("buy", marketStateFrom(config!, programPk), listing).map((b) => b.message),
           }}
         />
       )}
+      <OpenOnHash id="agents" />
     </div>
   );
 }

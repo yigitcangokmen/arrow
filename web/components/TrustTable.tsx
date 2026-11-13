@@ -1,13 +1,13 @@
-import { TRUST_ROWS } from "../lib/trust.ts";
+import { TRUST_ROWS, trustRowId } from "../lib/trust.ts";
 import { ProofPill } from "./ProofPill.tsx";
 import styles from "./TrustTable.module.css";
 
 /** Table on wide screens, one card per row at 640 px and below (CSS only). */
 export function TrustTable() {
   return (
-    <section id="trust" aria-labelledby="trust-title">
-      <h2 id="trust-title">Trust table</h2>
-      <p className={styles.lead}>What you trust, what each part can see, and how to check it. Open risks are marked RISKY, claims we do not make NOT PROVEN, and proof still to come TODO.</p>
+    <section aria-labelledby="trust-table-title">
+      <h2 id="trust-table-title" className={styles.title}>Trust table</h2>
+      <p className={styles.lead}>What you trust, what each part can see, and how to check it. Open risks are marked RISKY, claims we cannot prove NOT PROVEN, and proof still to come TODO.</p>
       <table className={styles.table}>
         <thead>
           <tr>
@@ -20,7 +20,7 @@ export function TrustTable() {
         </thead>
         <tbody>
           {TRUST_ROWS.map((r) => (
-            <tr key={r.part}>
+            <tr key={r.part} id={trustRowId(r.part)}>
               <th scope="row" data-label="Part">
                 {r.part} {r.flag ? <ProofPill label={r.flag} /> : null}
               </th>

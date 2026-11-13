@@ -4,7 +4,7 @@ import { b64, publicKeyHex, scalarFromLabel, seal, unseal } from "@arrow/sdk/cry
 import { prepareList } from "@arrow/sdk/flows";
 import { ListMsg } from "@arrow/sdk/schemas";
 import { CONTRACTS } from "../lib/config.ts";
-import { PaymentRefused } from "../lib/settle.ts";
+import { PaymentRefused, waitForRecord } from "../lib/settle.ts";
 import {
   CAP_MESSAGE, DATASETS, mapTryError, pickDemoListing, programHashBand, realDeps, runTry, TryError, TRY_STEPS, type NearApi, type StepInfo, type TryDeps, type TryStep,
 } from "../lib/try/tryFlow.ts";
@@ -22,13 +22,14 @@ const BUY_STATE = 25 + 4 * 5 + 3; // BUY fit 5 novelty 4
 interface Calls { near: { contractId: string; methodName: string; args: Record<string, string>; deposit?: bigint }[]; fetched: string[]; steps: [TryStep, StepInfo][] }
 
 /** A small fake chain: it records what the page sends and answers views from those msgs. */
-function world(o: { faucet?: number; sponsor?: { status: number; body: object }; uploadFails?: boolean; evidence?: unknown; storage?: string | null; balance?: bigint; tamper?: boolean; evalPanic?: boolean; evalRefund?: boolean; verdictIdx?: number; endless?: { pulled: () => number }; programWasmHash?: string; listingHash?: string } = {}) {
+function world(o: { faucet?: number; sponsor?: { status: number; body: object }; uploadFails?: boolean; evidence?: unknown; storage?: string | null; balance?: bigint; tamper?: boolean; evalPanic?: boolean; evalRefund?: boolean; verdictIdx?: number; endless?: { pulled: () => number }; programWasmHash?: string; listingHash?: string; listingLag?: number; realWait?: boolean } = {}) {
   const calls: Calls = { near: [], fetched: [], steps: [] };
   let listMsg: ListMsg | null = null;
   let evalMsg: { buyer_pk: string } | null = null;
   let blob: Uint8Array | null = null;
   const stored = { value: o.storage ?? null };
   let n = 0;
+  let listingReads = 0;
   if (o.uploadFails && o.evidence && (o.evidence as { runs: unknown[] }).runs.length > 0) {
     // the recorded demo listing already sits on the fake chain
     const seed = prepareList({
@@ -89,7 +90,7 @@ function world(o: { faucet?: number; sponsor?: { status: number; body: object };
       return "https://blob.test/b.bin";
     },
     views: {
-      listing: async () => listingRec(),
+      listing: async () => (++listingReads <= (o.listingLag ?? 0) ? null : listingRec()),
       eval: async () => ({
         id: 3, status: o.evalRefund ? "refunded" : "done", refund_reason: o.evalRefund ? "bad_output" : null,
         sealed_result: b64.enc(seal(evalMsg!.buyer_pk, Uint8Array.of(o.verdictIdx ?? BUY_STATE))), h: listMsg?.blob_sha256 ?? null,
@@ -105,7 +106,7 @@ function world(o: { faucet?: number; sponsor?: { status: number; body: object };
       if (name === "arrow_eval" && o.evalPanic) throw new PaymentRefused("Arrow: E11 daily eval cap reached for account");
       return name === "arrow_listed" ? { listing_id: 7 } : name === "arrow_eval" ? { eval_id: 3, left_milli: 1 } : { purchase_id: 5 };
     }) as TryDeps["findEvent"],
-    waitForRecord: (async (_what: string, read: () => Promise<unknown>) => read()) as TryDeps["waitForRecord"],
+    waitForRecord: o.realWait ? waitForRecord : ((async (_what: string, read: () => Promise<unknown>) => read()) as TryDeps["waitForRecord"]),
     storage: { get: () => stored.value, set: (v) => void (stored.value = v) },
     sleep: async () => {},
     now: (() => { let t = 0; return () => (t += 1000); })(),
@@ -193,9 +194,24 @@ describe("runTry, failures", () => {
     expect(w.calls.steps.at(-1)).toEqual(["eval", { state: "failed", detail: CAP_MESSAGE }]);
   });
 
-  it("explains a refunded inspection and points to bench:offline", async () => {
+  it("explains a refunded inspection in plain words, with the fee share kept, and no CLI hint", async () => {
     const w = world({ evalRefund: true });
-    await expect(w.run()).rejects.toThrow(/refunded \(bad_output\).*bench:offline/);
+    const err = await w.run().catch((e) => e);
+    expect(err).toMatchObject({ code: "REFUNDED", step: "result" });
+    expect(err.message).toMatch(/refunded \(bad_output\): the run in sealed hardware failed or took too long, so the contract sent the fee back, less Arrow's 10% share/);
+    expect(err.message).not.toMatch(/npm run|NEAR AI credit/);
+  });
+
+  it("waits for a new listing the view does not show yet instead of failing (arrow_listed before the view)", async () => {
+    const w = world({ listingLag: 2, realWait: true });
+    const r = await w.run();
+    expect(r.listingId).toBe(7);
+    expect(r.hashes?.match).toBe(true);
+  });
+
+  it("names the listing when it never appears", async () => {
+    const w = world({ listingLag: 1_000, realWait: true });
+    await expect(w.run()).rejects.toMatchObject({ code: "OTHER", step: "list", message: expect.stringMatching(/Listing #7 could not be read back/) });
   });
 
   it("refuses to decrypt when the downloaded bytes do not match the chain hash", async () => {

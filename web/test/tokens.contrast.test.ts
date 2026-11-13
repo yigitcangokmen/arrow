@@ -31,6 +31,12 @@ describe.each(["light", "dark"] as const)("%s theme", (theme) => {
       for (const bg of ["bg", "surface"]) expect(contrast(t[k]!, t[bg]!), `${k} on ${bg}`).toBeGreaterThanOrEqual(4.5);
     }
   });
+  it("the dark band, the filled button and the sunken panels keep 4.5:1", () => {
+    for (const [fg, bg] of [["ink-text", "ink"], ["ink-muted", "ink"], ["accent-ink", "accent"], ["text", "sunken"], ["muted", "sunken"], ["proven", "sunken"], ["notproven", "sunken"]]) {
+      expect(t[fg], `--${fg} is defined`).toBeDefined();
+      expect(contrast(t[fg]!, t[bg]!), `${fg} on ${bg}`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
 });
 
 it("the system-dark media block carries the same control border as the explicit dark theme", () => {

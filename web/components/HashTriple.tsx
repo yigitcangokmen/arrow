@@ -22,7 +22,7 @@ export function HashTriple({ onChain, enclave, release, downloaded }: {
         {check.rows.map((r) => (
           <div key={r.label} className={styles.row}>
             <dt>{r.label}{r.state === "mismatch" ? " ✘" : r.state === "ok" ? " ✔" : ""}</dt>
-            <dd className="mono">{r.value ?? "not available yet"}</dd>
+            <dd className="mono" title={r.value ?? undefined}>{r.value ?? "not available yet"}</dd>
           </div>
         ))}
       </dl>

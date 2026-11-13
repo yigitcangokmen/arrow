@@ -34,6 +34,15 @@ export function listingLinks(id: number | string, net: Network): { buy: string; 
   return { buy: withNetwork(`/buy/${id}`, net), x402: withNetwork(`/l/${id}/data`, net) };
 }
 
+/**
+ * The public source repository, or null while it is private: a private repo answers 404 to visitors, so the site shows no
+ * GitHub link until this is set (making the repo public is a human step).
+ */
+export const REPO_URL: string | null = null;
+
+/** The recorded run judges are sent to: eval #14 on arrow-v2.arrowhq.testnet, the wallet-labels inspection that was then bought (purchase #5). */
+export const RECORDED_EVAL = 14;
+
 export const NAV_LINKS = [
   ["/", "Arrow"],
   ["/sell", "Sell"],

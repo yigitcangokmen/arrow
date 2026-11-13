@@ -30,7 +30,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <Nav />
         </Suspense>
         <main id="main">{children}</main>
-        <Footer />
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </body>
     </html>
   );

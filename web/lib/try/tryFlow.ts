@@ -153,6 +153,11 @@ export function pickDemoListing(evidence: unknown, scene?: "L1" | "L2"): number 
   return last ? Number(last.listing_id) : null;
 }
 
+/** Why the contract refunded, in plain words. A refund is the contract's answer to a failed or late run, not a lost payment. */
+function refundCause(reason: string | null | undefined): string {
+  return reason === "hash_mismatch" ? "the file its host served is not the file listed on chain" : "the run in sealed hardware failed or took too long";
+}
+
 /** Contract panics and refunds in the words of DEC P-03; everything else keeps its own text. */
 export function mapTryError(e: unknown): { message: string; code: TryError["code"] } {
   const text = e instanceof Error ? e.message : String(e);
@@ -223,16 +228,25 @@ export async function runTry(opts: {
     } else {
       // No fresh upload (Blob not configured, rate limited or offline): eval and buy work on any listing, so use a recorded one.
       const demo = pickDemoListing(deps.evidence, dataset.scene);
-      if (demo === null) throw new TryError("NO_DEMO_LISTING", "Uploading a fresh listing is not available right now and there is no pre-listed demo listing. Run `npm run try:testnet` instead.", "list");
+      if (demo === null) throw new TryError("NO_DEMO_LISTING", "A fresh demo file could not be uploaded right now, and there is no pre-listed demo listing to use instead. Try again in a minute.", "list");
       listingId = demo;
       usedDemoListing = true;
       step("list", { state: "done", detail: `using pre-listed demo listing #${demo}` });
     }
 
-    const listing = await deps.views.listing(listingId);
-    if (!listing) throw new TryError("OTHER", `Listing #${listingId} does not exist on testnet.`, "list");
+    // The arrow_listed event can arrive before the RPC node that answers the view has the new listing: poll before giving up.
+    const listing = await deps
+      .waitForRecord("The new listing", async () => {
+        const l = await deps.views.listing(listingId);
+        return l ? { status: "done" as const, listing: l } : null;
+      }, { signal, everyMs: 2_000, timeoutMs: 60_000, sleep: deps.sleep, now: deps.now })
+      .then((r) => r.listing)
+      .catch((e: unknown) => {
+        if (e instanceof Error && e.name === "AbortError") throw e;
+        throw new TryError("OTHER", `Listing #${listingId} could not be read back from testnet within a minute. Run the demo again in a moment.`, "list");
+      });
     if (usedDemoListing && config.programWasmHash && (listing as { program_hash_at_list?: string }).program_hash_at_list !== config.programWasmHash) {
-      throw new TryError("NO_DEMO_LISTING", `The recorded demo listing #${listingId} was sealed to an older enclave program and can no longer be inspected. Run \`npm run try:testnet\` instead.`, "list");
+      throw new TryError("NO_DEMO_LISTING", `The recorded demo listing #${listingId} was sealed to an older enclave program and can no longer be inspected, and a fresh demo file could not be uploaded right now. Try again in a minute.`, "list");
     }
 
     // 4. eval
@@ -251,7 +265,7 @@ export async function runTry(opts: {
     step("result", { state: "doing" });
     const evalRec = await deps.waitForRecord("The inspection", () => deps.views.eval(evalId), { signal, everyMs: 4_000, timeoutMs: 180_000, sleep: deps.sleep, now: deps.now });
     if (evalRec.status === "refunded") {
-      throw new TryError("REFUNDED", `The inspection was refunded${evalRec.refund_reason ? ` (${evalRec.refund_reason})` : ""}. If NEAR AI credit ran out, run \`npm run bench:offline\` to re-score recorded runs without the network.`, "result");
+      throw new TryError("REFUNDED", `The inspection was refunded${evalRec.refund_reason ? ` (${evalRec.refund_reason})` : ""}: ${refundCause(evalRec.refund_reason)}, so the contract sent the fee back, less Arrow's 10% share.`, "result");
     }
     if (!evalRec.sealed_result) throw new TryError("OTHER", "The contract marked the inspection done without a result.", "result");
     const state = decodeEvalResult(evalRec.sealed_result, scalar, listing.mode);
@@ -270,7 +284,7 @@ export async function runTry(opts: {
     const buyEvent = await deps.findEvent("testnet", buyPaid, "arrow_purchase", { phase: "accepted", idField: "purchase_id", ...poll });
     const purchaseId = Number(buyEvent.purchase_id);
     const buyRec = await deps.waitForRecord("The purchase", () => deps.views.purchase(purchaseId), { signal, everyMs: 4_000, timeoutMs: 180_000, sleep: deps.sleep, now: deps.now });
-    if (buyRec.status === "refunded") throw new TryError("REFUNDED", `The purchase was refunded${buyRec.refund_reason ? ` (${buyRec.refund_reason})` : ""}.`, "buy");
+    if (buyRec.status === "refunded") throw new TryError("REFUNDED", `The purchase was refunded${buyRec.refund_reason ? ` (${buyRec.refund_reason})` : ""}: ${refundCause(buyRec.refund_reason)}, so the contract sent the price back in full.`, "buy");
     if (!buyRec.sealed_k_buyer) throw new TryError("OTHER", "The contract marked the purchase done without a key.", "buy");
     const key = openRelease(buyRec.sealed_k_buyer, scalar);
     step("buy", { state: "done", txHash: buyPaid.txHash, detail: `purchase #${purchaseId}` });

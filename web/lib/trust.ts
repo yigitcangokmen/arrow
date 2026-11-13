@@ -232,3 +232,6 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     flag: "RISKY",
   },
 ];
+
+/** The anchor of a trust-table row on the home page ("Output channel" -> "trust-row-output-channel"). */
+export const trustRowId = (part: string): string => `trust-row-${part.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;

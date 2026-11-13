@@ -1,7 +1,49 @@
-.head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.facts { color: var(--muted); overflow-wrap: anywhere; }
-.verdict { font-size: clamp(1.4rem, 5vw, 2rem); font-weight: 700; margin: 8px 0; overflow-wrap: anywhere; }
+.layout { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--sp-6); align-items: start; }
+.aside { position: sticky; top: 88px; display: grid; gap: var(--sp-3); min-width: 0; }
+.summary { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-5); box-shadow: var(--shadow-1); display: grid; gap: var(--sp-3); }
+.summary p { margin: 0; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-3); }
+.top .mono, .top :global(.mono) { color: var(--muted); font-size: 12px; }
+.title { margin: 0; font-size: 24px; letter-spacing: -0.02em; line-height: 1.2; overflow-wrap: anywhere; }
+.desc { color: var(--muted); font-size: 15px; overflow-wrap: anywhere; }
+.prices { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+.prices > div { background: var(--sunken); border-radius: var(--r-sm); padding: var(--sp-3) var(--sp-4); display: grid; }
+.prices span { font-size: 12px; color: var(--muted); }
+.prices b { font-size: 20px; font-weight: 600; }
+.prices small { font-size: 13px; font-weight: 400; color: var(--muted); }
+.facts { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.disc { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); padding: 0 var(--sp-4); font-size: 14px; color: var(--muted); }
+.disc > summary { padding: var(--sp-3) 0; color: var(--text); font-weight: 500; font-size: 15px; }
+.disc > p { margin: 0 0 var(--sp-3); overflow-wrap: anywhere; }
+.counter { background: var(--sunken); border-radius: var(--r-sm); padding: var(--sp-2) var(--sp-3); margin: 0 0 var(--sp-3); font-size: 12.5px; color: var(--text); }
+.who { border-left: 2px solid var(--border); padding: var(--sp-1) 0 var(--sp-1) var(--sp-4); font-size: 14px; color: var(--muted); }
+.who ul { margin: 0 0 var(--sp-2); padding-left: 18px; display: grid; gap: 4px; }
+.whoTitle { margin: 0 0 var(--sp-2); font-weight: 600; color: var(--text); }
+.steps { display: grid; gap: var(--sp-3); min-width: 0; }
+.steps > * { margin: 0; }
+.step { position: relative; }
+.step > h2 { font-size: 18px; margin: 2px 0 4px; }
+.sub { margin: 0 0 var(--sp-3); font-size: 14px; color: var(--muted); }
+.num { position: absolute; right: var(--sp-4); top: var(--sp-4); width: 28px; height: 28px; border-radius: var(--r-pill); border: 1px solid var(--control-border); display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; color: var(--muted); background: var(--surface); }
+.done .num { color: var(--proven); border-color: var(--proven); }
+.now { border-color: var(--accent) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
+.now .num { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.failed .num { color: var(--danger); border-color: var(--danger); }
+.later .upTitle { margin: 4px 0 4px; font-size: 18px; font-weight: 600; color: var(--muted); }
+.later .sub { margin: 0; }
+.check { display: inline-flex; gap: 8px; align-items: center; margin: 0 0 var(--sp-2); font-size: 15px; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+.verdict { font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: 700; letter-spacing: -0.02em; margin: 8px 0; overflow-wrap: anywhere; }
 .buy { color: var(--proven); }
 .pass { color: var(--notproven); }
-.steps { margin: 0 0 16px; }
-.sign { font-size: 0.9rem; color: var(--muted); margin: 0 0 8px; }
+.sign { font-size: 0.9rem; color: var(--muted); margin: 0 0 var(--sp-3); }
+.back { display: inline-block; margin: 0 0 var(--sp-4); font-size: 15px; }
+
+@media (max-width: 960px) {
+  .layout { grid-template-columns: 1fr; gap: var(--sp-5); }
+  .aside { position: static; }
+}
+.who li::marker { color: var(--control-border); }
+.demo { display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: var(--r-sm); background: var(--accent); color: var(--accent-ink); font-weight: 600; text-decoration: none; }
+.demo:hover { text-decoration: underline; }
+.noteAction { margin-top: var(--sp-3) !important; }

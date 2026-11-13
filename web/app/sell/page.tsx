@@ -8,7 +8,7 @@ import { formatUsdc } from "../../lib/format.ts";
 import { sellerConfig } from "../../lib/server/config.ts";
 import { SellForm } from "./SellForm.tsx";
 import styles from "./sell.module.css";
-import form from "../../components/form.module.css";
+import { Note, PageHead } from "../../components/Section.tsx";
 
 export const metadata: Metadata = { title: "Sell data" };
 
@@ -23,16 +23,25 @@ export default async function Sell({ searchParams }: { searchParams: Promise<{ n
   }
   return (
     <div data-ready="true">
-      <h1>Sell data</h1>
-      <p className={styles.lead}>
-        Your file is encrypted in this browser. Only the ciphertext is uploaded, and the key is sealed to the enclave&apos;s program
-        key. You need an EVM wallet and {cfg ? formatUsdc(BigInt(cfg.bond)) : "the listing bond in"} USDC on NEAR Intents for the listing bond; no NEAR account.
-      </p>
+      <PageHead eyebrow="Sell data" title="Sell a file buyers can check before they pay.">
+        Your file is encrypted in this tab before anything is uploaded. Buyers pay you to have an AI inspect it, and pay you again when they buy.
+        The key goes to a buyer who pays; the two exceptions are in <Link href="/#trust">who sees what</Link>.
+      </PageHead>
       {net === "testnet" ? (
-        <div className={form.band} role="note">
-          Payments run on mainnet; use <Link href="/try">/try</Link> for the free testnet flow. This page is read-only on testnet.
-        </div>
+        <Note>
+          <p>
+            <b>Read-only on testnet.</b> Listing with real payouts needs mainnet, which is not deployed yet, so the form below is switched off.
+            To watch a listing happen with a throwaway account, run the free demo.
+          </p>
+          <p className={styles.noteAction}><Link className={styles.demo} href="/try">Run the demo, free</Link></p>
+        </Note>
       ) : null}
+      <p className={styles.lead}>
+        Only the encrypted file is uploaded, and its key is sealed to Arrow&apos;s enclave program, which releases it to a buyer who pays.
+        To list you need an Ethereum-style wallet (such as MetaMask) and {cfg ? formatUsdc(BigInt(cfg.bond)) : "the listing bond in"} USDC
+        for the listing bond, in a NEAR Intents balance (a USDC balance held for your wallet on NEAR, topped up from Base); no NEAR account.
+        The AI that inspects for buyers reads a 40-row sample.
+      </p>
       {failure || !cfg ? (
         <ErrorBox title={`Could not read the market contract on ${net}`} fallback="Reload in a minute, or use the CLI: npm run arrow -- list --help">
           <p className="mono">{failure}</p>

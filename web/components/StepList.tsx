@@ -7,15 +7,15 @@ export interface Step {
   detail?: string;
 }
 
-const MARK: Record<StepState, string> = { todo: "·", doing: "…", done: "✔", failed: "✘" };
+const MARK: Record<Exclude<StepState, "todo">, string> = { doing: "…", done: "✔", failed: "✘" };
 const SPOKEN: Record<StepState, string> = { todo: "not started", doing: "in progress", done: "done", failed: "failed" };
 
 export function StepList({ steps }: { steps: Step[] }) {
   return (
     <ol className={styles.list}>
-      {steps.map((s) => (
+      {steps.map((s, i) => (
         <li key={s.label} className={`${styles.item} ${styles[s.state]}`}>
-          <span aria-hidden="true" className={styles.mark}>{MARK[s.state]}</span>
+          <span aria-hidden="true" className={styles.mark}>{s.state === "todo" ? i + 1 : MARK[s.state]}</span>
           <span>
             {s.label}
             <span className="sr-only"> ({SPOKEN[s.state]})</span>
