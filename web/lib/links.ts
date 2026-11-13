@@ -46,17 +46,31 @@ export const RECORDED_EVAL = 14;
 export const RECORDED_RUN_PATH = "/try/recorded";
 /** The rest of the recorded run: the listing it inspected and the purchase that followed (same account, same key). */
 export const RECORDED_RUN = { listingId: 14, evalId: RECORDED_EVAL, purchaseId: 5 } as const;
+/**
+ * The recorded failed run on the home page: inspection #12 on listing #12 (a synthetic listing whose file host is missing on purpose) on
+ * arrow-v2.arrowhq.testnet. Its refund transaction (evidence/testnet.json, kind "refund") logs arrow_refund {reason: "not_ok",
+ * amount: "225000"}: 0.25 test USDC paid, 0.225 back, 0.025 kept as Arrow's 10% share.
+ */
+export const RECORDED_REFUND = { evalId: 12, paid: "$0.25", back: "$0.225", kept: "$0.025" } as const;
 
+/** Every page in the navigation. The desktop bar shows Trust, Verify and Sell; the phone menu and the footer show all of them. */
 export const NAV_LINKS = [
   ["/", "Arrow"],
-  ["/sell", "Sell"],
-  ["/seller", "Payouts"],
+  ["/trust", "Trust"],
   ["/verify", "Verify"],
+  ["/sell", "Sell"],
   ["/attack", "Attack"],
+  ["/seller", "Payouts"],
   ["/try", "Try"],
 ] as const;
 
-/** The main navigation for the network being viewed: `?network=` is kept on every link that reads it. /attack and /try ignore it. */
+/** The links the desktop bar shows between the name and the network badge. */
+export const NAV_BAR = ["Trust", "Verify", "Sell"] as const;
+
+/** The trust page: who sees what, the limits and the full trust table (`#trust-table`). */
+export const TRUST_PATH = "/trust";
+
+/** The main navigation for the network being viewed: `?network=` is kept on every link that reads it. /trust, /attack and /try ignore it. */
 export function navLinks(net: Network): { href: string; label: string }[] {
-  return NAV_LINKS.map(([path, label]) => ({ href: path === "/attack" || path === "/try" ? path : withNetwork(path, net), label }));
+  return NAV_LINKS.map(([path, label]) => ({ href: path === "/attack" || path === "/try" || path === "/trust" ? path : withNetwork(path, net), label }));
 }

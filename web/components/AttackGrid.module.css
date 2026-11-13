@@ -1,0 +1,8 @@
+.grid { display: grid; grid-template-columns: repeat(12, 18px); gap: 5px; }
+.ok, .miss { position: relative; width: 18px; height: 18px; border-radius: 4px; border: 1px solid; }
+.ok { border-color: var(--proven); background: color-mix(in srgb, var(--proven) 18%, var(--surface)); }
+.miss { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 18%, var(--surface)); }
+.ok::after { content: ""; position: absolute; left: 5px; top: 2px; width: 4px; height: 8px; border: solid var(--proven); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.miss::before, .miss::after { content: ""; position: absolute; left: 7px; top: 3px; width: 2px; height: 10px; background: var(--danger); transform: rotate(45deg); }
+.miss::after { transform: rotate(-45deg); }
+@media (max-width: 400px) { .grid { grid-template-columns: repeat(12, 14px); gap: 4px; } .ok, .miss { width: 14px; height: 14px; } .ok::after { left: 4px; top: 1px; width: 3px; height: 7px; } .miss::before, .miss::after { left: 5px; top: 2px; height: 8px; } }

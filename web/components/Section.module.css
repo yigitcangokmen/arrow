@@ -1,14 +1,12 @@
-.eyebrow { margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.eyebrow { margin: 0; font-family: var(--font-mono); font-size: var(--t-label); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+/* the same eyebrow on every page: an accent square, then the label */
+.eyebrow::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 10px; vertical-align: 1px; background: var(--accent); }
 .head { display: grid; gap: var(--sp-3); margin: 0 0 var(--sp-7); }
 .h2 { margin: 0; font-size: clamp(28px, 3.2vw, 40px); font-weight: 600; line-height: 1.08; letter-spacing: -0.03em; text-wrap: balance; }
 .lede { margin: 0; max-width: 620px; font-size: 18px; line-height: 1.55; color: var(--muted); }
 .page { display: grid; gap: var(--sp-3); margin: var(--sp-4) 0 var(--sp-6); }
-.h1 { margin: 0; }
-/* The separator sits left of every item and is clipped at the start of each line, so a wrapped line never begins with a dot. */
-.honesty { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 14px; color: var(--muted); overflow: hidden; }
-.honesty li { position: relative; }
-.honesty li::before { content: "·"; position: absolute; left: -15px; color: var(--control-border); }
-.honesty b { color: var(--text); font-weight: 600; }
+/* one page-head scale for every inner route (the same as /try, /try/recorded and /trust) */
+.h1 { margin: 0; font-size: clamp(40px, 5.2vw, 72px); line-height: 0.98; letter-spacing: -0.035em; }
 .note { border: 1px solid var(--border); border-left: 3px solid var(--notproven); border-radius: var(--r-md); background: var(--surface); padding: var(--sp-3) var(--sp-4); margin: 0 0 var(--sp-6); font-size: 15px; overflow-wrap: anywhere; }
 .note p { margin: 0; }
 

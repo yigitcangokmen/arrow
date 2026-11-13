@@ -12,6 +12,7 @@
   --danger: #b3261e;
   --focus: #1b5fd6;
   --sunken: #f1f1ed; /* mock panels, tiles, the counter line */
+  --band: #f1f1ed; /* alternate full-width section bands */
   --accent-ink: #ffffff; /* text on the filled button */
   --ink: #16181d; /* the "Who sees what" band */
   --ink-text: #f2f3f5;
@@ -34,14 +35,27 @@
   --sp-7: 48px;
   --sp-8: 64px;
   --sp-9: 96px;
+  --flap: #14181f; /* split-flap tiles: dark in both themes */
+  --flap-ink: #f2f3f5;
+  --flap-buy: #52c98a; /* BUY letters on the always-dark tiles */
+  --pix: #b9cdf2; /* the pixel dissolve: a soft accent tint, never a glare */
+  --beam: color-mix(in srgb, var(--accent) 55%, transparent);
+  --hatch: repeating-linear-gradient(45deg, var(--border) 0 1px, transparent 1px 6px);
+  --glow: radial-gradient(60% 40% at 50% 0, color-mix(in srgb, var(--accent) 10%, transparent), transparent);
+  --t-display: clamp(44px, 6.4vw, 92px);
+  --t-h2: clamp(32px, 4vw, 56px);
+  --t-lede: clamp(17px, 1.4vw, 20px);
+  --t-label: 12px;
+  --sec-y: clamp(64px, 8vw, 112px);
+  --r-machine: 24px;
   --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1115;
-    --surface: #171a20;
+    --bg: #0b0d11;
+    --surface: #13161c;
     --text: #e8eaee;
     --muted: #9aa1ae;
     --border: #2b303a;
@@ -53,18 +67,23 @@
     --danger: #ff7d73;
     --focus: #7aa7ff;
     --sunken: #1d2129;
-    --accent-ink: #0f1115;
+    --band: #101318; /* a slight lift over --bg, never mid-grey */
+    --accent-ink: #0b0d11;
     --ink: #222731;
     --ink-text: #e8eaee;
     --ink-muted: #9aa1ae;
     --ink-line: #3b4250;
     --shadow-1: none;
+    --flap: #1a1f28; /* lifted off --bg, so the tiles read as tiles */
+    --pix: #26324a;
+    --flap-ink: #f2f3f5;
+    --glow: radial-gradient(60% 40% at 50% 0, color-mix(in srgb, var(--accent) 14%, transparent), transparent);
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #0f1115;
-  --surface: #171a20;
+  --bg: #0b0d11;
+  --surface: #13161c;
   --text: #e8eaee;
   --muted: #9aa1ae;
   --border: #2b303a;
@@ -76,10 +95,15 @@
   --danger: #ff7d73;
   --focus: #7aa7ff;
   --sunken: #1d2129;
-  --accent-ink: #0f1115;
+  --band: #101318; /* a slight lift over --bg, never mid-grey */
+  --accent-ink: #0b0d11;
   --ink: #222731;
   --ink-text: #e8eaee;
   --ink-muted: #9aa1ae;
   --ink-line: #3b4250;
   --shadow-1: none;
+  --flap: #1a1f28; /* lifted off --bg, so the tiles read as tiles */
+  --pix: #26324a;
+  --flap-ink: #f2f3f5;
+  --glow: radial-gradient(60% 40% at 50% 0, color-mix(in srgb, var(--accent) 14%, transparent), transparent);
 }

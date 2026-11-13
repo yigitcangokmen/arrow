@@ -1,0 +1,13 @@
+.grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(9, 18px); gap: 5px; }
+.grid li { display: block; }
+.cell { display: block; width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--border); background: var(--sunken); }
+.risky { background: var(--risky); border-color: var(--risky); }
+/* not proven is hollow (an open question), risky is solid: the two never read as one muddy pair */
+.notproven { background: var(--surface); border: 2px solid var(--notproven); }
+.todo { background: var(--hatch), var(--surface); border-color: var(--control-border); }
+a.cell:hover, a.cell:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.links { grid-template-columns: repeat(9, 24px); gap: 4px; }
+.links .cell { width: 24px; height: 24px; border-radius: 5px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend .cell { width: 10px; height: 10px; border-radius: 3px; }

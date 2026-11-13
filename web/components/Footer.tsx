@@ -2,33 +2,40 @@ import Link from "next/link";
 import { teamAccounts } from "../generated/data.ts";
 import { DEFAULT_NETWORK } from "../lib/config.ts";
 import { REPO_URL } from "../lib/links.ts";
-import { loadListingViews } from "../lib/server/listingsPage.ts";
+import { lastGoodListings, loadListingViews } from "../lib/server/listingsPage.ts";
+import { mainnetContractLive } from "../lib/server/mainnetLive.ts";
+import type { ListingView } from "../lib/server/listingsCache.ts";
 import styles from "./Footer.module.css";
 
-/** Outside sellers on the deploy's network, read from the chain (30 s cache). Null when the listings cannot be read: the clause is then left out. */
+/**
+ * Outside sellers on the deploy's network, read from the chain (30 s cache; the last good read while the RPC is busy). Null when the
+ * listings have never been read: the clause is then left out.
+ */
 async function outsideSellers(): Promise<number | null> {
+  const count = (views: ListingView[]) => new Set(views.filter((v) => v.label === "external").map((v) => v.seller)).size;
   try {
-    const views = await loadListingViews(DEFAULT_NETWORK, teamAccounts);
-    return new Set(views.filter((v) => v.label === "external").map((v) => v.seller)).size;
+    return count(await loadListingViews(DEFAULT_NETWORK, teamAccounts));
   } catch {
-    return null;
+    const last = lastGoodListings(DEFAULT_NETWORK);
+    return last ? count(last.views) : null;
   }
 }
 
 export async function Footer() {
-  const outside = await outsideSellers();
+  // The same check as the network badge, so the footer never says "not deployed" while the badge says the contract is live.
+  const [outside, live] = await Promise.all([outsideSellers(), mainnetContractLive()]);
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div>
           <p className={styles.brand}>Arrow</p>
           <p className={styles.fine}>
-            {DEFAULT_NETWORK === "testnet" ? "NEAR testnet · synthetic demo data · mainnet not deployed" : "NEAR mainnet"}{outside !== null ? <> · outside sellers of real data so far: <span className="mono">{outside}</span></> : null}
+            {DEFAULT_NETWORK === "testnet" ? `NEAR testnet · synthetic demo data · ${live ? "mainnet contract deployed" : "mainnet not deployed"}` : "NEAR mainnet"}{outside !== null ? <> · outside sellers of real data so far: <span className="mono">{outside}</span></> : null}
           </p>
         </div>
         <ul className={styles.links} aria-label="Footer">
           <li><Link href="/try">Try it free</Link></li>
-          <li><a href="/#trust-table">Trust table</a></li>
+          <li><Link href="/trust#trust-table">Trust table</Link></li>
           <li><Link href="/verify">Verify</Link></li>
           <li><Link href="/attack">Attack</Link></li>
           <li><Link href="/sell">Sell</Link></li>

@@ -17,7 +17,7 @@
 .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 8px 0 0; }
 .primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
 /* A primary action that cannot run yet is drawn neutral, not as a washed-out accent (contrast stays above 4.5:1). */
-.primary:disabled, .primary[aria-disabled="true"] { background: var(--sunken); color: var(--muted); border: 1px dashed var(--control-border); opacity: 1; }
+.primary:disabled, .primary[aria-disabled="true"] { background: var(--sunken); color: var(--muted); border: 1px solid var(--border); opacity: 1; cursor: not-allowed; }
 .why { list-style: none; margin: var(--sp-2) 0 0; padding: 0; display: grid; gap: 4px; }
 .why li { position: relative; padding-left: 18px; }
 .why li::before { content: ""; position: absolute; left: 2px; top: 0.6em; width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--notproven); }

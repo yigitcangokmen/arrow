@@ -9,8 +9,13 @@
 .fileInput { position: absolute; inset: 0; width: 1px !important; height: 1px; min-height: 0 !important; padding: 0 !important; opacity: 0; overflow: hidden; }
 .fileButton { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--control-border); border-radius: var(--r-sm); background: var(--surface); color: var(--text); font-weight: 600; font-size: 15px; cursor: pointer; }
 .fileInput:focus-visible + .fileButton { outline: 2px solid var(--focus); outline-offset: 2px; }
-.fileInput:disabled + .fileButton { background: var(--sunken); color: var(--muted); border-style: dashed; cursor: not-allowed; }
+.fileInput:disabled + .fileButton { background: var(--sunken); color: var(--muted); cursor: not-allowed; }
 .fileName { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.summary > summary { cursor: pointer; }
+.summary[open] > summary { margin-bottom: 4px; }
 .summary { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--sunken); padding: var(--sp-4); margin: var(--sp-2) 0 var(--sp-4); display: grid; gap: 6px; }
 .summary p { margin: 0; }
 .summaryTitle { font-weight: 600; }
+.need { margin: 0 0 var(--sp-5); font-size: 14.5px; color: var(--muted); }
+.need > summary { color: var(--text); font-weight: 500; padding: 4px 0; }
+.need p { margin: var(--sp-2) 0 0; max-width: 72ch; }

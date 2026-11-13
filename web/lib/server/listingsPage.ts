@@ -31,20 +31,30 @@ export function sortListingViews(views: readonly ListingView[]): ListingView[] {
 export function groupHomeListings(views: readonly ListingView[], teamAccounts: readonly string[]): { featured: ListingView[]; more: ListingView[] } {
   const featured: ListingView[] = [];
   const more: ListingView[] = [];
-  for (const v of views) {
-    const ok = v.stale !== true && isTeamAccount(v.seller, teamAccounts) && !/^e2e/i.test(v.displayTitle.trim()) && !/^try/i.test(v.seller);
-    (ok ? featured : more).push(v);
-  }
+  const ok = (v: ListingView) => v.stale !== true && isTeamAccount(v.seller, teamAccounts) && !/^e2e/i.test(v.displayTitle.trim()) && !/^try/i.test(v.seller);
+  // A test run that relists a demo file under the same title must not double the demo: one card per title, the first one listed
+  // (the lowest id, which the recorded runs use); the copies go into more.
+  const first = new Map<string, number>();
+  for (const v of views) if (ok(v)) first.set(v.displayTitle, Math.min(first.get(v.displayTitle) ?? Infinity, Number(v.id)));
+  for (const v of views) (ok(v) && first.get(v.displayTitle) === Number(v.id) ? featured : more).push(v);
   return { featured, more };
 }
 
 const cached = ttlCache<ListingView[]>(30_000);
+const lastGood = new Map<Network, { at: number; views: ListingView[] }>();
 
 export function loadListingViews(net: Network, teamAccounts: readonly string[]): Promise<ListingView[]> {
   return cached(net, async () => {
     const views = new ArrowViews(net, CONTRACTS[net]);
     const [listings, cv] = await Promise.all([pageAllListings(views), views.config().catch(() => null)]);
     const hash = typeof cv?.config.program_wasm_hash === "string" ? cv.config.program_wasm_hash : null;
-    return sortListingViews(markStale(listings.map((l) => toListingView(l, teamAccounts)), hash));
+    const out = sortListingViews(markStale(listings.map((l) => toListingView(l, teamAccounts)), hash));
+    lastGood.set(net, { at: Date.now(), views: out });
+    return out;
   });
+}
+
+/** The last listings this server instance read from the chain, with when; null when it has not read any yet. For a busy RPC. */
+export function lastGoodListings(net: Network): { at: number; views: ListingView[] } | null {
+  return lastGood.get(net) ?? null;
 }

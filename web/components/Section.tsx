@@ -23,17 +23,6 @@ export function PageHead({ eyebrow, title, children }: { eyebrow: string; title:
   );
 }
 
-/** Dot-separated facts, the first one bold. */
-export function HonestyLine({ items }: { items: string[] }) {
-  return (
-    <ul className={styles.honesty} aria-label="What this demo is">
-      {items.map((t, i) => (
-        <li key={t}>{i === 0 ? <b>{t}</b> : t}</li>
-      ))}
-    </ul>
-  );
-}
-
 /** A calm notice with a left rule, for the read-only and testnet notes. */
 export function Note({ children }: { children: ReactNode }) {
   return <div className={styles.note} role="note">{children}</div>;

@@ -522,8 +522,8 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
               <p id="payout-hint" className={form.hint}>Leave empty to be paid to this wallet</p>
             </div>
           </div>
-          <div className={styles.summary}>
-            <p className={styles.summaryTitle}>What buyers can learn, and what you earn</p>
+          <details className={styles.summary}>
+            <summary className={styles.summaryTitle}>What buyers can learn, and what you earn</summary>
             <p>
               The verdicts can tell buyers at most{" "}
               <b className="mono">{formatBits((Number.isInteger(Number(maxEvals)) && Number(maxEvals) > 0 ? Number(maxEvals) : 0) * BITS_PER_EVAL_MILLI[mode])} bits</b>{" "}
@@ -533,7 +533,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
               The most the verdicts let out for this listing (run time and instruction count are public too): {budgetPreview(Number.isInteger(Number(maxEvals)) && Number(maxEvals) > 0 ? Number(maxEvals) : 0, mode)}.
             </p>
             <p className={form.hint} id="take-rate">{takeRate(price, evalFee, feeBps, bondUnits)}</p>
-          </div>
+          </details>
           <div className={form.field}>
             <label>
               <input type="checkbox" checked={selfHost} onChange={(e) => setSelfHost(e.target.checked)} /> I host the encrypted file myself (an https URL I paste)

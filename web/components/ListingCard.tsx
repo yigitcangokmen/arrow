@@ -14,8 +14,44 @@ function tryHref(title: string): string {
   return "/try";
 }
 
-/** `team` is set by a page that knows the seller is a team account; the card then names the team next to the account. */
-export function ListingCard({ listing: l, network, team = false }: { listing: ListingView; network: Network; team?: boolean }) {
+/**
+ * The home page's short card: labels, title, three column names, the row count and the two prices. On testnet, where real purchases
+ * are switched off, the whole card opens the free demo run of its scene; on mainnet it opens the listing page, which holds the seller,
+ * the leak budget and the rest. Only for listings the page knows a team account made.
+ */
+function CompactCard({ listing: l, network }: { listing: ListingView; network: Network }) {
+  const links = listingLinks(l.id, network);
+  return (
+    <Link
+      href={network === "testnet" ? tryHref(l.displayTitle) : links.buy}
+      className={`${styles.card} ${styles.compact}`}
+      title={network === "testnet" ? `Opens the free demo, which lists a fresh copy of this synthetic file. Listing #${String(l.id)} itself: ${links.buy}` : undefined}
+    >
+      <div className={styles.top}>
+        <span className={styles.badges}>
+          <Badge kind={l.label} />
+          {l.label !== "team-made" ? <Badge kind="team-made" /> : null}
+        </span>
+        <span className="mono">#{String(l.id)}</span>
+      </div>
+      <h3 className={styles.title}><bdi>{l.displayTitle}</bdi></h3>
+      <ul className={styles.cols} aria-label="Columns">
+        {l.columns.slice(0, 3).map((c) => <li key={c}>{c}</li>)}
+      </ul>
+      <p className={styles.compactFoot}>
+        {/rows/i.test(l.displayTitle) ? <span /> : <span><b className="mono">{Number(l.rows_claimed).toLocaleString("en-US")}</b> rows</span>}
+        <span>inspect <b className="mono">${formatUsdc(l.eval_fee)}</b> · buy <b className="mono">${formatUsdc(l.price)}</b></span>
+      </p>
+    </Link>
+  );
+}
+
+/**
+ * `team` is set by a page that knows the seller is a team account; the card then names the team next to the account. `compact` (team
+ * listings only) is the home page's short card.
+ */
+export function ListingCard({ listing: l, network, team = false, compact = false }: { listing: ListingView; network: Network; team?: boolean; compact?: boolean }) {
+  if (compact && team && !l.stale) return <CompactCard listing={l} network={network} />;
   const links = listingLinks(l.id, network);
   const demo = network === "testnet" && !l.stale;
   return (

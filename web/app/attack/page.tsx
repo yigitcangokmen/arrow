@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { ErrorBox } from "../../components/ErrorBox.tsx";
+import { AttackGrid } from "../../components/AttackGrid.tsx";
 import { PageHead } from "../../components/Section.tsx";
 import { TxLink } from "../../components/TxLink.tsx";
 import { bench, benchLive, benchRoom, teamAccounts } from "../../generated/data.ts";
@@ -71,6 +72,8 @@ export default async function Attack() {
   const room = roomView(inputs);
   const mainnet = mainnetView(inputs);
   const stopped = nativeStopped(inputs);
+  const native = inputs.native;
+  const caught = inputs.room && native ? inputs.room.attacks.map((a) => native[a.id]?.regex_flag === true) : null;
 
   // The lemon comparison reads its amounts from the demo listing the rest of the site points at (the team's wallet-labels file);
   // without one it states no amounts.
@@ -96,19 +99,30 @@ export default async function Attack() {
 
   return (
     <div data-ready="true">
-      <PageHead eyebrow="Attack" title="Attacks we ran, and what has not run yet.">
-        An attack here is a seller hiding instructions in the data to push the AI toward BUY, or a buyer trying to make it read rows out.
-        Every number on this page is counted from recorded runs, and what has not run yet says so.
+      <PageHead eyebrow="Attack" title={`Attacks: ${status.filter((x) => x.done !== null).length} of ${status.length} tests run.`}>
+        {stopped ? `${stopped.k} of ${stopped.n} planted instructions caught by the pattern check, replayed offline.` : "Recorded attacks, and what has not run yet."}
       </PageHead>
+      <details className={styles.what}>
+        <summary>What counts as an attack here</summary>
+        <p>
+          An attack here is a seller hiding instructions in the data to push the AI toward BUY, or a buyer trying to make it read rows out.
+          Every number on this page is counted from recorded runs, and what has not run yet says so.
+        </p>
+      </details>
       <section className={styles.top} aria-labelledby="live">
         <div className={styles.figure}>
           {stopped ? (
             <>
               <p className={styles.big}>{stopped.k}/{stopped.n}</p>
-              <p>
-                instructions planted in the data are caught by a fixed pattern check that runs before the AI is asked. For a caught file the
-                answer is PASS even if the AI were fooled. This result was replayed on our own machine, not in the sealed hardware.
-              </p>
+              {caught ? <div className={styles.grid24}><AttackGrid caught={caught} /></div> : null}
+              <p>caught by a fixed pattern check before the AI is asked, replayed on our own machine.</p>
+              <details className={styles.what}>
+                <summary>More on this number</summary>
+                <p>
+                  Instructions planted in the data are caught by a fixed pattern check that runs before the AI is asked. For a caught file the
+                  answer is PASS even if the AI were fooled. This result was replayed on our own machine, not in the sealed hardware.
+                </p>
+              </details>
               <p className={styles.small}>
                 {room?.headline ? <>In the sealed hardware, with the AI: <span className="mono">{room.headline}</span>.</> : <>The same attacks in the sealed hardware, with the AI: not run yet.</>}
               </p>
@@ -161,12 +175,15 @@ export default async function Attack() {
       <section className={styles.section} aria-labelledby="room">
         <p className={styles.eyebrow}>Refusal room</p>
         <h2 id="room" className={styles.h2}>24 planted instructions, one by one.</h2>
-        <p className={styles.note}>
+        <details className={styles.what}>
+          <summary>How to read the refusal room</summary>
+          <p className={styles.note}>
           Four groups of six (plain, Unicode, encoding, other languages) and two controls. Each row shows whether the fixed pattern check
           catches the file on its own, before the AI. A pattern-check catch and an AI PASS give the same answer (PASS · fit 1 · novelty 1), so a
           live result cannot say which one fired. A buyer can also plant a fake row and ask about it to test a seller; that is the buyer&apos;s own
           practice, not something Arrow promises.
-        </p>
+          </p>
+        </details>
         {room ? (
           <>
             {room.headline ? (
@@ -283,7 +300,7 @@ export default async function Attack() {
             <p>Blind purchase: pay the full price and learn the value after. Arrow: pay a small inspection fee to let an AI inspect it first; a PASS costs only that fee.</p>
           )}
         </blockquote>
-        <p className={styles.note}>Amounts are read from a listing on {DEFAULT_NETWORK}, not fixed in this page. The trust table says what is still trusted: <Link href="/#trust">Trust table</Link>.</p>
+        <p className={styles.note}>Amounts are read from a listing on {DEFAULT_NETWORK}, not fixed in this page. The trust table says what is still trusted: <Link href="/trust#trust-table">Trust table</Link>.</p>
       </section>
     </div>
   );

@@ -48,3 +48,7 @@
 .cmds { margin: var(--sp-2) 0 0; padding-left: 1.1em; display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
 .cmds .mono { overflow-wrap: anywhere; }
 .nowrap { white-space: nowrap; }
+.what { margin: 0 0 var(--sp-4); font-size: 14.5px; color: var(--muted); }
+.what > summary { color: var(--text); font-weight: 500; padding: 4px 0; }
+.what p { margin: var(--sp-2) 0 0; max-width: 76ch; }
+.grid24 { margin: 4px 0 14px; }

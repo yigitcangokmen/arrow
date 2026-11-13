@@ -9,14 +9,11 @@ import styles from "./verify.module.css";
  * The rows of a report, grouped. Each row opens with one plain sentence; the engine's label and wording follow unchanged, so the
  * page never says more than `npm run verify` does.
  */
-export function VerifyRows({ rows, after }: { rows: readonly Row[]; after?: Record<string, ReactNode> }) {
+export function VerifyRows({ rows, after, fold = false }: { rows: readonly Row[]; after?: Record<string, ReactNode>; fold?: boolean }) {
   return (
     <>
-      {groupRows(rows).map((g) => (
-        <section key={g.key} className={styles.group} aria-labelledby={`g-${g.key}`}>
-          <p className={styles.eyebrow}>{g.title}</p>
-          <h2 id={`g-${g.key}`} className={styles.groupTitle}>{GROUP_PLAIN[g.key]}</h2>
-          <p className={styles.note}>{g.note}</p>
+      {groupRows(rows).map((g) => {
+        const table = (
           <table className={styles.table}>
             <thead>
               <tr><th scope="col">Result</th><th scope="col">Row</th><th scope="col">Claim and evidence</th></tr>
@@ -27,8 +24,30 @@ export function VerifyRows({ rows, after }: { rows: readonly Row[]; after?: Reco
               ))}
             </tbody>
           </table>
-        </section>
-      ))}
+        );
+        // With `fold`, only the REQUIRED rows stay open; every other group is one click away, its counts on the fold.
+        if (fold && g.key !== "required") {
+          const counts = [...new Set(g.rows.map((r) => r.label))].map((l) => `${g.rows.filter((r) => r.label === l).length} ${l}`).join(" · ");
+          return (
+            <details key={g.key} className={styles.groupFold}>
+              <summary>
+                <span className={styles.groupFoldTitle}>{GROUP_PLAIN[g.key]}</span>
+                <span className={styles.groupFoldCount}>{counts}</span>
+              </summary>
+              <p className={styles.note}>{g.note}</p>
+              {table}
+            </details>
+          );
+        }
+        return (
+          <section key={g.key} className={styles.group} aria-labelledby={`g-${g.key}`}>
+            <p className={styles.eyebrow}>{g.title}</p>
+            <h2 id={`g-${g.key}`} className={styles.groupTitle}>{GROUP_PLAIN[g.key]}</h2>
+            <p className={styles.note}>{g.note}</p>
+            {table}
+          </section>
+        );
+      })}
     </>
   );
 }

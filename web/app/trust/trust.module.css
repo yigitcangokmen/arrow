@@ -1,0 +1,22 @@
+.page { max-width: none; padding: 0; margin: 0; }
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--sp-6); }
+.head { padding: clamp(40px, 6vw, 80px) 0 var(--sp-7); }
+.eyebrow { margin: 0; font-family: var(--font-mono); font-size: var(--t-label); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.eyebrow::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 10px; vertical-align: 1px; background: var(--accent); }
+.h1 { margin: var(--sp-4) 0 var(--sp-4); font-size: clamp(40px, 5.2vw, 72px); line-height: 0.98; letter-spacing: -0.035em; }
+.lede { margin: 0; max-width: 44ch; font-size: var(--t-lede); line-height: 1.45; color: var(--muted); }
+.sight { margin-top: var(--sp-4); }
+.jump { margin: var(--sp-5) 0 0; font-size: 15px; }
+.why { background: var(--band); border-top: 1px solid var(--border); }
+.whyGrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-7); padding-top: var(--sp-8); padding-bottom: var(--sp-8); }
+.whyLeft { margin: 0; color: var(--muted); font-size: 17px; }
+.whyRight > p { margin: 0 0 var(--sp-3); font-size: 17px; }
+.define { color: var(--muted); font-size: 15px !important; }
+.fold { font-size: 14px; color: var(--muted); }
+.fold > summary { padding: 6px 0; font-weight: 500; color: var(--text); }
+.fold > p { margin: 6px 0 0; border-left: 2px solid var(--border); padding-left: 12px; }
+@media (max-width: 860px) {
+  .wrap { padding: 0 var(--gutter); }
+  .whyGrid { grid-template-columns: 1fr; gap: var(--sp-4); padding-top: var(--sp-7); padding-bottom: var(--sp-7); }
+}
+.legend { margin-top: var(--sp-5); }

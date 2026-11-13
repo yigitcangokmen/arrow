@@ -14,6 +14,7 @@ import { CopyEvidence } from "../../../components/CopyEvidence.tsx";
 import { ErrorBox } from "../../../components/ErrorBox.tsx";
 import { HashTriple } from "../../../components/HashTriple.tsx";
 import { MeaningTiles } from "../../../components/MeaningTiles.tsx";
+import Stepper, { Step as RailStep } from "../../../components/reactbits/Stepper.tsx";
 import type { Step } from "../../../components/StepList.tsx";
 import { TopUp } from "../../../components/TopUp.tsx";
 import { TxLink } from "../../../components/TxLink.tsx";
@@ -47,6 +48,18 @@ interface Delivery {
 }
 
 const STEP_LABELS = ["Wallet and viewing key", "Balance", "Your criteria", "Inspect", "Result", "Buy", "Download and verify"] as const;
+/** The rail's short names for the same seven steps. */
+const RAIL = ["Wallet", "Balance", "Criteria", "Inspect", "Verdict", "Buy", "Decrypt"] as const;
+/** One line per step, for the read-only page, where only step 1 is drawn and the rail names the rest. */
+const STEP_LINES = [
+  "Connect a wallet such as MetaMask and sign once to make your viewing key; no money moves.",
+  "Your NEAR Intents balance, a USDC balance held for your wallet on NEAR, topped up from Base.",
+  "Say what you need in one or two sentences. The seller cannot read them.",
+  "Arrow's program, in sealed hardware, sends a 40-row sample to NEAR AI to judge against your criteria (45 to 120 s).",
+  "BUY or PASS, with fit and novelty from 1 to 5 if the seller allows scores, decrypted here with your viewing key.",
+  "The program checks the file is the one it inspected, then seals its key to you. Buying after a PASS asks first.",
+  "Your browser downloads the sealed file, checks its fingerprint and decrypts it with your key.",
+] as const;
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
 export function BuyFlow({ network, listing, programPk, readOnly, blockers, team = false }: {
@@ -449,6 +462,9 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers, team 
   return (
     <fieldset disabled={readOnly} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       <Announcer text={announce} />
+      <Stepper className={styles.rail} step={current === -1 ? RAIL.length + 1 : current + 1} label="Steps">
+        {RAIL.map((t) => <RailStep key={t} title={t} />)}
+      </Stepper>
       <div className={styles.layout}>
       <aside className={styles.aside}>
         <section className={styles.summary} aria-labelledby="listing-title">
@@ -501,16 +517,16 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers, team 
             id; payment goes through NEAR Intents. CLI: <span className="mono">npm run arrow -- eval --help</span>
           </p>
         </details>
-        <div className={styles.who}>
-          <p className={styles.whoTitle}>Who sees what on this page</p>
-          <ul>
+        <details className={styles.disc}>
+          <summary>Who sees what on this page</summary>
+          <ul className={styles.whoList}>
             <li>Your criteria: the enclave and the AI, not the seller. This page&apos;s JavaScript, served by Arrow, handles them too, and the group that governs OutLayer&apos;s keystore could unseal them.</li>
             <li>Your viewing key: the step 1 signature makes it, and anyone who gets that same signature can make it too. Sign it only on this site.</li>
             <li>Your 0x address and what you paid: public on chain.</li>
             <li>The rows: the AI, in its own sealed hardware, reads a 40-row sample; you see none until you buy.</li>
           </ul>
-          <a href="/#trust-table">Full trust table →</a>
-        </div>
+          <p><a href="/trust#trust-table">Full trust table →</a></p>
+        </details>
       </aside>
 
       <div className={styles.steps}>
@@ -534,24 +550,39 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers, team 
       <section className={stepClass(0)} aria-labelledby="b1">
         {mark(0)}
         <h2 id="b1">1. Wallet and viewing key</h2>
-        <p className={styles.sub}>Connect an Ethereum-style wallet such as MetaMask (it pays with USDC from Base; no NEAR account needed), then sign once. The signature makes your private viewing key, the key that opens your verdicts; no money moves.</p>
+        <p className={styles.sub}>Connect a wallet such as MetaMask, then sign once to make your viewing key. No money moves.</p>
         <div className={styles.wallet}>
           <WalletButton eoa={eoa} balance={balance} onConnect={setEoa} onBalance={setBalance} onReset={resetWallet} refreshKey={balanceKey} />
         </div>
         {wrongDomain ? <p className={form.error} role="alert">Viewing keys are bound to {SITE_DOMAIN || "the site domain, which is not set"}. Open Arrow there.</p> : null}
-        <p className={styles.sign}>
-          Signature 1 of 2 (a message, no money moves): derives your private viewing key. The result is decrypted with it, and it is not stored; reloading asks again.
-        </p>
         <button type="button" disabled={!eoa || vk !== null || busy !== null || wrongDomain || locked} onClick={() => void deriveKey()}>
           {vk ? "Viewing key ready" : busy === "key" ? "Waiting for your wallet…" : "Sign to derive my viewing key"}
         </button>
-        <p className={form.hint}>A regular wallet account is needed; smart-contract wallets (EIP-1271) are not supported. The same signature always makes the same key, so sign it only on this site.</p>
+        <details className={styles.more}>
+          <summary>How paying works</summary>
+          <p>
+            An Ethereum-style wallet pays with USDC from Base; no NEAR account is needed. Signature 1 of 2 is a message, and no money moves: it
+            derives your private viewing key, the key that opens your verdicts. It is not stored; reloading asks again. A regular wallet account
+            is needed; smart-contract wallets (EIP-1271) are not supported. The same signature always makes the same key, so sign it only on
+            this site. Signature 2 of 2 pays for the inspection, as a JSON message from your NEAR Intents balance.
+          </p>
+        </details>
       </section>
+
+      {readOnly ? (
+        <details className={styles.more}>
+          <summary>What each step does</summary>
+          <ol className={styles.lines}>
+            {STEP_LINES.map((l, i) => <li key={i}><b>{RAIL[i]}.</b> {l}</li>)}
+          </ol>
+        </details>
+      ) : (
+      <>
 
       <section className={stepClass(1)} aria-labelledby="b2">
         {mark(1)}
         <h2 id="b2">2. Balance</h2>
-        <p className={styles.sub}>What you can spend from your NEAR Intents balance, a USDC balance held for your wallet on NEAR. Top it up from Base USDC if needed.{balance !== null ? <> Now: <span className="mono">{formatUsdc(balance)} USDC</span>.</> : null}</p>
+        <p className={styles.sub}>Your NEAR Intents balance: USDC held for your wallet on NEAR, topped up from Base.{balance !== null ? <> Now: <span className="mono">{formatUsdc(balance)} USDC</span>.</> : null}</p>
         <label className={styles.check}>
           <input type="checkbox" checked={mayBuy} onChange={(e) => setMayBuy(e.target.checked)} /> I may buy after inspecting (plan for ${formatUsdc(price)} more)
         </label>
@@ -572,9 +603,9 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers, team 
       <section className={stepClass(3)} aria-labelledby="b4">
         {mark(3)}
         <h2 id="b4">4. Inspect for ${formatUsdc(evalFee)}</h2>
-        <p className={styles.sub}>In sealed hardware, Arrow&apos;s program opens the file and sends a 40-row sample to an AI, in its own sealed hardware, that judges it against your criteria. 45 to 120 seconds.</p>
+        <p className={styles.sub}>Arrow&apos;s program, in sealed hardware, sends a 40-row sample to NEAR AI to judge. 45 to 120 seconds.</p>
         <p className={styles.sign} id="b4-sign">
-          Signature 2 of 2: this signs a payment of ${formatUsdc(evalFee)} USDC from your Intents balance to {CONTRACTS[network]}. Your wallet shows the payment as a JSON message: check the receiver and the amount.
+          Signature 2 of 2: pays ${formatUsdc(evalFee)} USDC from your Intents balance to {CONTRACTS[network]}. Check both in your wallet.
         </p>
         <button
           type="button"
@@ -660,7 +691,7 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers, team 
         </section>
       ) : null}
 
-      {outcome ? null : upcoming(4, "BUY or PASS, with fit and novelty from 1 to 5 if the seller allows scores, decrypted here with your viewing key.")}
+      {outcome ? null : upcoming(4, STEP_LINES[4])}
 
       {buyVisible ? (
         <section className={stepClass(5)} aria-labelledby="b6">
@@ -700,7 +731,7 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers, team 
         </section>
       ) : null}
 
-      {buyVisible ? null : upcoming(5, "Opens once your wallet is connected and signed (step 1). Buying after a PASS, or without a verdict, asks you to confirm first.")}
+      {buyVisible ? null : upcoming(5, "Opens after step 1. Buying after a PASS, or without a verdict, asks first.")}
 
       {buyTx || delivery || refund ? (
         <section className={stepClass(6)} aria-labelledby="b7">
@@ -757,7 +788,9 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers, team 
         </section>
       ) : null}
 
-      {buyTx || delivery || refund ? null : upcoming(6, "Your browser downloads the sealed file, checks its fingerprint and decrypts it with your key.")}
+      {buyTx || delivery || refund ? null : upcoming(6, STEP_LINES[6])}
+      </>
+      )}
 
       {error ? (
         <ErrorBox title="That step did not finish" fallback={error.fallback}>

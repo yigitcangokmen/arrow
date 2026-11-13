@@ -10,7 +10,7 @@ export function BitCounter({ spentBits, budgetBits }: { spentBits: number; budge
         {formatBits(Math.round(budgetBits * 1000))} bits
       </p>
       <p className={styles.note}>
-        a 40-row sample is read by NEAR AI&apos;s TEE model (see <a href="/#trust">trust table</a>)
+        a 40-row sample is read by NEAR AI&apos;s TEE model (see <a href="/trust#trust-table">trust table</a>)
       </p>
     </div>
   );

@@ -5,13 +5,15 @@ import { Announcer } from "../../components/Announcer.tsx";
 import { Countdown } from "../../components/Countdown.tsx";
 import { ErrorBox } from "../../components/ErrorBox.tsx";
 import { HashTriple } from "../../components/HashTriple.tsx";
+import { Machine, type MachinePhase, type MachineVerdict } from "../../components/Machine.tsx";
+import Stepper, { Step as RailStep } from "../../components/reactbits/Stepper.tsx";
 import { MeaningTiles } from "../../components/MeaningTiles.tsx";
 import { StepList, type Step, type StepState } from "../../components/StepList.tsx";
 import { TxLink } from "../../components/TxLink.tsx";
 import form from "../../components/form.module.css";
 import { stateLine } from "../../lib/format.ts";
-import { RECORDED_RUN_PATH } from "../../lib/links.ts";
-import { realDeps, runTry, TRY_STEPS, TryError, type RefundedRun, type StepInfo, type TryConfig, type TryCriteria, type TryResult, type TryStep } from "../../lib/try/tryFlow.ts";
+import { RECORDED_RUN_PATH, TRUST_PATH } from "../../lib/links.ts";
+import { DATASETS, realDeps, runTry, TRY_STEPS, TryError, type RefundedRun, type StepInfo, type TryConfig, type TryCriteria, type TryResult, type TryStep } from "../../lib/try/tryFlow.ts";
 import styles from "./try.module.css";
 
 const LABELS: Record<TryStep, string> = {
@@ -24,14 +26,52 @@ const LABELS: Record<TryStep, string> = {
   decrypt: "Download the file and check it is the same one",
 };
 
+/** The seven steps as the rail names them. */
+const RAIL: Record<TryStep, string> = { account: "Account", mint: "Test dollars", list: "List", eval: "Pay", result: "Verdict", buy: "Buy", decrypt: "Decrypt" };
+
 type Tx = { step: TryStep; hash: string };
+type States = Record<TryStep, StepInfo["state"] | "todo">;
+
+const started = (s: StepInfo["state"] | "todo") => s !== "todo";
+
+/**
+ * The machine's phase from the real run's steps: account, test dollars, listing and waiting to pay → Lock; the inspection paid and
+ * running in sealed hardware → Sample; the verdict → Verdict; buying or walking away → Decide. The Sample picture starts only once the
+ * inspection is paid, so a run that waits for a slow queue never looks like it is sampling.
+ */
+export function machinePhase(st: States): MachinePhase {
+  if (st.result === "done") return started(st.buy) ? 4 : 3;
+  if (st.eval === "done" || started(st.result)) return 2;
+  if (started(st.account) || started(st.mint) || started(st.list)) return 1;
+  return 0;
+}
+
+/** The verdict as the run's own result step reported it ("BUY · fit 5 · novelty 4"). */
+function parseVerdict(detail: string | undefined): MachineVerdict | null {
+  const m = detail ? /^(BUY|PASS)(?: · fit (\d) · novelty (\d))?/.exec(detail) : null;
+  return m ? { word: m[1] as "BUY" | "PASS", fit: m[2] ? Number(m[2]) : undefined, novelty: m[3] ? Number(m[3]) : undefined } : null;
+}
+
+/** The first rows of the decrypted file, first three columns: the face the file card dissolves into once the fingerprints match. */
+function Preview({ bytes, name }: { bytes: Uint8Array; name: string }) {
+  const lines = new TextDecoder().decode(bytes.subarray(0, 4096)).split(/\r?\n/).filter(Boolean).slice(0, 5);
+  const cells = lines.map((l) => l.split(",").slice(0, 3));
+  return (
+    <>
+      <div className={styles.previewHead}><span className="mono">{name}</span><span className={styles.previewTag}>decrypted · match ✓</span></div>
+      <table className={styles.preview}>
+        <tbody>{cells.map((r, i) => <tr key={i}>{r.map((c, j) => (i === 0 ? <th key={j} scope="col">{c}</th> : <td key={j}>{c}</td>))}</tr>)}</tbody>
+      </table>
+    </>
+  );
+}
 
 const NEXT: { scene: TryCriteria | null; href: string; title: string; text: string }[] = [
   { scene: "demo", href: "/try?criteria=demo", title: "Run the PASS scene", text: "The unlock schedule does not fit the buyer's need: watch it say PASS." },
   { scene: "demo-buy", href: "/try?criteria=demo-buy", title: "Run the BUY scene", text: "Wallet labels that fit: it says BUY, buys and checks the file." },
   { scene: "print-row-1", href: "/try?criteria=print-row-1", title: "Ask it to print row 1", text: "A buyer tries to make the AI read out data. The answer is still one of the 51 verdicts." },
   { scene: null, href: "/verify", title: "Check the recorded proof", text: "Your fresh run is not in the recorded evidence; its transactions are above." },
-  { scene: null, href: "/#trust", title: "Who sees what", text: "What each part can see, and the limits, in plain words." },
+  { scene: null, href: TRUST_PATH, title: "Who sees what", text: "What each part can see, and the limits, in plain words." },
 ];
 
 /** The two ways on after a run that did not finish: run it again here, or watch a recorded run that finished. */
@@ -64,7 +104,7 @@ function headline(r: TryResult, scene: TryCriteria): string {
 
 export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCriteria; config: TryConfig; evidence: unknown; criteria: Record<string, unknown> }) {
   const deps = useMemo(() => realDeps({ evidence, criteria }), [evidence, criteria]);
-  const [states, setStates] = useState<Record<TryStep, StepInfo["state"] | "todo">>(() => Object.fromEntries(TRY_STEPS.map((s) => [s, "todo"])) as never);
+  const [states, setStates] = useState<States>(() => Object.fromEntries(TRY_STEPS.map((s) => [s, "todo"])) as never);
   const [details, setDetails] = useState<Partial<Record<TryStep, string>>>({});
   const [txs, setTxs] = useState<Tx[]>([]);
   const [running, setRunning] = useState(false);
@@ -116,6 +156,11 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
   const finished = TRY_STEPS.filter((s) => states[s] === "done" || states[s] === "skipped").length;
   const stepNo = Math.min(TRY_STEPS.length, finished + (running ? 1 : 0));
   const doing = TRY_STEPS.find((s) => states[s] === "doing");
+  const phase = machinePhase(states);
+  const verdict = states.result === "done" ? (result ? { word: result.state.verdict, fit: result.state.fit, novelty: result.state.novelty } : parseVerdict(details.result)) : null;
+  // The rail sits on the step in progress, or past the last one when the run finished.
+  const firstOpen = TRY_STEPS.findIndex((s) => states[s] !== "done" && states[s] !== "skipped");
+  const railStep = firstOpen === -1 ? TRY_STEPS.length + 1 : firstOpen + 1;
   // Step changes, the result and a failure are read out through the one always-mounted live region.
   const announce = result ? headline(result, scene) : calm ? "The run ended without a verdict, as designed. What happened and the next steps are below." : error ? "The run stopped. The reason and the next steps are below." : running && doing ? `Step ${stepNo} of ${TRY_STEPS.length}: ${LABELS[doing]}` : "";
 
@@ -137,20 +182,39 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
           </p>
           <Link className={styles.recorded} href={RECORDED_RUN_PATH}>Or watch a recorded run</Link>
         </div>
-        <p className={styles.runNote}>
-          Each paid step runs Arrow&apos;s program in sealed hardware through OutLayer&apos;s shared testnet queue. When that queue is slow, the
-          program does not answer late; the contract refunds the payment on its own. This page checks the queue before each payment, waits
-          while it is slow, and pays a refunded step once more.
-        </p>
 
         <Announcer text={announce} />
-        <StepList steps={steps} />
+        <Machine
+          mode="live"
+          label="This run: the file, the sealed hardware, the verdict and the choice, driven by the run's own steps."
+          fileName={DATASETS[scene].file}
+          phase={phase}
+          verdict={verdict}
+          caption={verdict ? "this run" : running ? "running" : "waiting"}
+          decided={states.buy === "doing" || states.buy === "done" ? "buy" : states.result === "done" && states.buy === "skipped" ? "walk" : null}
+          unlocked={result?.file && result.hashes?.match ? <Preview bytes={result.file.bytes} name={DATASETS[scene].file} /> : null}
+        />
+        <div className={styles.rail}>
+          <Stepper step={railStep} label="Steps of the run">
+            {TRY_STEPS.map((s) => <RailStep key={s} title={RAIL[s]} />)}
+          </Stepper>
+          {doing ? (
+            <p className={styles.now}>
+              <span className="mono">{stepNo}/{TRY_STEPS.length}</span> {LABELS[doing]}
+              {details[doing] ? <span className={styles.nowDetail}> · {details[doing]}</span> : null}
+            </p>
+          ) : null}
+        </div>
         {running && doing && details[doing]?.startsWith("OutLayer's shared testnet queue is slow") ? (
           <p className={styles.waitNote}>
             This page pays as soon as the queue is quick again; Cancel stops it. Meanwhile:{" "}
             <a href={RECORDED_RUN_PATH} target="_blank" rel="noopener noreferrer">watch the recorded run<span className="sr-only"> (opens in a new tab)</span></a>.
           </p>
         ) : null}
+        <details className={styles.log} open={!!error}>
+          <summary>Step log</summary>
+          <StepList steps={steps} />
+        </details>
         {txs.length > 0 ? (
           <ul id="try-txs" className={styles.txs} aria-label="Transactions">
             {txs.map((t) => (
@@ -241,33 +305,38 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
         </section>
       ) : null}
 
-      <div className={styles.while}>
-        <div>
-          <h3>{running ? "What is happening right now." : "What happens during a run."}</h3>
+      <div className={styles.folds}>
+        <details className={styles.fold}>
+          <summary>{running ? "What is happening right now" : "What happens during a run"}</summary>
           <p>
             Your fee goes to the market, which starts Arrow&apos;s program in sealed hardware; the program asks an AI about a sample and writes
             back a short answer.
           </p>
-          <details className={styles.more}>
-            <summary>In detail</summary>
-            <p>
+          <p>
             The payment reaches the market contract, which asks OutLayer to run Arrow&apos;s program inside an Intel TDX enclave. The program
             downloads the encrypted file, checks its fingerprint against the chain, decrypts it, samples 40 rows and sends them with the
             buyer&apos;s criteria to NEAR AI&apos;s model, which runs in its own sealed hardware. The verdict comes back and the contract writes
             it on chain, sealed to the buyer&apos;s key.
-            </p>
-          </details>
-        </div>
-        <div>
-          <h3>Why the verdict is so small.</h3>
+          </p>
+        </details>
+        <details className={styles.fold}>
+          <summary>Why the verdict is so small</summary>
           <p>
             To keep what an answer can carry about the data small. The program can only write one of 51 fixed answers: BUY or PASS, fit 1–5, novelty 1–5,
             no free text. Measured as information (one bit is one yes/no answer), that is at most 5.67 bits per
             inspection, and at most 283.65 bits over a listing&apos;s 50 inspections. A failed run shows on chain as one of two more outcomes (an
             error output, or no output). Run time and instruction count are public and are not counted in that figure.{" "}
-            <a href="/#trust">Who sees what</a>.
+            <Link href={TRUST_PATH}>Who sees what</Link>.
           </p>
-        </div>
+        </details>
+        <details className={styles.fold}>
+          <summary>When the queue is slow</summary>
+          <p>
+            Each paid step runs Arrow&apos;s program in sealed hardware through OutLayer&apos;s shared testnet queue. When that queue is slow, the
+            program does not answer late; the contract refunds the payment on its own. This page checks the queue before each payment, waits
+            while it is slow, and pays a refunded step once more.
+          </p>
+        </details>
       </div>
 
       {result ? (

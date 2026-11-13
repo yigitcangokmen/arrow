@@ -56,3 +56,38 @@ a.scene:hover { border-color: var(--text); }
 .refunds { margin: 0 0 var(--sp-2); padding-left: 20px; font-size: 14.5px; color: var(--muted); display: grid; gap: 4px; }
 @media (max-width: 720px) { .recorded { margin-left: 0; } }
 .waitNote { margin: var(--sp-2) 0 0; padding: var(--sp-2) var(--sp-3); border-left: 3px solid var(--notproven); background: var(--sunken); border-radius: var(--r-sm); font-size: 14px; }
+
+/* UI2: page head, the live machine's rail and the folds */
+.head { display: grid; gap: var(--sp-3); margin: var(--sp-4) 0 var(--sp-5); }
+.eyebrow { margin: 0; font-family: var(--font-mono); font-size: var(--t-label); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.eyebrow::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 10px; vertical-align: 1px; background: var(--accent); }
+.h1 { margin: 0; font-size: clamp(40px, 5.2vw, 72px); line-height: 0.98; letter-spacing: -0.035em; }
+.lede { margin: 0; max-width: 52ch; font-size: var(--t-lede); line-height: 1.45; color: var(--muted); }
+.rail { margin-top: var(--sp-3); }
+.now { margin: var(--sp-3) 0 0; font-size: 15px; overflow-wrap: anywhere; }
+.now :global(.mono) { color: var(--muted); margin-right: 6px; }
+.nowDetail { color: var(--muted); }
+.log { margin-top: var(--sp-3); font-size: 14px; }
+.log > summary { color: var(--muted); padding: 4px 0; }
+.folds { margin-top: var(--sp-5); display: grid; }
+.fold { border-top: 1px solid var(--border); padding: var(--sp-3) 0; font-size: 14.5px; color: var(--muted); }
+.fold:last-child { border-bottom: 1px solid var(--border); }
+.fold > summary { color: var(--text); font-weight: 500; }
+.fold p { margin: var(--sp-2) 0 0; max-width: 80ch; }
+.fold b { color: var(--text); }
+.previewHead { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; }
+.previewHead .mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.previewTag { flex: none; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--proven); }
+.preview { width: 100%; border-collapse: collapse; table-layout: fixed; font-family: var(--font-mono); font-size: 11px; align-self: start; }
+.preview th, .preview td { padding: 5px 4px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.preview th { color: var(--muted); font-weight: 500; }
+@media (max-width: 720px) { .run { padding: var(--sp-3); } }
+.folds + .folds { margin-top: 0; }
+.folds + .folds .fold:first-child { border-top: 0; }
+
+/* the testnet RPC is rate-limiting: a calm waiting state, not an error */
+.busy { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-1); padding: var(--sp-5) var(--sp-6); color: var(--muted); font-size: 15px; }
+.busy p { margin: 0 0 var(--sp-3); max-width: 64ch; }
+.busyTitle { color: var(--text); font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+.busyTitle::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--notproven); }
+.busyActs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-4); margin: var(--sp-4) 0 0 !important; }

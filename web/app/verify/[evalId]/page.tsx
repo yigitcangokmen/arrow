@@ -149,7 +149,7 @@ async function EvalBody({ id, net }: { id: number; net: "testnet" | "mainnet" })
                 : "Not every required row could be PROVEN for this inspection. NOT PROVEN means this page could not show it, for example because a record was missing; each row below says why."}
             </span>
             <span className={styles.cli}>{summary.line}</span>
-            {summary.failure ? <span className={styles.fail}>{summary.failure}</span> : null}
+            {summary.failure ? <span className={summary.busy ? styles.busy : styles.fail}>{summary.failure}</span> : null}
           </div>
           <VerifyRows rows={report.rows} after={{ N1: <NearAiRow urlPrefix={NEAR_AI_URL} /> }} />
           <script id="verify-rows" type="application/json" dangerouslySetInnerHTML={{ __html: reportJson(report) }} />

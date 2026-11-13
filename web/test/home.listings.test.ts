@@ -48,4 +48,16 @@ describe("groupHomeListings", () => {
     expect(featured.map((v) => v.id)).toEqual([13, 14]);
     expect(more.map((v) => v.id)).toEqual([1, 15, 16, 17]);
   });
+  it("shows one card per demo title: a later relist of the same file by a test run goes into more", async () => {
+    const { groupHomeListings, markStale } = await import("../lib/server/listingsPage.ts");
+    const t = ["arrowhq.testnet"];
+    const views = markStale([
+      toListingView(base({ id: 27, seller: "e2e-seller.arrowhq.testnet", title: "[synthetic] NEAR DeFi wallet labels (1,000 rows)", program_hash_at_list: "aa" }), t),
+      toListingView(base({ id: 14, seller: "e2e-seller.arrowhq.testnet", title: "[synthetic] NEAR DeFi wallet labels (1,000 rows)", program_hash_at_list: "aa" }), t),
+      toListingView(base({ id: 13, seller: "e2e-seller.arrowhq.testnet", title: "[synthetic] Q1 2027 token unlock schedule (412 rows)", program_hash_at_list: "aa" }), t),
+    ], "aa");
+    const { featured, more } = groupHomeListings(views, t);
+    expect(featured.map((v) => v.id)).toEqual([14, 13]);
+    expect(more.map((v) => v.id)).toEqual([27]);
+  });
 });

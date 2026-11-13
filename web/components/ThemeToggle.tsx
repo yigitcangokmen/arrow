@@ -7,6 +7,9 @@ const ORDER: Pref[] = ["system", "light", "dark"];
 const KEY = "arrow-theme";
 
 function stored(): Pref {
+  // The page may have been opened with ?theme=: the attribute the head script set is the theme in use.
+  const attr = document.documentElement.getAttribute("data-theme");
+  if (attr === "light" || attr === "dark") return attr;
   try {
     const v = localStorage.getItem(KEY);
     return v === "light" || v === "dark" ? v : "system";

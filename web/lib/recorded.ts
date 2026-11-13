@@ -2,7 +2,7 @@
 // transaction of each step from the evidence file and the times and fingerprints read from the chain.
 import { EvidenceFile, type Eval, type Listing, type Purchase } from "@arrow/sdk/schemas";
 import { CONTRACTS } from "./config.ts";
-import { RECORDED_RUN } from "./links.ts";
+import { RECORDED_REFUND, RECORDED_RUN } from "./links.ts";
 
 export interface ReplayStep {
   label: string;
@@ -70,4 +70,11 @@ export function recordedRun(evidence: unknown, chain: { listing: Listing | null;
     },
   ];
   return { steps, verdict, fingerprints, match, paidAt: ev?.timestamp_utc ?? null };
+}
+
+/** The refund transaction of the recorded failed inspection (RECORDED_REFUND) from the evidence file, or null. */
+export function recordedRefundTx(evidence: unknown): string | null {
+  const parsed = EvidenceFile.safeParse(evidence);
+  const runs = parsed.success && parsed.data.contract === CONTRACTS.testnet ? parsed.data.runs : [];
+  return runs.find((r) => r.kind === "refund" && Number(r.eval_id) === RECORDED_REFUND.evalId)?.tx ?? null;
 }

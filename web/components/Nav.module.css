@@ -1,4 +1,8 @@
 .header { position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--border); background: var(--bg); }
+/* the blur costs a repaint per scroll frame: only on wide screens with a pointer, opaque on phones */
+@media (hover: hover) and (min-width: 900px) {
+  .header { background: color-mix(in srgb, var(--bg) 88%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+}
 .nav { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--sp-6); height: 64px; display: flex; align-items: center; gap: var(--sp-5); }
 .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 18px; letter-spacing: -0.01em; color: var(--text); text-decoration: none; flex: none; }
 .links { list-style: none; margin: 0 0 0 var(--sp-2); padding: 0; display: flex; gap: var(--sp-5); }
@@ -8,11 +12,11 @@
 .sheet a[aria-current="page"] { font-weight: 600; }
 .right { margin-left: auto; display: flex; align-items: center; gap: var(--sp-3); }
 .chip { display: inline-flex; }
-.try { display: inline-flex; align-items: center; height: 40px; padding: 0 18px; border-radius: var(--r-sm); background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 15px; text-decoration: none; white-space: nowrap; }
+.try { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border-radius: var(--r-pill); background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 15px; text-decoration: none; white-space: nowrap; }
 .try:hover { text-decoration: underline; }
 .theme { display: inline-flex; }
 .menu { display: none; }
-.menu summary { list-style: none; display: inline-flex; align-items: center; height: 40px; padding: 0 12px; border: 1px solid var(--control-border); border-radius: var(--r-sm); font-size: 15px; color: var(--text); }
+.menu summary { list-style: none; display: inline-grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--control-border); border-radius: 50%; color: var(--text); }
 .menu summary::-webkit-details-marker { display: none; }
 .menu summary::before { content: none; }
 .sheet { position: absolute; left: 0; right: 0; top: 64px; background: var(--surface); border-bottom: 1px solid var(--border); padding: var(--sp-4) var(--gutter) var(--sp-5); display: grid; gap: var(--sp-4); justify-items: start; }
@@ -25,6 +29,4 @@
   .menu { display: block; }
   .right { gap: var(--sp-2); }
 }
-@media (max-width: 360px) {
-  .chip { display: none; }
-}
+

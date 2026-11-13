@@ -1,0 +1,13 @@
+.path { position: relative; padding: 40px 0 4px; }
+.nodes { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.nodes li { display: grid; justify-items: center; gap: 6px; text-align: center; font-size: 14px; color: var(--muted); }
+.nodes a { color: var(--text); }
+.nodes b { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); font-weight: 600; }
+.dot { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--control-border); background: var(--surface); color: var(--text); }
+.x { border-color: var(--danger); color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, var(--surface)); }
+.ok { border-color: var(--proven); color: var(--proven); background: color-mix(in srgb, var(--proven) 10%, var(--surface)); }
+.line { position: absolute; top: 64px; left: 16.6%; right: 16.6%; height: 2px; background: repeating-linear-gradient(90deg, var(--control-border) 0 6px, transparent 6px 12px); }
+.arc { position: absolute; top: 18px; left: 16.6%; right: 16.6%; height: 46px; border: 2px dashed var(--proven); border-bottom: 0; border-radius: 160px 160px 0 0; clip-path: inset(0 0 0 100%); }
+.arc::after { content: ""; position: absolute; left: -7px; bottom: -2px; border-top: 9px solid var(--proven); border-left: 6px solid transparent; border-right: 6px solid transparent; }
+.path[data-in] .arc { clip-path: inset(0 0 0 0); transition: clip-path 0.6s ease-out; }
+@media (prefers-reduced-motion: reduce) { .arc { clip-path: none; } }

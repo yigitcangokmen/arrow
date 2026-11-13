@@ -8,10 +8,11 @@ import { evidence, releaseSha256, teamAccounts } from "../../generated/data.ts";
 import { parseNetwork } from "../../lib/config.ts";
 import { withNetwork } from "../../lib/links.ts";
 import { ttlCache } from "../../lib/server/listingsCache.ts";
-import { loadReport, rememberSummary } from "../../lib/server/verifyReport.ts";
+import { loadReport, parseEvidence, rememberSummary } from "../../lib/server/verifyReport.ts";
 import { evalIdsOf, PLAIN, reportJson, summaryView } from "../../lib/verifyView.ts";
 import { RECORDED_EVAL } from "../../lib/links.ts";
 import { PageHead } from "../../components/Section.tsx";
+import { FlagGrid, flagCounts } from "../../components/FlagGrid.tsx";
 import { NearAiRow } from "./NearAiRow.tsx";
 import { TryNext, VerifyRows } from "./VerifyView.tsx";
 import styles from "./verify.module.css";
@@ -33,19 +34,67 @@ function observedVerdict(observed: unknown): string | null {
   return m ? m[1]! : null;
 }
 
+/** The recorded inspections of this network's evidence file, with the verdict the recording observed. No chain call: it renders at once. */
+function recordedEvals(net: "testnet" | "mainnet"): { id: number; verdict: string | null }[] {
+  let ev: ReturnType<typeof parseEvidence> = null;
+  try {
+    ev = parseEvidence(evidence[net]);
+  } catch {
+    return [];
+  }
+  return evalIdsOf(ev).map((id) => ({
+    id,
+    verdict: observedVerdict(ev?.runs.filter((r) => r.kind === "eval" && Number(r.eval_id) === id && r.contract === ev?.contract).at(-1)?.observed),
+  }));
+}
+
+/**
+ * The last report in which every row could be checked, per network, with when it ran. When the RPC is too busy for a fresh run, the
+ * page shows this one, dated, next to the fresh partial result instead of only the partial one. In memory: a cold server has none.
+ */
+const lastFull = new Map<string, { report: Report; at: Date }>();
+
 /**
  * The heading, the explanation and the network switch render at once; the rows stream in when the engine is done (about 10 to
  * 90 seconds on a cold server), so nobody looks at an empty page while the chain is read.
  */
 export default async function Verify({ searchParams }: { searchParams: Promise<{ network?: string }> }) {
   const net = parseNetwork((await searchParams).network);
+  const flags = flagCounts();
   return (
     <div data-ready="true">
-      <PageHead eyebrow="Verify" title="Check the claims against the chain.">
-        Each row below is one promise, checked against public blockchain data by the same code you can run yourself. A row is PROVEN only
-        when an independent check passed; NOT PROVEN is never counted as a pass. Each row opens with a plain sentence, with the engine&apos;s
-        own wording under it. Run it yourself: <span className={`mono ${styles.nowrap}`}>npm run verify -- --network {net}</span>
+      <PageHead eyebrow="Verify" title="Checked from the chain.">
+        Each row is a promise; NOT PROVEN never counts as passed.
       </PageHead>
+      <details className={styles.how}>
+        <summary>How to read this</summary>
+        <p>
+          Each row below is one promise, checked against public blockchain data by the same code you can run yourself. A row is PROVEN only
+          when an independent check passed; NOT PROVEN is never counted as a pass. Each row opens with a plain sentence, with the engine&apos;s
+          own wording under it. Run it yourself: <span className={`mono ${styles.nowrap}`}>npm run verify -- --network {net}</span>
+        </p>
+      </details>
+      <div className={styles.flags}>
+        <FlagGrid link />
+        <p className={styles.note}>
+          Trust table: {flags.risky} RISKY · {flags.notProven} NOT PROVEN · {flags.todo} TODO of {flags.total} rows. <Link href="/trust#trust-table">Open it →</Link>
+        </p>
+      </div>
+      {(() => {
+        const evals = recordedEvals(net);
+        return evals.length > 0 ? (
+          <section className={styles.oneAt} aria-labelledby="g-evals">
+            <h2 id="g-evals" className={styles.oneTitle}>Check one inspection</h2>
+            <ul className={styles.evals}>
+              {evals.map(({ id, verdict }) => (
+                <li key={id}>
+                  <Link href={withNetwork(`/verify/${id}`, net)}>#{id}{verdict ? <span className={styles.evalVerdict}>{"\u00a0·\u00a0"}{verdict}</span> : null}</Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null;
+      })()}
       <ul className={styles.switch} aria-label="Network">
         {(["testnet", "mainnet"] as const).map((n) => (
           <li key={n}>{n === net ? <span className={styles.current}>{n}</span> : <Link href={withNetwork("/verify", n)}>{n}</Link>}</li>
@@ -64,10 +113,10 @@ function Pending({ net }: { net: "testnet" | "mainnet" }) {
   return (
     <div className={styles.pending} aria-busy="true">
       <p className={styles.pendingLine} role="status">
-        <span className={styles.spinner} aria-hidden="true" /> Checking every claim against {net} now. This reads dozens of transactions and
-        can take up to three minutes when the server is cold; later visits are quick.
+        <span className={styles.spinner} aria-hidden="true" /> Checking every promise against {net} now: up to three minutes on a cold server.
+        {recordedEvals(net).length > 0 ? " One inspection above opens in seconds." : ""}
       </p>
-      <p className={styles.note}>Among the things it checks:</p>
+      <p className={styles.note}>The required checks:</p>
       <ul className={styles.pendingList}>
         {required.map((id) => (
           <li key={id}><span className="mono">{id}</span> {PLAIN[id]}</li>
@@ -75,7 +124,7 @@ function Pending({ net }: { net: "testnet" | "mainnet" }) {
       </ul>
       {net === "testnet" ? (
         <p className={styles.note}>
-          While you wait: <Link href={`/verify/${RECORDED_EVAL}`}>one recorded inspection, checked on its own →</Link>
+          While you wait: <Link href={`/verify/${RECORDED_EVAL}`}>the recorded run, inspection #{RECORDED_EVAL} →</Link>
         </p>
       ) : null}
     </div>
@@ -85,22 +134,30 @@ function Pending({ net }: { net: "testnet" | "mainnet" }) {
 async function VerifyLive({ net }: { net: "testnet" | "mainnet" }) {
   let report: Report | null = null;
   let failure: string | null = null;
-  let evals: { id: number; verdict: string | null }[] = [];
   let runCount = 0;
   try {
     const raw = evidence[net];
     const out = await reports(net, () => loadReport({ network: net, evidence: raw, releaseSha256, teamAccounts }));
     report = out.report;
     runCount = out.evidence?.runs.length ?? 0;
-    evals = evalIdsOf(out.evidence).map((id) => ({
-      id,
-      verdict: observedVerdict(out.evidence?.runs.filter((r) => r.kind === "eval" && Number(r.eval_id) === id && r.contract === out.evidence?.contract).at(-1)?.observed),
-    }));
   } catch (e) {
     failure = e instanceof Error ? e.message.slice(0, 300) : "unknown error";
   }
 
-  const summary = report ? summaryView(report) : null;
+  let summary = report ? summaryView(report) : null;
+  // A run in which no row failed to reach the RPC is kept; a busy run shows the last such run instead, dated, and says so.
+  let fresh: { line: string; failure: string | null } | null = null;
+  let asOf: Date | null = null;
+  if (report && summary && !summary.busy) lastFull.set(net, { report, at: new Date() });
+  else if (report && summary?.busy) {
+    const last = lastFull.get(net);
+    if (last) {
+      fresh = { line: summary.line, failure: summary.failure };
+      report = last.report;
+      summary = summaryView(last.report);
+      asOf = last.at;
+    }
+  }
   // Only a passing line is quoted on the home page; a partial run (an RPC hiccup, say) is shown here and not repeated there.
   if (summary?.passed) rememberSummary(net, summary.line);
   if (failure) {
@@ -120,19 +177,22 @@ async function VerifyLive({ net }: { net: "testnet" | "mainnet" }) {
   return (
     <>
       <div className={styles.summary} role="status">
+        {asOf ? (
+          <p className={styles.asOf}>
+            Last full check at {asOf.toISOString().slice(11, 16)} UTC. The check just now could not reach the RPC ({fresh?.line}); reload in a minute to run it again.
+          </p>
+        ) : null}
         <p className={`${styles.verdictLine} ${summary.passed ? styles.ok : ""}`}>
           {summary.passed
             ? `All ${report.required.total} required checks passed.`
             : `${report.required.proven} of ${report.required.total} required checks passed right now.`}
         </p>
         <span className={styles.summaryPlain}>
-          {summary.passed
-            ? "Every required promise was checked against public blockchain data and holds. Below them are cross-checks, what this page cannot prove, and the known risks."
-            : "Not every required row could be PROVEN right now. Each row below says why."}
-          {net === "testnet" ? " R4 (cross-chain swaps), R6 (the lock) and R7 (listings before and after the lock) are mainnet-only rows; mainnet is not deployed yet." : null}
+          {summary.passed ? "Every required promise holds on public blockchain data." : "Not every required row could be PROVEN right now. Each row below says why."}
+          {net === "testnet" ? " R4, R6 and R7 are mainnet-only; mainnet is not deployed yet." : null}
         </span>
         <span className={styles.cli}>{summary.line}</span>
-        {summary.failure ? <span className={styles.fail}>{summary.failure}</span> : null}
+        {summary.failure ? <span className={summary.busy ? styles.busy : styles.fail}>{summary.failure}</span> : null}
         {report.preLock ? <Badge kind="pre-lock" /> : null}
         <Badge kind={net} />
       </div>
@@ -141,21 +201,7 @@ async function VerifyLive({ net }: { net: "testnet" | "mainnet" }) {
           <p>The evidence file for {net} has no runs, so the rows below cannot be PROVEN yet.</p>
         </EmptyState>
       ) : null}
-      <VerifyRows rows={report.rows} after={{ N1: <NearAiRow urlPrefix={NEAR_AI_URL} /> }} />
-      {evals.length > 0 ? (
-        <section className={styles.group} aria-labelledby="g-evals">
-          <p className={styles.eyebrow}>One at a time</p>
-          <h2 id="g-evals" className={styles.groupTitle}>Check one inspection.</h2>
-          <p className={styles.note}>Each opens that inspection&apos;s OutLayer attestation and verifies its Intel TDX quote in your browser. The verdict is what the recording script observed.</p>
-          <ul className={styles.evals}>
-            {evals.map(({ id, verdict }) => (
-              <li key={id}>
-                <Link href={withNetwork(`/verify/${id}`, net)}>inspection #{id}{verdict ? <span className={styles.evalVerdict}>{"\u00a0·\u00a0"}{verdict}</span> : null}</Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <VerifyRows rows={report.rows} after={{ N1: <NearAiRow urlPrefix={NEAR_AI_URL} /> }} fold />
       <TryNext />
       <script id="verify-rows" type="application/json" dangerouslySetInnerHTML={{ __html: reportJson(report) }} />
     </>

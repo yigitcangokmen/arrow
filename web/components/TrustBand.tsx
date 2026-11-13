@@ -22,6 +22,7 @@ export const LIMITS: { text: string; rows: string[] }[] = [
   { text: "The company that runs the sealed hardware, OutLayer, holds the keys, and the group that governs it could export them.", rows: ["OutLayer keystore DAO"] },
   { text: "OutLayer and NEAR Intents can change their own contracts, and OutLayer changed its mainnet contract this week.", rows: ["outlayer.near, intents.near contracts", "OutLayer on mainnet"] },
   { text: "Paying from Base goes through 1Click and a bridge run by Intents Technology, which hold the money for a short time during the swap.", rows: ["1Click and the PoA bridge (Intents Technology)"] },
+  { text: "Nothing on chain checks the hardware report of each run; the verify page checks it in your browser.", rows: ["Evaluation"] },
   { text: "The verdict can be wrong. Fixed rules check the structure, but whether a 40-row sample fits what you asked is the AI's judgement.", rows: ["Decision correctness"] },
   { text: "Anyone can see which wallet inspected which listing, when, and what it paid. Any site that gets the same wallet signature can open that wallet's verdicts.", rows: ["Buyer viewing key"] },
   { text: "A buyer can resell a file they bought. And if the key for a purchase is published too late, the buyer gets a refund and can still open the file.", rows: ["After purchase", "Time guard"] },
@@ -33,7 +34,6 @@ export const LIMITS: { text: string; rows: string[] }[] = [
 export const MORE: { text: string; rows: string[] }[] = [
   { text: "Every program key comes from one master key that OutLayer shares across programs.", rows: ["Program key / PROTECTED_MASTER"] },
   { text: "The rule that ties the key to Arrow's exact program is set, but no transaction has tested it.", rows: ["Program key / PROTECTED_MASTER"] },
-  { text: "Nothing on chain checks the hardware report of each run; the verify page checks it in your browser.", rows: ["Evaluation"] },
   { text: "The test of the AI's judgement on many datasets has not run, and instructions hidden inside well-formed data are an open risk.", rows: ["Decision correctness"] },
   { text: "A buyer can use up a listing's limit on inspections with runs that fail.", rows: ["Leak budget"] },
   { text: "The time limits use the clock of the machine that runs the sealed hardware.", rows: ["Time guard"] },
@@ -59,16 +59,16 @@ function Src({ rows }: { rows: string[] }) {
   );
 }
 
-/** "Who sees what": the dark band on the home page (`id="trust"`), with the full trust table one click away at its foot. */
+/** The dark band on /trust (`id="trust"`): every flagged row in plain words, with the full trust table one click away at its foot. */
 export function TrustBand({ verifyLine }: { verifyLine?: string | null }) {
   const c = flagCounts();
   return (
     <section id="trust" aria-labelledby="trust-title" className={styles.ink}>
       <div className={styles.wrap}>
         <div className={styles.inkVars}>
-          <SectionHead eyebrow="Trust, in plain words" title="Who sees what." id="trust-title">
-            What you still have to trust, in plain words: every flagged row of the trust table is in a line below, the main ones first. Each
-            line links to its row in the full table at the bottom of this band, which is the source of truth.
+          <SectionHead eyebrow="In plain words" title="What you still trust." id="trust-title">
+            Every flagged row of the trust table is in a line below, the main ones first. Each line links to its row in the full table at the
+            bottom of this band, which is the source of truth.
           </SectionHead>
           <div className={styles.grid}>
             <dl className={styles.dl}>

@@ -53,8 +53,8 @@ button {
   cursor: pointer;
 }
 /* One disabled look everywhere: neutral fill, dashed edge, text kept above 4.5:1 (no opacity fade). */
-button:disabled, button[aria-disabled="true"] { background: var(--sunken); color: var(--muted); border: 1px dashed var(--control-border); cursor: not-allowed; }
-input:disabled, select:disabled, textarea:disabled { background: var(--sunken) !important; color: var(--muted) !important; border-style: dashed !important; cursor: not-allowed; }
+button:disabled, button[aria-disabled="true"] { background: var(--sunken); color: var(--muted); border: 1px solid var(--border); cursor: not-allowed; }
+input:disabled, select:disabled, textarea:disabled { background: var(--sunken) !important; color: var(--muted) !important; cursor: not-allowed; }
 
 /* One chevron for every disclosure on the site (the nav menu turns it off). */
 summary { cursor: pointer; list-style: none; }

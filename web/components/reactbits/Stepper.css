@@ -1,0 +1,161 @@
+/* React Bits Stepper styles (MIT + Commons Clause, (c) 2026 David Haz, see ./LICENSE.md), trimmed to the rail and mapped onto
+   Arrow's tokens. */
+.stepper {
+  --stepper-well: var(--sunken);
+  --stepper-tile: var(--surface);
+  --stepper-tile-edge: var(--border);
+  --stepper-ink: var(--text);
+  --stepper-muted: var(--muted);
+  --stepper-faint: var(--control-border);
+  --stepper-solid: var(--text);
+  --stepper-solid-ink: var(--bg);
+  --stepper-radius: 14px;
+  --stepper-tile-radius: 10px;
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--stepper-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stepper__track {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border-radius: var(--stepper-radius);
+  background: var(--stepper-well);
+}
+
+.stepper__item {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.stepper__glider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: var(--stepper-tile-radius);
+  background: var(--stepper-tile);
+  box-shadow: inset 0 0 0 1px var(--stepper-tile-edge), 0 2px 6px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stepper__segment {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+  height: 40px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--stepper-tile-radius);
+  background: none;
+  color: var(--stepper-muted);
+  font-family: inherit;
+}
+
+button.stepper__segment {
+  cursor: pointer;
+}
+
+.stepper__badge {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--stepper-faint);
+  color: var(--stepper-muted);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+
+.stepper__badge[data-status="active"] {
+  box-shadow: inset 0 0 0 1.5px var(--stepper-ink);
+  color: var(--stepper-ink);
+}
+
+.stepper__badge[data-status="complete"] {
+  background: var(--stepper-solid);
+  box-shadow: none;
+  color: var(--stepper-solid-ink);
+}
+
+.stepper__check {
+  display: grid;
+  place-items: center;
+}
+
+.stepper__text {
+  display: flex;
+  min-width: 0;
+}
+
+.stepper__title {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--stepper-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.stepper__title:not([data-status="upcoming"]) {
+  color: var(--stepper-ink);
+}
+
+@media (hover: hover) {
+  button.stepper__segment:hover {
+    background: color-mix(in srgb, var(--stepper-ink) 4%, transparent);
+  }
+}
+
+button.stepper__segment:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Arrow: on a phone the rail shows numbers and the active step's title (the last one once all are done); the other titles stay for screen readers. */
+@media (max-width: 520px) {
+  .stepper__item[aria-current="step"], .stepper__item[data-last-done] {
+    flex-grow: 2.6;
+  }
+  .stepper__item:not([aria-current="step"]):not([data-last-done]) .stepper__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .stepper__segment {
+    gap: 6px;
+    padding: 0 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepper__glider,
+  .stepper__badge,
+  .stepper__title {
+    transition: none !important;
+  }
+}

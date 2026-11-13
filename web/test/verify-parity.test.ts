@@ -66,7 +66,7 @@ describe("verify parity", () => {
   it("a fully proven world passes and shows no failure text", async () => {
     const w = buildWorld("testnet");
     const { report } = await loadReport({ network: "testnet", evidence: w.evidence, fetchImpl: fakeFetch(w), releaseSha256: w.releaseSha256 });
-    expect(summaryView(report!)).toEqual({ line: "verify: 5/5 REQUIRED PROVEN · exit 0", passed: true, failure: null });
+    expect(summaryView(report!)).toEqual({ line: "verify: 5/5 REQUIRED PROVEN · exit 0", passed: true, busy: false, failure: null });
   });
 
   it("without release/sha256.txt (before the freeze) R1 is NOT PROVEN and the line says so", async () => {

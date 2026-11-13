@@ -1,0 +1,132 @@
+/* The machine: one framed card with a soft top glow. Everything moves from one data-phase attribute (0 reset, 1 Lock, 2 Sample,
+   3 Verdict, 4 Decide). CSS and 2-D canvas only; under reduced motion every element shows its final state. */
+.machine {
+  --flap-size: clamp(36px, 4vw, 56px);
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--r-machine);
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  isolation: isolate;
+}
+.machine::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--glow); pointer-events: none; }
+
+.stage { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 16px; }
+@media (min-width: 900px) {
+  /* the verdict board is the focal point: about 1.3x the other two panels */
+  .stage { grid-template-columns: minmax(0, 0.95fr) 44px minmax(0, 1fr) 44px minmax(0, 1.3fr); align-items: stretch; gap: 0; padding: 24px; }
+  .wire { align-self: center; }
+}
+
+.card { position: relative; min-width: 0; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg); overflow: hidden; }
+
+/* the file */
+.file { display: grid; }
+.face { position: absolute; inset: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 10px; padding: 12px; }
+.file > .face { position: relative; inset: auto; }
+.pix { width: 100% !important; height: 100%; min-height: 200px; border-radius: 0; }
+.fileHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.fileName { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-family: var(--font-mono); font-size: 12px; font-weight: 500; }
+.fileText { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fileName svg { flex: none; }
+.tag { flex: none; padding: 1px 7px; border: 1px solid var(--border); border-radius: var(--r-pill); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: var(--surface); }
+.rowsWrap { position: relative; min-height: 132px; }
+.rows { position: absolute; inset: 0; width: 100%; height: 100%; display: block; color: var(--muted); transition: filter 0.6s ease, opacity 0.6s ease; }
+.machine:not([data-phase="0"]) .rows { filter: blur(1.2px); opacity: 0.75; }
+.lock {
+  position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; display: grid; place-items: center;
+  border-radius: 12px; background: var(--surface); border: 1px solid var(--border); color: var(--text); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  transform: scale(0.6); opacity: 0; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
+}
+.machine:not([data-phase="0"]) .lock { transform: none; opacity: 1; }
+
+/* wires between the parts (desktop only) */
+.wire { display: none; position: relative; height: 2px; }
+@media (min-width: 900px) { .wire { display: block; } }
+.wire::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, var(--control-border) 0 6px, transparent 6px 12px); opacity: 0.6; }
+.wire::after { content: ""; position: absolute; right: -1px; top: -4px; border-left: 7px solid var(--control-border); border-top: 5px solid transparent; border-bottom: 5px solid transparent; opacity: 0.6; }
+/* a few runs of the dash only: on /try the Sample phase can wait minutes for the queue, and the wire stays lit without repainting */
+.wire[data-on]::before { background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 12px); opacity: 1; animation: dash 1s linear 6; }
+.wire[data-on]::after { border-left-color: var(--accent); opacity: 1; }
+@keyframes dash { to { background-position: 12px 0; } }
+
+/* the sealed box */
+.box {
+  position: relative; min-width: 0; padding: 12px; border: 1px solid var(--control-border); border-radius: var(--r-md); background: var(--bg);
+}
+.box::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 6px; background: var(--hatch);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.boxHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; margin: 4px 6px 12px; }
+.ai { padding: 2px 8px; border-radius: var(--r-pill); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); white-space: nowrap; }
+.seal { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.cells { position: relative; overflow-x: clip; margin: 0 6px 6px; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 5px; }
+@media (min-width: 900px) { .cells { grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 7px; } }
+.cells i { aspect-ratio: 1; border-radius: 3px; background: var(--sunken); border: 1px solid var(--border); transition: background-color 0.25s ease, border-color 0.25s ease; }
+.machine[data-phase="2"] .cells i { background: color-mix(in srgb, var(--accent) 45%, var(--surface)); border-color: var(--accent); transition-delay: calc(1250ms + var(--i) * 42ms); }
+/* checked: one neutral accent tint for BUY and PASS alike; only the board carries the verdict's colour */
+.machine[data-phase="3"] .cells i, .machine[data-phase="4"] .cells i { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); transition-delay: calc(var(--i) * 8ms); }
+.machine[data-instant] .cells i { transition: none; }
+/* the beam spans the grid and moves by transform only: its 36px band sits at the right edge, translated from left of the grid to past it */
+.beam {
+  position: absolute; z-index: 1; top: -8px; bottom: -8px; left: 0; width: 100%; opacity: 0; pointer-events: none; transform: translateX(calc(-100% - 4px));
+  background: linear-gradient(90deg, transparent calc(100% - 36px), var(--beam) calc(100% - 18px), transparent 100%);
+}
+.beam::after { content: ""; position: absolute; top: 0; bottom: 0; right: 17px; width: 2px; background: var(--accent); box-shadow: 0 0 12px 2px var(--beam); }
+.machine[data-phase="2"]:not([data-instant]) .beam { animation: sweep 1.4s cubic-bezier(0.4, 0, 0.6, 1) 1.2s 2 alternate both; }
+@keyframes sweep { 0% { transform: translateX(calc(-100% - 4px)); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateX(40px); opacity: 0; } }
+
+/* the sample chip: 40 tiny bars, no text */
+.chip {
+  position: absolute; z-index: 5; left: 0; top: 0; width: 34px; height: 26px; border-radius: 6px; opacity: 0; pointer-events: none;
+  background: repeating-linear-gradient(180deg, var(--bg) 0 1px, transparent 1px 3px) border-box, var(--text);
+  border: 3px solid var(--text);
+  transition: transform 1.2s cubic-bezier(0.3, 0.7, 0.2, 1), opacity 0.3s ease;
+}
+
+/* the verdict card */
+.verdict { grid-column: 1 / -1; display: grid; align-content: center; gap: 14px; padding: 18px 20px; background: var(--bg); isolation: isolate; }
+/* a soft glow behind the board, in the verdict's colour once it is in */
+.verdict::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.6s ease; background: radial-gradient(70% 60% at 30% 30%, color-mix(in srgb, var(--glow-c, var(--accent)) 16%, transparent), transparent 70%); }
+.machine[data-phase="3"] .verdict::before, .machine[data-phase="4"] .verdict::before { opacity: 1; }
+.machine[data-verdict="BUY"] .verdict { --glow-c: var(--proven); }
+.machine[data-verdict="PASS"] .verdict { --glow-c: var(--notproven); }
+.of { margin-left: -4px; font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+@media (min-width: 900px) { .verdict { grid-column: auto; } }
+.flap { min-height: calc(var(--flap-size) * 1.08); }
+.scores { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.score { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--muted); }
+.caption { margin: 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); min-height: 1.5em; }
+.caption a { color: inherit; text-decoration: underline; text-decoration-color: var(--control-border); text-underline-offset: 3px; }
+.caption a:hover { color: var(--text); text-decoration-color: currentColor; }
+/* the choice is a status, not a control: two small chips, the chosen one filled with a tick */
+.decide { display: flex; flex-wrap: wrap; gap: 6px; }
+.decide span {
+  display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 11px; white-space: nowrap; border-radius: var(--r-pill);
+  color: var(--muted); font-size: 13px; font-weight: 500; background: color-mix(in srgb, var(--sunken) 70%, transparent);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.decide small { font-family: var(--font-mono); font-weight: 500; font-size: 12px; opacity: 0.8; }
+.tick { display: none; }
+.machine[data-decided="buy"] .buy, .machine[data-decided="walk"] .walk { background: var(--text); color: var(--bg); font-weight: 600; }
+.machine[data-decided="buy"] .buy .tick, .machine[data-decided="walk"] .walk .tick { display: block; }
+
+/* a jump back to the start (a new pass) or to a final frame swaps badge and chip styles at once, with no fade in between */
+.machine[data-instant] .decide span, .machine[data-instant] :global(.stepper__badge), .machine[data-instant] .verdict::before { transition: none; }
+
+/* the rail */
+.rail { border-top: 1px solid var(--border); padding: 10px; background: color-mix(in srgb, var(--sunken) 50%, var(--surface)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .chip, .beam { display: none; }
+  .wire[data-on]::before { animation: none; }
+}
+@media (max-width: 600px) {
+  .fileHead { flex-wrap: wrap; row-gap: 6px; }
+  .fileName { flex: 1 1 100%; align-items: flex-start; }
+  .fileText { white-space: normal; overflow-wrap: anywhere; }
+  .boxHead { margin: 2px 2px 10px; }
+  .ai { white-space: normal; font-size: 9.5px; letter-spacing: 0.04em; padding: 2px 6px; }
+}

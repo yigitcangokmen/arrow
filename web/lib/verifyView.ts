@@ -1,6 +1,7 @@
 // What /verify shows, derived from the one report the sdk engine produces (the CLI prints the same rows).
 // Pure: no fetch, no generated data. The page text never decides a label; it only groups and prints them.
 import { formatReport, type Report, type Row } from "@arrow/sdk/verify";
+import { rpcBusy } from "./rpcBusy.ts";
 
 /** The CLI's last line, character for character: `verify: 5/5 REQUIRED PROVEN · exit 0`. */
 export const summaryLine = (r: Report): string => formatReport(r).at(-1) ?? "";
@@ -11,15 +12,26 @@ export interface SummaryView {
   passed: boolean;
   /** Printed next to the line when it did not pass. NOT PROVEN is never counted as a pass. */
   failure: string | null;
+  /** Every REQUIRED row that is not PROVEN failed only because the RPC did not answer: the page says "could not check", not FAIL. */
+  busy: boolean;
 }
 
 export function summaryView(r: Report): SummaryView {
   const missing = r.required.total - r.required.proven;
   const passed = r.exitCode === 0;
+  const open = r.rows.filter((row) => row.required && row.label !== "PROVEN");
+  const busy = !passed && open.length > 0 && open.every((row) => rpcBusy(row.detail));
   return {
     line: summaryLine(r),
     passed,
-    failure: passed ? null : r.required.total === 0 ? "FAIL: no REQUIRED row ran" : `FAIL: ${missing} of ${r.required.total} REQUIRED rows are not PROVEN`,
+    busy,
+    failure: passed
+      ? null
+      : r.required.total === 0
+        ? "FAIL: no REQUIRED row ran"
+        : busy
+          ? `Could not check ${missing} of ${r.required.total} REQUIRED rows right now: the RPC did not answer. Reload in a minute; until then they are not PROVEN.`
+          : `FAIL: ${missing} of ${r.required.total} REQUIRED rows are not PROVEN`,
   };
 }
 

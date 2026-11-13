@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { ArrowViews } from "@arrow/sdk/contract";
 import type { Listing } from "@arrow/sdk/schemas";
 import type { Metadata } from "next";
+import { EmptyState } from "../../../components/EmptyState.tsx";
 import { ErrorBox } from "../../../components/ErrorBox.tsx";
+import { RefreshSoon } from "../../../components/RefreshSoon.tsx";
 import { isTeamAccount } from "@arrow/sdk/team";
 import { teamAccounts } from "../../../generated/data.ts";
 import { blockersFor, marketStateFrom } from "../../../lib/blockers.ts";
@@ -11,7 +13,8 @@ import { CONTRACTS, parseNetwork } from "../../../lib/config.ts";
 import { toListingView } from "../../../lib/server/listingsCache.ts";
 import { OpenOnHash } from "../../../components/OpenOnHash.tsx";
 import { Note } from "../../../components/Section.tsx";
-import { withNetwork } from "../../../lib/links.ts";
+import { RECORDED_RUN_PATH, withNetwork } from "../../../lib/links.ts";
+import { rpcBusy } from "../../../lib/rpcBusy.ts";
 import styles from "./buy.module.css";
 import { BuyFlow } from "./BuyFlow.tsx";
 
@@ -42,17 +45,19 @@ export default async function BuyPage({ params, searchParams }: { params: Promis
       <Link href={`${withNetwork("/", net)}#listings`} className={styles.back}>← All listings</Link>
       {net === "testnet" ? (
         <Note>
-          <p>
-            <b>Real purchases are not live yet.</b> This page shows the seven steps a buyer takes, with the buttons switched off. The free
-            demo runs the same steps for you on testnet with a throwaway account.
-          </p>
+          <p><b>Real purchases need mainnet, which is not deployed yet.</b> The free demo runs the same steps on testnet.</p>
           <p className={styles.noteAction}><Link className={styles.demo} href="/try">Run the demo, free</Link></p>
         </Note>
       ) : null}
       {failure || !listing ? (
         <>
           <h1>Listing #{id}</h1>
-          {failure && /CodeDoesNotExist/.test(failure) ? (
+          {failure && rpcBusy(failure) ? (
+            <EmptyState title={`NEAR ${net} is busy right now.`}>
+              <p>This listing is read again in a minute. Meanwhile: <Link href={RECORDED_RUN_PATH}>watch a recorded run</Link>.</p>
+              <RefreshSoon key={Date.now()} seconds={60} />
+            </EmptyState>
+          ) : failure && /CodeDoesNotExist/.test(failure) ? (
             <ErrorBox title={`The ${net} market is not deployed yet`} fallback={`The demo listings live on testnet: ${withNetwork(`/buy/${id}`, "testnet")}`}>
               <p>There is no market contract on {net} yet, so this listing cannot exist there.</p>
               <details><summary>The error</summary><p className="mono">{failure}</p></details>

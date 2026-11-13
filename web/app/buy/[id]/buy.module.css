@@ -16,9 +16,9 @@
 .disc > summary { padding: var(--sp-3) 0; color: var(--text); font-weight: 500; font-size: 15px; }
 .disc > p { margin: 0 0 var(--sp-3); overflow-wrap: anywhere; }
 .counter { background: var(--sunken); border-radius: var(--r-sm); padding: var(--sp-2) var(--sp-3); margin: 0 0 var(--sp-3); font-size: 12.5px; color: var(--text); }
-.who { border-left: 2px solid var(--border); padding: var(--sp-1) 0 var(--sp-1) var(--sp-4); font-size: 14px; color: var(--muted); }
-.who ul { margin: 0 0 var(--sp-2); padding-left: 18px; display: grid; gap: 4px; }
-.whoTitle { margin: 0 0 var(--sp-2); font-weight: 600; color: var(--text); }
+.whoList { margin: 0 0 var(--sp-2); padding-left: 18px; display: grid; gap: 4px; }
+.whoList li::marker { color: var(--control-border); }
+.disc > p:last-child { margin-bottom: var(--sp-3); }
 .steps { display: grid; gap: var(--sp-3); min-width: 0; }
 .steps > * { margin: 0; }
 .step { position: relative; }
@@ -40,12 +40,18 @@
 /* Step 1's connect button sits between two paragraphs that have no margin of their own in the waiting state (.later .sub). */
 .wallet { margin: var(--sp-3) 0; }
 .back { display: inline-block; margin: 0 0 var(--sp-4); font-size: 15px; }
+.rail { margin: 0 0 var(--sp-5); }
+/* detail one click away: a quiet fold under a step */
+.more { font-size: 14px; color: var(--muted); }
+.more > summary { color: var(--text); font-weight: 500; padding: 4px 0; }
+.more > p { margin: var(--sp-2) 0 0; max-width: 70ch; }
+.lines { margin: var(--sp-2) 0 0; padding-left: 20px; display: grid; gap: 6px; }
+.lines b { color: var(--text); font-weight: 600; }
 
 @media (max-width: 960px) {
   .layout { grid-template-columns: 1fr; gap: var(--sp-5); }
   .aside { position: static; }
 }
-.who li::marker { color: var(--control-border); }
 .demo { display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: var(--r-sm); background: var(--accent); color: var(--accent-ink); font-weight: 600; text-decoration: none; }
 .demo:hover { text-decoration: underline; }
 .noteAction { margin-top: var(--sp-3) !important; }

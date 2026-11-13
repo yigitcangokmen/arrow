@@ -3,8 +3,8 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { parseNetwork } from "../lib/config.ts";
-import { navLinks } from "../lib/links.ts";
-import { Badge } from "./Badge.tsx";
+import { NAV_BAR, navLinks } from "../lib/links.ts";
+import { NetBadge } from "./NetBadge.tsx";
 import { ThemeToggle } from "./ThemeToggle.tsx";
 import styles from "./Nav.module.css";
 
@@ -18,12 +18,21 @@ function Mark() {
   );
 }
 
+function MenuIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}
+
 /**
  * Reads ?network= so the badge and the links follow the network being viewed (QA-16). Render it inside <Suspense>.
- * Desktop: brand, "Who sees what", the NAV_LINKS, the network chip, Try as the filled button and the theme switch.
- * Below 860 px the links move into a <details> menu; it closes after a click, on Escape (focus back on Menu) and on a tap outside.
+ * Desktop: brand, Trust · Verify · Sell, the network badge, Try as the filled button and the theme switch. Attack and Payouts are in
+ * the phone menu and the footer. Below 860 px the links move into a <details> menu; it closes after a click, on Escape (focus back on
+ * the menu button) and on a tap outside. `mainnetLive` comes from a server-side view call (lib/server/mainnetLive.ts).
  */
-export function Nav() {
+export function Nav({ mainnetLive = false }: { mainnetLive?: boolean }) {
   const net = parseNetwork(useSearchParams().get("network"));
   const menu = useRef<HTMLDetailsElement>(null);
   const links = navLinks(net);
@@ -56,28 +65,22 @@ export function Nav() {
       document.removeEventListener("pointerdown", onDown);
     };
   }, []);
-  const items = (
-    <>
-      {/* A plain link: a client-side jump to /#trust renders the loading screen first and loses the hash target. */}
-      <li><a href="/#trust" onClick={close}>Who sees what</a></li>
-      {middle.map(({ href, label }) => (
-        <li key={href}><Link href={href} onClick={close} aria-current={current(href)}>{label}</Link></li>
-      ))}
-    </>
+  const item = ({ href, label }: { href: string; label: string }) => (
+    <li key={href}><Link href={href} onClick={close} aria-current={current(href)}>{label}</Link></li>
   );
   return (
     <header className={styles.header}>
       <nav className={styles.nav} aria-label="Main">
         <Link href={brand.href} className={styles.brand}><Mark />{brand.label}</Link>
-        <ul className={styles.links}>{items}</ul>
+        <ul className={styles.links}>{middle.filter((l) => (NAV_BAR as readonly string[]).includes(l.label)).map(item)}</ul>
         <div className={styles.right}>
-          <span className={styles.chip}><Badge kind={net} /></span>
+          <NetBadge net={net} mainnetLive={mainnetLive} pathname={pathname} />
           <Link href={tryLink.href} className={styles.try} aria-current={current(tryLink.href)}>{tryLink.label}</Link>
           <span className={styles.theme}><ThemeToggle /></span>
           <details className={styles.menu} ref={menu}>
-            <summary>Menu</summary>
+            <summary><MenuIcon /><span className="sr-only">Menu</span></summary>
             <div className={styles.sheet}>
-              <ul>{items}</ul>
+              <ul>{middle.map(item)}</ul>
               <ThemeToggle withLabel />
             </div>
           </details>

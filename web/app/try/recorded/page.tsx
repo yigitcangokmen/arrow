@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { ArrowViews } from "@arrow/sdk/contract";
-import { HonestyLine, PageHead } from "../../../components/Section.tsx";
 import { evidence } from "../../../generated/data.ts";
 import { CONTRACTS } from "../../../lib/config.ts";
-import { RECORDED_RUN } from "../../../lib/links.ts";
+import { RECORDED_RUN, shortHash } from "../../../lib/links.ts";
 import { recordedRun } from "../../../lib/recorded.ts";
 import { Replay } from "./Replay.tsx";
 import styles from "./recorded.module.css";
@@ -17,23 +16,45 @@ export default async function Recorded() {
     .catch(() => null);
   const run = recordedRun(evidence.testnet, chain);
   const day = run.paidAt ? new Date(run.paidAt).toISOString().slice(0, 10) : null;
+  const m = run.verdict ? /^(BUY|PASS) · fit (\d)\/5 · novelty (\d)\/5/.exec(run.verdict) : null;
+  const verdict = m ? { word: m[1] as "BUY" | "PASS", fit: Number(m[2]), novelty: Number(m[3]) } : null;
+  const prints = run.fingerprints;
 
   return (
     <div data-ready="true">
-      <PageHead eyebrow="The demo, recorded" title="Watch a run that finished.">
-        The same steps as the free demo, from one run on NEAR testnet{day ? ` on ${day}` : ""}: a file is listed, a buyer pays for an
-        inspection, gets BUY, buys the file and checks it is the same file. Press play to watch it; every step with a transaction links to it.
-      </PageHead>
-      <HonestyLine items={["NEAR testnet", "synthetic data", "test money only", chain ? "times read from the chain now" : "chain not reachable: times left out"]} />
-      <Replay steps={run.steps} />
+      <div className={styles.head}>
+        <p className={styles.eyebrow}>Demo · recorded</p>
+        <h1 className={styles.h1}>A run that finished.</h1>
+        <p className={styles.lede}>One real run on NEAR testnet, replayed 6× faster; every step links to its transaction.</p>
+      </div>
+      <Replay
+        steps={run.steps}
+        verdict={verdict}
+        unlocked={
+          prints && run.match ? (
+            <div className={styles.unlocked}>
+              <span className={styles.unlockedTag}>fingerprints match ✓</span>
+              <dl>
+                <div><dt>listed</dt><dd className="mono">{shortHash(prints.listed)}</dd></div>
+                <div><dt>inspected</dt><dd className="mono">{prints.inspected ? shortHash(prints.inspected) : "not on chain"}</dd></div>
+                <div><dt>delivered</dt><dd className="mono">{prints.delivered ? shortHash(prints.delivered) : "not on chain"}</dd></div>
+              </dl>
+            </div>
+          ) : null
+        }
+      />
 
       <section className={styles.result} aria-labelledby="rec-result">
         <h2 id="rec-result">{run.verdict ? `It said ${run.verdict.split(" ")[0]}. The buyer bought it. The file matched.` : "The buyer bought the file and it matched."}</h2>
         {run.verdict ? <p className={styles.verdict}>{run.verdict}</p> : null}
-        <p className={styles.note}>
-          The verdict is sealed to that buyer&apos;s own key, so the chain shows it only in sealed form; the words above are what the run recorded
-          when it opened it. The fingerprints below are read from the chain now.
-        </p>
+        <details className={styles.fold}>
+          <summary>How this verdict was recorded</summary>
+          <p className={styles.note}>
+            The verdict is sealed to that buyer&apos;s own key, so the chain shows it only in sealed form; the words above are what the run recorded
+            when it opened it. The fingerprints below are read from the chain now{day ? `; the run was paid on ${day}` : ""}.
+            {chain ? " The times next to each step are read from the chain now." : " The chain could not be reached just now, so the real times are left out."}
+          </p>
+        </details>
         {run.fingerprints ? (
           <div className={styles.prints}>
             <dl>

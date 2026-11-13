@@ -5,6 +5,7 @@
 .summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-5); background: var(--surface); box-shadow: var(--shadow-1); margin: 0 0 var(--sp-7); }
 .line { font-family: var(--font-mono); font-size: clamp(1.05rem, 2.4vw, 1.4rem); font-weight: 700; overflow-wrap: anywhere; }
 .fail { color: var(--danger); font-weight: 700; }
+.busy { color: var(--notproven); font-weight: 600; }
 .group { margin: 0 0 var(--sp-7); }
 .eyebrow { margin: 0 0 6px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .groupTitle { margin: 0 0 6px; font-size: clamp(22px, 2.4vw, 28px); letter-spacing: -0.02em; }
@@ -70,3 +71,19 @@
   .req { display: inline; margin: 0 0 0 6px; }
   .facts { grid-template-columns: 1fr; }
 }
+.how { margin: 0 0 var(--sp-5); font-size: 14.5px; color: var(--muted); }
+.how > summary { color: var(--text); font-weight: 500; padding: 4px 0; }
+.how p { margin: var(--sp-2) 0 0; max-width: 76ch; }
+.flags { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-4); align-items: center; margin: 0 0 var(--sp-5); }
+@media (max-width: 600px) { .flags { grid-template-columns: 1fr; } }
+.asOf { flex-basis: 100%; margin: 0; padding: 8px 12px; border-left: 3px solid var(--notproven); background: var(--sunken); border-radius: 6px; font-size: 14px; color: var(--text); }
+/* the inspections, right under the flag grid: each opens in seconds while the full check runs */
+.oneAt { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 var(--sp-5); }
+.oneTitle { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: 0; }
+/* the groups after REQUIRED, one click away */
+.groupFold { margin: 0 0 var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); padding: 0 var(--sp-4); }
+.groupFold > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: var(--sp-4) 0; }
+.groupFold[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: var(--sp-3); }
+.groupFoldTitle { font-size: 18px; font-weight: 600; color: var(--text); }
+.groupFoldCount { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+.groupFold .table { margin-bottom: var(--sp-4); }

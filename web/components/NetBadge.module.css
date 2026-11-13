@@ -1,0 +1,20 @@
+.net { position: relative; }
+.net > summary {
+  display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px 0 9px; border-radius: var(--r-pill); border: 1px solid;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: var(--sunken); white-space: nowrap;
+}
+.net > summary::before { content: none; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent); }
+.net[data-state="testnet"] > summary { color: var(--notproven); border-color: color-mix(in srgb, var(--notproven) 55%, transparent); }
+.net[data-state="mainnet"] > summary { color: var(--proven); border-color: color-mix(in srgb, var(--proven) 55%, transparent); }
+.panel {
+  position: absolute; right: 0; top: 40px; z-index: 30; width: min(300px, calc(100vw - 32px)); padding: 14px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18); font-size: 14px; color: var(--text);
+}
+.panel dl { margin: 0 0 10px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-size: 13px; }
+.panel dt { color: var(--muted); }
+.panel dd { margin: 0; font-family: var(--font-mono); font-size: 12px; overflow-wrap: anywhere; }
+.panel p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.panel .acts { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; }
+@media (max-width: 860px) { .panel { position: fixed; left: 16px; right: 16px; top: 64px; width: auto; border-color: var(--control-border); box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45); } }
+@media (max-width: 380px) { .net > summary { padding: 0 9px; } .text { max-width: 8ch; overflow: hidden; text-overflow: ellipsis; } }
