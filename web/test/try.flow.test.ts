@@ -5,8 +5,9 @@ import { prepareList } from "@arrow/sdk/flows";
 import { ListMsg } from "@arrow/sdk/schemas";
 import { CONTRACTS } from "../lib/config.ts";
 import { PaymentRefused, waitForRecord } from "../lib/settle.ts";
+import { readQueue, requestIdOf, type QueueDeps } from "../lib/try/queue.ts";
 import {
-  CAP_MESSAGE, DATASETS, mapTryError, pickDemoListing, programHashBand, realDeps, runTry, TryError, TRY_STEPS, type NearApi, type StepInfo, type TryDeps, type TryStep,
+  CAP_MESSAGE, DATASETS, mapTryError, pickDemoListing, programHashBand, queueBusyLine, realDeps, runTry, TryError, TRY_STEPS, waitCause, type NearApi, type StepInfo, type TryDeps, type TryStep,
 } from "../lib/try/tryFlow.ts";
 
 const programScalar = scalarFromLabel("arrow:test:program:v1");
@@ -22,7 +23,24 @@ const BUY_STATE = 25 + 4 * 5 + 3; // BUY fit 5 novelty 4
 interface Calls { near: { contractId: string; methodName: string; args: Record<string, string>; deposit?: bigint }[]; fetched: string[]; steps: [TryStep, StepInfo][] }
 
 /** A small fake chain: it records what the page sends and answers views from those msgs. */
-function world(o: { faucet?: number; sponsor?: { status: number; body: object }; uploadFails?: boolean; evidence?: unknown; storage?: string | null; balance?: bigint; tamper?: boolean; evalPanic?: boolean; evalRefund?: boolean; verdictIdx?: number; endless?: { pulled: () => number }; programWasmHash?: string; listingHash?: string; listingLag?: number; realWait?: boolean } = {}) {
+/** A queue that answers `waits` in turn (the last one repeats); null means "could not be read". `lag` is every run's start lag; null: never started. */
+function fakeQueue(waits: (number | null)[] = [3], lag: number | null = 3): QueueDeps & { reads: () => number } {
+  let reads = 0;
+  return {
+    reads: () => reads,
+    lastRequestId: async () => {
+      const w = waits[Math.min(reads++, waits.length - 1)];
+      if (w === null) throw new Error("rpc down");
+      return 1000 + w; // the wait rides on the id so each read sees its own value
+    },
+    attestation: async (id) => (id >= 1000 ? { timestamp: 50_000 + (id - 1000), block_height: 1 } : lag === null ? null : { timestamp: 50_000 + lag, block_height: 1 }),
+    openRequest: async () => null,
+    blockTimeSec: async () => 50_000,
+    chainNowSec: async () => 50_010,
+  };
+}
+
+function world(o: { faucet?: number; sponsor?: { status: number; body: object }; uploadFails?: boolean; evidence?: unknown; storage?: string | null; balance?: bigint; tamper?: boolean; evalPanic?: boolean; evalRefund?: boolean; evalRefunds?: number; buyRefunds?: number; queue?: ReturnType<typeof fakeQueue>; verdictIdx?: number; endless?: { pulled: () => number }; programWasmHash?: string; listingHash?: string; listingLag?: number; realWait?: boolean } = {}) {
   const calls: Calls = { near: [], fetched: [], steps: [] };
   let listMsg: ListMsg | null = null;
   let evalMsg: { buyer_pk: string } | null = null;
@@ -30,6 +48,9 @@ function world(o: { faucet?: number; sponsor?: { status: number; body: object };
   const stored = { value: o.storage ?? null };
   let n = 0;
   let listingReads = 0;
+  let evalReads = 0;
+  let buyReads = 0;
+  const evalRefunds = o.evalRefund ? Infinity : o.evalRefunds ?? 0;
   if (o.uploadFails && o.evidence && (o.evidence as { runs: unknown[] }).runs.length > 0) {
     // the recorded demo listing already sits on the fake chain
     const seed = prepareList({
@@ -91,11 +112,15 @@ function world(o: { faucet?: number; sponsor?: { status: number; body: object };
     },
     views: {
       listing: async () => (++listingReads <= (o.listingLag ?? 0) ? null : listingRec()),
-      eval: async () => ({
-        id: 3, status: o.evalRefund ? "refunded" : "done", refund_reason: o.evalRefund ? "bad_output" : null,
-        sealed_result: b64.enc(seal(evalMsg!.buyer_pk, Uint8Array.of(o.verdictIdx ?? BUY_STATE))), h: listMsg?.blob_sha256 ?? null,
-      }),
+      eval: async () => {
+        const refunded = evalReads++ < evalRefunds;
+        return {
+          id: 3, status: refunded ? "refunded" : "done", refund_reason: refunded ? (o.evalRefund ? "bad_output" : "not_ok") : null,
+          sealed_result: refunded ? null : b64.enc(seal(evalMsg!.buyer_pk, Uint8Array.of(o.verdictIdx ?? BUY_STATE))), h: listMsg?.blob_sha256 ?? null,
+        };
+      },
       purchase: async () => {
+        if (buyReads++ < (o.buyRefunds ?? 0)) return { id: 5, status: "refunded", refund_reason: "not_ok", sealed_k_buyer: null, h: null };
         const payload = unseal(programScalar, b64.dec(listMsg!.sealed_k)); // K || sha, as the enclave would read it
         const buyerPk = (JSON.parse(calls.near.filter((c) => c.methodName === "ft_transfer_call").at(-1)!.args.msg) as { buyer_pk: string }).buyer_pk;
         return { id: 5, status: "done", sealed_k_buyer: b64.enc(seal(buyerPk, payload.subarray(0, 32))), h: listMsg?.blob_sha256 ?? null };
@@ -112,6 +137,9 @@ function world(o: { faucet?: number; sponsor?: { status: number; body: object };
     now: (() => { let t = 0; return () => (t += 1000); })(),
     evidence: o.evidence ?? null,
     criteria: criteriaFiles,
+    queue: o.queue ?? fakeQueue(),
+    // every payment's transaction names OutLayer request 7
+    txStatus: async () => ({ receipts_outcome: [{ id: "r", outcome: { executor_id: "outlayer.testnet", logs: [`EVENT_JSON:${JSON.stringify({ standard: "near-outlayer", version: "1.0.0", event: "execution_requested", data: [{ request_data: JSON.stringify({ request_id: 7 }) }] })}`] } }] }),
   };
   const run = (criteria: keyof typeof criteriaFiles = "demo-buy") =>
     runTry({ criteria, config: o.programWasmHash ? { ...config, programWasmHash: o.programWasmHash } : config, deps, signal: new AbortController().signal, onStep: (s, i) => calls.steps.push([s, i]) });
@@ -198,7 +226,7 @@ describe("runTry, failures", () => {
     const w = world({ evalRefund: true });
     const err = await w.run().catch((e) => e);
     expect(err).toMatchObject({ code: "REFUNDED", step: "result" });
-    expect(err.message).toMatch(/refunded \(bad_output\): the run in sealed hardware failed or took too long, so the contract sent the fee back, less Arrow's 10% share/);
+    expect(err.message).toMatch(/Both inspections were refunded \(bad_output\): the run in sealed hardware failed or took too long\. The contract sent the fee back, less Arrow's 10% share/);
     expect(err.message).not.toMatch(/npm run|NEAR AI credit/);
   });
 
@@ -229,6 +257,13 @@ describe("runTry, failures", () => {
     expect(err.message).toMatch(/Account creation failed: Sponsor is down\./);
     expect(err.message).toContain("npm run try:testnet");
     expect(w.calls.near).toHaveLength(0);
+  });
+
+  it("names the faucet's rate limit first when it answers 429 and the sponsor is not set up", async () => {
+    const w = world({ faucet: 429, sponsor: { status: 503, body: { error: "The testnet sponsor is out of funds or not configured.", code: "SPONSOR_UNAVAILABLE" } } });
+    const err = await w.run().catch((e) => e);
+    expect(err.code).toBe("ACCOUNT_FAILED");
+    expect(err.message).toMatch(/^Account creation failed: The public testnet faucet is rate-limiting your network address \(HTTP 429\), and this site's own account sponsor answered: The testnet sponsor is out of funds or not configured\./);
   });
 
   it("uses the sponsor account when only the faucet fails", async () => {
@@ -306,5 +341,104 @@ describe("helpers", () => {
   });
   it("the demo datasets exist next to the criteria they belong to", () => {
     for (const d of Object.values(DATASETS)) expect(fixture(`demo/${d.file}`).length).toBeGreaterThan(100);
+  });
+});
+
+// DEMO-1: OutLayer's shared testnet queue went from ~3 s to 80-115 s for minutes at a time (13 Nov), and every inspection
+// paid into it refunded (the frozen program stops a run that starts more than 45 s late). The page now reads the queue
+// before paying, waits while it is slow, explains a refund from the chain and pays a refunded run once more.
+describe("DEMO-1: OutLayer's queue before each payment", () => {
+  const ops = (c: Calls) => c.near.filter((x) => x.methodName === "ft_transfer_call").map((x) => JSON.parse(x.args.msg).op);
+
+  it("waits while the queue is slow and pays for the inspection once it clears", async () => {
+    const queue = fakeQueue([92, 64, 4]);
+    const w = world({ queue });
+    const r = await w.run("demo-buy");
+    expect(r.state.verdict).toBe("BUY");
+    const busy = w.calls.steps.filter(([s, i]) => s === "eval" && i.state === "doing" && /queue is slow/.test(i.detail ?? ""));
+    expect(busy.map(([, i]) => i.detail)).toEqual([
+      expect.stringContaining("newest jobs waited 92 s to start"),
+      expect.stringContaining("newest jobs waited 64 s to start"),
+    ]);
+    expect(ops(w.calls)).toEqual(["list", "eval", "buy"]);
+    expect(queue.reads()).toBe(4); // three before the inspection, one before the purchase
+  });
+
+  it("stops before paying when the queue stays slow for fifteen minutes", async () => {
+    const w = world({ queue: fakeQueue([110]) });
+    const err = await w.run("demo-buy").catch((e) => e);
+    expect(err).toMatchObject({ code: "QUEUE_BUSY", step: "eval" });
+    expect(err.message).toMatch(/stayed slow for 15 minutes .*waited 110 s.*Nothing was paid for the inspection\./);
+    expect(ops(w.calls)).toEqual(["list"]);
+  });
+
+  it("pays as before when the queue cannot be read", async () => {
+    const w = world({ queue: fakeQueue([null]) });
+    expect((await w.run("demo-buy")).hashes?.match).toBe(true);
+  });
+
+  it("pays a refunded inspection once more and keeps the refund, with its cause read from the chain", async () => {
+    const w = world({ evalRefunds: 1, queue: fakeQueue([3], 96) });
+    const r = await w.run("demo-buy");
+    expect(r.state.verdict).toBe("BUY");
+    expect(ops(w.calls)).toEqual(["list", "eval", "eval", "buy"]);
+    expect(r.refunds).toEqual([{ kind: "eval", id: 3, txHash: "tx3", reason: "not_ok", cause: expect.stringMatching(/waited 96 s in OutLayer's shared testnet queue before it started/) }]);
+    expect(w.calls.steps.some(([s, i]) => s === "result" && /Inspection #3 was refunded: .*Trying once more\./.test(i.detail ?? ""))).toBe(true);
+  });
+
+  it("ends with REFUNDED and both attempts after two refunded inspections, and never buys", async () => {
+    const w = world({ evalRefunds: 2, queue: fakeQueue([3], null) });
+    const err = await w.run("demo-buy").catch((e) => e);
+    expect(err).toBeInstanceOf(TryError);
+    expect(err).toMatchObject({ code: "REFUNDED", step: "result" });
+    expect(err.refunds).toHaveLength(2);
+    expect(err.message).toMatch(/^Both inspections were refunded \(not_ok\): it never started: OutLayer's shared testnet queue did not reach it within NEAR's waiting window/);
+    expect(ops(w.calls)).toEqual(["list", "eval", "eval"]);
+  });
+
+  it("pays a refunded purchase once more", async () => {
+    const w = world({ buyRefunds: 1 });
+    const r = await w.run("demo-buy");
+    expect(r.hashes?.match).toBe(true);
+    expect(ops(w.calls)).toEqual(["list", "eval", "buy", "buy"]);
+    expect(r.refunds.map((x) => x.kind)).toEqual(["buy"]);
+  });
+});
+
+describe("DEMO-1: reading the queue", () => {
+  const base: QueueDeps = {
+    lastRequestId: async () => 100,
+    attestation: async () => null,
+    openRequest: async () => null,
+    blockTimeSec: async () => 1_000,
+    chainNowSec: async () => 1_200,
+  };
+  it("takes the start lag of the newest run that started", async () => {
+    const q = await readQueue({ ...base, attestation: async (id) => (id === 98 ? { timestamp: 1_004, block_height: 5 } : null) });
+    expect(q).toEqual({ waitSec: 4 });
+  });
+  it("counts a newer request that is still open and has not started as waiting", async () => {
+    const q = await readQueue({
+      ...base,
+      attestation: async (id) => (id === 95 ? { timestamp: 1_003, block_height: 5 } : null),
+      openRequest: async (id) => (id === 97 ? { timestamp: "1110000000000" } : null), // requested at 1110 s, now 1200 s
+    });
+    expect(q).toEqual({ waitSec: 90 });
+  });
+  it("is null when nothing can be read", async () => {
+    expect(await readQueue({ ...base, lastRequestId: async () => { throw new Error("down"); } })).toBeNull();
+    expect(await readQueue(base)).toBeNull();
+  });
+  it("finds the OutLayer request id in a payment's transaction", () => {
+    const log = (d: unknown) => `EVENT_JSON:${JSON.stringify({ standard: "near-outlayer", version: "1.0.0", event: "execution_requested", data: [{ request_data: JSON.stringify(d) }] })}`;
+    expect(requestIdOf({ receipts_outcome: [{ id: "a", outcome: { executor_id: "x", logs: ["nothing", log({ request_id: 36061 })] } }] })).toBe(36061);
+    expect(requestIdOf({ receipts_outcome: [] })).toBeNull();
+  });
+  it("says why a run refunded in plain words", () => {
+    expect(waitCause("eval", "null", { started: false })).toMatch(/never started/);
+    expect(waitCause("eval", "not_ok", { started: true, lagSec: 80 })).toMatch(/waited 80 s .* more than 45 s late/);
+    expect(waitCause("eval", "not_ok", { started: true, lagSec: 5 })).toBe("the run in sealed hardware failed or took too long");
+    expect(waitCause("buy", "hash_mismatch", { started: true, lagSec: 90 })).toBe("the file its host served is not the file listed on chain");
+    expect(queueBusyLine(92, 75_000, "inspection")).toMatch(/waited 92 s to start.*\(1:15 so far, up to 15:00\)\.$/);
   });
 });

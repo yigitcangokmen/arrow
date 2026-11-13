@@ -48,3 +48,11 @@ a.scene:hover { border-color: var(--text); }
   .runButtons button { flex: 1; }
 }
 @media (max-width: 520px) { .next ul { grid-template-columns: 1fr; } }
+.recorded { font-size: 14.5px; margin-left: auto; }
+.runNote { margin: 0 0 var(--sp-3); max-width: 80ch; font-size: 14px; color: var(--muted); }
+.outcome { border: 1px solid var(--border); border-left: 4px solid var(--notproven); border-radius: var(--r-md); background: var(--surface); padding: var(--sp-3) var(--sp-4); margin: var(--sp-4) 0 var(--sp-3); overflow-wrap: anywhere; }
+.outcome h3 { margin: 0 0 6px; font-size: 18px; }
+.outcome p { margin: 0 0 var(--sp-2); }
+.refunds { margin: 0 0 var(--sp-2); padding-left: 20px; font-size: 14.5px; color: var(--muted); display: grid; gap: 4px; }
+@media (max-width: 720px) { .recorded { margin-left: 0; } }
+.waitNote { margin: var(--sp-2) 0 0; padding: var(--sp-2) var(--sp-3); border-left: 3px solid var(--notproven); background: var(--sunken); border-radius: var(--r-sm); font-size: 14px; }

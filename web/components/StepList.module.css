@@ -8,4 +8,5 @@
 .done .mark { color: var(--proven); border-color: var(--proven); }
 .failed .mark { border-color: var(--danger); }
 .failed { color: var(--danger); }
+.refunded .mark { color: var(--notproven); border-color: var(--notproven); }
 .detail { color: var(--muted); font-weight: 400; overflow-wrap: anywhere; font-size: 14px; }

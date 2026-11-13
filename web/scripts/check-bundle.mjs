@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const web = join(dirname(fileURLToPath(import.meta.url)), "..");
 const staticDir = join(web, ".next/static");
 const MARKERS = ["near-api-js", "GasKeyInvalidNumNonces"];
-const PAGES = ["/", "/sell", "/buy/1", "/seller", "/verify", "/attack"];
+const PAGES = ["/", "/sell", "/buy/1", "/seller", "/verify", "/attack", "/try/recorded"];
 const PORT = 3100;
 
 function walk(dir) {

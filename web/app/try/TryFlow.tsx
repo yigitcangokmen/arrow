@@ -10,8 +10,8 @@ import { StepList, type Step, type StepState } from "../../components/StepList.t
 import { TxLink } from "../../components/TxLink.tsx";
 import form from "../../components/form.module.css";
 import { stateLine } from "../../lib/format.ts";
-import { RECORDED_EVAL } from "../../lib/links.ts";
-import { realDeps, runTry, TRY_STEPS, TryError, type StepInfo, type TryConfig, type TryCriteria, type TryResult, type TryStep } from "../../lib/try/tryFlow.ts";
+import { RECORDED_RUN_PATH } from "../../lib/links.ts";
+import { realDeps, runTry, TRY_STEPS, TryError, type RefundedRun, type StepInfo, type TryConfig, type TryCriteria, type TryResult, type TryStep } from "../../lib/try/tryFlow.ts";
 import styles from "./try.module.css";
 
 const LABELS: Record<TryStep, string> = {
@@ -34,13 +34,23 @@ const NEXT: { scene: TryCriteria | null; href: string; title: string; text: stri
   { scene: null, href: "/#trust", title: "Who sees what", text: "What each part can see, and the limits, in plain words." },
 ];
 
-/** The two ways on after a failed run: run it again here, or open a recorded run that finished. */
+/** The two ways on after a run that did not finish: run it again here, or watch a recorded run that finished. */
 function Recover({ onRetry }: { onRetry(): void }) {
   return (
     <div className={styles.recover}>
       <button type="button" className={form.primary} onClick={onRetry}>Run it again</button>
-      <Link href={`/verify/${RECORDED_EVAL}`}>See a recorded run that finished, checked from the chain →</Link>
+      <Link href={RECORDED_RUN_PATH}>Watch a recorded run that finished →</Link>
     </div>
+  );
+}
+
+/** One refunded payment: what it was, why it refunded (read from the chain), and its transaction. */
+function RefundLine({ r }: { r: RefundedRun }) {
+  return (
+    <li>
+      {r.kind === "eval" ? `Inspection #${r.id}` : `Purchase #${r.id}`} was refunded{r.reason ? ` (${r.reason})` : ""}: {r.cause}.{" "}
+      <TxLink chain="near" network="testnet" hash={r.txHash} />
+    </li>
   );
 }
 
@@ -95,9 +105,11 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
     }
   }
 
+  // A refund or a pause before paying is the system working as designed: that step shows as refunded, not as failed.
+  const calm = error instanceof TryError && (error.code === "REFUNDED" || error.code === "QUEUE_BUSY") ? error.code : null;
   const steps: Step[] = TRY_STEPS.map((s) => ({
     label: LABELS[s],
-    state: (states[s] === "skipped" ? "todo" : states[s]) as StepState,
+    state: (states[s] === "skipped" ? "todo" : calm && states[s] === "failed" ? (calm === "REFUNDED" ? "refunded" : "todo") : states[s]) as StepState,
     detail: states[s] === "skipped" ? `skipped: ${details[s] ?? "not needed in this scene"}` : details[s],
   }));
   const totalSec = result ? Math.round(result.elapsedMs / 1000) : null;
@@ -105,7 +117,7 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
   const stepNo = Math.min(TRY_STEPS.length, finished + (running ? 1 : 0));
   const doing = TRY_STEPS.find((s) => states[s] === "doing");
   // Step changes, the result and a failure are read out through the one always-mounted live region.
-  const announce = result ? headline(result, scene) : error ? "The run stopped. The reason and the next steps are below." : running && doing ? `Step ${stepNo} of ${TRY_STEPS.length}: ${LABELS[doing]}` : "";
+  const announce = result ? headline(result, scene) : calm ? "The run ended without a verdict, as designed. What happened and the next steps are below." : error ? "The run stopped. The reason and the next steps are below." : running && doing ? `Step ${stepNo} of ${TRY_STEPS.length}: ${LABELS[doing]}` : "";
 
   return (
     <>
@@ -123,10 +135,22 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
             {running && startedAt !== null ? <> · <Countdown startedAt={startedAt} label="elapsed" /></> : totalSec !== null ? <> · <span className="mono">{totalSec} s in total</span></> : null}
             {" "}· about 3 minutes · nothing here costs money
           </p>
+          <Link className={styles.recorded} href={RECORDED_RUN_PATH}>Or watch a recorded run</Link>
         </div>
+        <p className={styles.runNote}>
+          Each paid step runs Arrow&apos;s program in sealed hardware through OutLayer&apos;s shared testnet queue. When that queue is slow, the
+          program does not answer late; the contract refunds the payment on its own. This page checks the queue before each payment, waits
+          while it is slow, and pays a refunded step once more.
+        </p>
 
         <Announcer text={announce} />
         <StepList steps={steps} />
+        {running && doing && details[doing]?.startsWith("OutLayer's shared testnet queue is slow") ? (
+          <p className={styles.waitNote}>
+            This page pays as soon as the queue is quick again; Cancel stops it. Meanwhile:{" "}
+            <a href={RECORDED_RUN_PATH} target="_blank" rel="noopener noreferrer">watch the recorded run<span className="sr-only"> (opens in a new tab)</span></a>.
+          </p>
+        ) : null}
         {txs.length > 0 ? (
           <ul id="try-txs" className={styles.txs} aria-label="Transactions">
             {txs.map((t) => (
@@ -136,23 +160,26 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
         ) : null}
 
         {error instanceof TryError && error.code === "REFUNDED" ? (
-          <ErrorBox title={error.step === "buy" ? "The purchase did not finish, so it was refunded" : "The AI check did not finish, so the inspection was refunded"}>
+          <div className={styles.outcome} role="status">
+            <h3>Refunded automatically. The refund rule did its job.</h3>
             <p>
               {error.step === "buy"
                 ? "The test money for the purchase went back to the throwaway account in full."
                 : "The test money went back to the throwaway account, less Arrow's 10% share of the fee."}{" "}
-              The run in sealed hardware failed or took too long. When that happens the contract sends the money back on its own: this is the
-              refund rule working, not a lost payment.
+              Arrow&apos;s program answers on time or not at all: when its run in sealed hardware fails or would answer late, the contract
+              sends the money back on its own, and no data comes out.
             </p>
-            {txs.filter((t) => t.step === "eval" || t.step === "buy").map((t) => (
-              <p key={t.hash}>The {t.step === "eval" ? "inspection" : "purchase"} transaction, with the refund: <TxLink chain="near" network="testnet" hash={t.hash} /></p>
-            ))}
+            <ul className={styles.refunds}>
+              {error.refunds.map((r) => <RefundLine key={r.txHash} r={r} />)}
+            </ul>
             <Recover onRetry={() => void start()} />
-            <details>
-              <summary>Details</summary>
-              <p className="mono">{error.message}</p>
-            </details>
-          </ErrorBox>
+          </div>
+        ) : error instanceof TryError && error.code === "QUEUE_BUSY" ? (
+          <div className={styles.outcome} role="status">
+            <h3>Paused before paying: OutLayer&apos;s testnet queue is slow.</h3>
+            <p>{error.message} A run paid now would almost certainly be refunded, so this page stopped first.</p>
+            <Recover onRetry={() => void start()} />
+          </div>
         ) : error ? (
           <ErrorBox title="The run stopped">
             <p>{error.message}</p>
@@ -174,6 +201,17 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
             Account <span className="mono">{result.accountId}</span> · listing #{result.listingId}{result.usedDemoListing ? " (pre-listed demo listing)" : ""} · eval #{result.evalId}
             {result.purchaseId !== undefined ? ` · purchase #${result.purchaseId}` : ""}{totalSec !== null ? ` · ${totalSec} s in total` : ""}
           </p>
+          {result.refunds.length > 0 ? (
+            <div className={styles.outcome}>
+              <p>
+                <b>{result.refunds.length === 1 ? "One payment was refunded first, then paid again." : "Some payments were refunded first, then paid again."}</b>{" "}
+                A refund is the contract&apos;s answer to a run that fails or would answer late.
+              </p>
+              <ul className={styles.refunds}>
+                {result.refunds.map((r) => <RefundLine key={r.txHash} r={r} />)}
+              </ul>
+            </div>
+          ) : null}
           <MeaningTiles withAnswers />
           {result.hashInput ? (
             <div className={styles.hashes}>

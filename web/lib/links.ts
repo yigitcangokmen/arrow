@@ -42,6 +42,10 @@ export const REPO_URL: string | null = null;
 
 /** The recorded run judges are sent to: eval #14 on arrow-v2.arrowhq.testnet, the wallet-labels inspection that was then bought (purchase #5). */
 export const RECORDED_EVAL = 14;
+/** That run as a page a visitor can watch: its steps replayed from the chain, with a transaction for each. */
+export const RECORDED_RUN_PATH = "/try/recorded";
+/** The rest of the recorded run: the listing it inspected and the purchase that followed (same account, same key). */
+export const RECORDED_RUN = { listingId: 14, evalId: RECORDED_EVAL, purchaseId: 5 } as const;
 
 export const NAV_LINKS = [
   ["/", "Arrow"],

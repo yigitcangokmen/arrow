@@ -8,7 +8,7 @@ if (!base) {
   console.error("usage: csp-browser-check.mjs <base-url> [<path>...]");
   process.exit(2);
 }
-const PATHS = args.length ? args : ["/", "/sell", "/seller", "/try", "/verify", "/buy/1", "/verify/1", "/attack", "/does-not-exist"];
+const PATHS = args.length ? args : ["/", "/sell", "/seller", "/try", "/try/recorded", "/verify", "/buy/1", "/verify/1", "/attack", "/does-not-exist"];
 const cdp = `http://127.0.0.1:${process.env.CDP_PORT ?? 9222}`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
