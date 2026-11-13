@@ -396,6 +396,15 @@ describe("DEMO-1: OutLayer's queue before each payment", () => {
     expect(ops(w.calls)).toEqual(["list", "eval", "eval"]);
   });
 
+  it("after a refunded purchase, a queue that stays slow stops the second payment and keeps the refund", async () => {
+    const w = world({ buyRefunds: 1, queue: fakeQueue([3, 3, 95]) });
+    const err = await w.run("demo-buy").catch((e) => e);
+    expect(err).toMatchObject({ code: "QUEUE_BUSY", step: "buy" });
+    expect(err.message).toMatch(/The purchase was not paid a second time\.$/);
+    expect(err.refunds.map((r: { kind: string }) => r.kind)).toEqual(["buy"]);
+    expect(ops(w.calls)).toEqual(["list", "eval", "buy"]);
+  });
+
   it("pays a refunded purchase once more", async () => {
     const w = world({ buyRefunds: 1 });
     const r = await w.run("demo-buy");

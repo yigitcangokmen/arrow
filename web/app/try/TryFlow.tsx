@@ -178,6 +178,11 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
           <div className={styles.outcome} role="status">
             <h3>Paused before paying: OutLayer&apos;s testnet queue is slow.</h3>
             <p>{error.message} A run paid now would almost certainly be refunded, so this page stopped first.</p>
+            {error.refunds.length > 0 ? (
+              <ul className={styles.refunds}>
+                {error.refunds.map((r) => <RefundLine key={r.txHash} r={r} />)}
+              </ul>
+            ) : null}
             <Recover onRetry={() => void start()} />
           </div>
         ) : error ? (

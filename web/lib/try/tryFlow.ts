@@ -245,9 +245,10 @@ export async function runTry(opts: {
       if (!q || q.waitSec <= QUEUE_BUSY_SEC) return;
       const waited = deps.now() - since;
       if (waited >= QUEUE_WAIT_MAX_MS) {
+        const again = refunds.some((r) => r.kind === (what === "inspection" ? "eval" : "buy"));
         throw new TryError(
           "QUEUE_BUSY",
-          `OutLayer's shared testnet queue stayed slow for ${QUEUE_WAIT_MAX_MS / 60_000} minutes (its newest jobs waited ${q.waitSec} s to start; Arrow's program stops a run that starts more than ${PROGRAM_START_LIMIT_SEC} s late). Nothing was paid for the ${what}.`,
+          `OutLayer's shared testnet queue stayed slow for ${QUEUE_WAIT_MAX_MS / 60_000} minutes (its newest jobs waited ${q.waitSec} s to start; Arrow's program stops a run that starts more than ${PROGRAM_START_LIMIT_SEC} s late). ${again ? `The ${what} was not paid a second time.` : `Nothing was paid for the ${what}.`}`,
           s,
           refunds,
         );
