@@ -134,3 +134,13 @@ describe("web halves of the contract group's items", () => {
     expect(html).toMatch(/listing bond is a listing fee paid to Arrow; it is not given back/);
   });
 });
+
+describe("HON-1: the home page's 402 sentence says what /api/x402/<id> does", () => {
+  it("describes a 402 that tells how to pay, not an address that answers once paid", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8").replace(/\s+/g, " ");
+    expect(src).not.toMatch(/asks for payment before it answers/);
+    expect(src).toMatch(/always answers HTTP 402 \(payment required\) with how to inspect the listing and pay through NEAR Intents\. It takes no payment itself and never returns the file\./);
+  });
+});
+

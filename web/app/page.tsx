@@ -303,7 +303,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
               <h3>Buyers can be programs.</h3>
               <p>
                 A command-line tool; a tool server for AI assistants (MCP) with <code>inspect_before_buy</code> and <code>buy</code>; and for each
-                listing a web address that asks for payment before it answers (HTTP 402).
+                listing a web address that always answers HTTP 402 (payment required) with how to inspect the listing and pay through NEAR
+                Intents. It takes no payment itself and never returns the file.
               </p>
               <p>
                 {REPO_URL ? (
