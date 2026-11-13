@@ -23,6 +23,9 @@
 .paradoxGrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-7); padding-top: var(--sp-6); padding-bottom: var(--sp-6); }
 .paradoxLeft { margin: 0; color: var(--muted); font-size: 16px; }
 .paradoxRight { margin: 0; font-size: 16px; }
+.paradoxRight > p { margin: 0; }
+.paradoxRight > .define { margin-top: var(--sp-3); color: var(--muted); font-size: 15px; }
+.paradoxRight > .judge { margin-top: 4px; }
 
 /* ---- sections ---- */
 .section { padding: var(--sp-9) 0; }

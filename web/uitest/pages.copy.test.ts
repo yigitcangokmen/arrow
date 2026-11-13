@@ -144,3 +144,24 @@ describe("HON-1: the home page's 402 sentence says what /api/x402/<id> does", ()
   });
 });
 
+describe("NOV-1: the second hero button leads to something watchable", () => {
+  it("links the recorded-run page, not the raw audit report", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+    expect(src).toMatch(/<Link href=\{RECORDED_RUN_PATH\} className=\{styles\.second\}>Watch a recorded run<\/Link>/);
+    const { RECORDED_RUN_PATH } = await import("../lib/links.ts");
+    expect(RECORDED_RUN_PATH).toBe("/try/recorded");
+  });
+});
+
+describe("NOV-2: one plain term for the enclave", () => {
+  it("the home page defines sealed hardware once, with the technical names behind a fold; /attack uses the same term", async () => {
+    const { readFileSync } = await import("node:fs");
+    const home = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8").replace(/\s+/g, " ");
+    expect(home.match(/<b>Sealed hardware<\/b> is /g)).toHaveLength(1);
+    expect(home).toMatch(/<summary>Technical detail<\/summary> <p> A trusted execution environment \(TEE, also called an enclave\)/);
+    const attack = readFileSync(new URL("../app/attack/page.tsx", import.meta.url), "utf8");
+    expect(attack).not.toMatch(/Ask the enclave/);
+    expect(attack).toMatch(/Ask Arrow&apos;s program, in sealed hardware, to print row 1/);
+  });
+});

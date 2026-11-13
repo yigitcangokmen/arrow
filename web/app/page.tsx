@@ -11,7 +11,7 @@ import { nativeStopped, readAttackInputs } from "../lib/attack.ts";
 import { CONTRACTS, parseNetwork } from "../lib/config.ts";
 import { devState } from "../lib/devState.ts";
 import { formatUsdc } from "../lib/format.ts";
-import { RECORDED_EVAL, REPO_URL, shortHash, withNetwork } from "../lib/links.ts";
+import { RECORDED_EVAL, RECORDED_RUN_PATH, REPO_URL, shortHash, withNetwork } from "../lib/links.ts";
 import { groupHomeListings, loadListingViews } from "../lib/server/listingsPage.ts";
 import type { ListingView } from "../lib/server/listingsCache.ts";
 import { lastSummary } from "../lib/server/verifyReport.ts";
@@ -64,11 +64,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
             <div className={styles.cta}>
               <div className={styles.ctaRow}>
                 <Link href="/try" className={styles.big}>Run the demo, free</Link>
-                <Link href={withNetwork(`/verify/${RECORDED_EVAL}`, "testnet")} className={styles.second}>Watch a recorded run</Link>
+                <Link href={RECORDED_RUN_PATH} className={styles.second}>Watch a recorded run</Link>
               </div>
               <p className={styles.caption}>
                 <b>No wallet, nothing to install.</b> About 3 minutes on NEAR testnet with synthetic data. Every payment and listing leaves a
-                transaction you can open. The recorded run is one that finished, checked against the chain.
+                transaction you can open. The recorded run replays, step by step, a run that finished.
               </p>
               <p className={styles.caption}><a href="#trust">Who sees what, and the limits →</a></p>
               <HonestyLine items={["NEAR testnet", "synthetic data", "test money only", "mainnet not deployed yet"]} />
@@ -84,10 +84,25 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
             In 1962 the economist Kenneth Arrow described why data is hard to sell: a buyer cannot judge it without seeing it, and once they have
             seen it they have little reason to pay.
           </p>
-          <p className={styles.paradoxRight}>
-            <b>Arrow&apos;s answer: the buyer does not look.</b> For a small fee, an AI looks for them inside sealed hardware and returns a capped
-            verdict. Then they decide.
-          </p>
+          <div className={styles.paradoxRight}>
+            <p>
+              <b>Arrow&apos;s answer: the buyer does not look.</b> For a small fee, an AI looks for them inside sealed hardware and returns a capped
+              verdict. Then they decide.
+            </p>
+            <p className={styles.define}>
+              <b>Sealed hardware</b> is a walled-off part of a computer chip, built so that even the machine&apos;s owner cannot read or change the
+              program running inside, and so that the chip can sign a report of exactly which program ran.
+            </p>
+            <details className={styles.judge}>
+              <summary>Technical detail</summary>
+              <p>
+                A trusted execution environment (TEE, also called an enclave). Arrow&apos;s program runs in an Intel TDX TEE on OutLayer&apos;s
+                workers; NEAR AI runs its model in Intel TDX with NVIDIA confidential computing. The signed report is a TDX quote: /verify checks
+                it in your browser, nothing on chain checks it, and the guarantee rests on Intel&apos;s hardware (trust rows <i>Evaluation</i> and{" "}
+                <i>LLM</i>).
+              </p>
+            </details>
+          </div>
         </div>
       </section>
 

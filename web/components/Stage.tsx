@@ -28,7 +28,7 @@ export function Stage() {
       <li className={styles.step}>
         <span className={styles.n}>02</span>
         <h2 className={styles.title}>Check it.</h2>
-        <p>You pay a $0.25 inspection fee. Arrow&apos;s sealed program takes a 40-row sample, and an AI in its own sealed hardware judges it against what you need. It can only pick one of 51 fixed answers, never free text.</p>
+        <p>You pay a $0.25 inspection fee. Arrow&apos;s program, in sealed hardware, takes a 40-row sample, and an AI in its own sealed hardware judges it against what you need. It can only pick one of 51 fixed answers, never free text.</p>
         <div className={styles.mock} aria-hidden="true">
           <span className={styles.verdict}><span className={styles.buy}>BUY</span> <small>· fit 5 · novelty 4</small></span>
           <span className={styles.row}><span>fit: how well it matches your need</span><span className={styles.v}>1–5</span></span>

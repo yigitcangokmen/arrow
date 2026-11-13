@@ -216,7 +216,7 @@ export function TryFlow({ scene, config, evidence, criteria }: { scene: TryCrite
           {result.hashInput ? (
             <div className={styles.hashes}>
               <p className={styles.match}>
-                {result.hashes?.match ? "4 fingerprints match ✓ The file you saved is the file the enclave inspected and then released." : "The fingerprints did not all match."}
+                {result.hashes?.match ? "4 fingerprints match ✓ The file you saved is the file the sealed hardware inspected and then released." : "The fingerprints did not all match."}
               </p>
               <details>
                 <summary>Show the four sha256 values</summary>
