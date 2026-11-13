@@ -420,7 +420,24 @@ export async function serves(url: string, sha: string): Promise<boolean> {
   }
 }
 
-/** testnet FastFS (repo is private, DEC K-03): `outlayer upload` signed by the seller; the CLI login is global, so it logs in first. */
+/**
+ * Runs fn and then puts the OutLayer CLI's testnet login back as it was (RH-14): the CLI keeps one global login per network,
+ * and the arrow-v2 login that /try maintenance uses must survive an upload signed by a seller.
+ */
+export async function keepOutlayerLogin<T>(home: string, fn: () => Promise<T>): Promise<T> {
+  const files = [join(home, ".outlayer/testnet/credentials.json"), join(home, ".outlayer/default-network")];
+  const saved = files.map((f) => (existsSync(f) ? readFileSync(f) : null));
+  try {
+    return await fn();
+  } finally {
+    files.forEach((f, i) => {
+      if (saved[i]) writeFileSync(f, saved[i]!, { mode: 0o600 });
+      else rmSync(f, { force: true });
+    });
+  }
+}
+
+/** testnet FastFS (repo is private, DEC K-03): `outlayer upload` signed by the seller; the CLI login is global, so it logs in first and restores the earlier login after the upload. */
 export function fastfsHost(sellerId: string, workDir: string): E2eDeps["host"] {
   return async (blob, sha) => {
     const guess = `https://test.fastfs.io/${sellerId}/outlayer.testnet/${sha}.bin`;
@@ -430,9 +447,11 @@ export function fastfsHost(sellerId: string, workDir: string): E2eDeps["host"] {
     const file = join(workDir, `${sha}.bin`);
     writeFileSync(file, blob);
     const env = { ...process.env, OUTLAYER_NETWORK: "testnet" };
-    const login = spawnSync("outlayer", ["login", "testnet"], { input: `${sellerId}\n${privateKey}\n`, env, encoding: "utf8" });
-    if (login.status !== 0) throw new Error(`outlayer login as ${sellerId} failed`);
-    const up = spawnSync("outlayer", ["upload", file], { env, encoding: "utf8" });
+    const up = await keepOutlayerLogin(process.env.HOME ?? "", async () => {
+      const login = spawnSync("outlayer", ["login", "testnet"], { input: `${sellerId}\n${privateKey}\n`, env, encoding: "utf8" });
+      if (login.status !== 0) throw new Error(`outlayer login as ${sellerId} failed`);
+      return spawnSync("outlayer", ["upload", file], { env, encoding: "utf8" });
+    });
     const url = /https:\/\/\S*fastfs\.io\/\S+/.exec(`${up.stdout}\n${up.stderr}`)?.[0]?.replace(/[)\].,]+$/, "");
     if (up.status !== 0 || !url) throw new Error(`outlayer upload failed (exit ${up.status})`);
     for (let i = 0; i < 72; i++) {

@@ -1,10 +1,10 @@
 // WS4-T10 acceptance with a fake chain: step order and evidence, the refund step needs both events, G3 triple equality.
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { hexToBytes, parseEvents } from "@arrow/sdk";
-import { type E2eDeps, runE2e } from "../src/e2e-testnet.ts";
+import { type E2eDeps, keepOutlayerLogin, runE2e } from "../src/e2e-testnet.ts";
 import { repoRoot } from "../src/lib/env.ts";
 import { BUYER, type Quirks, SELLER, world } from "./helpers/fakeChain.ts";
 
@@ -181,5 +181,33 @@ describe("e2e key store", () => {
     const again = fileKeys(path, "testnet:arrow-v2.arrowhq.testnet")(sha, "a.csv");
     expect(Buffer.from(again.key).toString("hex")).toBe(Buffer.from(testnet.key).toString("hex"));
     expect(Buffer.from(again.nonce).toString("hex")).toBe(Buffer.from(testnet.nonce).toString("hex"));
+  });
+});
+
+describe("OutLayer login (RH-14)", () => {
+  it("an upload signed by the seller leaves the earlier testnet login in place, even when it fails", async () => {
+    const home = mkdtempSync(join(tmpdir(), "arrow-ol-home-"));
+    try {
+      mkdirSync(join(home, ".outlayer/testnet"), { recursive: true });
+      const creds = join(home, ".outlayer/testnet/credentials.json");
+      writeFileSync(creds, '{"account_id":"arrow-v2.arrowhq.testnet"}');
+      writeFileSync(join(home, ".outlayer/default-network"), "testnet");
+      const seller = async () => {
+        writeFileSync(creds, '{"account_id":"e2e-seller.arrowhq.testnet"}');
+        writeFileSync(join(home, ".outlayer/default-network"), "mainnet");
+        return "uploaded";
+      };
+      expect(await keepOutlayerLogin(home, seller)).toBe("uploaded");
+      expect(readFileSync(creds, "utf8")).toContain("arrow-v2.arrowhq.testnet");
+      expect(readFileSync(join(home, ".outlayer/default-network"), "utf8")).toBe("testnet");
+      await expect(keepOutlayerLogin(home, async () => (await seller(), Promise.reject(new Error("upload failed"))))).rejects.toThrow("upload failed");
+      expect(readFileSync(creds, "utf8")).toContain("arrow-v2.arrowhq.testnet");
+      // no login before: none after
+      rmSync(creds);
+      await keepOutlayerLogin(home, seller);
+      expect(existsSync(creds)).toBe(false);
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
   });
 });

@@ -8,7 +8,7 @@ import { hexToBytes, NETWORKS, parseEvents } from "@arrow/sdk";
 import type { Ctx } from "../../agent/src/commands.ts";
 import { confirmSpend, EXIT_NEEDS_CONFIRM } from "../src/lib/confirm.ts";
 import { repoRoot } from "../src/lib/env.ts";
-import { AMOUNTS, configProblems, findRefundEvents, type MainnetDeps, type MainnetOpts, resumeFrom, runE2eMainnet, sellerShare, spendPlan } from "../src/e2e-mainnet.ts";
+import { AMOUNTS, configProblems, findRefundEvents, main, type MainnetDeps, type MainnetOpts, nextAfterStop, repoBlobHost, rerunBase, resumeFrom, runE2eMainnet, sellerShare, spendPlan, successValue, withdrawPayload } from "../src/e2e-mainnet.ts";
 import { BUYER, SELLER, world } from "./helpers/fakeChain.ts";
 import { fixture } from "../../agent/test/helpers.ts";
 
@@ -27,13 +27,12 @@ describe("spend plan", () => {
     expect(p.buyerAfter).toBe(1_999_596n + 4_998_000n - 500_000n - 500_000n - 2_000_000n - 25_000n);
     // seller: +0.5 funding -0.3 bonds +90% of 2 evals +98% of the price -1.00 outbound
     expect(p.sellerAfter).toBe(500_000n - 300_000n + 450_000n + 1_960_000n - 1_000_000n);
-    expect(p.h15Inbound).toBe(8_000_000n - p.buyerAfter);
     expect(p.shortfalls).toEqual([]);
     expect(p.spendsValue).toBe(true);
     const text = p.lines.join("\n");
-    expect(text).toContain("after this run, buyer Intents will hold ≈3.972596 USDC; H-15 needs ≥ 8.0 → H-15 inbound = max(3, 8.0 − 3.972596) = 4.027404 USDC");
+    expect(text).toContain("after this run, buyer Intents will hold ≈3.972596 USDC, seller ≈1.61 USDC");
+    expect(text).not.toContain("H-15");
     expect(text).toContain("step 8  eval L3: 0.25 USDC from the buyer, 0.225 refunded to the buyer's NEAR Intents balance (not to Base); a failed eval keeps the 10% treasury share");
-    expect(text).toContain("seller will hold ≈1.61 USDC; H-15 needs ≥ 3.5");
     expect(text).toContain("total leaving Base: 5 USDC + gas");
     expect(text).toContain("3 x 0.1 USDC listing bond");
   });
@@ -44,9 +43,12 @@ describe("spend plan", () => {
     expect(sellerShare(250_000n, 1000)).toBe(225_000n);
   });
 
-  it("H-15 inbound never drops below 3 USDC", () => {
-    const p = spendPlan({ ...BASE_PLAN, steps: ALL, buyerNow: 20_000_000n });
-    expect(p.h15Inbound).toBe(3_000_000n);
+  it("QA-09: the plan shows the worst case of the automatic eval retries (2 + 4 + 2 evals), only for the selected steps", () => {
+    const p = spendPlan({ ...BASE_PLAN, steps: ALL });
+    expect(p.worstEvalFees).toBe(2_000_000n);
+    expect(p.lines.join("\n")).toContain("worst case with the automatic retries: 8 evals = 2 USDC in eval fees from the buyer");
+    expect(spendPlan({ ...BASE_PLAN, steps: new Set([6, 7, 8, 9, 10]) }).worstEvalFees).toBe(500_000n);
+    expect(spendPlan({ ...BASE_PLAN, steps: new Set([6]) }).lines.join("\n")).not.toContain("worst case");
   });
 
   it("the plan covers only the selected steps and flags a balance that would go negative", () => {
@@ -359,5 +361,215 @@ describe("e2e-mainnet step machine", () => {
 
   it("AMOUNTS match the card: 5.00 inbound, 0.50 funding, 0.25 eval fee, 2.00 price, 1.00 outbound", () => {
     expect(AMOUNTS).toEqual({ inbound: 5_000_000n, fund: 500_000n, price: 2_000_000n, evalFee: 250_000n, outbound: 1_000_000n });
+  });
+});
+
+// ------------------------------------------------------------------ --mock-intents: the mainnet wasm rehearsed on testnet
+
+describe("mock-intents rehearsal (mainnet wasm on testnet)", () => {
+  const MOCK = "intents-rh.arrowhq.testnet";
+  const mockCfg = { ...fixture("config"), build: "mainnet", config: { ...fixture("config").config, outlayer: "outlayer.testnet", intents: MOCK, usdc_token_id: NETWORKS.mainnet.usdcToken } };
+  const pk = "04" + "11".repeat(64);
+  const mainnetVersion = { ...fixture("version"), build: "mainnet" };
+
+  it("expects the mainnet build and the mock as intents; the plain testnet rules stay as they were", () => {
+    const ok = configProblems({ network: "testnet", version: mainnetVersion, cfg: mockCfg, pk, release: { sha: mockCfg.config.program_wasm_hash, source: "release/sha256.txt", frozen: true }, mockIntents: MOCK });
+    expect(ok.problems).toEqual([]);
+    const other = configProblems({ network: "testnet", version: mainnetVersion, cfg: mockCfg, pk, release: null, mockIntents: "evil.testnet" });
+    expect(other.problems).toEqual([`intents is ${MOCK}, expected the mock evil.testnet`]);
+    // without the flag a mainnet build on testnet is still a blocker
+    expect(configProblems({ network: "testnet", version: mainnetVersion, cfg: mockCfg, pk, release: null }).problems).toEqual(["build is mainnet, not testnet"]);
+    expect(configProblems({ network: "testnet", version: fixture("version"), cfg: mockCfg, pk, release: null, mockIntents: MOCK }).problems).toEqual(["build is testnet, not mainnet"]);
+  });
+
+  it("step 8 passes on arrow_refund + the unused amount handed back to intents, and fails when the market returns another amount", async () => {
+    for (const [returned, status] of [[["225000"], "PASS"], [["250000"], "FAIL"]] as const) {
+      const { deps, run } = setup();
+      deps.mockIntents = MOCK;
+      const views = deps.ctx.views;
+      deps.ctx = { ...deps.ctx, views: { ...views, version: async () => mainnetVersion, config: async () => { const c = await views.config(); return { ...c, build: "mainnet", config: { ...c.config, intents: MOCK } }; } } };
+      deps.txReturn = async () => returned;
+      const r = await run();
+      const s8 = r.results.find((x) => x.n === 8)!;
+      expect(s8.status).toBe(status);
+      if (status === "PASS") {
+        expect(s8.summary).toContain('mt_on_transfer returned ["225000"]');
+        expect(r.exit).toBe(0);
+      } else expect(s8.summary).toContain('mt_on_transfer returned ["250000"] to intents, expected ["225000"]');
+    }
+  });
+
+  it("successValue decodes the final return value and is undefined while the tx has none", () => {
+    expect(successValue({ status: { SuccessValue: Buffer.from(JSON.stringify(["225000"])).toString("base64") } })).toEqual(["225000"]);
+    expect(successValue({ status: { SuccessValue: "" } })).toBeUndefined();
+    expect(successValue({ status: "Started" })).toBeUndefined();
+  });
+
+  it("--mock-intents is refused outside a testnet --dry run and without --blob-base", async () => {
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      expect(await main(["--network", "mainnet", "--mock-intents", MOCK])).toBe(2);
+      expect(await main(["--network", "testnet", "--dry-plan", "--mock-intents", MOCK, "--blob-base", "https://x.test"])).toBe(2);
+      expect(await main(["--network", "testnet", "--dry", "--mock-intents", MOCK])).toBe(2);
+    } finally {
+      err.mockRestore();
+    }
+  });
+});
+
+// ------------------------------------------------------------------ readiness fixes (docs/internal/readiness, 13 Nov)
+
+describe("a failed paid step stops the run (QA-02, QA-16, RH-01)", () => {
+  it("QA-02: step 1 REFUNDED twice stops before the seller funding, the listings and the evals; the next command checks 1Click first", async () => {
+    const t = setup({ mainnet: true });
+    t.deps.command = "npx tsx scripts/src/e2e-mainnet.ts --network mainnet --relay direct --blob-base https://b.test/blobs";
+    t.deps.inbound = async () => ({ status: "REFUNDED", baseTx: "0xbase", deposit: "0xdep", seconds: 40, block: 1, before: 0n, after: 0n, attempts: 2 });
+    const r = await t.run();
+    expect(r.exit).toBe(1);
+    expect(r.results.map((x) => [x.n, x.status])).toEqual([[0, "PASS"], [1, "FAIL"]]);
+    expect(t.calls.pay).toBe(0);
+    expect(t.w.listings.size).toBe(0);
+    const text = t.lines.join("\n");
+    expect(text).toContain("stopped after the failed step 1: no later step was paid");
+    expect(text).toContain("https://1click.chaindefuser.com/v0/status?depositAddress=");
+    expect(text).toContain("REFUNDED or FAILED (the USDC went back to Base): npx tsx scripts/src/e2e-mainnet.ts --network mainnet --relay direct --blob-base https://b.test/blobs --from-step 1");
+    expect(text).toContain("SUCCESS (it arrived late): npx tsx scripts/src/e2e-mainnet.ts --network mainnet --relay direct --blob-base https://b.test/blobs --from-step 2");
+  });
+
+  it("QA-02: a failed eval at step 4 stops the run before step 5 pays (it used to go on and pay steps 5, 6 and 8)", async () => {
+    // L1 must come out PASS; the BUY quirk makes step 4 FAIL after its eval was paid
+    const q = setup({ mainnet: true });
+    const quirk = world({ l1Verdict: "BUY" });
+    quirk.balances.set(BUYER, 10_000_000n);
+    quirk.balances.set(SELLER, 5_000_000n);
+    let pays = 0;
+    q.deps.ctx = {
+      ...q.deps.ctx,
+      views: { ...quirk.ctx.views, config: q.deps.ctx.views.config, version: q.deps.ctx.views.version },
+      transport: {
+        pay: async (a) => (pays++, quirk.ctx.transport.pay(a)),
+        transfer: async ({ actor, toId, amount }) => {
+          quirk.balances.set(actor.id, (quirk.balances.get(actor.id) ?? 0n) - amount);
+          quirk.balances.set(toId, (quirk.balances.get(toId) ?? 0n) + amount);
+          return { txHash: "fundtx", signerId: "arrow-relayer.arrowhq.near", url: "https://nearblocks.io/txns/fundtx" };
+        },
+      },
+      evidence: quirk.ctx.evidence,
+      wait: quirk.ctx.wait,
+    };
+    q.deps.balanceOf = async (id) => quirk.balances.get(id) ?? 0n;
+    q.deps.host = async (blob, sha) => {
+      const url = `https://host.test/${sha}.bin`;
+      quirk.blobs.set(url, blob);
+      return url;
+    };
+    q.deps.txEvents = async () => [];
+    const r = await q.run();
+    expect(r.results.map((x) => [x.n, x.status])).toEqual([[0, "PASS"], [1, "PASS"], [2, "PASS"], [3, "PASS"], [4, "FAIL"]]);
+    expect(pays).toBe(4); // 3 bonds + the step 4 eval, nothing after it
+    const text = q.lines.join("\n");
+    expect(text).toContain("stopped after the failed step 4");
+    expect(text).toMatch(/next: wait until qprobe shows every job started ≤ 30 s after its block, then npx tsx scripts\/src\/e2e-mainnet\.ts --network mainnet --from-step 4/);
+  });
+
+  it("QA-16: a step that throws after its payment says the money moved and names the --from-step that skips it", async () => {
+    const t = setup({ mainnet: true });
+    const views = t.deps.ctx.views;
+    // every read of the paid eval fails (an RPC 429 spell) until the settle timeout
+    t.deps.ctx = { ...t.deps.ctx, wait: { ...t.deps.ctx.wait, timeoutMs: 0 }, views: { ...views, eval: async () => { throw new Error("https://rpc.mainnet.near.org: HTTP 429"); } } };
+    const r = await t.run();
+    expect(r.results.at(-1)).toMatchObject({ n: 4, status: "FAIL" });
+    expect(t.calls.pay).toBe(4);
+    const text = t.lines.join("\n");
+    expect(text).toMatch(/step 4 sent https:\/\/testnet\.nearblocks\.io\/txns\/tx\d+ and then lost track of it: that money moved\. Never rerun step 4 blind\./);
+    expect(text).toContain(`npm run arrow -- status --network mainnet --listing ${r.listingIds.L1}`);
+    expect(text).toContain("that eval done or refunded: npx tsx scripts/src/e2e-mainnet.ts --network mainnet --from-step 5");
+    expect(text).not.toContain("--from-step 4 (evals already recorded");
+  });
+
+  it("failures after step 6 do not stop the run: step 8, 9 and 10 still run their checks", async () => {
+    const t = setup({ mainnet: true });
+    t.deps.outbound = async () => ({ status: "FAILED", deposit: "0xd", solTx: null, route: "generate-intent", nearTx: null });
+    const r = await t.run();
+    expect(r.results.find((x) => x.n === 9)!.status).toBe("FAIL");
+    expect(r.results.find((x) => x.n === 10)!.status).toBe("PASS");
+    expect(t.lines.join("\n")).not.toContain("stopped after");
+  });
+
+  it("RH-01: --to-step 5 stops before the buy and prints the queue probe and the --from-step 6 command; the resume pays only steps 6 and 8", async () => {
+    const t = setup({ mainnet: true });
+    t.deps.command = "npx tsx scripts/src/e2e-mainnet.ts --network mainnet";
+    const a = await t.run({ to: 5 });
+    expect(a.exit).toBe(0);
+    expect(a.results.map((x) => x.n)).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(t.lines.at(-1)).toBe("next: run the OutLayer queue probe (qprobe); when every job started ≤ 10 s after its block: npx tsx scripts/src/e2e-mainnet.ts --network mainnet --from-step 6");
+    expect(a.plan?.lines.join("\n")).not.toMatch(/step (6|8|9) /);
+    const before = t.calls.pay;
+    const b = await t.run({ from: 6 });
+    expect(b.exit).toBe(0);
+    expect(b.results.map((x) => [x.n, x.status])).toEqual([[6, "PASS"], [7, "PASS"], [8, "PASS"], [9, "PASS"], [10, "PASS"]]);
+    expect(t.calls.pay - before).toBe(2); // the buy and the broken-host eval
+  });
+
+  it("rerunBase drops --from-step, --only and the approval flags, and keeps --to-step so a retry in part 14a still stops before the buy", () => {
+    expect(rerunBase(["--network", "mainnet", "--relay", "direct", "--from-step", "4", "--yes", "--to-step", "5", "--only=6", "--blob-base", "https://b.test/blobs"]))
+      .toBe("npx tsx scripts/src/e2e-mainnet.ts --network mainnet --relay direct --to-step 5 --blob-base https://b.test/blobs");
+  });
+
+  it("part 14a: a failed eval prints a retry that keeps --to-step 5; a green 14a prints --from-step 6 without it", async () => {
+    const t = setup({ mainnet: true });
+    t.deps.command = "npx tsx scripts/src/e2e-mainnet.ts --network mainnet --to-step 5";
+    expect((await t.run({ to: 5 })).exit).toBe(0);
+    expect(t.lines.at(-1)).toContain("qprobe); when every job started ≤ 10 s after its block: npx tsx scripts/src/e2e-mainnet.ts --network mainnet --from-step 6");
+    expect(nextAfterStop(4, { command: t.deps.command, network: "mainnet" }).join("\n")).toContain("--network mainnet --to-step 5 --from-step 4");
+  });
+
+  it("nextAfterStop: step 2 reads the seller balance first, step 3 relists and never goes back to steps 1-2, step 6 waits for a fast queue", () => {
+    const p = { command: "C", network: "mainnet" as const };
+    expect(nextAfterStop(2, p).join("\n")).toContain("it rose by 0.5: C --from-step 3 · it did not: C --from-step 2");
+    expect(nextAfterStop(3, p).join("\n")).toContain("C --from-step 3 lists all three again");
+    expect(nextAfterStop(6, p).join("\n")).toContain("Wait until qprobe shows ≤ 10 s, then C --from-step 6");
+  });
+});
+
+describe("outbound: only an exact withdrawal is signed (S3)", () => {
+  const deposit = "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90";
+  const expected = { signerId: "0xA54B000000000000000000000000000000004B73", depositAddress: deposit, amount: "1000000" };
+  const payload = (intents: unknown[]) => JSON.stringify({ verifying_contract: "intents.near", signer_id: expected.signerId.toLowerCase(), deadline: "2026-11-16T15:22:24Z", nonce: "x", intents });
+  const good = payload([{ intent: "transfer", receiver_id: deposit, tokens: { [NETWORKS.mainnet.usdcToken]: "1000000" } }]);
+
+  it("passes the live-shaped 1Click payload through unchanged", () => {
+    expect(withdrawPayload({ standard: "erc191", payload: good }, expected)).toBe(good);
+  });
+
+  it.each([
+    ["an add_public_key intent", payload([{ intent: "add_public_key", public_key: "ed25519:evil" }])],
+    ["a transfer to another receiver", payload([{ intent: "transfer", receiver_id: "evil.near", tokens: { [NETWORKS.mainnet.usdcToken]: "1000000" } }])],
+    ["a larger amount", payload([{ intent: "transfer", receiver_id: deposit, tokens: { [NETWORKS.mainnet.usdcToken]: "9000000" } }])],
+    ["a second intent", payload([JSON.parse(good).intents[0], { intent: "transfer", receiver_id: "evil.near", tokens: { [NETWORKS.mainnet.usdcToken]: "1" } }])],
+  ])("refuses %s before anything is signed", (_what, bad) => {
+    expect(() => withdrawPayload({ standard: "erc191", payload: bad }, expected)).toThrow(/nothing was signed/);
+  });
+
+  it("refuses a non-ERC-191 payload", () => {
+    expect(() => withdrawPayload({ standard: "nep413", payload: good }, expected)).toThrow("ERC-191 expected");
+  });
+});
+
+describe("small readiness fixes", () => {
+  it("RH-10: a missing e2e blob tells the human to upload it to the blob base (runbook step 12), not to commit it", async () => {
+    const host = repoBlobHost("http://127.0.0.1:9/blobs/", work);
+    const err = await host(new Uint8Array([1, 2, 3]), "ab".repeat(32)).catch((e: Error) => e.message);
+    expect(err).toContain(`upload ${join(work, "fixtures/blobs/e2e", `${"ab".repeat(32)}.bin`)}`);
+    expect(err).toContain("to http://127.0.0.1:9/blobs/ (runbook step 12), then rerun");
+    expect(err).not.toContain("commit");
+  });
+
+  it("S12: the L2 listing says its demo purchase key is public, within the contract's 280-char limit", async () => {
+    const t = setup();
+    await t.run({ only: 3 });
+    const l2 = [...t.w.listings.values()].find((l) => l.title.includes("wallet labels"));
+    expect(l2.public_desc).toContain("public demo viewing key, so anyone can already decrypt this file");
+    expect([...l2.public_desc].length).toBeLessThanOrEqual(280);
   });
 });

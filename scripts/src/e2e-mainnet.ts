@@ -1,11 +1,19 @@
 // WS4-T15 (H-14): one real pass of the whole market on mainnet, or the same step machine on testnet with --dry.
 //   npx tsx scripts/src/e2e-mainnet.ts [--network mainnet|testnet] [--dry | --dry-plan] [--yes] [--relay direct|hosted]
 //        [--skip-inbound] [--skip-outbound] [--from-step N] [--only N] [--blob-base <https prefix>] [--buyer <acct>] [--seller <acct>]
+//        [--mock-intents <testnet acct>] [--to-step N]
 // 0 preflight · 1 inbound (Base -> Intents) · 2 seller funding · 3 list x3 · 4 eval L1 (PASS) · 5 eval L2 (BUY) · 6 buy L2 (demo key)
 // · 7 decrypt + hash triple · 8 eval on the broken-host listing -> refund · 9 outbound (Intents -> Solana) · 10 leak budget.
 //   mainnet      moves real USDC: a human runs it (H-14), types y at the spend plan, and agents never pass --yes.
 //   --dry-plan   preflight + spend plan only, sends nothing (either network).
+//   --to-step N  stop after step N (with --from-step N+1 later: e.g. a fresh OutLayer queue probe right before the buy, step 6).
+//   A FAIL in a paying step 1-6 stops the run and prints the exact next command (QA-02): later steps would pay on top of it.
 //   --dry        testnet rehearsal: steps 1, 2 and 9 are mainnet-only and skipped, the other 8 run against the testnet deploy.
+//   --mock-intents <acct>  with --network testnet --dry: dress rehearsal of the MAINNET contract wasm on testnet. The market
+//                (ARROW_CONTRACT_TESTNET) runs release/contracts/arrow-mainnet.wasm with `intents` = <acct>, a testnet account
+//                that signs mt_on_transfer itself in place of intents.near (key from ~/.near-credentials/testnet). Buyer and
+//                seller are the mainnet EVM ids from .env (nothing is signed with them). Step 8 checks the unused amount the
+//                market hands back to intents' mt_resolve_transfer instead of a token balance. Needs --blob-base.
 // Refunds land in the buyer's NEAR Intents balance, not in the Base wallet (DEC K-05).
 // Exit: 0 all green (WARN allowed), 1 a step failed, 3 steps were skipped, 5 spend not confirmed.
 import "./lib/require-node.ts";
@@ -14,7 +22,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { KeyPair } from "near-api-js";
+import { Account, KeyPair } from "near-api-js";
 import {
   BITS_PER_EVAL_MILLI, type ConfigView, encryptFile, formatUsdc, type Network, type NearEvent, NETWORKS, oneclick,
   parseEvents, prepareList, resolveNetwork, sha256Hex, signRawErc191, txStatus, type VersionView, view, viewAccessKey, viewAccount,
@@ -23,7 +31,7 @@ import { buyCommand, type Ctx, decryptCommand, type DecryptResult, evalCommand, 
 import { configDir, resolveActor } from "../../agent/src/keys.ts";
 import { readTable } from "../../agent/src/data.ts";
 import { findEventId, SettleTimeout } from "../../agent/src/settle.ts";
-import { muteRateLimitNoise, realTransport, type PaidTx, type RelayMode, type Transport } from "../../agent/src/transport.ts";
+import { muteRateLimitNoise, realTransport, retryRateLimited, rpcProvider, type PaidTx, type RelayMode, type Transport } from "../../agent/src/transport.ts";
 import { makeViews } from "../../agent/src/views.ts";
 import { ethBalance, sendUsdc, usdcBalance, waitReceipt } from "./lib/base.ts";
 import { confirmSpend } from "./lib/confirm.ts";
@@ -31,6 +39,7 @@ import { loadEnv, repoRoot } from "./lib/env.ts";
 import { appendRun, type EvidenceRun, readEvidence } from "./lib/evidence.ts";
 import { mtBalanceOf } from "./lib/intents.ts";
 import { explorerTx, log, mask } from "./lib/log.ts";
+import { nearKey } from "./lib/keystore.ts";
 import { balanceWarnings, INTENTS_METHODS, keyProblems } from "./lib/relayer.ts";
 import { fastfsHost, fileKeys, serves, type Status } from "./e2e-testnet.ts";
 
@@ -49,6 +58,9 @@ export const LAST_STEP = 10;
 export const MAINNET_ONLY = new Set([1, 2, 9]);
 /** steps that move value on mainnet */
 const SPENDS = [1, 2, 3, 4, 5, 6, 8, 9];
+/** A FAIL here stops the run: every later step would pay on top of a broken state, or (step 1) money may still be on its way (QA-02). */
+export const STOP_ON_FAIL = new Set([1, 2, 3, 4, 5, 6]);
+const ONECLICK_STATUS = (deposit: string) => `curl -s 'https://1click.chaindefuser.com/v0/status?depositAddress=${deposit}' | jq -r .status`;
 const UNLOCK = "fixtures/demo/unlock-schedule-412.csv";
 const LABELS = "fixtures/demo/wallet-labels-1000.csv";
 // Card amounts (USDC base units, 6 decimals). DEC K-06 demo prices: price 2.00, eval fee 0.25.
@@ -56,15 +68,12 @@ export const AMOUNTS = { inbound: 5_000_000n, fund: 500_000n, price: 2_000_000n,
 const PRICE = AMOUNTS.price.toString();
 const EVAL_FEE = AMOUNTS.evalFee.toString();
 const MAX_EVALS = 50;
-const H15_BUYER_NEEDS = 8_000_000n;
-const H15_SELLER_NEEDS = 3_500_000n;
-const H15_MIN_INBOUND = 3_000_000n;
 const MIN_ETH_WEI = 500_000_000_000_000n; // 0.0005 ETH, H-14 precondition
 const BROKEN_HOST = (sha: string) => `https://blob-host-missing.invalid/${sha}.bin`;
 
 const LISTING_SPECS: Record<Slot, { file: string; title: string; desc: string }> = {
   L1: { file: UNLOCK, title: "[synthetic] Q1 2027 token unlock schedule (412 rows)", desc: "Synthetic end-to-end test data: a fictional Q1 2027 token unlock schedule. Made by the Arrow team." },
-  L2: { file: LABELS, title: "[synthetic] NEAR DeFi wallet labels (1,000 rows)", desc: "Synthetic end-to-end test data: fictional labels for 1,000 NEAR DeFi wallets. Made by the Arrow team." },
+  L2: { file: LABELS, title: "[synthetic] NEAR DeFi wallet labels (1,000 rows)", desc: "Synthetic end-to-end test data: fictional labels for 1,000 NEAR DeFi wallets. Made by the Arrow team. Our own test purchase used the public demo viewing key, so anyone can already decrypt this file from the chain." },
   L3: { file: LABELS, title: "[synthetic] e2e broken host", desc: "Synthetic end-to-end test data. The ciphertext host is missing on purpose, so every eval must refund." },
 };
 
@@ -97,8 +106,8 @@ export interface Plan {
   lines: string[];
   buyerAfter: bigint;
   sellerAfter: bigint;
-  /** H-15 inbound in base units: max(3, 8.0 - buyerAfter) */
-  h15Inbound: bigint;
+  /** what the buyer pays in eval fees if every automatic retry fires (step 4: 2 evals, step 5: 4, step 8: 2) */
+  worstEvalFees: bigint;
   /** a balance would go below zero at some step: the run would fail half way and strand money */
   shortfalls: string[];
   spendsValue: boolean;
@@ -155,12 +164,13 @@ export function spendPlan(i: PlanInput): Plan {
     lines.push(`step 9  outbound: ${f(AMOUNTS.outbound)} USDC seller Intents -> Solana through 1Click`);
     check(9);
   }
-  const needed = H15_BUYER_NEEDS - buyer;
-  const h15Inbound = needed > H15_MIN_INBOUND ? needed : H15_MIN_INBOUND;
   lines.push(`total leaving Base: ${has(1) ? `${f(AMOUNTS.inbound)} USDC + gas` : "nothing"} (bonds, fees and the price stay inside Intents; treasury shares are not tracked)`);
-  lines.push(`after this run, buyer Intents will hold ≈${fs(buyer)} USDC; H-15 needs ≥ 8.0 → H-15 inbound = max(3, 8.0 − ${fs(buyer)}) = ${f(h15Inbound)} USDC`);
-  lines.push(`seller will hold ≈${fs(seller)} USDC; H-15 needs ≥ 3.5${seller < H15_SELLER_NEEDS ? ` (short by ${f(H15_SELLER_NEEDS - seller)}: a step 2 style transfer covers it)` : ""}`);
-  return { lines, buyerAfter: buyer, sellerAfter: seller, h15Inbound, shortfalls, spendsValue: SPENDS.some(has) };
+  lines.push(`after this run, buyer Intents will hold ≈${fs(buyer)} USDC, seller ≈${fs(seller)} USDC`);
+  // evalRetry repeats a null refund once; step 5 also repeats a completed non-BUY verdict once (QA-09)
+  const evals = (has(4) ? 2 : 0) + (has(5) ? 4 : 0) + (has(8) ? 2 : 0);
+  const worstEvalFees = BigInt(evals) * AMOUNTS.evalFee;
+  if (evals) lines.push(`worst case with the automatic retries: ${evals} evals = ${f(worstEvalFees)} USDC in eval fees from the buyer (a refunded eval returns all but the ${i.feeBpsEval / 100}% treasury share; every share goes to team wallets)`);
+  return { lines, buyerAfter: buyer, sellerAfter: seller, worstEvalFees, shortfalls, spendsValue: SPENDS.some(has) };
 }
 
 // ---------------------------------------------------------------------- preflight rules
@@ -173,11 +183,14 @@ export interface ReleaseSha {
 }
 
 /** The on-chain config against what H-14 expects. Blockers and warnings are kept apart. */
-export function configProblems(p: { network: Network; version: VersionView; cfg: ConfigView; pk: string | null; release: ReleaseSha | null }): { problems: string[]; warnings: string[] } {
+export function configProblems(p: { network: Network; version: VersionView; cfg: ConfigView; pk: string | null; release: ReleaseSha | null; mockIntents?: string }): { problems: string[]; warnings: string[] } {
   const problems: string[] = [];
   const warnings: string[] = [];
   const c = p.cfg.config as { outlayer?: string; intents?: string | null; usdc_token_id?: string; program_wasm_hash?: string };
-  if (p.version.build !== p.network) problems.push(`build is ${p.version.build}, not ${p.network}`);
+  // the mock-intents rehearsal runs the mainnet build on testnet
+  const build = p.mockIntents ? "mainnet" : p.network;
+  if (p.version.build !== build) problems.push(`build is ${p.version.build}, not ${build}`);
+  if (p.mockIntents && c.intents !== p.mockIntents) problems.push(`intents is ${c.intents}, expected the mock ${p.mockIntents}`);
   if (p.cfg.paused) problems.push("contract is paused");
   const outlayer = p.network === "mainnet" ? "outlayer.near" : "outlayer.testnet";
   if (c.outlayer !== outlayer) problems.push(`outlayer is ${c.outlayer}, expected ${outlayer}`);
@@ -285,6 +298,10 @@ export interface MainnetDeps {
   ctx: Ctx;
   /** testnet rehearsal: steps 1, 2 and 9 are not applicable */
   dry: boolean;
+  /** testnet account that stands in for intents.near (the mainnet wasm on testnet): step 8 reads the returned unused amount */
+  mockIntents?: string;
+  /** The JSON value the transaction finally returned (what intents' mt_resolve_transfer reads); mock-intents runs only. */
+  txReturn?(txHash: string): Promise<unknown>;
   buyerId: string;
   sellerId: string;
   contract: string;
@@ -310,10 +327,14 @@ export interface MainnetDeps {
   /** Compact UTC stamp that makes evidence ids unique per run. */
   stamp: string;
   say(line: string): void;
+  /** the command line that started this run without --from-step/--only/--yes (it keeps --to-step): the base of every printed next command */
+  command?: string;
 }
 
 export interface MainnetOpts {
   from: number;
+  /** last step to run (inclusive) */
+  to?: number;
   only?: number;
   dryPlan?: boolean;
   skipInbound?: boolean;
@@ -331,11 +352,20 @@ export interface MainnetReport {
 export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promise<MainnetReport> {
   const network = deps.ctx.network;
   const mainnet = network === "mainnet";
-  const sel = (n: number) => (opts.only === undefined || opts.only === n) && n >= opts.from;
+  const sel = (n: number) => (opts.only === undefined || opts.only === n) && n >= opts.from && (opts.to === undefined || n <= opts.to);
   const selected = new Set([...Array(LAST_STEP + 1).keys()].filter(sel));
   const prefix = `e2e-${deps.dry ? "dry" : "mainnet"}-${deps.stamp}`;
+  /** the step that is running, and every payment each step sent: a step that throws after paying has moved money (QA-16) */
+  let current = 0;
+  const paidIn = new Map<number, PaidTx[]>();
+  const note = async (p: Promise<PaidTx>) => {
+    const t = await p;
+    paidIn.set(current, [...(paidIn.get(current) ?? []), t]);
+    return t;
+  };
   const ctx: Ctx = {
     ...deps.ctx,
+    transport: { pay: (a) => note(deps.ctx.transport.pay(a)), transfer: (a) => note(deps.ctx.transport.transfer(a)) },
     // the single spend plan approved up front covers every payment below
     confirm: async () => {},
     evidence: (run) =>
@@ -373,14 +403,14 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
     const cfg = await ctx.views.config();
     const pk = await ctx.views.programPubkey();
     const c = cfg.config as { listing_bond?: string; fee_bps_eval?: number; fee_bps_sale?: number; program_wasm_hash?: string };
-    const checked = configProblems({ network, version: v, cfg, pk, release: deps.release });
+    const checked = configProblems({ network, version: v, cfg, pk, release: deps.release, mockIntents: deps.mockIntents });
     problems.push(...checked.problems);
     warnings.push(...checked.warnings);
     const tank = big(cfg.tank_available);
     if (tank < tankNeeded(cfg)) problems.push(`gas tank ${tank} yoctoNEAR is below ${tankNeeded(cfg)} (3 evals + 1 release)`);
     for (const [role, id] of [["buyer", deps.buyerId], ["seller", deps.sellerId]] as const) {
       const a = ctx.actor(role);
-      if (mainnet ? !a.evm : !a.nearSecret) problems.push(`no ${mainnet ? "EVM key" : "NEAR key"} for the ${role} ${id}`);
+      if (!deps.mockIntents && (mainnet ? !a.evm : !a.nearSecret)) problems.push(`no ${mainnet ? "EVM key" : "NEAR key"} for the ${role} ${id}`);
     }
     if (deps.buyerId === deps.sellerId) problems.push("buyer and seller are the same account");
 
@@ -587,6 +617,7 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
     if (r.status === "refunded" && r.refund_reason === "null") r = await evalOnce("L3", critPath("demo-buy.json"));
     if (r.status !== "refunded") return { n: 8, status: "FAIL", summary: `expected a refund, got ${verdictText(r)}`, link: r.tx_url };
     if (r.refund_reason !== "not_ok") return { n: 8, status: "FAIL", summary: `refund reason "${r.refund_reason}", expected "not_ok" (enclave fetch/ok:false)`, link: r.tx_url };
+    if (deps.mockIntents) return mockRefund(r);
     let found = findRefundEvents([], { network, contract: deps.contract, buyerId: deps.buyerId, evalId: r.eval_id });
     for (let i = 0; i < 20 && !(found.refund && found.transfer); i++) {
       const events = await deps.txEvents(r.tx).catch(() => []);
@@ -608,6 +639,24 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
     }
     if (after !== before - kept) return { n: 8, status: "FAIL", summary: `buyer balance ${f(before)} before, ${f(after)} after the refund (expected ${fs(before - kept)})`, link: r.tx_url };
     return { n: 8, status: "PASS", summary: `arrow_refund{reason:"not_ok"} + ${what} ${f(back)} USDC + buyer ${mainnet ? "Intents " : ""}balance ${f(after)} (the treasury kept ${f(kept)})`, link: r.tx_url };
+  }
+
+  /** Mock-intents rehearsal: no token moves, so the proof is the arrow_refund event plus the unused amount handed back to intents. */
+  async function mockRefund(r: EvalResult): Promise<StepResult> {
+    const bps = ((await ctx.views.config()).config as { fee_bps_eval?: number }).fee_bps_eval ?? 1000;
+    const back = failRefund(big(EVAL_FEE), bps);
+    let refund: any;
+    let returned: unknown;
+    for (let i = 0; i < 20 && !(refund && returned !== undefined); i++) {
+      const events = await deps.txEvents(r.tx).catch(() => []);
+      refund = events.filter((e) => e.standard === "arrow" && e.event === "arrow_refund").flatMap(items).find((d) => d.kind === "eval" && Number(d.id) === r.eval_id);
+      returned = await deps.txReturn?.(r.tx).catch(() => undefined);
+      if (!(refund && returned !== undefined)) await deps.sleep(3000);
+    }
+    if (!refund) return { n: 8, status: "FAIL", summary: "no arrow_refund event in the payment transaction", link: r.tx_url };
+    if (String(refund.amount) !== String(back)) return { n: 8, status: "FAIL", summary: `arrow_refund amount ${refund.amount}, expected ${back}`, link: r.tx_url };
+    if (JSON.stringify(returned) !== JSON.stringify([String(back)])) return { n: 8, status: "FAIL", summary: `mt_on_transfer returned ${JSON.stringify(returned)} to intents, expected ["${back}"]`, link: r.tx_url };
+    return { n: 8, status: "PASS", summary: `arrow_refund{reason:"not_ok"} ${f(back)} USDC + mt_on_transfer returned ["${back}"] for intents' mt_resolve_transfer (mock ${deps.mockIntents}; no token moved)`, link: r.tx_url };
   }
 
   async function outbound(): Promise<StepResult> {
@@ -672,8 +721,14 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
   }
 
   let aborted = false;
+  let stopped: { n: number; lostTx?: PaidTx[] } | undefined;
+  const stop = (n: number, threw: boolean) => {
+    aborted = true;
+    stopped = { n, ...(threw && paidIn.has(n) && { lostTx: paidIn.get(n) }) };
+  };
   for (const [n, fn] of plan) {
     if (aborted) break;
+    current = n;
     if (n !== 0 && (!selected.has(n) || opts.dryPlan)) continue;
     if (n !== 0 && deps.dry && MAINNET_ONLY.has(n)) {
       emit({ n, status: "SKIP", summary: "mainnet-only: skipped in dry", na: true });
@@ -689,8 +744,10 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
     }
     try {
       const r = await fn();
-      if (n !== 0) emit(r);
-      else {
+      if (n !== 0) {
+        emit(r);
+        if (r.status === "FAIL" && STOP_ON_FAIL.has(n)) stop(n, false);
+      } else {
         // the preflight always runs (its numbers feed the plan) but is printed only when asked for or when it fails
         if (selected.has(0) || opts.dryPlan || r.status === "FAIL") emit(r);
         if (r.status === "FAIL") aborted = true;
@@ -699,6 +756,7 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
     } catch (e) {
       emit({ n, status: "FAIL", summary: e instanceof SettleTimeout ? e.message : mask(e instanceof Error ? e.message : String(e)) });
       if (n === 0) aborted = true;
+      else if (STOP_ON_FAIL.has(n)) stop(n, true);
     }
   }
 
@@ -715,20 +773,82 @@ export async function runE2eMainnet(deps: MainnetDeps, opts: MainnetOpts): Promi
   const counted = results.filter((r) => !r.na);
   const count = (s: Status) => counted.filter((r) => r.status === s).length;
   const green = count("PASS") + count("WARN");
-  const head = deps.dry ? "E2E mainnet (dry on testnet)" : "E2E mainnet";
+  const head = deps.mockIntents ? "E2E mainnet (mainnet wasm on testnet, mock intents)" : deps.dry ? "E2E mainnet (dry on testnet)" : "E2E mainnet";
   const unit = deps.dry ? "applicable steps green" : "green";
   const summary = opts.dryPlan
     ? `E2E mainnet (${network}) dry-plan: preflight ${count("FAIL") ? "FAILED" : "green"}${S.plan ? " · spend plan printed" : ""} · nothing sent`
     : `${head}: ${green}/${counted.length} ${unit}` + (count("WARN") ? ` (${count("WARN")} WARN)` : "") + (count("SKIP") ? ` · ${count("SKIP")} skipped` : "") + (count("FAIL") ? ` · ${count("FAIL")} FAILED` : "");
   deps.say(summary);
-  if (!opts.dryPlan && mainnet && count("FAIL") === 0 && count("SKIP") === 0) deps.say(`next: npm run verify -- --network mainnet --only e2e --pre-lock`);
-  if (count("FAIL") > 0 && !opts.dryPlan) deps.say(`if a step failed, do not rerun from scratch: paste this output; the agent names the exact --from-step N command`);
+  const command = deps.command ?? `npx tsx ${SCRIPT} --network ${network}`;
+  const partial = opts.to !== undefined && opts.to < LAST_STEP && opts.only === undefined;
+  if (stopped) {
+    deps.say(`stopped after the failed step ${stopped.n}: no later step was paid`);
+    for (const l of nextAfterStop(stopped.n, { command, network, lostTx: stopped.lostTx, listingIds: S.ids })) deps.say(`next: ${l}`);
+  } else if (count("FAIL") > 0 && !opts.dryPlan) deps.say(`if a step failed, do not rerun from scratch: paste this output; the agent names the exact --from-step N command`);
+  else if (!opts.dryPlan && partial && count("SKIP") === 0) deps.say(`next: run the OutLayer queue probe (qprobe); when every job started ≤ ${opts.to! + 1 === 6 ? "10" : "30"} s after its block: ${command.replace(/ --to-step[ =]\d+/, "")} --from-step ${opts.to! + 1}`);
+  else if (!opts.dryPlan && mainnet && count("FAIL") === 0 && count("SKIP") === 0) deps.say(`next: npm run verify -- --network mainnet --only e2e --pre-lock`);
   return { results, listingIds: S.ids, exit: count("FAIL") ? 1 : count("SKIP") ? 3 : 0, summary, plan: S.plan };
+}
+
+/** The exact next command after a FAIL stopped the run at step n (QA-02, QA-16). Pure, so the tests read the same words the human does. */
+export function nextAfterStop(n: number, p: { command: string; network: Network; lostTx?: PaidTx[]; listingIds?: Partial<Record<Slot, number>> }): string[] {
+  const run = (flags: string) => `${p.command} ${flags}`;
+  const out: string[] = [];
+  if (p.lostTx?.length) {
+    const slot = n === 4 ? "L1" : n === 5 || n === 6 ? "L2" : undefined;
+    const id = slot ? p.listingIds?.[slot] : undefined;
+    out.push(`step ${n} sent ${p.lostTx.map((t) => t.url).join(", ")} and then lost track of it: that money moved. Never rerun step ${n} blind.`);
+    out.push(`read what happened first: npm run arrow -- status --network ${p.network}${id !== undefined ? ` --listing ${id}` : ""} (and the tx link above)`);
+    if (n === 4 || n === 5) out.push(`that eval done or refunded: ${run(`--from-step ${n + 1}`)} · still pending: wait 2 min and read it again`);
+    if (n === 6) out.push(`purchase done: ${run("--from-step 7")} · refunded: wait for the queue, then ${run("--from-step 6")} · pending: wait 2 min and read it again`);
+    if (n !== 4 && n !== 5 && n !== 6) out.push("then follow the line below for this step");
+  }
+  switch (n) {
+    case 1:
+      out.push("step 1 failed before anything else was paid. Before any rerun, read the 1Click status of the deposit address printed above:");
+      out.push(`  ${ONECLICK_STATUS("<deposit address>")}`);
+      out.push(`  REFUNDED or FAILED (the USDC went back to Base): ${run("--from-step 1")}`);
+      out.push(`  SUCCESS (it arrived late): ${run("--from-step 2")}`);
+      out.push("  anything else (PENDING_DEPOSIT, KNOWN_DEPOSIT_TX, PROCESSING): wait and read it again; never start a second inbound while one is open");
+      break;
+    case 2:
+      out.push(`the 0.5 USDC transfer may still land. Read the seller's Intents balance first: npx tsx scripts/src/balances.ts --network ${p.network}`);
+      out.push(`  it rose by 0.5: ${run("--from-step 3")} · it did not: ${run("--from-step 2")}`);
+      break;
+    case 3:
+      out.push(`${run("--from-step 3")} lists all three again (3 more bonds); listings made before the failure stay on chain (there is no delist). Never rerun --from-step 1 or 2: they would pay again`);
+      break;
+    case 4:
+    case 5:
+      if (!p.lostTx?.length) out.push(`wait until qprobe shows every job started ≤ 30 s after its block, then ${run(`--from-step ${n}`)} (evals already recorded are not paid again)`);
+      break;
+    case 6:
+      if (!p.lostTx?.length) out.push(`a refunded buy returned the full price. Wait until qprobe shows ≤ 10 s, then ${run("--from-step 6")}`);
+      break;
+  }
+  return out;
+}
+
+/** The command line of this run without --from-step, --only and the approval flags: the base of every printed next command. It keeps --to-step, so a retry inside part 14a still stops before the buy. */
+export function rerunBase(argv: string[]): string {
+  const drop = new Set(["--from-step", "--only"]);
+  const keep: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    const name = a.split("=")[0];
+    if (drop.has(name)) {
+      if (!a.includes("=")) i++;
+      continue;
+    }
+    if (a === "--yes" || a === "--dry-plan") continue;
+    keep.push(a);
+  }
+  return ["npx tsx", SCRIPT, ...keep].join(" ");
 }
 
 // ---------------------------------------------------------------------- real dependencies
 
-/** Hosts the e2e ciphertexts at <blobBase>/<sha>.bin. When one is missing it is written to fixtures/blobs/e2e/ for the human to commit and push (D4-13). */
+/** Hosts the e2e ciphertexts at <blobBase>/<sha>.bin. When one is missing it is written to fixtures/blobs/e2e/ for the human to upload (runbook step 12). */
 export function repoBlobHost(blobBase: string, repo: string): MainnetDeps["host"] {
   return async (blob, sha) => {
     const url = `${blobBase.replace(/\/+$/, "")}/${sha}.bin`;
@@ -737,8 +857,15 @@ export function repoBlobHost(blobBase: string, repo: string): MainnetDeps["host"
     mkdirSync(dir, { recursive: true });
     const file = join(dir, `${sha}.bin`);
     writeFileSync(file, blob);
-    throw new Error(`${url} does not serve the ciphertext: commit and push ${file} (sha256 ${sha}, ${blob.length} bytes) at the freeze commit, then rerun`);
+    throw new Error(`${url} does not serve the ciphertext: upload ${file} (sha256 ${sha}, ${blob.length} bytes) to ${blobBase.replace(/\/+$/, "")}/ (runbook step 12), then rerun`);
   };
+}
+
+/** The 1Click generate-intent payload, only if it is exactly this withdrawal: one USDC transfer of `amount` to the quote's deposit address (S3, QA-08/CRY-1). Throws before anything is signed. */
+export function withdrawPayload(intent: { standard?: string; payload?: unknown }, expected: { signerId: string; depositAddress: string; amount: string }): string {
+  if (intent.standard !== "erc191" || typeof intent.payload !== "string") throw new Error(`1Click returned a ${intent.standard} payload, ERC-191 expected`);
+  oneclick.assertWithdrawIntent(intent.payload, expected);
+  return intent.payload;
 }
 
 export const destinationTxHash = (s: { swapDetails?: Record<string, unknown> } | null): string | null => {
@@ -753,7 +880,7 @@ function parseStep(s: string | undefined, name: string): number | undefined {
   return n;
 }
 
-const USAGE = "usage: npx tsx scripts/src/e2e-mainnet.ts [--network mainnet|testnet] [--dry | --dry-plan] [--yes] [--relay direct|hosted] [--skip-inbound] [--skip-outbound] [--from-step N] [--only N] [--blob-base <https prefix>] [--buyer <acct>] [--seller <acct>]";
+const USAGE = "usage: npx tsx scripts/src/e2e-mainnet.ts [--network mainnet|testnet] [--dry | --dry-plan] [--yes] [--relay direct|hosted] [--skip-inbound] [--skip-outbound] [--from-step N] [--only N] [--blob-base <https prefix>] [--buyer <acct>] [--seller <acct>] [--mock-intents <testnet acct>] [--to-step N]";
 
 export async function main(argv: string[]): Promise<number> {
   const { values: v } = parseArgs({
@@ -762,6 +889,7 @@ export async function main(argv: string[]): Promise<number> {
       network: { type: "string", default: "mainnet" }, dry: { type: "boolean" }, "dry-plan": { type: "boolean" }, yes: { type: "boolean" },
       relay: { type: "string", default: "direct" }, "skip-inbound": { type: "boolean" }, "skip-outbound": { type: "boolean" },
       "from-step": { type: "string" }, only: { type: "string" }, "blob-base": { type: "string" }, buyer: { type: "string" }, seller: { type: "string" },
+      "mock-intents": { type: "string" }, "to-step": { type: "string" },
       help: { type: "boolean", short: "h" },
     },
     strict: true,
@@ -776,14 +904,20 @@ export async function main(argv: string[]): Promise<number> {
   if (v.relay !== "direct" && v.relay !== "hosted") return usage("--relay must be direct or hosted");
   if (network === "testnet" && !v.dry && !v["dry-plan"]) return usage("testnet runs only as a rehearsal: add --dry");
   if (network === "mainnet" && v.dry) return usage("--dry is the testnet rehearsal; on mainnet use --dry-plan (preflight + spend plan, sends nothing)");
+  const mock = v["mock-intents"];
+  if (mock !== undefined && (network !== "testnet" || !v.dry)) return usage("--mock-intents is a testnet rehearsal: use it with --network testnet --dry");
+  if (mock !== undefined && !v["blob-base"]) return usage("--mock-intents needs --blob-base (the sellers are EVM ids, so FastFS cannot host for them)");
   let from: number;
   let only: number | undefined;
+  let to: number | undefined;
   try {
     from = parseStep(v["from-step"], "from-step") ?? 0;
     only = parseStep(v.only, "only");
+    to = parseStep(v["to-step"], "to-step");
   } catch (e) {
     return usage((e as Error).message);
   }
+  if (to !== undefined && to < from) return usage("--to-step must not be below --from-step");
 
   loadEnv();
   muteRateLimitNoise();
@@ -798,11 +932,13 @@ export async function main(argv: string[]): Promise<number> {
     signers.set(t.txHash, t.signerId);
     return t;
   };
-  const transport: Transport = { pay: (a) => remember(real.pay(a)), transfer: (a) => remember(real.transfer(a)) };
+  const transport: Transport = mock
+    ? { pay: (a) => remember(mockIntentsPay(mock, cfg.contract, env, a)), transfer: async () => { throw new Error("transfer runs on mainnet only"); } }
+    : { pay: (a) => remember(real.pay(a)), transfer: (a) => remember(real.transfer(a)) };
   const buyerAccount = v.buyer ?? "e2e-buyer.arrowhq.testnet";
   const sellerAccount = v.seller ?? "e2e-seller.arrowhq.testnet";
   const actor = (role: "buyer" | "seller", flags: { demoKey?: boolean } = {}) =>
-    mainnet ? resolveActor("mainnet", role, flags) : resolveActor("testnet", role, { ...flags, account: role === "buyer" ? buyerAccount : sellerAccount });
+    mainnet || mock ? resolveActor("mainnet", role, flags) : resolveActor("testnet", role, { ...flags, account: role === "buyer" ? buyerAccount : sellerAccount });
   const buyer = actor("buyer");
   const seller = actor("seller");
   const repo = repoRoot();
@@ -832,9 +968,12 @@ export async function main(argv: string[]): Promise<number> {
   const relayerAccountId = env.RELAYER_ACCOUNT_ID || "arrow-relayer.arrowhq.near";
   const deps: MainnetDeps = {
     ctx, dry: !mainnet, buyerId: buyer.id, sellerId: seller.id, contract: cfg.contract, release,
+    ...(mock && { mockIntents: mock, txReturn: async (hash: string) => successValue(await txStatus(network, hash, mock, "NONE")) }),
     balanceOf: mainnet
       ? (id) => mtBalanceOf("mainnet", id)
-      : async (id) => big(await view<string>("testnet", cfg.usdcToken, "ft_balance_of", { account_id: id })),
+      : mock
+        ? async () => 0n // the mock keeps no balances; step 8 checks the returned unused amount instead
+        : async (id) => big(await view<string>("testnet", cfg.usdcToken, "ft_balance_of", { account_id: id })),
     host: v["blob-base"]
       ? repoBlobHost(v["blob-base"], repo)
       : mainnet
@@ -848,6 +987,7 @@ export async function main(argv: string[]): Promise<number> {
     sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
     stamp: new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z"),
     say: (l) => console.log(l), // summaries hold no secrets; log() would also mask the 0x… hash in a Base explorer link
+    command: rerunBase(argv),
   };
 
   if (mainnet) {
@@ -883,6 +1023,8 @@ export async function main(argv: string[]): Promise<number> {
         const q = await oneclick.quote(oneclick.inboundQuoteRequest({ amount: units.toString(), evm: buyer0x, dry: false, slippageBps }));
         const deposit = q.quote.depositAddress;
         if (!deposit) throw new Error("real quote returned no depositAddress");
+        // printed before any money moves, so a timeout or crash later still leaves the address to check (QA-02)
+        console.log(`1Click inbound deposit address ${deposit} · status: ${ONECLICK_STATUS(deposit)}`);
         const before = await mtBalanceOf("mainnet", buyer0x);
         const sentAt = Date.now();
         const baseTx = await sendUsdc(wallet, deposit as `0x${string}`, units);
@@ -910,8 +1052,7 @@ export async function main(argv: string[]): Promise<number> {
       let nearTx: string | null = null;
       try {
         const { intent } = await generateIntent({ signerId: seller.id, depositAddress: deposit });
-        if (intent.standard !== "erc191" || typeof intent.payload !== "string") throw new Error(`1Click returned a ${intent.standard} payload, ERC-191 expected`);
-        await submitIntent(await signRawErc191(intent.payload, sellerKey));
+        await submitIntent(await signRawErc191(withdrawPayload(intent, { signerId: seller.id, depositAddress: deposit, amount: units.toString() }), sellerKey));
       } catch (e) {
         // D4-09 (2): a plain ERC-191 transfer intent to the quote's deposit address through our relayer, then tell 1Click about it
         log(`generate-intent route failed (${mask((e as Error).message).slice(0, 120)}): falling back to a transfer intent to the deposit address`);
@@ -926,11 +1067,32 @@ export async function main(argv: string[]): Promise<number> {
   }
 
   try {
-    const report = await runE2eMainnet(deps, { from, only, dryPlan: v["dry-plan"], skipInbound: v["skip-inbound"], skipOutbound: v["skip-outbound"] });
+    const report = await runE2eMainnet(deps, { from, to, only, dryPlan: v["dry-plan"], skipInbound: v["skip-inbound"], skipOutbound: v["skip-outbound"] });
     return report.exit;
   } finally {
     rmSync(workDir, { recursive: true, force: true });
   }
+}
+
+/** Mock-intents rail: the mock account signs mt_on_transfer on the market as intents.near would after a transfer intent with msg. */
+async function mockIntentsPay(mock: string, contract: string, env: Record<string, string | undefined>, a: { actor: { id: string }; amount: bigint; msg: string }): Promise<PaidTx> {
+  const account = new Account(mock, rpcProvider("testnet", env), nearKey("testnet", mock) as `ed25519:${string}`);
+  const out = await retryRateLimited(() => account.callFunctionRaw({
+    contractId: contract,
+    methodName: "mt_on_transfer",
+    args: { sender_id: a.actor.id, previous_owner_ids: [a.actor.id], token_ids: [NETWORKS.mainnet.usdcToken], amounts: [a.amount.toString()], msg: a.msg },
+    gas: 300_000_000_000_000n,
+    waitUntil: "INCLUDED_FINAL",
+  }));
+  const txHash = out.transaction.hash as string;
+  return { txHash, signerId: mock, url: explorerTx("testnet", "near", txHash) };
+}
+
+/** The decoded final SuccessValue of a transaction, or undefined while it has none. */
+export function successValue(tx: any): unknown {
+  const b64 = tx?.status?.SuccessValue;
+  if (typeof b64 !== "string" || b64 === "") return undefined;
+  return JSON.parse(Buffer.from(b64, "base64").toString("utf8"));
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
