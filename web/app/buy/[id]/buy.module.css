@@ -37,6 +37,8 @@
 .buy { color: var(--proven); }
 .pass { color: var(--notproven); }
 .sign { font-size: 0.9rem; color: var(--muted); margin: 0 0 var(--sp-3); }
+/* Step 1's connect button sits between two paragraphs that have no margin of their own in the waiting state (.later .sub). */
+.wallet { margin: var(--sp-3) 0; }
 .back { display: inline-block; margin: 0 0 var(--sp-4); font-size: 15px; }
 
 @media (max-width: 960px) {

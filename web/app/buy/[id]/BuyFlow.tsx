@@ -535,7 +535,9 @@ export function BuyFlow({ network, listing, programPk, readOnly, blockers, team 
         {mark(0)}
         <h2 id="b1">1. Wallet and viewing key</h2>
         <p className={styles.sub}>Connect an Ethereum-style wallet such as MetaMask (it pays with USDC from Base; no NEAR account needed), then sign once. The signature makes your private viewing key, the key that opens your verdicts; no money moves.</p>
-        <WalletButton eoa={eoa} balance={balance} onConnect={setEoa} onBalance={setBalance} onReset={resetWallet} refreshKey={balanceKey} />
+        <div className={styles.wallet}>
+          <WalletButton eoa={eoa} balance={balance} onConnect={setEoa} onBalance={setBalance} onReset={resetWallet} refreshKey={balanceKey} />
+        </div>
         {wrongDomain ? <p className={form.error} role="alert">Viewing keys are bound to {SITE_DOMAIN || "the site domain, which is not set"}. Open Arrow there.</p> : null}
         <p className={styles.sign}>
           Signature 1 of 2 (a message, no money moves): derives your private viewing key. The result is decrypted with it, and it is not stored; reloading asks again.
