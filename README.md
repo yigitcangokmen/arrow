@@ -1,4 +1,20 @@
-# Arrow: inspect before you pay, on NEAR
+<p align="center"><img src="assets/banner.png" alt="Arrow: inspect before you pay, on NEAR mainnet" width="100%"></p>
+
+<h2 align="center">See the verdict, not the rows.</h2>
+
+<p align="center">Arrow is an <b>inspect-before-pay data market on NEAR</b>. A seller lists an encrypted file. Inside sealed hardware, an AI checks a 40-row sample against what the buyer needs, and the buyer gets a verdict, not the rows: BUY or PASS, with fit and novelty. Then they buy it, or walk away having paid only the inspection fee.</p>
+
+<p align="center">
+  <a href="https://github.com/yigitcangokmen/arrow/actions/workflows/ci.yml"><img src="https://github.com/yigitcangokmen/arrow/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://arrow-market.vercel.app"><img src="https://img.shields.io/badge/try%20the%20app-arrow--market.vercel.app-2f81f7" alt="try the app: arrow-market.vercel.app"></a>
+  <a href="#status"><img src="https://img.shields.io/badge/NEAR-mainnet-00c08b" alt="NEAR: mainnet"></a>
+  <a href="#trust-table"><img src="https://img.shields.io/badge/TEE-Intel%20TDX-6e40c9" alt="TEE: Intel TDX"></a>
+  <img src="https://img.shields.io/badge/Rust-1.97.1-b7410e" alt="Rust 1.97.1">
+  <img src="https://img.shields.io/badge/TypeScript-5-3178c6" alt="TypeScript 5">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-97ca00" alt="License: MIT"></a>
+</p>
+
+---
 
 You cannot sell information: to judge its value the buyer must see it, and once they have seen it they have no reason to pay ([Kenneth Arrow, 1962](https://www.nber.org/books-and-chapters/rate-and-direction-inventive-activity-economic-and-social-factors/economic-welfare-and-allocation-resources-invention)). Arrow is a data market on NEAR, named after that paradox, where the buyer does not look: for a small fee, [a fixed model](docs/design.md#near-ai-call) in NEAR AI's TEE judges a sample of the seller's rows against the buyer's criteria, and the buyer gets BUY or PASS, plus fit and novelty from 1 to 5 if the seller allows them ([decision](docs/design.md#decision)), not the rows. On mainnet (not deployed yet), payment is USDC from Base through NEAR Intents, and when an inspection fails most of the fee comes back ([amounts](#6-who-got-paid)).
 

@@ -29,7 +29,7 @@ describe("claims wording", () => {
   });
 
   it("priv5_reader_is_the_near_ai_tee_not_a_place_nobody_can_look", () => {
-    for (const text of [readme.split("\n")[2]!, line("You cannot sell information"), read("web/app/layout.tsx"), read("web/app/page.tsx"), read("web/app/buy/[id]/BuyFlow.tsx"), read("docs/outreach/invite.md")]) {
+    for (const text of [line("inspect-before-pay data market on NEAR</b>"), line("You cannot sell information"), read("web/app/layout.tsx"), read("web/app/page.tsx"), read("web/app/buy/[id]/BuyFlow.tsx"), read("docs/outreach/invite.md")]) {
       expect(text).not.toMatch(/nobody can look|reading the data inside the enclave|reads the (sealed )?data inside (a|the) (tee|enclave)/i);
     }
     expect(line("You cannot sell information")).toMatch(/NEAR AI's TEE/);
@@ -91,7 +91,7 @@ describe("claims wording", () => {
 
   it("clm9_inbound_is_base_usdc_only", () => {
     expect(readme).not.toMatch(/any chain/i);
-    expect(readme.split("\n")[2]).toContain("USDC from Base");
+    expect(line("You cannot sell information")).toContain("USDC from Base");
   });
 
   it("clm11_relayer_fullaccess_key_is_disclosed", () => {
@@ -129,7 +129,7 @@ describe("claims wording", () => {
     ] as const) {
       expect(text, name).toMatch(/README Money|\[Money\]\(#6-who-got-paid\)/);
     }
-    expect(readme.split("\n")[2]).toContain("[amounts](#6-who-got-paid)");
+    expect(line("You cannot sell information")).toContain("[amounts](#6-who-got-paid)");
     for (const [name, text] of [
       ["README Money", line("- **Money.**")],
       ["video F07", read("docs/video/script.md").split("\n").find((l) => l.startsWith("| F07"))!],
