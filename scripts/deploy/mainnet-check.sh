@@ -28,7 +28,7 @@ rpc_query() { # rpc_query <params json> -> result json; falls over to FastNEAR w
 }
 view() { # view <account> <method> [<args json>] -> decoded JSON result
   local a=${3:-}; [ -n "$a" ] || a='{}'
-  rpc_query "{\"request_type\":\"call_function\",\"finality\":\"final\",\"account_id\":\"$1\",\"method_name\":\"$2\",\"args_base64\":\"$(printf '%s' "$a" | base64)\"}" | jq -r 'if .result then (.result | implode) else error(tostring) end'
+  rpc_query "{\"request_type\":\"call_function\",\"finality\":\"final\",\"account_id\":\"$1\",\"method_name\":\"$2\",\"args_base64\":\"$(printf '%s' "$a" | base64 | tr -d '\n')\"}" | jq -r 'if .result then (.result | implode) else error(tostring) end'
 }
 account() { rpc_query "{\"request_type\":\"view_account\",\"finality\":\"final\",\"account_id\":\"$1\"}"; }
 near_ge() { python3 -c 'import sys; sys.exit(0 if int(sys.argv[1]) >= int(sys.argv[2]) else 1)' "$1" "$2"; }
