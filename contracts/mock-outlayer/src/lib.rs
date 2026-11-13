@@ -24,7 +24,7 @@ use near_sdk::{
 /// OutLayer base fee: kept on failure and timeout (0.001 NEAR).
 pub const BASE_FEE: u128 = 1_000_000_000_000_000_000_000;
 const PER_MILLION_INSTRUCTIONS: u128 = 100_000_000_000_000; // 1e14
-const PER_MS: u128 = 100_000_000_000_000_000; // 1e17
+pub const PER_MS: u128 = 100_000_000_000_000_000; // 1e17
 pub const MAX_INSTRUCTIONS: u64 = 500_000_000_000;
 pub const MAX_EXECUTION_SECONDS: u64 = 180;
 pub const MAX_MEMORY_MB: u32 = 4096;
@@ -108,6 +108,8 @@ pub struct MockOutlayer {
     /// `mt_transfer` to this receiver panics (a refused payout, as intents.near does for
     /// sender == receiver or while mt_transfer is paused).
     reject: Option<AccountId>,
+    /// OutLayer's time price; `outlayer.near`'s owner can change it at any time (XC-1).
+    per_ms: u128,
 }
 
 #[near]
@@ -121,7 +123,13 @@ impl MockOutlayer {
             pending: 0,
             last_yield: None,
             reject: None,
+            per_ms: PER_MS,
         }
+    }
+
+    /// Plays `outlayer.near`'s owner raising (or lowering) the per-millisecond price. Sandbox only.
+    pub fn set_per_ms_fee(&mut self, per_ms: U128) {
+        self.per_ms = per_ms.0;
     }
 
     /// Anyone may set or clear the refused receiver. Sandbox only.
@@ -156,7 +164,7 @@ impl MockOutlayer {
         };
         check_limits(&limits);
         let deposit = env::attached_deposit().as_yoctonear();
-        if deposit < estimate(&limits) {
+        if deposit < estimate(&limits, self.per_ms) {
             env::panic_str("Insufficient payment");
         }
 
@@ -336,12 +344,12 @@ fn check_limits(l: &ResourceLimits) {
     }
 }
 
-/// OutLayer `estimate_cost` with the live price (base 1e21, 1e14 per million instructions, 1e17 per ms).
+/// OutLayer `estimate_cost` (base 1e21, 1e14 per million instructions, `per_ms`; live per_ms is 1e17).
 /// A missing limit counts as the hard cap.
-pub fn estimate(l: &ResourceLimits) -> u128 {
+pub fn estimate(l: &ResourceLimits, per_ms: u128) -> u128 {
     let instr = u128::from(l.max_instructions.unwrap_or(MAX_INSTRUCTIONS));
     let secs = u128::from(l.max_execution_seconds.unwrap_or(MAX_EXECUTION_SECONDS));
-    BASE_FEE + (instr / 1_000_000) * PER_MILLION_INSTRUCTIONS + secs * 1000 * PER_MS
+    BASE_FEE + (instr / 1_000_000) * PER_MILLION_INSTRUCTIONS + secs * 1000 * per_ms
 }
 
 fn b64_of(byte: u8, len: usize) -> String {
@@ -451,22 +459,22 @@ mod tests {
 
     #[test]
     fn estimate_matches_outlayer_formula() {
-        assert_eq!(estimate(&eval_limits()), 11_002_000_000_000_000_000_000);
+        assert_eq!(estimate(&eval_limits(), PER_MS), 11_002_000_000_000_000_000_000);
         let release = ResourceLimits { max_instructions: Some(2_000_000_000), max_memory_mb: Some(128), max_execution_seconds: Some(30) };
-        assert_eq!(estimate(&release), 4_000_200_000_000_000_000_000);
+        assert_eq!(estimate(&release, PER_MS), 4_000_200_000_000_000_000_000);
     }
 
     #[test]
     #[should_panic(expected = "Insufficient payment")]
     fn insufficient_payment_panics() {
-        ctx(estimate(&eval_limits()) - 1);
+        ctx(estimate(&eval_limits(), PER_MS) - 1);
         let mut c = MockOutlayer::new();
         call(&mut c, wasm("https://x.test/a.wasm", &"ab".repeat(32)), "arrow");
     }
 
     #[test]
     fn request_is_recorded_with_default_mode() {
-        ctx(estimate(&eval_limits()));
+        ctx(estimate(&eval_limits(), PER_MS));
         let mut c = MockOutlayer::new();
         call(&mut c, wasm("https://x.test/a.wasm", &"ab".repeat(32)), "arrow");
         let r = c.last_request().unwrap();

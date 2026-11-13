@@ -107,7 +107,8 @@ post() {
     && pass "build mainnet, payment notify, result chain, not paused" || fail "build/paths: $(echo "$cfg" | jq -c '[.build, .payment_path, .result_path, .paused]')"
   [ "$(account "$market" | jq -r .code_hash)" = "$(code_hash_of "$W")" ] && pass "code_hash = $W" || fail "code_hash differs from $W"
   avail=$(echo "$cfg" | jq -r .tank_available)
-  near_ge "$avail" 400000000000000000000000 && pass "tank_available $(to_near "$avail") NEAR" || fail "tank_available $(to_near "$avail") NEAR < 0.4"
+  # >= the listing reserve (tank_min 0.05 + 10 eval deposits of 0.05 = 0.55) plus a margin, or new listings are refused
+  near_ge "$avail" 600000000000000000000000 && pass "tank_available $(to_near "$avail") NEAR" || fail "tank_available $(to_near "$avail") NEAR < 0.6"
   rc=$(echo "$cfg" | jq -r .config.program_wasm_hash); row=$(secret_row "$market" "$rc")
   if [ -n "$row" ] && [ "$(echo "$row" | jq -c '[.access.Logic.operator, (.access.Logic.conditions | map(keys[0])), (.access.Logic.conditions[1].Predecessor.condition.Whitelist.accounts)]')" = "[\"And\",[\"WasmHash\",\"Predecessor\"],[\"$market\"]]" ]; then
     pass "secret_row profile arrow, WasmHash $rc AND Predecessor $market"

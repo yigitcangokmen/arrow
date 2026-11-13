@@ -18,8 +18,8 @@
       "min_price": "100000",
       "listing_bond": "100000",
       "max_evals_cap": 500,
-      "outlayer_deposit_eval": "20000000000000000000000",
-      "outlayer_deposit_release": "10000000000000000000000",
+      "outlayer_deposit_eval": "50000000000000000000000",
+      "outlayer_deposit_release": "30000000000000000000000",
       "tank_min": "50000000000000000000000",
       "limits_eval": {
         "max_instructions": 20000000000,

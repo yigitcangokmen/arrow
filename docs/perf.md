@@ -110,6 +110,6 @@ Where the 13a985d figure of 1.33e10 goes at 200 000 rows (from runs at 10 000 ro
 
 The contract's NEAR balance (the tank) pays for every eval, whether or not the eval succeeds:
 
-- OutLayer charge: 0.00570 NEAR for one eval (testnet run 8 above, rc `73415b8f…`, `Cost: 5702040000000000000000 yoctoNEAR`; the mainnet charge is not measured yet, Pending M8 in [JUDGES.md](../JUDGES.md#pending-ledger)); the rest of the 0.02 NEAR deposit comes back.
+- OutLayer charge: 0.00570 NEAR for one eval (testnet run 8 above, rc `73415b8f…`, `Cost: 5702040000000000000000 yoctoNEAR`; the mainnet charge is not measured yet, Pending M8 in [JUDGES.md](../JUDGES.md#pending-ledger)); the rest of the deposit (0.02 NEAR on testnet, 0.05 NEAR in the mainnet config) comes back.
 - Storage: a settled eval record takes about 580 bytes of contract state, about 0.0058 NEAR at 10^19 yoctoNEAR per byte. A failed eval writes the record too.
-- Together: about 0.0115 NEAR per eval. A tank funded with 0.5 NEAR, less the 0.05 NEAR `tank_min` and one 0.02 NEAR deposit, covers about 37 evals before `op=eval` is refused with E10.
+- Together: about 0.0115 NEAR per eval. A tank funded with 0.5 NEAR, less the 0.05 NEAR `tank_min` and one 0.05 NEAR mainnet deposit, covers about 34 evals before `op=eval` is refused with E10.

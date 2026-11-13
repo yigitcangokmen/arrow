@@ -171,13 +171,13 @@ describe("mainnet-check.sh guard (QA-03: steps 2 and 4 must not send twice)", ()
 
 describe("mainnet-check.sh post (S5: what the lock would freeze)", () => {
   const USDC = "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1";
-  const setupPost = (keys: unknown, balance: string) => {
+  const setupPost = (keys: unknown, balance: string, tank = 1.09) => {
     put("scripts/deploy/render-init.sh", "#!/usr/bin/env bash\necho '{\"cfg\":{}}'\n");
     put("release/contracts/arrow-mainnet.wasm", "\0asm");
     return fakeRpc({
       accounts: { "m.near": { amount: NEAR(3.8), code_hash: EMPTY } },
       views: {
-        "m.near.get_config": { build: "mainnet", payment_path: "notify", result_path: "chain", paused: false, tank_available: NEAR(1.09), config: { usdc_token_id: USDC, program_wasm_hash: "ab".repeat(32) } },
+        "m.near.get_config": { build: "mainnet", payment_path: "notify", result_path: "chain", paused: false, tank_available: NEAR(tank), config: { usdc_token_id: USDC, program_wasm_hash: "ab".repeat(32) } },
         "outlayer.near.list_user_secrets": [],
         "m.near.program_pubkey": "04" + "11".repeat(64),
         "intents.near.public_keys_of": keys,
@@ -193,6 +193,18 @@ describe("mainnet-check.sh post (S5: what the lock would freeze)", () => {
       const r = await runAsync(["post", "m.near", "mainnet"]);
       expect(r.out).toContain("PASS intents_keys_empty intents.near public_keys_of m.near = []");
       expect(r.out).toContain("PASS market_usdc_idle intents.near USDC on m.near = 0");
+    } finally {
+      rpc.close();
+    }
+  });
+
+  it("fails a tank below the listing reserve (tank_min + 10 x 0.05 eval deposit = 0.55 NEAR)", async () => {
+    const rpc = await setupPost([], "0", 0.5);
+    try {
+      put(".env", `MAINNET_RPC_URL=${rpc.url}\n`);
+      const r = await runAsync(["post", "m.near", "mainnet"]);
+      expect(r.out).toContain("FAIL tank_available 0.5000 NEAR < 0.6");
+      expect(r.code).toBe(1);
     } finally {
       rpc.close();
     }

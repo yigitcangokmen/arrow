@@ -173,7 +173,7 @@ which does not exist on testnet. The full derive path is proven on testnet by `a
 
 Expected: `PASS` for `config_matches_init (mainnet template, secrets_ref arrow-market.near)`,
 `build mainnet, payment notify, result chain, not paused`, `code_hash = release/contracts/arrow-mainnet.wasm`,
-`tank_available` ≥ 0.4 NEAR, `secret_row … AND Predecessor arrow-market.near`, `intents_keys_empty` (no key for the
+`tank_available` ≥ 0.6 NEAR (listing reserve 0.55), `secret_row … AND Predecessor arrow-market.near`, `intents_keys_empty` (no key for the
 market on intents.near), `market_usdc_idle` (no USDC parked on the market's Intents account), `program_pubkey_130hex 04…`
 (waits up to 120 s for the key).
 

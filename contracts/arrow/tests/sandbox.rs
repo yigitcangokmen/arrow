@@ -196,9 +196,26 @@ async fn refund_on_outlayer_call_failure() -> R<()> {
     let out = e.eval(Who::Buyer, id, EVAL_FEE).await?;
     assert_eval_refunded(&e, &out, 1, "null", EVAL_REFUND).await?;
     let t1 = e.tank().await?;
-    // The 0.02 NEAR deposit comes back with the failed receipt; only the eval record's storage is spent.
+    // The 0.05 NEAR deposit comes back with the failed receipt; only the eval record's storage is spent.
     assert!(t0.saturating_sub(t1) < NEAR / 100, "tank dropped by {}", t0.saturating_sub(t1));
     assert_eq!(e.mock.view("requests_count").await?.json::<u64>()?, requests, "failed request rolled back");
+    Ok(())
+}
+
+/// XC-1: OutLayer admits a request only when the deposit covers `estimate_cost(limits)` at its current price, and
+/// `outlayer.near`'s owner can raise that price after the lock, when the deposits can no longer change. With the
+/// mainnet init deposits and limits, an eval and a buy must still run after the time price quadruples (live 1e17/ms).
+#[tokio::test]
+async fn outlayer_price_rise_still_admitted() -> R<()> {
+    let e = setup(Net::Mainnet, Path::Notify).await?;
+    let id = e.list("scored", None, 10).await?;
+    e.root.call(e.mock.id(), "set_per_ms_fee").args_json(json!({"per_ms": (4 * 10u128.pow(17)).to_string()})).transact().await?.into_result()?;
+    let out = e.eval(Who::Buyer, id, EVAL_FEE).await?;
+    assert_eq!(refund_reason(&out), None, "eval refunded at 4x per_ms: {out:?}");
+    assert_eq!(e.get_eval(1).await?["status"].as_str(), Some("done"));
+    let out = e.buy(Who::Buyer, id, PRICE).await?;
+    assert_eq!(refund_reason(&out), None, "buy refunded at 4x per_ms: {out:?}");
+    assert_eq!(e.get_purchase(1).await?["status"].as_str(), Some("done"));
     Ok(())
 }
 
@@ -413,11 +430,14 @@ async fn seller_rehosts_blob() -> R<()> {
 async fn max_listings_cannot_starve_evals() -> R<()> {
     let e = setup(Net::Mainnet, Path::Notify).await?;
     let id = e.list("scored", None, 10).await?;
-    // Free balance: tank_min 0.05 + 10 eval deposits 0.2 + 0.1 NEAR (about two maximal listings).
+    // Free balance: the list reserve (tank_min + 10 eval deposits) + 0.1 NEAR (about two maximal listings).
+    let c: Value = e.view("get_config", json!({})).await?;
+    let num = |k: &str| c["config"][k].as_str().expect(k).parse::<u128>().expect(k);
+    let reserve = num("tank_min") + 10 * num("outlayer_deposit_eval");
     e.worker
         .patch(e.arrow.id())
-        .account_from_current(|cur| {
-            let bal = u128::from(cur.storage_usage) * 10u128.pow(19) + 35 * NEAR / 100;
+        .account_from_current(move |cur| {
+            let bal = u128::from(cur.storage_usage) * 10u128.pow(19) + reserve + NEAR / 10;
             near_workspaces::types::AccountDetailsPatch::from(cur).balance(near_workspaces::types::NearToken::from_yoctonear(bal))
         })
         .transact()
@@ -438,7 +458,7 @@ async fn max_listings_cannot_starve_evals() -> R<()> {
     }
     println!("max_listings_cannot_starve_evals: {listed} listed, {refused} refused, tank {}", e.tank().await?);
     assert!(listed >= 1 && refused >= 1, "{listed} listed, {refused} refused");
-    assert!(e.tank().await? >= 25 * NEAR / 100, "listings went below the eval reserve");
+    assert!(e.tank().await? >= reserve, "listings went below the eval reserve");
     let out = e.eval(Who::Buyer, id, EVAL_FEE).await?;
     assert!(out.receipt_failures().is_empty(), "{out:?}");
     assert_eq!(e.get_eval(1).await?["status"].as_str(), Some("done"));
@@ -544,7 +564,7 @@ async fn empty_tank_refunds() -> R<()> {
     let e = setup(Net::Mainnet, Path::Notify).await?;
     let id = e.list("scored", None, 10).await?;
     let transfers = e.transfers().await?.len();
-    // Free balance 0.04 NEAR < tank_min 0.05 + eval deposit 0.02 (storage staking kept intact).
+    // Free balance 0.04 NEAR < tank_min 0.05 + eval deposit 0.05 (storage staking kept intact).
     e.worker
         .patch(e.arrow.id())
         .account_from_current(|cur| {
@@ -680,10 +700,10 @@ async fn outlayer_request_args() -> R<()> {
     };
     assert!(e.eval(Who::Buyer, id, EVAL_FEE).await?.receipt_failures().is_empty());
     let r: Value = e.mock.view("last_request").await?.json()?;
-    check(&r, "20000000000000000000000", json!({"max_instructions": 20_000_000_000u64, "max_memory_mb": 512, "max_execution_seconds": 100}), "eval");
+    check(&r, "50000000000000000000000", json!({"max_instructions": 20_000_000_000u64, "max_memory_mb": 512, "max_execution_seconds": 100}), "eval");
     assert!(e.buy(Who::Buyer, id, PRICE).await?.receipt_failures().is_empty());
     let r: Value = e.mock.view("last_request").await?.json()?;
-    check(&r, "10000000000000000000000", json!({"max_instructions": 4_000_000_000u64, "max_memory_mb": 128, "max_execution_seconds": 30}), "release");
+    check(&r, "30000000000000000000000", json!({"max_instructions": 4_000_000_000u64, "max_memory_mb": 128, "max_execution_seconds": 30}), "release");
     Ok(())
 }
 
@@ -697,7 +717,7 @@ async fn tank_refilled_by_outlayer_refund() -> R<()> {
     let drop = t0.saturating_sub(t1);
     let storage = u128::from(st1.saturating_sub(st0)) * 10u128.pow(19);
     println!("tank_refilled_by_outlayer_refund: drop {drop} yocto, storage {storage} yocto ({} bytes)", st1 - st0);
-    // Deposit 0.02 NEAR out, everything but OutLayer's 0.001 NEAR base fee back to the payer (self).
+    // Deposit 0.05 NEAR out, everything but OutLayer's 0.001 NEAR base fee back to the payer (self).
     // The only other cost is the 1 yoctoNEAR attached to each of the two mt_transfer payouts.
     assert!(drop <= NEAR / 1000 + storage + 2, "drop {drop} > base fee + storage {storage} + 2 yocto");
     assert!(drop < NEAR / 100);
