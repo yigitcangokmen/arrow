@@ -9,3 +9,11 @@
 .note { color: var(--muted); font-size: 14.5px; max-width: 75ch; }
 .links { display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-6); margin-top: var(--sp-5); }
 @media (max-width: 720px) { .result { padding: var(--sp-5); } .bar button { width: 100%; } }
+.prints { background: var(--sunken); border-radius: var(--r-md); padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-3); }
+.prints dl { margin: 0; display: grid; gap: 6px; }
+.prints dl > div { display: grid; grid-template-columns: minmax(0, 18rem) minmax(0, 1fr); gap: 2px 12px; }
+.prints dt { color: var(--muted); font-size: 14px; }
+.prints dd { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+.prints p { margin: var(--sp-2) 0 0; font-weight: 600; }
+.match { color: var(--proven); }
+@media (max-width: 720px) { .prints dl > div { grid-template-columns: 1fr; } }

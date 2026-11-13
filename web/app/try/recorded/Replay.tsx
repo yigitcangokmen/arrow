@@ -11,7 +11,7 @@ const SPEED = 6;
 
 /** Plays the recorded run step by step, faster than real time; the real times stay next to each step. */
 export function Replay({ steps }: { steps: ReplayStep[] }) {
-  // -1: not started; otherwise the real-run second the replay has reached.
+  // null: not started (every step shown, done); otherwise the real-run second the replay has reached.
   const [t, setT] = useState<number | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const end = Math.max(...steps.map((s) => s.at)) + 1;
@@ -43,7 +43,8 @@ export function Replay({ steps }: { steps: ReplayStep[] }) {
   const shown: Step[] = steps.map((s, i) => {
     const next = steps[i + 1];
     const state = t === null ? "done" : t < s.at ? "todo" : next && t < next.at && i > 0 ? "doing" : "done";
-    return { label: s.label, state, detail: [s.clock, s.detail].filter(Boolean).join(" · ") };
+    // A step the replay has not reached yet keeps its outcome to itself.
+    return { label: s.label, state, detail: state === "todo" ? undefined : [s.clock, s.detail].filter(Boolean).join(" · ") };
   });
   const playing = t !== null && t < end;
   const elapsed = t === null ? null : Math.max(0, Math.round(t));

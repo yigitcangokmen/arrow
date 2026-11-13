@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowViews } from "@arrow/sdk/contract";
-import { HashTriple } from "../../../components/HashTriple.tsx";
 import { HonestyLine, PageHead } from "../../../components/Section.tsx";
 import { evidence } from "../../../generated/data.ts";
 import { CONTRACTS } from "../../../lib/config.ts";
@@ -36,7 +35,16 @@ export default async function Recorded() {
           when it opened it. The fingerprints below are read from the chain now.
         </p>
         {run.fingerprints ? (
-          <HashTriple onChain={run.fingerprints.listed} enclave={run.fingerprints.inspected} release={run.fingerprints.delivered} />
+          <div className={styles.prints}>
+            <dl>
+              <div><dt>listed (on chain since the listing)</dt><dd className="mono">{run.fingerprints.listed}</dd></div>
+              <div><dt>inspected (reported by the sealed hardware)</dt><dd className="mono">{run.fingerprints.inspected ?? "not on chain"}</dd></div>
+              <div><dt>delivered (reported with the key)</dt><dd className="mono">{run.fingerprints.delivered ?? "not on chain"}</dd></div>
+            </dl>
+            <p className={run.match ? styles.match : undefined} role="status">
+              {run.match ? "3 fingerprints on chain match ✓ The run recorded that the file it downloaded matched too." : "The fingerprints on chain do not all match."}
+            </p>
+          </div>
         ) : null}
       </section>
 
