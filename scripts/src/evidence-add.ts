@@ -114,6 +114,8 @@ async function main(): Promise<void> {
   for (const s of values.set ?? []) {
     const [field, value] = splitPair(s, "--set");
     if (!(SET_FIELDS as readonly string[]).includes(field)) throw new UsageError(`--set field must be one of ${SET_FIELDS.join("|")}`);
+    // an unset shell variable expands to nothing; writing "" would leave verify R1 NOT PROVEN without a word (QA-08)
+    if (value.trim() === "") throw new UsageError(`--set ${field} is empty (was .env sourced? set -a && . ./.env && set +a)`);
     sets[field] = value;
   }
   const raws: Record<string, unknown>[] = [];

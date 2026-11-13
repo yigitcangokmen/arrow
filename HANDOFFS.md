@@ -32,10 +32,10 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | 12 Kas 10:00 [03:00Z] (latest 21:00 [14:00Z]) | H-13a | WS-5 T04 | `/sell` blob upload | DONE 11 Kas ~02:00: store arrow-blobs (store_hJvfN8WAsLpJYjIp, public, iad1) linked to arrow-market for prod/preview/dev; BLOB_READ_WRITE_TOKEN in .env and .env.local |
 | 12 Kas 12:00 [05:00Z] | H-01b | WS-1 T02 | H-12 mainnet secret | DONE by decision (DEC §K KU-11): no paid key; NEARAI_API_KEY_MAINNET = the NEAR Builders key |
 | 12 Kas 18:10 [11:10Z] | H-11 | WS-1 T16 | freeze push; agent pushes (K-02) | N/A as human step: agent pushes (K-02) |
-| 12 Kas 18:30-20:30 [11:30-13:30Z] | H-12 | WS-1 T17 | mainnet deploy, H-14 | BLOCKED until K3 freeze + H-01b (lines ready and twin-rehearsed 22:50, block below; runbook scripts/deploy/mainnet.md on main ea83520) |
+| 12 Kas 18:30-20:30 [11:30-13:30Z] | H-12 | WS-1 T17 | mainnet deploy, H-14 | OPEN · SUPERSEDED 13 Kas 19:30 GMT+3 by the local go-live runbook (docs/internal/MAINNET-RUNBOOK.md, outside the repo): run its lines, not the ones below (K3 freeze and H-01b are done) |
 | 12 Kas 19:30 [12:30Z] | H-W6a | WS-6 T05 | bench blob push (only if triggered) | N/A unless triggered |
 | 12 Kas 21:00 [14:00Z] | H-13b | WS-5 T10 | hosted relay/sponsor routes | OPEN |
-| 12 Kas 21:00-23:00 [14:00-16:00Z] | H-14 | WS-1 T18 + WS-4 T15 | K4 | OPEN |
+| 12 Kas 21:00-23:00 [14:00-16:00Z] | H-14 | WS-1 T18 + WS-4 T15 | K4 | OPEN · SUPERSEDED 13 Kas 19:30 GMT+3 by the local go-live runbook (docs/internal/MAINNET-RUNBOOK.md, outside the repo): run its lines, not the ones below |
 | 13 Kas 10:30 [03:30Z] | H-09b | WS-7 T03 | outreach follow-up | OPEN |
 | 13 Kas 12:30-13:30 [05:30-06:30Z] | H-15a | WS-5 | first browser purchase before H-15 | OPEN |
 | 13 Kas 08:30 [01:30Z] | H-W3-2 | WS-3 T11b | WS3-T12 (only if triggered) | N/A: not triggered (WS3-T11b DONE 19:18, every decision rule "no change") |
@@ -43,7 +43,7 @@ Format: PLAN App. A.2. Labels are kept exactly as in the task cards (DEC C-11, W
 | 13 Kas 19:00-23:00 [12:00-16:00Z] | H-15 | WS-1 T19 | K5 | OPEN |
 | 14 Kas 06:30 [13 Kas 23:30Z] | H-W6c | WS-6 T08 | H-18 (only if precheck fails) | N/A unless triggered |
 | 14 Kas 07:00-09:00 [00:00-02:00Z] | H-18 | WS-6 T08 | WS6-T07 | OPEN |
-| 14 Kas 10:00-11:00 [03:00-04:00Z] (latest 14:00 [07:00Z]) | H-16 | WS-1 T20 | K6 lock | OPEN |
+| 14 Kas 10:00-11:00 [03:00-04:00Z] (latest 14:00 [07:00Z]) | H-16 | WS-1 T20 | K6 lock | OPEN · SUPERSEDED 13 Kas 19:30 GMT+3 by the local go-live runbook (docs/internal/MAINNET-RUNBOOK.md, outside the repo): run its lines, not the ones below; the lock is a separate go/no-go |
 | 14 Kas 15:00-19:00 [08:00-12:00Z] | H-17v | WS-7 T06 | video, H-17b | OPEN |
 | 14 Kas 15:30 [08:30Z] | H-17 | WS-1 T22 | final push (agent, K-02) + public check (human, K-03) | OPEN (public part only) |
 | 14 Kas 19:00 [12:00Z] | H-19 | WS-7 T07 | H-19x | OPEN |
@@ -295,7 +295,7 @@ Write result to: Result line (both tx hashes).
 If it fails: DeleteAccountWithLargeState is not expected (small state); any other error → paste it to the agent. The delete-account form was run on testnet at 21:49 (arrow-h07-twin-2148.testnet).
 Result (human fills): DONE 22:15 GMT+7. mt_transfer 20000 → arrowhq.near 7pQZRaHXD9HYMR1uCwFHnttyPr4KgJM6pUmao7giGfQ1 · delete-account 6DBnU8naQHNNdb9XV28boP8RiZcSt3z9mHfnkxAfkMRd. Read-only 22:16: arrow-spike.arrowhq.near UNKNOWN_ACCOUNT, arrowhq.near 9.0611 NEAR and Intents USDC 20000.
 
-## H-12 · Mainnet deploy + secret + init_program_key · due 12 Kas 18:30-20:30 GMT+7 [11:30-13:30Z] · status: BLOCKED until K3 freeze (12 Kas 18:00) + H-01b
+## H-12 · Mainnet deploy + secret + init_program_key · due 12 Kas 18:30-20:30 GMT+7 [11:30-13:30Z] · status: OPEN · SUPERSEDED 13 Kas 19:30 GMT+3 by the local go-live runbook (docs/internal/MAINNET-RUNBOOK.md, outside the repo): run its lines, not the ones below. The restore line below logs in as arrow.arrowhq.testnet, which the 13 Nov rehearsal locked; the runbook restores arrow-v2.arrowhq.testnet
 Purpose: deploy the market to arrow-market.near, not locked (DEC B-06); arrow-market-v2.near stays a reserve with no deploy (DEC D-07). Rewritten 22:50 by S-α (WS1-T17) as single lines in run order; full runbook with expected output and each step's testnet twin: `scripts/deploy/mainnet.md` (ws/1-gates ea83520, on main after the next merge).
 Preconditions: K3 PASS (release/sha256.txt written; `.env` PROGRAM_WASM_URL / PROGRAM_WASM_SHA256 = frozen values); H-01b DONE (`.env` NEARAI_API_KEY_MAINNET filled); step 0 prints PASS on every row. Agent read-only 22:45: arrow-market.near exists, 0.1 NEAR, no code; arrowhq.near 9.0611 NEAR (needs ≥ the step 0 deposit + 0.5 + gas); outlayer not logged in on mainnet; contract wasm = SHA256SUMS and fresh (WS2-T13 reproducible rebuild at the final commit is a hard precondition; `mainnet-check.sh wasm` → PASS contract_wasm_fresh); storage-estimate prints the deposit. Today step 0 FAILs exactly on `program_frozen` and `nearai_key_mainnet`. Each `sign-with-keychain` may show a macOS Keychain prompt: allow it.
 Twin: every signing line ran 22:30-22:44 on testnet against mainnet-dryrun.arrowhq.testnet with the same wasm, the same init JSON and the same `sign-with-keychain` form (create Eb6sXMQM…, storage EVTKMY4N…, deploy+init 29RhuCrm…, tank C5vnSJfF…, secret set + logout/restore OK, init_program_key DD4Q6MX8… → "derive failed: null" because outlayer.near does not exist on testnet, self-only check frrHwP7u… → E14, account deleted 2wU5urgX…). Finding: `new` only accepts the mainnet init JSON on arrow-market.near (secrets_ref must be the contract itself; first twin try FM8kHR3y… → E15 secrets_ref), so the twin rendered its own name there.
@@ -342,7 +342,7 @@ Write result to: Result satırı
 If it fails: NEAR DevHub Telegram (https://t.me/neardev) faucet kanalı; ajan bu arada sandbox testleriyle devam eder
 Result (human fills):
 
-## H-14 · e2e-mainnet run · due 12 Kas 21:00-23:00 GMT+7 [14:00-16:00Z] · status: OPEN (block written 11 Kas 01:10 by S-δ, WS4-T15; script on main 25061e7, merged round 7)
+## H-14 · e2e-mainnet run · due 12 Kas 21:00-23:00 GMT+7 [14:00-16:00Z] · status: OPEN · SUPERSEDED 13 Kas 19:30 GMT+3 by the local go-live runbook (docs/internal/MAINNET-RUNBOOK.md, outside the repo): run its lines, not the ones below. The 8.0/3.5 USDC H-15 targets below are gone from the spend plan (block written 11 Kas 01:10 by S-δ, WS4-T15; script on main 25061e7, merged round 7)
 Purpose: one real mainnet pass of the full flow; produces K4 evidence (evidence/mainnet.json). Spends about $5 plus gas; the spend plan is printed first and nothing moves until you type y.
 Preconditions:
     - H-12 done and K3 freeze pushed: `npx tsx scripts/src/e2e-mainnet.ts --network mainnet --dry-plan` prints preflight all OK (today it FAILs on `CodeDoesNotExist arrow-market.near`, as expected before H-12)

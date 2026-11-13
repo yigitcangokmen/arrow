@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Read-only checks around the mainnet deploy (H-12, WS1-T17). Signs nothing, prints no key.
-#   bash scripts/deploy/mainnet-check.sh pre  [<market> <owner> <network>]   # before H-12 step 1
-#   bash scripts/deploy/mainnet-check.sh post [<market> <network>]           # after H-12 step 6
+#   bash scripts/deploy/mainnet-check.sh pre  [<market> <owner> <network>]   # runbook step 0, before any transaction
+#   bash scripts/deploy/mainnet-check.sh post [<market> <network>]           # runbook step 8, after the program key (step 7)
+#   bash scripts/deploy/mainnet-check.sh guard storage|tank [<market> <network>]   # stop line in front of runbook step 2 / step 4
 #   bash scripts/deploy/mainnet-check.sh wasm                                # offline: the contract wasm against SHA256SUMS and this tree
-# Defaults: arrow-market.near, arrowhq.near, mainnet. Testnet twin:
-#   bash scripts/deploy/mainnet-check.sh pre mainnet-dryrun.arrowhq.testnet arrowhq.testnet testnet
+# Defaults: arrow-market.near, arrowhq.near, mainnet. There is no usable testnet twin: the frozen program serves only
+# arrow.arrowhq.testnet (locked by the 13 Nov rehearsal) and arrow-v2.arrowhq.testnet (the live /try market) on testnet, and
+# `post` on any other market fails config_matches_init, because it swaps only secrets_ref into the mainnet template.
 # Every row prints PASS or FAIL; the exit code is 1 when any row failed.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
@@ -41,8 +43,9 @@ secret_row() { # secret_row <market> <wasm sha>: the (profile arrow, WasmHash) r
 }
 set_net() {
   case "$1" in
-    mainnet) RPC=$(envget MAINNET_RPC_URL); RPC=${RPC:-https://rpc.mainnet.near.org}; RPC2=https://rpc.mainnet.fastnear.com; OUTLAYER=outlayer.near ;;
-    testnet) RPC=$(envget TESTNET_RPC_URL); RPC=${RPC:-https://rpc.testnet.near.org}; RPC2=https://rpc.testnet.fastnear.com; OUTLAYER=outlayer.testnet ;;
+    # FastNEAR first, as in sdk/src/config.ts (QA-16): rpc.*.near.org is deprecated and answers -429 often, so it is only the fallback
+    mainnet) RPC=$(envget MAINNET_RPC_URL); RPC=${RPC:-https://rpc.mainnet.fastnear.com}; RPC2=https://rpc.mainnet.near.org; OUTLAYER=outlayer.near ;;
+    testnet) RPC=$(envget TESTNET_RPC_URL); RPC=${RPC:-https://rpc.testnet.fastnear.com}; RPC2=https://rpc.testnet.near.org; OUTLAYER=outlayer.testnet ;;
     *) echo "network must be mainnet or testnet" >&2; exit 2 ;;
   esac
 }
@@ -87,14 +90,14 @@ pre() {
   ob=$(account "$owner" | jq -r '.amount // "0"')
   near_ge "$ob" "$(python3 -c 'import sys; print(int((float(sys.argv[1]) + 1) * 10**24))' "$dep")" \
     && pass "owner_balance $owner $(to_near "$ob") NEAR >= deposit $dep + 1" || fail "owner_balance $owner $(to_near "$ob") NEAR < deposit $dep + 1"
-  echo "deposit for step 1: $dep NEAR"
+  echo "deposit (runbook step 2): $dep NEAR"
   if OUTLAYER_NETWORK=$net outlayer whoami >/dev/null 2>&1; then fail "outlayer_logged_out: outlayer is logged in on $net (run the logout line first)"
   else pass "outlayer_logged_out on $net"; fi
   return $FAIL
 }
 
 post() {
-  local market=${1:-arrow-market.near} net=${2:-mainnet} cfg build want pk i rc row avail
+  local market=${1:-arrow-market.near} net=${2:-mainnet} cfg build want pk i rc row avail keys usdc bal
   set_net "$net"
   cfg=$(view "$market" get_config); build=$(echo "$cfg" | jq -r .build)
   # `new` requires secrets_ref.account_id == the contract itself, so the twin renders it with its own name
@@ -109,6 +112,15 @@ post() {
   if [ -n "$row" ] && [ "$(echo "$row" | jq -c '[.access.Logic.operator, (.access.Logic.conditions | map(keys[0])), (.access.Logic.conditions[1].Predecessor.condition.Whitelist.accounts)]')" = "[\"And\",[\"WasmHash\",\"Predecessor\"],[\"$market\"]]" ]; then
     pass "secret_row profile arrow, WasmHash $rc AND Predecessor $market"
   else fail "secret_row for $rc: ${row:-missing}"; fi
+  if [ "$net" = mainnet ]; then # what the lock freezes for good (S5): a key on intents.near, or USDC parked on the market's Intents account
+    keys=$(view intents.near public_keys_of "{\"account_id\":\"$market\"}" | jq -c .) || keys="(unreadable)"
+    [ "$keys" = "[]" ] && pass "intents_keys_empty intents.near public_keys_of $market = []" \
+      || fail "intents_keys_empty: intents.near public_keys_of $market = $keys (such a key could move the market's Intents balance after the lock)"
+    usdc=$(echo "$cfg" | jq -r .config.usdc_token_id)
+    bal=$(view intents.near mt_balance_of "{\"account_id\":\"$market\",\"token_id\":\"$usdc\"}" | jq -r .) || bal="(unreadable)"
+    [ "$bal" = 0 ] && pass "market_usdc_idle intents.near USDC on $market = 0" \
+      || fail "market_usdc_idle: $market holds $bal USDC base units on intents.near (a payment in flight or an owed payout; the lock would freeze it)"
+  fi
   for i in $(seq 1 12); do # the derive answer arrives through yield/resume
     pk=$(view "$market" program_pubkey | jq -r '. // empty')
     [ -n "$pk" ] && break
@@ -118,9 +130,29 @@ post() {
   return $FAIL
 }
 
+guard() { # QA-03: a second paste of step 2 or step 4 would send the NEAR again into an account that is locked later
+  local what=${1:-} market=${2:-arrow-market.near} net=${3:-mainnet} acct amount code avail
+  set_net "$net"
+  case "$what" in
+    storage)
+      acct=$(account "$market"); amount=$(echo "$acct" | jq -r '.amount // empty'); code=$(echo "$acct" | jq -r '.code_hash // empty')
+      if [ -z "$amount" ]; then fail "guard_storage: cannot read $market ($(echo "$acct" | jq -c .)); read it again, send nothing yet"
+      elif [ "$code" != 11111111111111111111111111111111 ]; then fail "guard_storage: $market already has code: step 2 is done, do not send it again"
+      elif near_ge "$amount" 1000000000000000000000000; then fail "guard_storage: $market holds $(to_near "$amount") NEAR (> 1): step 2 already landed, do not send it again"
+      else pass "guard_storage: $market holds $(to_near "$amount") NEAR and no code: send step 2 once"; fi ;;
+    tank)
+      if ! avail=$(view "$market" get_config | jq -r '.tank_available // empty') || [ -z "$avail" ]; then fail "guard_tank: cannot read get_config of $market; read it again, send nothing yet"
+      elif near_ge "$avail" 900000000000000000000000; then fail "guard_tank: tank_available $(to_near "$avail") NEAR (>= 0.9): step 4 already landed, do not send it again"
+      else pass "guard_tank: tank_available $(to_near "$avail") NEAR: send step 4 once"; fi ;;
+    *) echo "usage: mainnet-check.sh guard storage|tank [<market> <network>]" >&2; exit 2 ;;
+  esac
+  return $FAIL
+}
+
 case "${1:-}" in
   pre) shift; pre "$@" ;;
   post) shift; post "$@" ;;
+  guard) shift; guard "$@" ;;
   wasm) contract_wasm; exit $FAIL ;;
   *) sed -n '2,8p' "$0" >&2; exit 2 ;;
 esac

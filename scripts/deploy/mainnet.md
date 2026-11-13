@@ -47,13 +47,17 @@ secrets_ref`), so the mainnet init JSON can only initialise `arrow-market.near`.
 
 All lines start in the main checkout. Copy one line, run it, compare with "Expected", then go on.
 
-### 0. Preflight (read-only, signs nothing)
+Numbering: the go-live runbook (kept outside the repo) numbers these lines 0, 2, 3, 4, 5, 6, 7, 8 (its step 1 is the relayer
+top-up). Each heading below names both. The evidence ids `h12-deploy-storage`, `-init`, `-tank`, `-pubkey` are the same in
+both files.
+
+### 0. Preflight (read-only, signs nothing) · runbook step 0
 
     cd ~/Desktop/hackathon/near-builds/arrow && bash scripts/deploy/mainnet-check.sh pre
 
 Expected: every row `PASS`, including `contract_wasm_fresh`, `program_frozen`, `program_url_serves_sha`,
 `nearai_key_mainnet`, `market_empty arrow-market.near`, `owner_balance arrowhq.near … >= deposit <n> + 1`,
-`outlayer_logged_out on mainnet`, and `deposit for step 1: <n> NEAR`.
+`outlayer_logged_out on mainnet` (9 rows), and `deposit (runbook step 2): <n> NEAR`.
 
 `program_url_serves_sha` is the only guard against a FastFS upload that reported "Upload complete!" while a chunk
 transaction never landed, or that stays unindexed (404) for an hour. Upload the frozen program hours before the deploy and check
@@ -67,15 +71,18 @@ file again; do not start step 1.
 Twin (2026-11-10): all rows ran; `program_frozen` and `nearai_key_mainnet` FAIL as expected today (no freeze,
 H-01b open); testnet `outlayer_logged_out` FAIL is the normal testnet login.
 
-### 1. Storage money (arrowhq.near → arrow-market.near)
+### 1. Storage money (arrowhq.near → arrow-market.near) · runbook step 2
 
-    cd ~/Desktop/hackathon/near-builds/arrow && DEP=$(bash scripts/deploy/storage-estimate.sh | awk '/^deposit:/{print $2}') && echo "sending $DEP NEAR" && near tokens arrowhq.near send-near arrow-market.near "$DEP NEAR" network-config mainnet sign-with-keychain send
+The `guard storage` row refuses when the market already holds more than 1 NEAR or has code, so a second paste of this
+line sends nothing (an extra 3.7 NEAR would become tank that nobody can withdraw after the lock).
+
+    cd ~/Desktop/hackathon/near-builds/arrow && bash scripts/deploy/mainnet-check.sh guard storage && DEP=$(bash scripts/deploy/storage-estimate.sh | awk '/^deposit:/{print $2}') && echo "sending $DEP NEAR" && near tokens arrowhq.near send-near arrow-market.near "$DEP NEAR" network-config mainnet sign-with-keychain send
 
 Expected: `sending <n> NEAR` (the value step 0 printed), then `<arrowhq.near> has transferred <n> NEAR to <arrow-market.near> successfully.`
 
 Twin: OK `EVTKMY4N2TmeZVPJx6LC7u9qfCdyGdW4vWF6hKP5aNQC` (arrowhq.testnet → mainnet-dryrun, 3.4 NEAR for the first build).
 
-### 2. Deploy + init
+### 2. Deploy + init · runbook step 3
 
     cd ~/Desktop/hackathon/near-builds/arrow && shasum -a 256 release/contracts/arrow-mainnet.wasm && I=$(bash scripts/deploy/render-init.sh mainnet) && near contract deploy arrow-market.near use-file release/contracts/arrow-mainnet.wasm with-init-call new json-args "$I" prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' network-config mainnet sign-with-keychain send
 
@@ -88,15 +95,20 @@ with the unmodified mainnet JSON, `FM8kHR3yAA5znDoHKGan5uNom7ZgSXXpZcwC9AxeC4ro`
 was rolled back with the failed init). The twin then rendered `secrets_ref.account_id` as its own name; that is the
 only difference from the mainnet line.
 
-### 3. Gas tank (0.5 NEAR from arrowhq.near)
+### 3. Gas tank (0.5 NEAR from arrowhq.near) · runbook step 4
 
-    near contract call-function as-transaction arrow-market.near fund_tank json-args '{}' prepaid-gas '30.0 Tgas' attached-deposit '0.5 NEAR' sign-as arrowhq.near network-config mainnet sign-with-keychain send
+    cd ~/Desktop/hackathon/near-builds/arrow && bash scripts/deploy/mainnet-check.sh guard tank && near contract call-function as-transaction arrow-market.near fund_tank json-args '{}' prepaid-gas '30.0 Tgas' attached-deposit '0.5 NEAR' sign-as arrowhq.near network-config mainnet sign-with-keychain send
 
 Expected: log `arrow: tank funded 500000000000000000000000`.
 
 Twin: OK `C5vnSJfFBaKm6Z8u7KXDrD82JosSuuCefWyyAdit23oj`, `tank_available` 1.15 NEAR afterwards.
 
-### 4. OutLayer secret (login as arrow-market.near, set the secret for the frozen program)
+### 4. OutLayer secret (login as arrow-market.near, set the secret for the frozen program) · runbook step 5
+
+**Run `secrets set` once.** It generates a new `PROTECTED_MASTER`, so after step 6 a second run changes the program key and
+every listing sealed to the old key stops working. To change only the NEAR AI key use `outlayer secrets update`, which
+merges, keeps the access condition (checked on testnet 13 Nov) and, by its help text, keeps `PROTECTED_*`; then run step 6 again and check that
+`program_pubkey` did not change.
 
 The key goes from the keychain straight into `outlayer login`; it is never shown. The line stops before
 logging in when `NEARAI_API_KEY_MAINNET` is empty.
@@ -119,17 +131,18 @@ Twin: OK. With `NEARAI_API_KEY_MAINNET` empty the line stopped at the guard
 `And[WasmHash 73415b8f…, Predecessor Whitelist [mainnet-dryrun.arrowhq.testnet]]`. The twin secret was
 deleted afterwards. The same login + secrets form ran on mainnet in H-08d step 1 (arrow-spike, 22:10).
 
-### 5. Log out of mainnet OutLayer, put the testnet login back
+### 5. Log out of mainnet OutLayer, put the testnet login back · runbook step 6
 
-    cd ~/Desktop/hackathon/near-builds/arrow && OUTLAYER_NETWORK=mainnet outlayer logout && printf '%s\n%s\n' arrow.arrowhq.testnet "$(jq -r .private_key ~/.near-credentials/testnet/arrow.arrowhq.testnet.json)" | outlayer login testnet >/dev/null && ls ~/.outlayer/mainnet && outlayer whoami
+    cd ~/Desktop/hackathon/near-builds/arrow && OUTLAYER_NETWORK=mainnet outlayer logout && printf '%s\n%s\n' arrow-v2.arrowhq.testnet "$(jq -r .private_key ~/.near-credentials/testnet/arrow-v2.arrowhq.testnet.json)" | outlayer login testnet >/dev/null && ls ~/.outlayer/mainnet && outlayer whoami
 
 Expected: `Logged out from mainnet`, an empty `~/.outlayer/mainnet` listing, then
-`Account: arrow.arrowhq.testnet`, `Network: testnet`.
+`Account: arrow-v2.arrowhq.testnet`, `Network: testnet` (the live /try market; `arrow.arrowhq.testnet` is locked since the
+13 Nov rehearsal).
 
 Twin: OK (`Logged out from testnet`, empty mainnet folder, `Account: arrow.arrowhq.testnet`). Same form as
 H-08d step 5 on mainnet.
 
-### 6. Program key (self-signed by arrow-market.near; 0.05 NEAR goes to OutLayer, the unused part comes back)
+### 6. Program key (self-signed by arrow-market.near; 0.05 NEAR goes to OutLayer, the unused part comes back) · runbook step 7
 
     near contract call-function as-transaction arrow-market.near init_program_key json-args '{}' prepaid-gas '300.0 Tgas' attached-deposit '0.05 NEAR' sign-as arrow-market.near network-config mainnet sign-with-keychain send
 
@@ -154,13 +167,14 @@ Twin: OK `DD4Q6MX8REqG1BgfzjqDgghEek7b6x4ChKpLhM7zEXEm`: the self-signed call pa
 which does not exist on testnet. The full derive path is proven on testnet by `arrow.arrowhq.testnet`
 (`testnet.sh pubkey`, program_pubkey 04161f9c…).
 
-### 7. Post-deploy check (read-only)
+### 7. Post-deploy check (read-only) · runbook step 8
 
     cd ~/Desktop/hackathon/near-builds/arrow && bash scripts/deploy/mainnet-check.sh post
 
 Expected: `PASS` for `config_matches_init (mainnet template, secrets_ref arrow-market.near)`,
 `build mainnet, payment notify, result chain, not paused`, `code_hash = release/contracts/arrow-mainnet.wasm`,
-`tank_available` ≥ 0.4 NEAR, `secret_row … AND Predecessor arrow-market.near`, `program_pubkey_130hex 04…`
+`tank_available` ≥ 0.4 NEAR, `secret_row … AND Predecessor arrow-market.near`, `intents_keys_empty` (no key for the
+market on intents.near), `market_usdc_idle` (no USDC parked on the market's Intents account), `program_pubkey_130hex 04…`
 (waits up to 120 s for the key).
 
 Twin: 5/6 PASS on mainnet-dryrun (pubkey FAIL as explained in step 6). The same script on
@@ -183,9 +197,11 @@ No deploy, no secret (reserve only, DEC D-07).
 
 ## After H-12 (agent)
 
-Paste the step 1, 2, 3 and 6 tx hashes. The agent records them (archival RPC fills block and time):
+Paste the step 1, 2, 3 and 6 tx hashes. The agent records them (archival RPC fills block and time). The first line sources
+`.env`, because `$PROGRAM_WASM_SHA256` and `$PROGRAM_WASM_URL` are empty in a fresh shell and an empty `--set` leaves R1
+NOT PROVEN:
 
-    npx tsx scripts/src/evidence-add.ts --network mainnet --set contract=arrow-market.near --set "contract_wasm_sha256=$(awk '$2=="arrow-mainnet.wasm"{print $1}' release/contracts/SHA256SUMS)" --set "program_wasm_sha256=$PROGRAM_WASM_SHA256" --set "program_wasm_url=$PROGRAM_WASM_URL"
+    set -a && . ./.env && set +a && npx tsx scripts/src/evidence-add.ts --network mainnet --set contract=arrow-market.near --set "contract_wasm_sha256=$(awk '$2=="arrow-mainnet.wasm"{print $1}' release/contracts/SHA256SUMS)" --set "program_wasm_sha256=$PROGRAM_WASM_SHA256" --set "program_wasm_url=$PROGRAM_WASM_URL"
     npx tsx scripts/src/evidence-add.ts --network mainnet --sender arrowhq.near --run '{"id":"h12-deploy-storage","kind":"deploy","tx":"<step 1 tx>","chain":"near","expect":"<n> NEAR to arrow-market.near (the step 1 value)","observed":"…","script":"scripts/deploy/mainnet.md"}'
 
 (one `--run` per tx: `h12-deploy-storage`, `h12-deploy-init` with sender arrow-market.near, `h12-deploy-tank`,

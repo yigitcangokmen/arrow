@@ -1,7 +1,7 @@
 // WS1-T05 acceptance: evidence_add_file_flag, duplicate id refused, secret field refused, accounts written.
 // Runs the CLI against a temp evidence dir (ARROW_EVIDENCE_DIR); no network (every run carries block_height or no tx).
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -121,5 +121,14 @@ describe("evidence-add", { timeout: 20_000 }, () => {
     expect(bad.status).toBe(1);
     const unknown = cli("--network", "testnet", "--set", "runs=[]");
     expect(unknown.status).toBe(1);
+  });
+
+  it("QA-08: an empty --set value (an unset shell variable) is refused and nothing is written", () => {
+    for (const field of ["program_wasm_url", "program_wasm_sha256", "contract"]) {
+      const r = cli("--network", "testnet", "--set", `${field}=`);
+      expect(r.status).not.toBe(0);
+      expect(r.stderr).toContain(`--set ${field} is empty`);
+    }
+    expect(existsSync(join(dir, "testnet.json")) ? testnet().program_wasm_url : undefined).toBeUndefined();
   });
 });

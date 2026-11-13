@@ -48,6 +48,9 @@ web/public/dcap/
 web/public/demo/
 web/next-env.d.ts
 
+# mainnet e2e ciphertexts: uploaded to the Vercel Blob store (runbook step 12), rebuilt from ~/.config/arrow/e2e-keys.json
+fixtures/blobs/e2e/
+
 # S3a dry run output (the funded run owns spikes/s3/s3a-results.json)
 spikes/s3/s3a-dry-results.json
 .vercel
