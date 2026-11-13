@@ -35,6 +35,14 @@ export function listingLinks(id: number | string, net: Network): { buy: string; 
 }
 
 /**
+ * The x402 path the home page's agent card shows (QA-13): the wallet-labels listing of the network being viewed, else the
+ * recorded testnet run. It keeps the network query, so a judge who copies it from the mainnet site reaches the testnet listing.
+ */
+export function agentCardPath(walletId: number | string | null | undefined, net: Network): string {
+  return walletId != null ? listingLinks(walletId, net).x402 : listingLinks(RECORDED_RUN.listingId, "testnet").x402;
+}
+
+/**
  * The public source repository, or null while it is private: a private repo answers 404 to visitors, so the site shows no
  * GitHub link until this is set (making the repo public is a human step).
  */

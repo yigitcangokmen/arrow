@@ -228,7 +228,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "Hosting of the wasm file (hash-pinned)",
     sees: "—",
     cannot: "Swap the program: the hash is pinned",
-    check: "Availability depends on the host staying reachable, e.g. a public repository",
+    check: "Served from testnet FastFS (test.fastfs.io). Availability depends on that host staying reachable; once the market is locked, the URL cannot change",
     flag: "RISKY",
   },
 ];

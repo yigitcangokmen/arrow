@@ -16,7 +16,7 @@ import { readAttackInputs } from "../lib/attack.ts";
 import { CONTRACTS, parseNetwork } from "../lib/config.ts";
 import { devState } from "../lib/devState.ts";
 import { formatUsdc } from "../lib/format.ts";
-import { listingLinks, RECORDED_EVAL, RECORDED_REFUND, RECORDED_RUN, RECORDED_RUN_PATH, REPO_URL, TRUST_PATH, txUrl, withNetwork } from "../lib/links.ts";
+import { agentCardPath, RECORDED_EVAL, RECORDED_REFUND, RECORDED_RUN, RECORDED_RUN_PATH, REPO_URL, TRUST_PATH, txUrl, withNetwork } from "../lib/links.ts";
 import { recordedRefundTx, recordedRun } from "../lib/recorded.ts";
 import { rpcBusy } from "../lib/rpcBusy.ts";
 import { groupHomeListings, lastGoodListings, loadListingViews } from "../lib/server/listingsPage.ts";
@@ -87,7 +87,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
   const verifyLine = lastSummary(net);
   const inspections = featured.reduce((n, l) => n + l.budget.evalsUsed, 0);
   const refundTx = recordedRefundTx(evidence.testnet);
-  const agentPath = new URL(listingLinks(wallet?.id ?? RECORDED_RUN.listingId, "testnet").x402, "https://x").pathname;
+  const agentPath = agentCardPath(wallet?.id, net);
   const run = await recordedPrints();
   const prints = run?.fingerprints ?? null;
 

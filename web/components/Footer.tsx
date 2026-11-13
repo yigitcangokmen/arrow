@@ -5,6 +5,7 @@ import { REPO_URL } from "../lib/links.ts";
 import { lastGoodListings, loadListingViews } from "../lib/server/listingsPage.ts";
 import { mainnetContractLive } from "../lib/server/mainnetLive.ts";
 import type { ListingView } from "../lib/server/listingsCache.ts";
+import { FooterNet } from "./FooterNet.tsx";
 import styles from "./Footer.module.css";
 
 /**
@@ -30,7 +31,7 @@ export async function Footer() {
         <div>
           <p className={styles.brand}>Arrow</p>
           <p className={styles.fine}>
-            {DEFAULT_NETWORK === "testnet" ? `NEAR testnet · synthetic demo data · ${live ? "mainnet contract deployed" : "mainnet not deployed"}` : "NEAR mainnet"}{outside !== null ? <> · outside sellers of real data so far: <span className="mono">{outside}</span></> : null}
+            <FooterNet live={live} />{outside !== null ? <> · outside sellers of real data so far: <span className="mono">{outside}</span></> : null}
           </p>
         </div>
         <ul className={styles.links} aria-label="Footer">

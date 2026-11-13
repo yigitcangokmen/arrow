@@ -38,7 +38,7 @@ export const MORE: { text: string; rows: string[] }[] = [
   { text: "A buyer can use up a listing's limit on inspections with runs that fail.", rows: ["Leak budget"] },
   { text: "The time limits use the clock of the machine that runs the sealed hardware.", rows: ["Time guard"] },
   { text: "The market contract keeps NEAR to pay for each run. Failed runs still use it up, and when it runs low new inspections are refused until someone tops it up.", rows: ["Gas tank"] },
-  { text: "The account that relays payments has a second, all-powers key, kept offline by the team; whoever holds it can drain the relay's gas or stop it. It holds no user money.", rows: ["Relayer account"] },
+  { text: "The account that relays payments has a second, all-powers key, kept by the team in a laptop keychain, never on the server; whoever holds it can drain the relay's gas or stop it. It holds no user money.", rows: ["Relayer account"] },
   { text: "The program file sits on a public file host. Its fingerprint is pinned on chain, so the host cannot swap it unnoticed, but it could stop serving it.", rows: ["Program bytes"] },
   { text: "How much the public run time reveals has not been measured; no number is published.", rows: ["Side channels"] },
 ];
