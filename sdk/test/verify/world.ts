@@ -28,6 +28,8 @@ const event = (standard: string, name: string, data: unknown) =>
   "EVENT_JSON:" + JSON.stringify({ standard, version: "1.0.0", event: name, data });
 
 export interface World {
+  /** Block timestamps (ns) by block hash for the fake `block` RPC; any other block answers 1763000000000000000. */
+  blockTimes?: Record<string, string>;
   network: Network;
   contract: string;
   buyer: string;
@@ -204,7 +206,7 @@ export function fakeFetch(w: World): typeof fetch {
         const t = w.txs[params.tx_hash];
         return t ? rpcOk(t) : rpcErr("UNKNOWN_TRANSACTION", `tx ${params.tx_hash} unknown`);
       }
-      if (method === "block") return rpcOk({ header: { timestamp_nanosec: "1763000000000000000" } });
+      if (method === "block") return rpcOk({ header: { timestamp_nanosec: w.blockTimes?.[params.block_id] ?? "1763000000000000000" } });
       if (method === "query") {
         if (params.request_type === "call_function") {
           const args = JSON.parse(Buffer.from(params.args_base64, "base64").toString());

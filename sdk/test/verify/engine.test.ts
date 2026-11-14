@@ -580,6 +580,31 @@ describe("I5 (CRY-4): the program secret row", () => {
     expect((await i5(w)).detail).toContain("set_program");
   });
 
+  /** A second set_program tx in block LATERBLOCK, after the secret row was made, setting `hash` (url moved). */
+  const resetProgram = (w: World, hash: string, id: string, block: string, ns: string) => {
+    const tx = JSON.parse(JSON.stringify(w.txs.SETPROG1));
+    tx.transaction.hash = id;
+    tx.transaction_outcome = { ...tx.transaction_outcome, id, block_hash: block };
+    tx.transaction.actions[0].FunctionCall.args = Buffer.from(JSON.stringify({ url: "https://moved.test/arrow-tee.wasm", hash })).toString("base64");
+    w.txs[id] = tx;
+    w.blockTimes = { ...(w.blockTimes ?? {}), [block]: ns };
+    w.evidence.runs.push({ ...w.evidence.runs.find((r) => r.id === "d1")!, id: `d-${id}`, tx: id });
+  };
+
+  it("a later set_program that only moves the url (same hash) keeps a row made for this program PROVEN", async () => {
+    const w = buildWorld();
+    resetProgram(w, w.config.config.program_wasm_hash, "SETPROG2", "LATERBLOCK", "1763000200000000000");
+    expect(await i5(w), (await i5(w)).detail).toMatchObject({ label: "PROVEN" });
+  });
+
+  it("a row made before a switch to another wasm and back is NOT PROVEN", async () => {
+    const w = buildWorld();
+    const hash = w.config.config.program_wasm_hash;
+    resetProgram(w, "cd".repeat(32), "SETPROGB", "BLOCKB", "1763000200000000000");
+    resetProgram(w, hash, "SETPROG3", "BLOCKC", "1763000300000000000");
+    expect(await i5(w)).toMatchObject({ label: "NOT PROVEN" });
+  });
+
   it("without a recorded set_program of this wasm it is NOT PROVEN", async () => {
     const w = buildWorld();
     w.evidence.runs = w.evidence.runs.filter((r) => r.kind !== "deploy");

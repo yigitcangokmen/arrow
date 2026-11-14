@@ -25,9 +25,13 @@ const isExpectedAccess = (access: any, hash: string, contract: string): boolean 
   );
 };
 
-/** Block time (ns) of the newest recorded tx that set this program hash: set_program, or `new` for a program set at init. */
-async function lastProgramSetNs(ctx: VerifyCtx, hash: string): Promise<bigint | null> {
-  let last: bigint | null = null;
+/**
+ * Block time (ns) since which this program hash has been the market's program: the first recorded set of `hash` (set_program,
+ * or `new` at init) after the last recorded set of any other hash. A set_program that writes the same hash again (only the
+ * url moves) does not start a new program, so it does not count; a switch to another wasm and back does.
+ */
+async function currentProgramSinceNs(ctx: VerifyCtx, hash: string): Promise<bigint | null> {
+  const events: { ns: bigint; hash: string }[] = [];
   for (const run of ctx.runs("deploy")) {
     if (!run.tx) continue;
     let tx: any;
@@ -41,14 +45,20 @@ async function lastProgramSetNs(ctx: VerifyCtx, hash: string): Promise<bigint | 
     const sets = [
       ...functionCallArgs(tx, { ...at, methodName: "set_program" }).map((a) => a?.hash),
       ...functionCallArgs(tx, { ...at, methodName: "new" }).map((a) => a?.cfg?.program_wasm_hash),
-    ];
-    if (!sets.includes(hash)) continue;
+    ].filter((h): h is string => typeof h === "string");
+    if (!sets.length) continue;
     const block = await rpc<{ header?: { timestamp_nanosec?: string } }>(ctx.network, "block", { block_id: tx.transaction_outcome?.block_hash }, { ...ctx.rpcOpts, archival: true });
     const ns = block?.header?.timestamp_nanosec;
     if (typeof ns !== "string" || !/^\d+$/.test(ns)) continue;
-    if (last === null || BigInt(ns) > last) last = BigInt(ns);
+    for (const h of sets) events.push({ ns: BigInt(ns), hash: lc(h) });
   }
-  return last;
+  events.sort((x, y) => (x.ns < y.ns ? -1 : x.ns > y.ns ? 1 : 0));
+  let since: bigint | null = null;
+  for (const e of events) {
+    if (e.hash !== hash) since = null;
+    else if (since === null) since = e.ns;
+  }
+  return since;
 }
 
 export async function i5(ctx: VerifyCtx) {
@@ -60,8 +70,8 @@ export async function i5(ctx: VerifyCtx) {
   const s = mine[0];
   if (!isExpectedAccess(s.access, hash, ctx.contract)) return no(`access is not And[WasmHash ${shortHash(hash)}, Predecessor Whitelist [${ctx.contract}]]: ${JSON.stringify(s.access).slice(0, 160)}`);
   if (typeof s.created_at !== "number" || s.updated_at !== s.created_at) return no(`updated_at ${s.updated_at} != created_at ${s.created_at}: the row was changed after it was made, so its access may have been moved`);
-  const setNs = await lastProgramSetNs(ctx, hash);
+  const setNs = await currentProgramSinceNs(ctx, hash);
   if (setNs === null) return no(`no recorded set_program of ${shortHash(hash)} to compare the row's creation with`);
-  if (BigInt(s.created_at) <= setNs) return no(`the row was created at ${s.created_at}, not after the last recorded set_program of ${shortHash(hash)} at ${setNs}`);
-  return row("I5", "PROVEN", false, TITLE, `one row on ${ctx.cfg.outlayer}: And[WasmHash ${shortHash(hash)}, Predecessor [${ctx.contract}]], created_at == updated_at, created after the last recorded set_program`);
+  if (BigInt(s.created_at) <= setNs) return no(`the row was created at ${s.created_at}, not after ${shortHash(hash)} became the program (recorded set_program or new at ${setNs})`);
+  return row("I5", "PROVEN", false, TITLE, `one row on ${ctx.cfg.outlayer}: And[WasmHash ${shortHash(hash)}, Predecessor [${ctx.contract}]], created_at == updated_at, created after ${shortHash(hash)} became the program (re-sets of the same hash that only move the url do not count)`);
 }
