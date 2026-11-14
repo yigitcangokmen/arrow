@@ -122,7 +122,8 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "Short custody during swaps. Base USDC is a bridged token (omft.near) that 1Click swaps into native NEAR USDC, the only token the market accepts; a Solana withdrawal is the reverse swap. The swap is a trust step",
     sees: "Swap transactions",
     cannot: "—",
-    check: "1Click /v0/status. Paid inbound ran once on mainnet (2 USDC from Base); the outbound Solana withdrawal is a dry quote only. Custody is not shown",
+    check:
+      "1Click /v0/status, read by npm run verify -- --network mainnet row R4. On mainnet on 14 Nov, 5.00 USDC came in from Base (4.999784 arrived on Intents, Base tx 0x60ff039b3d3ca5f0759f5981433b45050c5de91a805f2b4406084a4cbf04f419) and the seller withdrew 1.00 USDC to Solana (Solana tx 2hkMCjWQWGEGTzVJDUEwANVzRRL5yWpfapAucembXWHovYRWfrCddX2n8dVivtEPa5kk72885tynk8vYQYV7UyHr); both ended SUCCESS. Custody is not shown",
     flag: "NOT PROVEN",
   },
   {
