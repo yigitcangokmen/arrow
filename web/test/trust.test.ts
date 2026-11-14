@@ -56,8 +56,16 @@ describe("trust table", () => {
   it("the_operator_row_does_not_state_the_lock_as_a_fact", () => {
     const op = TRUST_ROWS.find((r) => r.part === "Arrow operator")!;
     expect(op.flag).toBe("TODO");
-    expect(op.check).toMatch(/not locked yet|not deployed/i);
+    expect(op.check).toMatch(/live on mainnet; not locked yet, so the team can still change it/i);
+    expect(op.check).not.toMatch(/not deployed/i);
     expect(`${op.cannot} ${op.check}`).not.toMatch(/no access keys after the lock/i);
+  });
+
+  it("the_refund_row_cites_the_arrow_contracts_mainnet_refund", () => {
+    const r = TRUST_ROWS.find((x) => x.part === "Refund destination")!;
+    expect(r.flag).toBeUndefined();
+    expect(r.check).toMatch(/The Arrow contract refunded a failed eval on mainnet \(arrow_refund not_ok, mainnet tx \S+\)/);
+    expect(r.check).not.toMatch(/still to do/i);
   });
 
   it("the_inference_key_row_says_it_cannot_be_topped_up", () => {

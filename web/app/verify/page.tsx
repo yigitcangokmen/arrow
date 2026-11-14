@@ -189,7 +189,7 @@ async function VerifyLive({ net }: { net: "testnet" | "mainnet" }) {
         </p>
         <span className={styles.summaryPlain}>
           {summary.passed ? "Every required promise holds on public blockchain data." : "Not every required row could be PROVEN right now. Each row below says why."}
-          {net === "testnet" ? " R4, R6 and R7 are mainnet-only; mainnet is not deployed yet." : null}
+          {net === "testnet" ? " R4, R6 and R7 are mainnet-only. The market is live on mainnet; it is not locked yet, so the team can still change it." : null}
         </span>
         <span className={styles.cli}>{summary.line}</span>
         {summary.failure ? <span className={summary.busy ? styles.busy : styles.fail}>{summary.failure}</span> : null}

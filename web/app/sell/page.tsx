@@ -32,7 +32,7 @@ export default async function Sell({ searchParams }: { searchParams: Promise<{ n
       </PageHead>
       {net === "testnet" ? (
         <Note>
-          <p><b>Read-only on testnet.</b> Listing with real payouts needs mainnet, which is not deployed yet.</p>
+          <p><b>Read-only on testnet.</b> Listing with real payouts needs mainnet, where the market is live; it is not locked yet, so the team can still change it.</p>
           <p className={styles.noteAction}><Link className={styles.demo} href="/try">Run the demo, free</Link></p>
         </Note>
       ) : null}

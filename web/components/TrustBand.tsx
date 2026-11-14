@@ -26,7 +26,7 @@ export const LIMITS: { text: string; rows: string[] }[] = [
   { text: "The verdict can be wrong. Fixed rules check the structure, but whether a 40-row sample fits what you asked is the AI's judgement.", rows: ["Decision correctness"] },
   { text: "Anyone can see which wallet inspected which listing, when, and what it paid. Any site that gets the same wallet signature can open that wallet's verdicts.", rows: ["Buyer viewing key"] },
   { text: "A buyer can resell a file they bought. And if the key for a purchase is published too late, the buyer gets a refund and can still open the file.", rows: ["After purchase", "Time guard"] },
-  { text: "Real payments are not live yet: mainnet is not deployed and the contract can still be changed by the team.", rows: ["Arrow operator", "Refund destination"] },
+  { text: "Real payments are live on mainnet, but the market is not locked yet, so the team can still change it.", rows: ["Arrow operator"] },
   { text: "The AI runs on the hackathon's free key. If it runs out, inspections fail and most of the fee comes back.", rows: ["NEAR AI API key (inside the OutLayer secret)"] },
 ];
 

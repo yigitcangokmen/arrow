@@ -41,7 +41,7 @@ export function NetBadge({ net, mainnetLive, pathname }: { net: Network; mainnet
       ? "Live on NEAR mainnet. Open for details."
       : shown === "mainnet"
         ? "NEAR mainnet: the market is not deployed there yet. Open for details."
-        : "NEAR testnet. Synthetic data, test money only, mainnet not deployed yet. Open for details.";
+        : "NEAR testnet. Synthetic data, test money only. The market is live on mainnet, not locked yet. Open for details.";
   return (
     <details ref={ref} className={styles.net} data-state={state}>
       <summary aria-label={label}>
@@ -68,7 +68,7 @@ export function NetBadge({ net, mainnetLive, pathname }: { net: Network; mainnet
         ) : shown === "mainnet" ? (
           <p>The market contract is not deployed on mainnet yet. The demo runs on testnet.</p>
         ) : (
-          <p>Synthetic demo data. Mainnet is not deployed yet.</p>
+          <p>Synthetic demo data. The market is live on mainnet; not locked yet, so the team can still change it.</p>
         )}
         <p className={styles.acts}>
           {state === "mainnet" ? (

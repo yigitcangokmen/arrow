@@ -16,7 +16,7 @@
 
 ---
 
-You cannot sell information: to judge its value the buyer must see it, and once they have seen it they have no reason to pay ([Kenneth Arrow, 1962](https://www.nber.org/books-and-chapters/rate-and-direction-inventive-activity-economic-and-social-factors/economic-welfare-and-allocation-resources-invention)). Arrow is a data market on NEAR, named after that paradox, where the buyer does not look: for a small fee, [a fixed model](docs/design.md#near-ai-call) in NEAR AI's TEE judges a sample of the seller's rows against the buyer's criteria, and the buyer gets BUY or PASS, plus fit and novelty from 1 to 5 if the seller allows them ([decision](docs/design.md#decision)), not the rows. On mainnet (not deployed yet), payment is USDC from Base through NEAR Intents, and when an inspection fails most of the fee comes back ([amounts](#6-who-got-paid)).
+You cannot sell information: to judge its value the buyer must see it, and once they have seen it they have no reason to pay ([Kenneth Arrow, 1962](https://www.nber.org/books-and-chapters/rate-and-direction-inventive-activity-economic-and-social-factors/economic-welfare-and-allocation-resources-invention)). Arrow is a data market on NEAR, named after that paradox, where the buyer does not look: for a small fee, [a fixed model](docs/design.md#near-ai-call) in NEAR AI's TEE judges a sample of the seller's rows against the buyer's criteria, and the buyer gets BUY or PASS, plus fit and novelty from 1 to 5 if the seller allows them ([decision](docs/design.md#decision)), not the rows. On mainnet (live; not locked yet, so the team can still change it), payment is USDC from Base through NEAR Intents, and when an inspection fails most of the fee comes back ([amounts](#6-who-got-paid)).
 
 ```mermaid
 flowchart LR
@@ -33,7 +33,7 @@ flowchart LR
   Judge -.-> Back
 ```
 
-**[The story](#how-it-works) · [Trust table](#trust-table) · [Try it](#try-it-do-x-see-y) · [Hosted demo (testnet)](https://arrow-market.vercel.app) · [Evidence ledger](JUDGES.md) · [Pending mainnet steps](JUDGES.md#pending-ledger) · [Testnet contract](https://testnet.nearblocks.io/address/arrow-v2.arrowhq.testnet) · [Design notes](docs/design.md)**
+**[The story](#how-it-works) · [Trust table](#trust-table) · [Try it](#try-it-do-x-see-y) · [Live app (mainnet)](https://arrow-market.vercel.app) · [Free demo (testnet)](https://arrow-market.vercel.app/try) · [Evidence ledger](JUDGES.md) · [Pending mainnet steps](JUDGES.md#pending-ledger) · [Mainnet contract](https://nearblocks.io/address/arrow-market.near) · [Testnet contract](https://testnet.nearblocks.io/address/arrow-v2.arrowhq.testnet) · [Design notes](docs/design.md)**
 
 ## How it works
 
@@ -226,7 +226,7 @@ flowchart TB
 
 ## Trust table
 
-**PROVEN**: a command or transaction shows it today; the parenthesis says where. **RISKY**: true, and a weakness. **NOT PROVEN**: we do not claim it. **TODO**: waits for a [Pending ledger](JUDGES.md#pending-ledger) step. `J#n` is row n of [JUDGES.md](JUDGES.md). Each row counted under its weakest label: 4 PROVEN, 14 RISKY, 4 NOT PROVEN, 3 TODO.
+**PROVEN**: a command or transaction shows it today; the parenthesis says where. **RISKY**: true, and a weakness. **NOT PROVEN**: we do not claim it. **TODO**: waits for a [Pending ledger](JUDGES.md#pending-ledger) step. `J#n` is row n of [JUDGES.md](JUDGES.md). Each row counted under its weakest label: 5 PROVEN, 14 RISKY, 4 NOT PROVEN, 2 TODO.
 
 | Part | Who you trust | Can see | Cannot | How to check | Label |
 |---|---|---|---|---|---|
@@ -246,7 +246,7 @@ flowchart TB
 | Leak budget | The contract counter | n/a | n/a | [Rules](docs/design.md#leak-budget); J#15, J#41 | RISKY |
 | Decision correctness | Structural gates and the LLM | n/a | Override a failed structural gate | J#5 (gates); J#9, J#53 (semantics) | PROVEN (gates), RISKY (semantics) |
 | 1Click and the PoA bridge (Intents Technology) | Short custody during swaps | Swap transactions | n/a | Base USDC (other 1Click origins are untested) arrives as a bridged token (`omft.near`) that 1Click swaps into native NEAR USDC, the only token the market accepts; J#24, J#25 | NOT PROVEN (custody), PROVEN (one inbound) |
-| Refund destination | `intents.near` | n/a | n/a | Moving a refund back to Base is a separate 1Click withdrawal; J#17; Pending M12 | PROVEN (mainnet, spike contract); TODO (Arrow contract) |
+| Refund destination | `intents.near` | n/a | n/a | Arrow contract on mainnet: e2e step 8 refunded a failed eval (`arrow_refund` `not_ok`), tx `TODO_TX_M12_REFUND` (Pending M12); spike contract: J#17. Moving a refund back to Base is a separate 1Click withdrawal | PROVEN (mainnet: Arrow contract, spike contract) |
 | NEAR AI API key (inside the OutLayer secret) | Billing | Usage volume | See content | If it runs out, evals fail; J#44 | RISKY |
 | Gas tank | The operator (tops it up) and OutLayer's NEAR charge | n/a | n/a | `fund_tank` refills it; J#46; [cost, runway and E10](docs/perf.md#gas-tank) | RISKY |
 | Relayer account | Whoever holds the keys of `arrow-relayer.arrowhq.near` (the team) | The intents it relays: signer, `msg`, IP | Spend or move user funds: the relayer holds none | The relay server signs only with a function-call key limited to `execute_intents` on `intents.near`. The account's FullAccess key stays with the team (in a laptop's macOS keychain, never on the server), to revoke a leaked server key; whoever holds it can drain the relayer's gas or stop `/api/relay`; J#47. The relay's rate limits are per server instance and protect only the relayer's gas: across instances the worst case is about 0.34 NEAR of gas (its balance down to the 0.65 NEAR floor, then the hosted relay pauses) and no user funds; a signed payment still runs once (J#56) | RISKY |
@@ -260,11 +260,11 @@ flowchart TB
 
 ## Status
 
-As of 2026-11-11 20:20 UTC.
+As of 2026-11-14, after the mainnet deploy and before the lock.
 
 - Testnet: contract `arrow-v2.arrowhq.testnet` runs the frozen program `6ad7fed4…` (tag `wasm-freeze`; set_program: run `deploy-testnet-set_program-freeze` in `evidence/testnet.json`; [build](#build-from-source)); end-to-end run on it: [K2](JUDGES.md#gates-already-run). It is not locked (the lock deletes the contract's access keys); pre-freeze listings: [J#57](JUDGES.md#claims).
-- Mainnet: the Arrow contract `arrow-market.near` is not deployed and the Arrow program has not run on mainnet; spike runs: [gates](JUDGES.md#gates-already-run).
-- Hosted demo: [arrow-market.vercel.app](https://arrow-market.vercel.app), on testnet against `arrow-v2.arrowhq.testnet`, built from `9bf4cae` with the frozen program's sha embedded; its `/verify` shows the same rows as `npm run verify -- --network testnet`. Its `/try` reads OutLayer's shared testnet queue before each payment and waits while the queue is slow, because an inspection that starts more than 45 s after its request refunds by design; on 2026-11-13 that queue alternated between about 3 s and 60-110 s for spells of 15-45 minutes.
+- Mainnet: the Arrow contract `arrow-market.near` is live on mainnet; not locked yet, so the team can still change it (the lock deletes its access keys: Pending M15a). Deploy and init: tx `TODO_TX_M2_INIT`. The frozen program `6ad7fed4…` ran there: eval tx `TODO_TX_M8_EVAL_L1`, buy tx `TODO_TX_M10_BUY_L2`, refund tx `TODO_TX_M12_REFUND` ([Pending ledger](JUDGES.md#pending-ledger) M1-M14); `npm run verify -- --network mainnet --pre-lock` reads them. Earlier spike runs: [gates](JUDGES.md#gates-already-run).
+- Hosted site: [arrow-market.vercel.app](https://arrow-market.vercel.app), on mainnet against `arrow-market.near` (live; not locked yet, so the team can still change it), with the frozen program's sha embedded; its `/verify?network=mainnet` shows the same rows as `npm run verify -- --network mainnet --pre-lock`. `?network=testnet` and `/try` keep the free demo on testnet against `arrow-v2.arrowhq.testnet`. Its `/try` reads OutLayer's shared testnet queue before each payment and waits while the queue is slow, because an inspection that starts more than 45 s after its request refunds by design; on 2026-11-13 that queue alternated between about 3 s and 60-110 s for spells of 15-45 minutes.
 - Not yet: the demo video (not recorded) and outside demand (no seller invitation sent; drafts in `docs/outreach/`).
 - Repository and CI: private until a human makes it public, so repository links (including the contract's NEP-330 source link) do not resolve yet. All five CI jobs are green; `tee` rebuilds the program natively on x86_64 Linux and in the pinned image and compares both with `release/sha256.txt` ([Build from source](#build-from-source)).
 
@@ -378,7 +378,7 @@ The variables, all prefixed `ARROW_MCP_`: `ALLOW_MAINNET` and `ALLOW_BUY` are of
 
 **Enclave.** `bash scripts/build-tee-docker.sh` (Docker; it builds the committed `HEAD` in a pinned linux/amd64 image, about 1.5 min on Apple silicon after the image pull) prints `6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1`, the value in `release/sha256.txt`, the contract's `program_wasm_hash` and the attested `wasm_hash`. Without Docker, `bash scripts/build-tee.sh` gives the same sha only on `x86_64-unknown-linux-gnu` with rustup: Cargo mixes the build machine's target triple into the hash of every crate that has a build script or a proc-macro dependency, so another host gives other bytes (macOS arm64: `2d2dc4d0…`, which ran on testnet as rc4 before the freeze). Proof of the cause: on a Mac, `RUSTC=scripts/dev/rustc-fixed-host.sh bash scripts/build-tee.sh target/rel-tee-shim` changes only the host line Cargo sees and prints the canonical sha. Flags, toolchain and the proof: [release/BUILD.md](release/BUILD.md).
 
-**Contracts.** `cargo near build reproducible-wasm`, then compare with the code hash of `arrow-market.near` once it is deployed (Pending M2). The committed `release/contracts/arrow-mainnet.wasm` is that build at `6ae732d` (sha256 `f59f35e7…`, code hash `HXohArFy…`; [release/contracts/BUILD.md](release/contracts/BUILD.md)), and `bash scripts/deploy/mainnet-check.sh wasm` prints `PASS contract_wasm_sha256` and `PASS contract_wasm_fresh`.
+**Contracts.** `cargo near build reproducible-wasm`, then compare with the code hash of `arrow-market.near` (deployed in tx `TODO_TX_M2_INIT`, Pending M2): `bash scripts/deploy/mainnet-check.sh post` prints `PASS code_hash = release/contracts/arrow-mainnet.wasm`. The committed `release/contracts/arrow-mainnet.wasm` is that build at `6ae732d` (sha256 `f59f35e7…`, code hash `HXohArFy…`; [release/contracts/BUILD.md](release/contracts/BUILD.md)), and `bash scripts/deploy/mainnet-check.sh wasm` prints `PASS contract_wasm_sha256` and `PASS contract_wasm_fresh`.
 
 ## Hackathon rules
 

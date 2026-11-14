@@ -80,7 +80,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "Relayer liveness and the gas tank",
     sees: "The encrypted blobs it hosts, and the IP address, 0x address and listing of every payment relayed through /api/relay",
     cannot: "The plan after the lock, not yet a fact: read data, take funds, or change the contract or wasm hash",
-    check: "Not locked yet: there is no lock transaction, and the mainnet market contract is not deployed. The contract is meant to own itself with no access keys; npm run verify (row R6) shows it once it is done",
+    check: "Live on mainnet; not locked yet, so the team can still change it: there is no lock transaction, and arrow-market.near still has an access key. The contract is meant to own itself with no access keys; npm run verify -- --network mainnet (row R6) shows it once it is done",
     flag: "TODO",
   },
   {
@@ -206,15 +206,14 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "—",
     cannot: "—",
     check:
-      "Refunded to your NEAR Intents balance. Moving it back to a Base wallet is a separate 1Click withdrawal. Refunds by mt_resolve_transfer are shown on mainnet with a spike contract; a refund from the Arrow contract on mainnet is still to do",
-    flag: "TODO",
+      "Refunded to your NEAR Intents balance. Moving it back to a Base wallet is a separate 1Click withdrawal. The Arrow contract refunded a failed eval on mainnet (arrow_refund not_ok, mainnet tx TODO_TX_M12_REFUND); refunds by mt_resolve_transfer were shown on mainnet before that with a spike contract",
   },
   {
     part: "HTTP 402 wrapper",
     trust: "Nothing: it carries no payment",
     sees: "—",
     cannot: "Move funds",
-    check: "accepts is empty on purpose; payment goes through NEAR Intents. curl -i https://arrow-market.vercel.app/api/x402/13 answers 402 with X-Arrow-Listing and an empty accepts",
+    check: "accepts is empty on purpose; payment goes through NEAR Intents. curl -i 'https://arrow-market.vercel.app/api/x402/13?network=testnet' answers 402 with X-Arrow-Listing and an empty accepts",
   },
   {
     part: "40-row sample to NEAR AI",

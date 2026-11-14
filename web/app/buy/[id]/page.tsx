@@ -45,7 +45,7 @@ export default async function BuyPage({ params, searchParams }: { params: Promis
       <Link href={`${withNetwork("/", net)}#listings`} className={styles.back}>← All listings</Link>
       {net === "testnet" ? (
         <Note>
-          <p><b>Real purchases need mainnet, which is not deployed yet.</b> The free demo runs the same steps on testnet.</p>
+          <p><b>Real purchases run on mainnet, where the market is live; it is not locked yet, so the team can still change it.</b> The free demo runs the same steps on testnet.</p>
           <p className={styles.noteAction}><Link className={styles.demo} href="/try">Run the demo, free</Link></p>
         </Note>
       ) : null}

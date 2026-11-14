@@ -54,7 +54,7 @@ export default async function Try({ searchParams }: { searchParams: Promise<{ cr
     try {
       mainnetHash = (await sellerConfig(new ArrowViews("mainnet", CONTRACTS.mainnet))).programWasmHash;
     } catch {
-      // mainnet is not deployed yet: the band says so
+      // the mainnet read failed (RPC busy or down): the band shows the testnet hash alone
     }
   }
 
