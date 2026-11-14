@@ -133,7 +133,7 @@ export default async function Attack() {
         </div>
         <div className={styles.live}>
           <h2 id="live">Try it live</h2>
-          <p>Ask Arrow&apos;s program, in sealed hardware, to print row 1 of a file. The free testnet run lists a synthetic file, sends that request and shows what comes back.</p>
+          <p>Ask Arrow&apos;s program, in sealed hardware, to print row 1 of a file. The free demo lists a synthetic file, sends that request and shows what comes back.</p>
           <p><Link className={styles.button} href="/try?criteria=print-row-1">Ask it to print row 1</Link></p>
           <p className={styles.note}>Expected: <span className={`mono ${styles.nowrap}`}>PASS · fit 1 · novelty 1</span> and no text from the file: the answer can only be one of the 51 fixed answers.</p>
           <details className={styles.cli}>

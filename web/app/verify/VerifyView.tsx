@@ -91,7 +91,7 @@ function RowLine({ row, extra }: { row: Row; extra?: ReactNode }) {
 export function TryNext() {
   return (
     <div className={styles.next}>
-      <p><b>See it happen.</b> The free demo runs a listing, an inspection and a purchase on testnet with a throwaway account, in about 3 minutes.</p>
+      <p><b>See it happen.</b> The free demo runs a listing, an inspection and a purchase with a throwaway account, in about 3 minutes.</p>
       <Link className={styles.go} href="/try">Run the demo, free</Link>
     </div>
   );

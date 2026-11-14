@@ -55,11 +55,12 @@ export const RECORDED_RUN_PATH = "/try/recorded";
 /** The rest of the recorded run: the listing it inspected and the purchase that followed (same account, same key). */
 export const RECORDED_RUN = { listingId: 14, evalId: RECORDED_EVAL, purchaseId: 5 } as const;
 /**
- * The recorded failed run on the home page: inspection #12 on listing #12 (a synthetic listing whose file host is missing on purpose) on
- * arrow-v2.arrowhq.testnet. Its refund transaction (evidence/testnet.json, kind "refund") logs arrow_refund {reason: "not_ok",
- * amount: "225000"}: 0.25 test USDC paid, 0.225 back, 0.025 kept as Arrow's 10% share.
+ * The recorded failed run on the home page: inspection #3 on listing #3 ("[synthetic] e2e broken host", file host missing on purpose) on
+ * arrow-market.near, mainnet. Its refund transaction (evidence/mainnet.json, run e2e-mainnet-20261114T113005Z-eval-mainnet-3) logs
+ * arrow_refund {reason: "not_ok", amount: "225000"}: 0.25 USDC paid, 0.225 back to the buyer's NEAR Intents balance, 0.025 to the
+ * treasury as Arrow's 10% share.
  */
-export const RECORDED_REFUND = { evalId: 12, paid: "$0.25", back: "$0.225", kept: "$0.025" } as const;
+export const RECORDED_REFUND = { evalId: 3, listingId: 3, title: "[synthetic] e2e broken host", paid: "$0.25", back: "$0.225", kept: "$0.025" } as const;
 
 /** Every page in the navigation. The desktop bar shows Trust, Verify and Sell; the phone menu and the footer show all of them. */
 export const NAV_LINKS = [

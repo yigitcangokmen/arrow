@@ -172,7 +172,7 @@ export function SellerPanel({ network, readOnly }: { network: Network; readOnly:
       </section>
 
       <section className={form.panel} aria-labelledby="p3">
-        <h2 id="p3">Withdraw to Solana <span className={styles.chip}>untested from this page</span></h2>
+        <h2 id="p3">Withdraw to Solana</h2>
         <p className={form.hint}>
           This signs a withdrawal from your NEAR Intents balance to a Solana address. You receive USDC on Solana; 1Click may take a few minutes.
         </p>

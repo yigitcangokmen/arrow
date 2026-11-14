@@ -75,6 +75,6 @@ export function recordedRun(evidence: unknown, chain: { listing: Listing | null;
 /** The refund transaction of the recorded failed inspection (RECORDED_REFUND) from the evidence file, or null. */
 export function recordedRefundTx(evidence: unknown): string | null {
   const parsed = EvidenceFile.safeParse(evidence);
-  const runs = parsed.success && parsed.data.contract === CONTRACTS.testnet ? parsed.data.runs : [];
+  const runs = parsed.success && parsed.data.contract === CONTRACTS.mainnet ? parsed.data.runs : [];
   return runs.find((r) => r.kind === "refund" && Number(r.eval_id) === RECORDED_REFUND.evalId)?.tx ?? null;
 }

@@ -86,7 +86,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
   const caught = attack.room && native ? attack.room.attacks.map((a) => native[a.id]?.regex_flag === true) : null;
   const verifyLine = lastSummary(net);
   const inspections = featured.reduce((n, l) => n + l.budget.evalsUsed, 0);
-  const refundTx = recordedRefundTx(evidence.testnet);
+  const refundTx = recordedRefundTx(evidence.mainnet);
   const agentPath = agentCardPath(wallet?.id, net);
   const run = await recordedPrints();
   const prints = run?.fingerprints ?? null;
@@ -199,20 +199,21 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
             <h2 id="refund-title" className={styles.h2}>A failed run <span className={styles.dim}>pays you back.</span></h2>
             <p className={styles.sent}>A purchase comes back in full; an inspection comes back less Arrow&apos;s 10% share, to your Intents balance.</p>
           </div>
-          <RefundPath paid={RECORDED_REFUND.paid} back={RECORDED_REFUND.back} txHref={refundTx ? txUrl("near", "testnet", refundTx) : null} />
+          <RefundPath paid={RECORDED_REFUND.paid} back={RECORDED_REFUND.back} txHref={refundTx ? txUrl("near", "mainnet", refundTx) : null} />
           <details className={styles.fold}>
             <summary>Full rule</summary>
             <p>
               In the demo listings an inspection costs <span className="mono">$0.25</span> and a purchase <span className="mono">$2</span>. If the
               sealed hardware fails, a purchase comes back in full and an inspection comes back less Arrow&apos;s <span className="mono">10%</span>{" "}
-              share of the fee. On mainnet it goes to your NEAR Intents balance, a USDC balance held for your wallet on NEAR; on testnet, to your
-              test-token balance. The money moves back through <code>intents.near</code>&apos;s own <code>mt_resolve_transfer</code>.
+              share of the fee. It goes to your NEAR Intents balance, a USDC balance held for your wallet on NEAR. The money moves back
+              through <code>intents.near</code>&apos;s own <code>mt_resolve_transfer</code>.
             </p>
             <p>
-              The run drawn above is inspection #{RECORDED_REFUND.evalId} on testnet, on a synthetic listing whose file host is missing on
-              purpose: the sealed hardware returned an error output (<code>not_ok</code>), {RECORDED_REFUND.back} of the {RECORDED_REFUND.paid}{" "}
-              in test USDC came back and Arrow kept {RECORDED_REFUND.kept}.{" "}
-              <Link href={withNetwork(`/verify/${RECORDED_REFUND.evalId}`, "testnet")}>That run, checked from the chain →</Link>
+              The run drawn above is inspection #{RECORDED_REFUND.evalId} on mainnet, on listing #{RECORDED_REFUND.listingId}{" "}
+              <bdi>{RECORDED_REFUND.title}</bdi>, whose file host is missing on purpose: the sealed hardware returned an error output
+              (<code>not_ok</code>), {RECORDED_REFUND.back} of the {RECORDED_REFUND.paid} in USDC went back to the buyer&apos;s NEAR Intents
+              balance and Arrow&apos;s treasury kept {RECORDED_REFUND.kept}.{" "}
+              <Link href={withNetwork(`/verify/${RECORDED_REFUND.evalId}`, "mainnet")}>That run, checked from the chain →</Link>
             </p>
           </details>
         </div>

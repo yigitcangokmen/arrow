@@ -11,7 +11,7 @@ export const WHO: { label: string; value: string; detail: string; rows: string[]
   { label: "NEAR AI", value: "A 40-row sample, whole-file totals and what you asked for. Its model runs in its own sealed hardware.", detail: "The sample reaches it encrypted in transit, but not sealed end to end. That it keeps nothing is its own claim; we cannot prove it.", rows: ["40-row sample to NEAR AI", "Wasm to NEAR AI", "LLM"] },
   { label: "Arrow, the operator", value: "Hosts the encrypted files and sees who pays: IP address, wallet address, listing.", detail: "This site is served by Arrow, and a changed version could read what you type. For sensitive data use the command-line tool.", rows: ["Arrow operator", "Arrow web app (served JavaScript)"] },
   { label: "Anyone on chain", value: "How long each inspection ran and how much work it did; the column names, row count and exact file size.", detail: "These can hint at the data. They are not counted in the 6-bit figure, and a buyer can steer them with what they ask.", rows: ["Side channels"] },
-  { label: "If it fails", value: "A failed purchase comes back in full; a failed inspection, less Arrow's 10% share of the fee.", detail: "On mainnet it goes to your NEAR Intents balance, a USDC balance held for your wallet on NEAR; on testnet, to your test-token balance.", rows: ["Refund destination"] },
+  { label: "If it fails", value: "A failed purchase comes back in full; a failed inspection, less Arrow's 10% share of the fee.", detail: "It goes to your NEAR Intents balance, a USDC balance held for your wallet on NEAR.", rows: ["Refund destination"] },
 ];
 
 /**
@@ -109,7 +109,7 @@ export function TrustBand({ verifyLine }: { verifyLine?: string | null }) {
                 </p>
               ) : null}
               <p className={styles.check}>
-                Check it yourself: <code>npm run verify -- --network testnet</code>
+                Check it yourself: <code>npm run verify -- --network mainnet --pre-lock</code>
               </p>
             </div>
           </div>

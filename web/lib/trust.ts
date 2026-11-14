@@ -23,9 +23,9 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     part: "Program key / PROTECTED_MASTER",
     trust: "OutLayer keystore (TDX) and the shared OutLayer master",
     sees: "Inside the TEE",
-    cannot: "Release to a non-Arrow caller (tested); release to an unpinned wasm (configured, not tested)",
+    cannot: "Release to a non-Arrow caller (tested); release to an unpinned wasm (on mainnet the secret row's access rule is WasmHash 6ad7fed4… AND caller arrow-market.near, never changed since it was made)",
     check:
-      "WasmHash and Predecessor conditions are configured; in-wasm network allowlist. Negative tests: an attacker account calling OutLayer directly is refused (testnet tx smm9T86m…, mainnet tx Bzzg22r9…). Both call the pinned wasm, so they test the Predecessor condition only; no transaction tests WasmHash",
+      "WasmHash and Predecessor conditions are configured; in-wasm network allowlist. npm run verify -- --network mainnet row I5 reads the rule from chain: one row on outlayer.near, And[WasmHash 6ad7fed4…, Predecessor arrow-market.near], created_at == updated_at (PROVEN on 14 Nov). Negative tests: an attacker account calling OutLayer directly is refused (testnet tx smm9T86m…, mainnet tx Bzzg22r9…). Both call the pinned wasm, so they test the Predecessor condition only; no transaction tests WasmHash",
     flag: "NOT PROVEN",
   },
   {

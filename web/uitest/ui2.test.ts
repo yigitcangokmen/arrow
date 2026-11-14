@@ -68,9 +68,10 @@ describe("home page: honesty stays one click away", () => {
     const { RECORDED_REFUND } = await import("../lib/links.ts");
     const { recordedRefundTx } = await import("../lib/recorded.ts");
     const { evidence } = await import("../generated/data.ts");
-    expect(RECORDED_REFUND).toMatchObject({ evalId: 12, paid: "$0.25", back: "$0.225" });
-    expect(recordedRefundTx(evidence.testnet)).toBe("6rqmzBncKWBkpAouApBn8GpcN8VWj7bmchRmKSarsiqy");
-    expect(src).toMatch(/<RefundPath paid=\{RECORDED_REFUND\.paid\} back=\{RECORDED_REFUND\.back\} txHref=/);
+    expect(RECORDED_REFUND).toMatchObject({ evalId: 3, listingId: 3, paid: "$0.25", back: "$0.225", kept: "$0.025" });
+    expect(recordedRefundTx(evidence.mainnet)).toBe("7Gnw32jEcgUwmhdH2T4YtcJoUPS6hdetpTmWpoFqRcos");
+    expect(recordedRefundTx(evidence.testnet)).toBeNull();
+    expect(src).toMatch(/<RefundPath paid=\{RECORDED_REFUND\.paid\} back=\{RECORDED_REFUND\.back\} txHref=\{refundTx \? txUrl\("near", "mainnet", refundTx\)/);
   });
   it("who sees what keeps the side channels on every page that shows it", () => {
     const sight = readFileSync(new URL("../components/Sightlines.tsx", import.meta.url), "utf8");
