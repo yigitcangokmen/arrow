@@ -152,6 +152,11 @@ describe("CRY-1 / QA-08 / WEB-6: assertWithdrawPayload", () => {
   it("accepts the recorded 1Click shape", () => {
     expect(() => assertWithdrawPayload(JSON.stringify(recorded()), want)).not.toThrow();
   });
+  it("accepts the 72.5 h deadline 1Click answered on mainnet on 2026-11-14 (read without signing)", () => {
+    const p = recorded();
+    p.deadline = new Date(now + 72.5 * 3_600_000).toISOString();
+    expect(() => assertWithdrawPayload(JSON.stringify(p), want)).not.toThrow();
+  });
   it("refuses an add_public_key intent (the account takeover)", () => {
     bad((p) => (p.intents = [{ intent: "add_public_key", public_key: "ed25519:attacker" }]), /intent kind add_public_key/);
   });

@@ -54,7 +54,7 @@ export class WithdrawPayloadError extends Error {
   }
 }
 
-const MAX_WITHDRAW_DEADLINE_MS = 72 * 3_600_000; // 1Click's own intents expire about 41 hours ahead (measured)
+const MAX_WITHDRAW_DEADLINE_MS = 7 * 24 * 3_600_000; // 1Click's own intents expired about 41 h ahead on 11 Nov and 72.5 h ahead on 14 Nov (measured); a week still refuses a far-future deadline
 const TOP_KEYS = new Set(["verifying_contract", "signer_id", "deadline", "nonce", "intents"]);
 const INTENT_KEYS = new Set(["intent", "receiver_id", "tokens"]);
 
