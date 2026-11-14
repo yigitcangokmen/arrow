@@ -1,8 +1,8 @@
 # X post
 
-Standard account (no X Premium): one post with the 2:15 cut attached natively, and one reply with the links. The human posts it. Fill `{{YOUTUBE_URL}}` after the upload.
+Standard account (no X Premium): one post with the 2:15 cut attached natively, and one reply with the links. The human posts it. Fill `{{YOUTUBE_URL}}` after the upload. The post is 271 of 280 characters (a URL counts as 23).
 
-## Post (271 of 280 characters; a URL counts as 23)
+## Post
 
 ```
 To judge data you must see it. Then why pay?
