@@ -6,9 +6,11 @@ const ID_WIDTH = 4;
 
 export const SUMMARY_RE = /^verify: \d+\/\d+ REQUIRED PROVEN · exit [01]$/;
 
-export function formatReport(r: Report): string[] {
-  const lines = [`Arrow verify · ${r.network} · ${r.contract} · ${r.generatedAt.slice(0, 16)}Z`];
-  for (const row of r.rows) {
+/** `requiredOnly` prints just the REQUIRED rows (the summary line counts only those anyway); the header says so. */
+export function formatReport(r: Report, opts: { requiredOnly?: boolean } = {}): string[] {
+  const head = `Arrow verify · ${r.network} · ${r.contract} · ${r.generatedAt.slice(0, 16)}Z`;
+  const lines = [opts.requiredOnly ? `${head} · REQUIRED rows only (run without --required for every row)` : head];
+  for (const row of opts.requiredOnly ? r.rows.filter((x) => x.required) : r.rows) {
     lines.push(`${`[${row.label}]`.padEnd(TAG_WIDTH)}${row.id.padEnd(ID_WIDTH)}${row.title}${row.detail ? `   ${row.detail}` : ""}`);
     for (const link of row.links) lines.push(`${" ".repeat(TAG_WIDTH + ID_WIDTH)}${link}`);
   }

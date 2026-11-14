@@ -528,6 +528,18 @@ describe("STATE-2: R1 after set_program", () => {
   });
 });
 
+describe("formatReport({ requiredOnly })", () => {
+  it("prints only the REQUIRED rows, says so, and keeps the summary line", async () => {
+    const r = await run(buildWorld("testnet"));
+    const lines = formatReport(r, { requiredOnly: true });
+    const ids = r.rows.filter((x) => x.required).map((x) => x.id);
+    for (const id of ids) expect(lines.some((l) => l.includes(` ${id} `) || l.includes(`]${id}`) || new RegExp(`\\]\\s+${id}\\s`).test(l)), id).toBe(true);
+    for (const x of r.rows.filter((y) => !y.required)) expect(lines.some((l) => new RegExp(`\\]\\s+${x.id}\\s`).test(l)), x.id).toBe(false);
+    expect(lines.some((l) => l.includes("REQUIRED rows only"))).toBe(true);
+    expect(lines.at(-1)).toBe(formatReport(r).at(-1));
+  });
+});
+
 describe("I5 (CRY-4): the program secret row", () => {
   const i5 = async (w: World) => row(await run(w), "I5");
 

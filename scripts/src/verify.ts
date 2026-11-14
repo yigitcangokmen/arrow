@@ -1,4 +1,4 @@
-// npm run verify -- [--network testnet|mainnet] [--pre-lock] [--only <kind>] [--decrypt-demo] [--json]
+// npm run verify -- [--network testnet|mainnet] [--pre-lock] [--only <kind>] [--required] [--decrypt-demo] [--json]
 //                   [--evidence <path>] [--unlocked-reason "<text>"]          (WS4-T13, DEC O-01..O-07)
 // Reads evidence/<network>.json, the contract's views, the archival RPC, OutLayer's attestation API and 1Click.
 // Prints PROVEN / NOT PROVEN / RISKY rows and ends with `verify: <n>/<N> REQUIRED PROVEN · exit <0|1>`. Writes nothing
@@ -19,6 +19,7 @@ export const HELP = `usage: npm run verify -- [options]
   --network testnet|mainnet   default: mainnet
   --pre-lock                  before the lock: R6 pending, listings count as pre-lock (mainnet)
   --only <kind>[,<kind>]      ${ONLY_KINDS.join(" | ")}
+  --required                  print only the REQUIRED rows (the summary line is the same)
   --decrypt-demo              open the demo purchase with the public demo viewing key
   --json                      print the report as JSON
   --evidence <path>           evidence file (default: evidence/<network>.json in the main checkout)
@@ -39,7 +40,7 @@ export async function main(argv: string[], io: { out: (line: string) => void; er
       strict: true,
       options: {
         network: { type: "string", default: "mainnet" }, "pre-lock": { type: "boolean" }, only: { type: "string", multiple: true },
-        "decrypt-demo": { type: "boolean" }, json: { type: "boolean" }, evidence: { type: "string" }, "unlocked-reason": { type: "string" }, help: { type: "boolean", short: "h" },
+        "decrypt-demo": { type: "boolean" }, required: { type: "boolean" }, json: { type: "boolean" }, evidence: { type: "string" }, "unlocked-reason": { type: "string" }, help: { type: "boolean", short: "h" },
       },
     }).values;
   } catch (e) {
@@ -92,7 +93,7 @@ export async function main(argv: string[], io: { out: (line: string) => void; er
 
     const report = await runVerify(opts);
     if (values.json) io.out(JSON.stringify(report, null, 2));
-    else for (const line of formatReport(report)) io.out(line);
+    else for (const line of formatReport(report, { requiredOnly: values.required === true })) io.out(line);
     return report.exitCode;
   } catch (e) {
     io.err(`verify failed: ${e instanceof Error ? e.message : String(e)}`);
