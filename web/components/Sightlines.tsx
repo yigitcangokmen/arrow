@@ -24,8 +24,8 @@ interface Party {
  * What each part of the system holds and never gets, the same on the home page and /trust. The trust table (/trust) is the source of
  * truth; these are its short form, and they keep the side channels visible (NEAR AI's file totals and your criteria; on chain the
  * column names, row count, run time and who paid). The chain and the Arrow site are separate cards: "never gets the rows" is true of
- * the chain, while the site's served JavaScript handles everything the page does (trust row "Arrow web app", RISKY), and the Arrow
- * operator's "cannot read data" is a plan until the contract is locked (row "Arrow operator", TODO).
+ * the chain, while the site's served JavaScript handles everything the page does (trust row "Arrow web app", RISKY); the Arrow
+ * operator's "cannot change the contract" holds since the lock (row "Arrow operator", lock tx EqBJFv…k75X, verify row R6).
  */
 const PARTIES: Party[] = [
   { who: "You", icon: <Person />, you: true, gets: ["verdict", "fit · novelty", "rows, after you buy"], never: [] },

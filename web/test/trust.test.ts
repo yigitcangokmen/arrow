@@ -26,7 +26,7 @@ describe("trust table", () => {
 
   it("reads_the_readme_table", () => {
     expect(rows.length).toBeGreaterThanOrEqual(20);
-    expect(rows.some((r) => r.flag === "TODO")).toBe(true);
+    expect(rows.some((r) => r.flag === "RISKY")).toBe(true);
   });
 
   it("every_readme_row_is_in_the_ui_with_the_same_flag", () => {
@@ -53,12 +53,22 @@ describe("trust table", () => {
     }
   });
 
-  it("the_operator_row_does_not_state_the_lock_as_a_fact", () => {
+  it("the_operator_row_cites_the_lock_tx_and_r6", () => {
     const op = TRUST_ROWS.find((r) => r.part === "Arrow operator")!;
-    expect(op.flag).toBe("TODO");
-    expect(op.check).toMatch(/live on mainnet; not locked yet, so the team can still change it/i);
-    expect(op.check).not.toMatch(/not deployed/i);
-    expect(`${op.cannot} ${op.check}`).not.toMatch(/no access keys after the lock/i);
+    expect(op.flag).toBeUndefined();
+    expect(op.check).toContain("lock tx EqBJFvgJrSipYN3yHaPEm68FvKVPEJLzRb64KtnXk75X");
+    expect(op.check).toMatch(/row R6 is PROVEN/);
+    expect(op.check).toMatch(/cannot pause the market; a failing market still keeps 10% of each eval fee/);
+    expect(JSON.stringify(TRUST_ROWS)).not.toMatch(/not locked yet|can still change it|not yet a fact/i);
+  });
+
+  it("the_program_bytes_row_names_the_arrow_site_and_stays_risky", () => {
+    const pb = TRUST_ROWS.find((r) => r.part === "Program bytes")!;
+    expect(pb.flag).toBe("RISKY");
+    expect(pb.check).toContain("arrow-market.vercel.app/program/6ad7fed4");
+    expect(pb.check).toContain("DkHQdN6rXPcem3B5QWwibgGUU6kAXMPHDVtbJMGC3xvP");
+    expect(pb.check).toMatch(/depends on the site staying up/);
+    expect(pb.check).not.toMatch(/Served from testnet FastFS/);
   });
 
   it("the_refund_row_cites_the_arrow_contracts_mainnet_refund", () => {

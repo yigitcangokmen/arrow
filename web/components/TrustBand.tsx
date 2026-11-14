@@ -26,7 +26,7 @@ export const LIMITS: { text: string; rows: string[] }[] = [
   { text: "The verdict can be wrong. Fixed rules check the structure, but whether a 40-row sample fits what you asked is the AI's judgement.", rows: ["Decision correctness"] },
   { text: "Anyone can see which wallet inspected which listing, when, and what it paid. Any site that gets the same wallet signature can open that wallet's verdicts.", rows: ["Buyer viewing key"] },
   { text: "A buyer can resell a file they bought. And if the key for a purchase is published too late, the buyer gets a refund and can still open the file.", rows: ["After purchase", "Time guard"] },
-  { text: "Real payments are live on mainnet, but the market is not locked yet, so the team can still change it.", rows: ["Arrow operator"] },
+  { text: "The market is locked: since 14 Nov nobody holds a key to its contract, not even the team (lock tx EqBJFv…k75X). So the team cannot pause it either: if it breaks, a failed inspection still keeps Arrow's 10% of the fee.", rows: ["Arrow operator"] },
   { text: "The AI runs on the hackathon's free key. If it runs out, inspections fail and most of the fee comes back.", rows: ["NEAR AI API key (inside the OutLayer secret)"] },
 ];
 
@@ -39,7 +39,7 @@ export const MORE: { text: string; rows: string[] }[] = [
   { text: "The time limits use the clock of the machine that runs the sealed hardware.", rows: ["Time guard"] },
   { text: "The market contract keeps NEAR to pay for each run. Failed runs still use it up, and when it runs low new inspections are refused until someone tops it up.", rows: ["Gas tank"] },
   { text: "The account that relays payments has a second, all-powers key, kept by the team in a laptop keychain, never on the server; whoever holds it can drain the relay's gas or stop it. It holds no user money.", rows: ["Relayer account"] },
-  { text: "The program file sits on a public file host. Its fingerprint is pinned on chain, so the host cannot swap it unnoticed, but it could stop serving it.", rows: ["Program bytes"] },
+  { text: "The program file is served by this site, at an address the lock froze. Its fingerprint is pinned on chain, so the site cannot swap it unnoticed, but it could stop serving it.", rows: ["Program bytes"] },
   { text: "How much the public run time reveals has not been measured; no number is published.", rows: ["Side channels"] },
 ];
 
@@ -109,7 +109,7 @@ export function TrustBand({ verifyLine }: { verifyLine?: string | null }) {
                 </p>
               ) : null}
               <p className={styles.check}>
-                Check it yourself: <code>npm run verify -- --network mainnet --pre-lock</code>
+                Check it yourself: <code>npm run verify -- --network mainnet</code>
               </p>
             </div>
           </div>

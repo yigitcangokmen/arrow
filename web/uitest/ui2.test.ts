@@ -22,6 +22,19 @@ describe("NetBadge: MAINNET only when the mainnet contract answered", () => {
     expect(netBadgeText("testnet", "testnet", "/try/recorded")).toBe("Mainnet not live");
     expect(netBadgeText("testnet", "mainnet", "/try")).toBe("Testnet");
   });
+  it("says Locked, with the lock tx, only when mainnet is live and the evidence holds the lock tx", async () => {
+    const { NetBadge } = await import("../components/NetBadge.tsx");
+    const tx = "EqBJFvgJrSipYN3yHaPEm68FvKVPEJLzRb64KtnXk75X";
+    const words = (html: string) => html.replace(/<[^>]+>/g, "");
+    const locked = renderToStaticMarkup(h(NetBadge, { net: "mainnet", mainnetLive: true, pathname: "/", lockTx: tx }));
+    expect(words(locked)).toContain("Live on NEAR mainnet · Locked");
+    expect(locked).toContain(`href="https://nearblocks.io/txns/${tx}"`);
+    expect(words(locked)).toContain("the contract has no access keys, not even ours");
+    const unlocked = renderToStaticMarkup(h(NetBadge, { net: "mainnet", mainnetLive: true, pathname: "/", lockTx: null }));
+    expect(words(unlocked)).not.toMatch(/Locked/);
+    const down = renderToStaticMarkup(h(NetBadge, { net: "mainnet", mainnetLive: false, pathname: "/", lockTx: tx }));
+    expect(words(down)).not.toMatch(/Locked/);
+  });
   it("a failing view call counts as not live", async () => {
     const { mainnetContractLive } = await import("../lib/server/mainnetLive.ts");
     expect(await mainnetContractLive(() => Promise.reject(new Error("CodeDoesNotExist")))).toBe(false);

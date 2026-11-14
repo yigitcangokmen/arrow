@@ -18,3 +18,6 @@
 .panel .acts { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; }
 @media (max-width: 860px) { .panel { position: fixed; left: 16px; right: 16px; top: 64px; width: auto; border-color: var(--control-border); box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45); } }
 @media (max-width: 380px) { .net > summary { padding: 0 9px; } .text { max-width: 8ch; overflow: hidden; text-overflow: ellipsis; } }
+/* Locked: "Live on NEAR mainnet · Locked", then "Mainnet · Locked", then "Locked" on the narrowest screens. */
+@media (max-width: 520px) { .net[data-locked] .wide { display: none; } }
+@media (max-width: 380px) { .net[data-locked] .mid { display: none; } .net[data-locked] .text { max-width: none; } }

@@ -2,18 +2,20 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { CONTRACTS, type Network } from "../lib/config.ts";
-import { addressUrl, pinnedNetwork, TRUST_PATH, withNetwork } from "../lib/links.ts";
+import { addressUrl, pinnedNetwork, shortHash, TRUST_PATH, txUrl, withNetwork } from "../lib/links.ts";
 import { netBadgeState, netBadgeText } from "../lib/netBadge.ts";
 import styles from "./NetBadge.module.css";
 
 /**
  * The network badge: a <details> pill with a small panel, no inline handlers. TESTNET (amber dot) on testnet and always on the free try pages;
- * MAINNET (green dot, "Live on NEAR mainnet") only when the mainnet contract answered a server-side view call. The dot never pulses.
- * Closes on Escape and on a tap outside.
+ * MAINNET (green dot, "Live on NEAR mainnet") only when the mainnet contract answered a server-side view call; "· Locked" is added when
+ * the evidence file also holds the lock tx, shortened to "Mainnet · Locked" and then "Locked" on narrow screens so the nav still fits.
+ * The dot never pulses. Closes on Escape and on a tap outside.
  */
-export function NetBadge({ net, mainnetLive, pathname }: { net: Network; mainnetLive: boolean; pathname: string }) {
+export function NetBadge({ net, mainnetLive, pathname, lockTx = null }: { net: Network; mainnetLive: boolean; pathname: string; lockTx?: string | null }) {
   const ref = useRef<HTMLDetailsElement>(null);
   const state = netBadgeState(net, mainnetLive, pathname);
+  const locked = state === "mainnet" && lockTx !== null;
   const shown: Network = state === "mainnet" ? "mainnet" : (pinnedNetwork(pathname) ?? net);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -38,15 +40,24 @@ export function NetBadge({ net, mainnetLive, pathname }: { net: Network; mainnet
   };
   const label =
     state === "mainnet"
-      ? "Live on NEAR mainnet. Open for details."
+      ? `Live on NEAR mainnet${locked ? ", locked" : ""}. Open for details.`
       : shown === "mainnet"
         ? "NEAR mainnet: the market is not deployed there yet. Open for details."
-        : "NEAR testnet. Synthetic data, test money only. The market is live on mainnet, not locked yet. Open for details.";
+        : "NEAR testnet. Synthetic data, test money only. The market is live and locked on mainnet. Open for details.";
   return (
-    <details ref={ref} className={styles.net} data-state={state}>
+    <details ref={ref} className={styles.net} data-state={state} data-locked={locked ? "" : undefined}>
       <summary aria-label={label}>
         <span className={styles.dot} aria-hidden="true" />
-        <span className={styles.text}>{netBadgeText(state, net, pathname)}</span>
+        <span className={styles.text}>
+          {locked ? (
+            <>
+              <span className={styles.wide}>Live on NEAR </span>
+              <span className={styles.mid}>mainnet · </span>Locked
+            </>
+          ) : (
+            netBadgeText(state, net, pathname)
+          )}
+        </span>
       </summary>
       <div className={styles.panel}>
         <dl>
@@ -62,13 +73,21 @@ export function NetBadge({ net, mainnetLive, pathname }: { net: Network; mainnet
           </dd>
           <dt>Money</dt>
           <dd>{state === "mainnet" ? "USDC via NEAR Intents" : "test USDC only"}</dd>
+          {locked ? (
+            <>
+              <dt>Lock</dt>
+              <dd>
+                <a href={txUrl("near", "mainnet", lockTx!)} target="_blank" rel="noopener noreferrer">{shortHash(lockTx!)}<span className="sr-only"> (lock transaction, opens in a new tab)</span></a>
+              </dd>
+            </>
+          ) : null}
         </dl>
         {state === "mainnet" ? (
-          <p>Refunds go to your Intents balance.</p>
+          <p>{locked ? "Locked: the contract has no access keys, not even ours. " : null}Refunds go to your Intents balance.</p>
         ) : shown === "mainnet" ? (
           <p>The market contract is not deployed on mainnet yet. The demo runs on testnet.</p>
         ) : (
-          <p>Synthetic demo data. The market is live on mainnet; not locked yet, so the team can still change it.</p>
+          <p>Synthetic demo data. The market is live on mainnet and locked: its contract has no access keys, so the team cannot change it.</p>
         )}
         <p className={styles.acts}>
           {state === "mainnet" ? (

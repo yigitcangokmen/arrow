@@ -1,7 +1,7 @@
 // NOV-1: the recorded-run page replays one finished run from the evidence file and the chain.
 import { describe, expect, it } from "vitest";
 import { evidence } from "../generated/data.ts";
-import { recordedRun } from "../lib/recorded.ts";
+import { mainnetLockTx, recordedRun } from "../lib/recorded.ts";
 
 // The mainnet run of 14 Nov on arrow-market.near as the chain holds it (get_listing 2, get_eval 2, get_purchase 1).
 const sha = "9ab5bfe48c96a896206684c252fb0b0f68867ae909816977640f83d6c815d344";
@@ -31,5 +31,15 @@ describe("recordedRun", () => {
     expect(r.steps.map((s) => s.clock)).toEqual(["earlier", null, null, null, null, null, null]);
     expect(r.match).toBe(false);
     expect(r.fingerprints).toBeNull();
+  });
+});
+
+describe("mainnetLockTx", () => {
+  it("reads the lock tx of arrow-market.near from the evidence file, and nothing from another contract or before the lock", () => {
+    expect(mainnetLockTx(evidence.mainnet)).toBe("EqBJFvgJrSipYN3yHaPEm68FvKVPEJLzRb64KtnXk75X");
+    const m = evidence.mainnet as { lock: object };
+    expect(mainnetLockTx({ ...m, lock: { tx: null, block_height: null, timestamp_utc: null } })).toBeNull();
+    expect(mainnetLockTx({ ...m, contract: "other.near" })).toBeNull();
+    expect(mainnetLockTx(null)).toBeNull();
   });
 });

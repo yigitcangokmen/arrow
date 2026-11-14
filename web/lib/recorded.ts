@@ -72,6 +72,12 @@ export function recordedRun(evidence: unknown, chain: { listing: Listing | null;
   return { steps, verdict, fingerprints, match, paidAt: ev?.timestamp_utc ?? null };
 }
 
+/** The mainnet lock tx (the DeleteKey that left arrow-market.near with no access keys) from the evidence file, or null before the lock. */
+export function mainnetLockTx(evidence: unknown): string | null {
+  const parsed = EvidenceFile.safeParse(evidence);
+  return parsed.success && parsed.data.contract === CONTRACTS.mainnet ? parsed.data.lock.tx : null;
+}
+
 /** The refund transaction of the recorded failed inspection (RECORDED_REFUND) from the evidence file, or null. */
 export function recordedRefundTx(evidence: unknown): string | null {
   const parsed = EvidenceFile.safeParse(evidence);

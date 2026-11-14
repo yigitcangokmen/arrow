@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import { type ReactNode, Suspense } from "react";
 import { Footer } from "../components/Footer.tsx";
 import { Nav } from "../components/Nav.tsx";
+import { evidence } from "../generated/data.ts";
+import { mainnetLockTx } from "../lib/recorded.ts";
 import { mainnetContractLive } from "../lib/server/mainnetLive.ts";
 import "./tokens.css";
 import "./globals.css";
@@ -18,9 +20,12 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 // Runs before the page is painted: ?theme=light|dark, then localStorage["arrow-theme"], else the system setting.
 const THEME_SCRIPT = `(function(){try{var t=new URLSearchParams(location.search).get("theme");if(t!=="light"&&t!=="dark"){try{t=localStorage.getItem("arrow-theme")}catch(e){t=null}}if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})();`;
 
-/** The nav with the result of the mainnet contract check (cached five minutes), so the badge can never claim mainnet on a flag alone. */
+/**
+ * The nav with the result of the mainnet contract check (cached five minutes), so the badge can never claim mainnet on a flag alone.
+ * "Locked" also needs that live check; the lock itself comes from the evidence file's lock tx (R6 on /verify reads the keys from chain).
+ */
 async function NavWithNetwork() {
-  return <Nav mainnetLive={await mainnetContractLive()} />;
+  return <Nav mainnetLive={await mainnetContractLive()} mainnetLockTx={mainnetLockTx(evidence.mainnet)} />;
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

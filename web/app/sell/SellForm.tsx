@@ -405,7 +405,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
   const resumable = listMsg !== null || paidTx !== null || pending !== null;
   const canStart = ready && !busy && !inProgress && !resumable;
   const why = [
-    readOnly ? "This page is read-only on this network: listing needs mainnet, where the market is live; it is not locked yet, so the team can still change it. The free demo lists a file for you." : null,
+    readOnly ? "This page is read-only on this network: listing needs mainnet, where the market is live and locked: its contract has no access keys, so the team cannot change it. The free demo lists a file for you." : null,
     !eoa ? "Connect a wallet (section 1)." : null,
     eoa && !picked ? "Choose a file (section 2)." : null,
     needTopUp ? "Add USDC for the listing bond (section 1)." : null,

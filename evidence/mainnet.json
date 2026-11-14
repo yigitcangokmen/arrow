@@ -5,9 +5,9 @@
   "program_wasm_sha256": "6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1",
   "program_wasm_url": "https://arrow-market.vercel.app/program/6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1.wasm",
   "lock": {
-    "tx": null,
-    "block_height": null,
-    "timestamp_utc": null
+    "tx": "EqBJFvgJrSipYN3yHaPEm68FvKVPEJLzRb64KtnXk75X",
+    "block_height": 224538032,
+    "timestamp_utc": "2026-11-14T16:16:55.207Z"
   },
   "accounts": {
     "treasury": "arrowhq.near",

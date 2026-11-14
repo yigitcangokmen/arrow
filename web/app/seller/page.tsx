@@ -16,7 +16,7 @@ export default async function Seller({ searchParams }: { searchParams: Promise<{
       </PageHead>
       {net === "testnet" ? (
         <Note>
-          <b>Read-only on testnet.</b> Payouts run on mainnet, where the market is live; it is not locked yet, so the team can still change it. <Link href="/try">Run the demo, free</Link>.
+          <b>Read-only on testnet.</b> Payouts run on mainnet, where the market is live and locked: its contract has no access keys, so the team cannot change it. <Link href="/try">Run the demo, free</Link>.
         </Note>
       ) : null}
       <details className={styles.how}>

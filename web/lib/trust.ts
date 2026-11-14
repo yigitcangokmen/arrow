@@ -78,9 +78,8 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     part: "Arrow operator",
     trust: "Relayer liveness and the gas tank",
     sees: "The encrypted blobs it hosts, and the IP address, 0x address and listing of every payment relayed through /api/relay",
-    cannot: "The plan after the lock, not yet a fact: read data, take funds, or change the contract or wasm hash",
-    check: "Live on mainnet; not locked yet, so the team can still change it: there is no lock transaction, and arrow-market.near still has an access key. The contract is meant to own itself with no access keys; npm run verify -- --network mainnet (row R6) shows it once it is done",
-    flag: "TODO",
+    cannot: "Decrypt the blobs it hosts (the site it serves can: Arrow web app row); take funds or change the contract or wasm hash after the lock, since nobody holds a key to the contract, the team included",
+    check: "Locked on mainnet on 14 Nov, lock tx EqBJFvgJrSipYN3yHaPEm68FvKVPEJLzRb64KtnXk75X (block 224538032): arrow-market.near has 0 access keys and 0 intents.near keys, and npm run verify -- --network mainnet row R6 is PROVEN. After the lock the team cannot pause the market; a failing market still keeps 10% of each eval fee",
   },
   {
     part: "Arrow web app (served JavaScript)",
@@ -223,10 +222,10 @@ export const TRUST_ROWS: readonly TrustRow[] = [
   },
   {
     part: "Program bytes",
-    trust: "Hosting of the wasm file (hash-pinned)",
+    trust: "The Arrow site, which serves the wasm file (hash-pinned)",
     sees: "—",
     cannot: "Swap the program: the hash is pinned",
-    check: "Served from testnet FastFS (test.fastfs.io). Availability depends on that host staying reachable; once the market is locked, the URL cannot change",
+    check: "Served from the Arrow site at arrow-market.vercel.app/program/6ad7fed4….wasm, the same bytes as release/arrow-tee.wasm. set_program tx DkHQdN6rXPcem3B5QWwibgGUU6kAXMPHDVtbJMGC3xvP moved the URL there from testnet FastFS before the lock, and the lock freezes it. Availability depends on the site staying up",
     flag: "RISKY",
   },
 ];

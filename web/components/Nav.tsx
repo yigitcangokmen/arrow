@@ -30,9 +30,10 @@ function MenuIcon() {
  * Reads ?network= so the badge and the links follow the network being viewed (QA-16). Render it inside <Suspense>.
  * Desktop: brand, Trust · Verify · Sell, the network badge, Try as the filled button and the theme switch. Attack and Payouts are in
  * the phone menu and the footer. Below 860 px the links move into a <details> menu; it closes after a click, on Escape (focus back on
- * the menu button) and on a tap outside. `mainnetLive` comes from a server-side view call (lib/server/mainnetLive.ts).
+ * the menu button) and on a tap outside. `mainnetLive` comes from a server-side view call (lib/server/mainnetLive.ts); `mainnetLockTx`
+ * from the evidence file.
  */
-export function Nav({ mainnetLive = false }: { mainnetLive?: boolean }) {
+export function Nav({ mainnetLive = false, mainnetLockTx = null }: { mainnetLive?: boolean; mainnetLockTx?: string | null }) {
   const net = parseNetwork(useSearchParams().get("network"));
   const menu = useRef<HTMLDetailsElement>(null);
   const links = navLinks(net);
@@ -74,7 +75,7 @@ export function Nav({ mainnetLive = false }: { mainnetLive?: boolean }) {
         <Link href={brand.href} className={styles.brand}><Mark />{brand.label}</Link>
         <ul className={styles.links}>{middle.filter((l) => (NAV_BAR as readonly string[]).includes(l.label)).map(item)}</ul>
         <div className={styles.right}>
-          <NetBadge net={net} mainnetLive={mainnetLive} pathname={pathname} />
+          <NetBadge net={net} mainnetLive={mainnetLive} pathname={pathname} lockTx={mainnetLockTx} />
           <Link href={tryLink.href} className={styles.try} aria-current={current(tryLink.href)}>{tryLink.label}</Link>
           <span className={styles.theme}><ThemeToggle /></span>
           <details className={styles.menu} ref={menu}>
