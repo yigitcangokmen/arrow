@@ -60,9 +60,10 @@ describe("home page: honesty stays one click away", () => {
     expect(src).toMatch(/Run time and work done are public and are not counted in that figure/);
     expect(src).toMatch(/offline replay · pattern check/);
   });
-  it("the hero's verdicts are recorded inspections, named on the board as recorded testnet runs and linked to their audit", () => {
-    expect(src).toMatch(/caption: `recorded · testnet eval #\$\{RECORDED_EVAL\}`, href: withNetwork\(`\/verify\/\$\{RECORDED_EVAL\}`, "testnet"\)/);
-    expect(src).toMatch(/caption: "recorded · testnet eval #13", href: withNetwork\("\/verify\/13", "testnet"\)/);
+  it("the hero's verdicts are recorded inspections, named on the board as recorded mainnet runs and linked to their audit", () => {
+    expect(src).toMatch(/word: "BUY", fit: 5, novelty: 4 \}, caption: "recorded · mainnet eval #2", href: withNetwork\("\/verify\/2", "mainnet"\)/);
+    expect(src).toMatch(/word: "PASS", fit: 2, novelty: 1 \}, caption: "recorded · mainnet eval #1", href: withNetwork\("\/verify\/1", "mainnet"\)/);
+    expect(src).toMatch(/The verdicts shown are recorded mainnet inspections/);
   });
   it("the refund picture is the recorded failed inspection, with its refund transaction one click away", async () => {
     const { RECORDED_REFUND } = await import("../lib/links.ts");

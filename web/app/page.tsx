@@ -25,13 +25,15 @@ import { lastSummary } from "../lib/server/verifyReport.ts";
 import styles from "./page.module.css";
 
 /**
- * The hero machine's two passes. Both are recorded inspections on arrow-v2.arrowhq.testnet (evidence/testnet.json): eval #14 on the
- * wallet-labels listing #14 said BUY · fit 5/5 · novelty 4/5, eval #13 on the unlock-schedule listing #13 said PASS · fit 2/5 · novelty 1/5.
- * The caption says so on the board and links to the page that checks each one from the chain.
+ * The hero machine's two passes. Both are recorded inspections on arrow-market.near, mainnet, 14 Nov (evidence/mainnet.json, e2e
+ * steps 4-5): eval #2 on the wallet-labels listing #2 (tx DuoZg5F6RUSrNMbRSZjS3Q7ABMwda2ZbWZkHrfcwhAfD) said BUY · fit 5/5 · novelty 4/5,
+ * eval #1 on the unlock-schedule listing #1 (tx 9VzDbtdtvNX5XSYfGikAzxkiRF4cFNsJaTqWYpsntFcP) said PASS · fit 2/5 · novelty 1/5. Both were
+ * paid with the public demo viewing key, so anyone can open the sealed verdicts on chain. The caption says so on the board and links to
+ * the page that checks each one from the chain, which links its transaction.
  */
 const PASSES: MachinePass[] = [
-  { verdict: { word: "BUY", fit: 5, novelty: 4 }, caption: `recorded · testnet eval #${RECORDED_EVAL}`, href: withNetwork(`/verify/${RECORDED_EVAL}`, "testnet"), fileName: "wallet-labels-1000.csv" },
-  { verdict: { word: "PASS", fit: 2, novelty: 1 }, caption: "recorded · testnet eval #13", href: withNetwork("/verify/13", "testnet"), fileName: "unlock-schedule-412.csv" },
+  { verdict: { word: "BUY", fit: 5, novelty: 4 }, caption: "recorded · mainnet eval #2", href: withNetwork("/verify/2", "mainnet"), fileName: "wallet-labels-1000.csv" },
+  { verdict: { word: "PASS", fit: 2, novelty: 1 }, caption: "recorded · mainnet eval #1", href: withNetwork("/verify/1", "mainnet"), fileName: "unlock-schedule-412.csv" },
 ];
 
 /** The recorded run's fingerprints as the chain holds them now (listing #14, eval #14, purchase #5); ten-minute cache. */
@@ -109,7 +111,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
           <div className={styles.machine}>
             <Machine
               mode="loop"
-              label="How Arrow works: a sealed file, a 40-row sample that Arrow's program in sealed hardware sends to NEAR AI's model, a verdict, then buy or walk away. The verdicts shown are recorded testnet inspections; hover or focus pauses the animation."
+              label="How Arrow works: a sealed file, a 40-row sample that Arrow's program in sealed hardware sends to NEAR AI's model, a verdict, then buy or walk away. The verdicts shown are recorded mainnet inspections; hover or focus pauses the animation."
               fileName="wallet-labels-1000.csv"
               price={price}
               passes={PASSES}
