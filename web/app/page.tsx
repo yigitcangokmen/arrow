@@ -36,14 +36,14 @@ const PASSES: MachinePass[] = [
   { verdict: { word: "PASS", fit: 2, novelty: 1 }, caption: "recorded · mainnet eval #1", href: withNetwork("/verify/1", "mainnet"), fileName: "unlock-schedule-412.csv" },
 ];
 
-/** The recorded run's fingerprints as the chain holds them now (listing #14, eval #14, purchase #5); ten-minute cache. */
+/** The recorded run's fingerprints as the chain holds them now (mainnet listing #2, eval #2, purchase #1); ten-minute cache. */
 const recorded = ttlCache<ReturnType<typeof recordedRun>>(600_000, Date.now, 1, { failTtlMs: 60_000 });
 async function recordedPrints() {
   try {
     return await recorded("run", async () => {
-      const views = new ArrowViews("testnet", CONTRACTS.testnet);
+      const views = new ArrowViews("mainnet", CONTRACTS.mainnet);
       const [listing, ev, purchase] = await Promise.all([views.listing(RECORDED_RUN.listingId), views.eval(RECORDED_RUN.evalId), views.purchase(RECORDED_RUN.purchaseId)]);
-      return recordedRun(evidence.testnet, { listing, eval: ev, purchase });
+      return recordedRun(evidence.mainnet, { listing, eval: ev, purchase });
     });
   } catch {
     return null;
@@ -134,7 +134,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
               listed={prints?.listed ?? wallet?.blob_sha256 ?? null}
               inspected={prints?.inspected ?? null}
               delivered={prints?.delivered ?? null}
-              href={withNetwork(`/verify/${RECORDED_EVAL}`, "testnet")}
+              href={withNetwork(`/verify/${RECORDED_EVAL}`, "mainnet")}
             />
           </div>
           <details className={styles.fold}>
@@ -143,7 +143,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
               <code>listing.blob_sha256 == eval.h == release.h == sha256(downloaded blob)</code>. A release mismatch refunds the purchase with
               reason <code>hash_mismatch</code>; an inspection of a swapped file stops and refunds as <code>not_ok</code>. The download check
               runs in your browser after the purchase has settled, so it warns and does not refund. The fingerprints above are those of the
-              recorded run (listing #{RECORDED_RUN.listingId}, eval #{RECORDED_RUN.evalId}, purchase #{RECORDED_RUN.purchaseId}) as the chain holds them now. Shown on{" "}
+              recorded mainnet run (listing #{RECORDED_RUN.listingId}, eval #{RECORDED_RUN.evalId}, purchase #{RECORDED_RUN.purchaseId}) as the chain holds them now. Shown on{" "}
               <Link href="/verify">/verify</Link> and by <code>npm run verify</code>.
             </p>
           </details>

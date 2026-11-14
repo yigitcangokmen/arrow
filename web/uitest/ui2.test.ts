@@ -13,11 +13,13 @@ describe("NetBadge: MAINNET only when the mainnet contract answered", () => {
     expect(netBadgeText("testnet", "mainnet", "/")).toBe("Mainnet not live");
     expect(netBadgeText("testnet", "testnet", "/sell")).toBe("Testnet");
   });
-  it("mainnet with a live contract says so, except on the free try pages, which always run on testnet", () => {
+  it("mainnet with a live contract says so, except on the free try pages, which always run on testnet; the recorded run is mainnet", () => {
     expect(netBadgeState("mainnet", true, "/")).toBe("mainnet");
     expect(netBadgeText("mainnet", "mainnet", "/")).toBe("Live on NEAR mainnet");
     expect(netBadgeState("mainnet", true, "/try")).toBe("testnet");
-    expect(netBadgeState("mainnet", true, "/try/recorded")).toBe("testnet");
+    expect(netBadgeState("mainnet", true, "/try/recorded")).toBe("mainnet");
+    expect(netBadgeState("testnet", true, "/try/recorded")).toBe("mainnet");
+    expect(netBadgeText("testnet", "testnet", "/try/recorded")).toBe("Mainnet not live");
     expect(netBadgeText("testnet", "mainnet", "/try")).toBe("Testnet");
   });
   it("a failing view call counts as not live", async () => {

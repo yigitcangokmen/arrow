@@ -2,19 +2,19 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { CONTRACTS, type Network } from "../lib/config.ts";
-import { addressUrl, TRUST_PATH, withNetwork } from "../lib/links.ts";
+import { addressUrl, pinnedNetwork, TRUST_PATH, withNetwork } from "../lib/links.ts";
 import { netBadgeState, netBadgeText } from "../lib/netBadge.ts";
 import styles from "./NetBadge.module.css";
 
 /**
- * The network badge: a <details> pill with a small panel, no inline handlers. TESTNET (amber dot) today and always on the try pages;
+ * The network badge: a <details> pill with a small panel, no inline handlers. TESTNET (amber dot) on testnet and always on the free try pages;
  * MAINNET (green dot, "Live on NEAR mainnet") only when the mainnet contract answered a server-side view call. The dot never pulses.
  * Closes on Escape and on a tap outside.
  */
 export function NetBadge({ net, mainnetLive, pathname }: { net: Network; mainnetLive: boolean; pathname: string }) {
   const ref = useRef<HTMLDetailsElement>(null);
   const state = netBadgeState(net, mainnetLive, pathname);
-  const shown: Network = state === "mainnet" ? "mainnet" : pathname.startsWith("/try") ? "testnet" : net;
+  const shown: Network = state === "mainnet" ? "mainnet" : (pinnedNetwork(pathname) ?? net);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const d = ref.current;

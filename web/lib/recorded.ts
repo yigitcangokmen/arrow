@@ -1,5 +1,5 @@
-// The recorded run on /try/recorded: the steps of one finished testnet run (listing #14, eval #14, purchase #5), with the
-// transaction of each step from the evidence file and the times and fingerprints read from the chain.
+// The recorded run on /try/recorded: the steps of one finished mainnet run on arrow-market.near (listing #2, eval #2, purchase #1,
+// 14 Nov), with the transaction of each step from the evidence file and the times and fingerprints read from the chain.
 import { EvidenceFile, type Eval, type Listing, type Purchase } from "@arrow/sdk/schemas";
 import { CONTRACTS } from "./config.ts";
 import { RECORDED_REFUND, RECORDED_RUN } from "./links.ts";
@@ -28,7 +28,7 @@ const sec = (ns: string | number | null | undefined): number | null => (ns === n
 /** Builds the replay. `chain` is what the views returned (null when the RPC was not reachable); the evidence alone still gives the transactions. */
 export function recordedRun(evidence: unknown, chain: { listing: Listing | null; eval: Eval | null; purchase: Purchase | null } | null): RecordedRun {
   const parsed = EvidenceFile.safeParse(evidence);
-  const runs = parsed.success && parsed.data.contract === CONTRACTS.testnet ? parsed.data.runs : [];
+  const runs = parsed.success && parsed.data.contract === CONTRACTS.mainnet ? parsed.data.runs : [];
   const list = [...runs].reverse().find((r) => r.kind === "list" && Number(r.listing_id) === RECORDED_RUN.listingId) ?? null;
   const ev = runs.find((r) => r.kind === "eval" && Number(r.eval_id) === RECORDED_RUN.evalId && Number(r.listing_id) === RECORDED_RUN.listingId) ?? null;
   const buy = runs.find((r) => r.kind === "buy" && Number(r.purchase_id) === RECORDED_RUN.purchaseId) ?? null;
@@ -55,7 +55,7 @@ export function recordedRun(evidence: unknown, chain: { listing: Listing | null;
   const bAt = Math.max(buyAt ?? vAt + 15, vAt + 3);
   const kAt = Math.max(buySettled ?? bAt + 10, bAt + 3);
   const steps: ReplayStep[] = [
-    { label: "A seller lists a synthetic file, encrypted in their browser", at: -2, clock: "earlier", detail: l ? `listing #${l.id}: ${l.title}` : `listing #${RECORDED_RUN.listingId}`, txHash: list?.tx ?? null },
+    { label: "A seller lists a synthetic file, encrypted before upload", at: -2, clock: "earlier", detail: l ? `listing #${l.id}: ${l.title}` : `listing #${RECORDED_RUN.listingId}`, txHash: list?.tx ?? null },
     { label: "A buyer pays the inspection fee", at: 0, clock: t0 === null ? null : "+0 s", detail: `eval #${RECORDED_RUN.evalId}`, txHash: ev?.tx ?? null },
     { label: "Arrow's program, in sealed hardware, checks the file's fingerprint, takes a 40-row sample and asks the AI", at: 2, clock: null, detail: "nothing of this step is public except its run time and work done", txHash: null },
     { label: "The verdict comes back, sealed to the buyer", at: vAt, clock: clock(evalSettled), detail: verdict ?? "done", txHash: null },

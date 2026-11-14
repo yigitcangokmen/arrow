@@ -122,9 +122,9 @@ function Pending({ net }: { net: "testnet" | "mainnet" }) {
           <li key={id}><span className="mono">{id}</span> {PLAIN[id]}</li>
         ))}
       </ul>
-      {net === "testnet" ? (
+      {net === "mainnet" ? (
         <p className={styles.note}>
-          While you wait: <Link href={`/verify/${RECORDED_EVAL}`}>the recorded run, inspection #{RECORDED_EVAL} →</Link>
+          While you wait: <Link href={withNetwork(`/verify/${RECORDED_EVAL}`, "mainnet")}>the recorded run, inspection #{RECORDED_EVAL} →</Link>
         </p>
       ) : null}
     </div>

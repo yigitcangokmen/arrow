@@ -36,10 +36,10 @@ export function listingLinks(id: number | string, net: Network): { buy: string; 
 
 /**
  * The x402 path the home page's agent card shows (QA-13): the wallet-labels listing of the network being viewed, else the
- * recorded testnet run. It keeps the network query, so a judge who copies it from the mainnet site reaches the testnet listing.
+ * recorded mainnet run's listing. It keeps the network query, so a judge who copies it from a testnet view reaches the mainnet listing.
  */
 export function agentCardPath(walletId: number | string | null | undefined, net: Network): string {
-  return walletId != null ? listingLinks(walletId, net).x402 : listingLinks(RECORDED_RUN.listingId, "testnet").x402;
+  return walletId != null ? listingLinks(walletId, net).x402 : listingLinks(RECORDED_RUN.listingId, "mainnet").x402;
 }
 
 /**
@@ -48,12 +48,21 @@ export function agentCardPath(walletId: number | string | null | undefined, net:
  */
 export const REPO_URL: string | null = null;
 
-/** The recorded run judges are sent to: eval #14 on arrow-v2.arrowhq.testnet, the wallet-labels inspection that was then bought (purchase #5). */
-export const RECORDED_EVAL = 14;
+/**
+ * The recorded run judges are sent to: eval #2 on arrow-market.near, mainnet, 14 Nov, the wallet-labels inspection that was then bought
+ * (purchase #1). It was paid with the public demo viewing key, so anyone can open its sealed verdict.
+ */
+export const RECORDED_EVAL = 2;
 /** That run as a page a visitor can watch: its steps replayed from the chain, with a transaction for each. */
 export const RECORDED_RUN_PATH = "/try/recorded";
 /** The rest of the recorded run: the listing it inspected and the purchase that followed (same account, same key). */
-export const RECORDED_RUN = { listingId: 14, evalId: RECORDED_EVAL, purchaseId: 5 } as const;
+export const RECORDED_RUN = { listingId: 2, evalId: RECORDED_EVAL, purchaseId: 1 } as const;
+
+/** The network a page shows whatever ?network= says: the free try pages run on testnet; the recorded run replays a mainnet run. */
+export function pinnedNetwork(pathname: string): Network | null {
+  if (pathname === RECORDED_RUN_PATH) return "mainnet";
+  return pathname === "/try" || pathname.startsWith("/try/") ? "testnet" : null;
+}
 /**
  * The recorded failed run on the home page: inspection #3 on listing #3 ("[synthetic] e2e broken host", file host missing on purpose) on
  * arrow-market.near, mainnet. Its refund transaction (evidence/mainnet.json, run e2e-mainnet-20261114T113005Z-eval-mainnet-3) logs

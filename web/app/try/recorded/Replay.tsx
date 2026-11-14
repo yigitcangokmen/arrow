@@ -95,7 +95,7 @@ export function Replay({ steps, verdict, unlocked }: { steps: ReplayStep[]; verd
       </details>
       <ul className={styles.txs} aria-label="Transactions of the recorded run">
         {steps.filter((s) => s.txHash).map((s) => (
-          <li key={s.txHash}>{s.label.split(",")[0]}: <TxLink chain="near" network="testnet" hash={s.txHash!} /></li>
+          <li key={s.txHash}>{s.label.split(",")[0]}: <TxLink chain="near" network="mainnet" hash={s.txHash!} /></li>
         ))}
       </ul>
     </div>

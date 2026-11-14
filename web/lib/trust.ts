@@ -212,7 +212,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     trust: "Nothing: it carries no payment",
     sees: "—",
     cannot: "Move funds",
-    check: "accepts is empty on purpose; payment goes through NEAR Intents. curl -i 'https://arrow-market.vercel.app/api/x402/13?network=testnet' answers 402 with X-Arrow-Listing and an empty accepts",
+    check: "accepts is empty on purpose; payment goes through NEAR Intents. curl -i 'https://arrow-market.vercel.app/api/x402/1' answers 402 with X-Arrow-Listing arrow-market.near/1 and an empty accepts",
   },
   {
     part: "40-row sample to NEAR AI",

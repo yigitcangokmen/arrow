@@ -24,12 +24,13 @@ describe("mainnetContractLive cache", () => {
 });
 
 describe("home agent card path (QA-13)", () => {
-  it("on the mainnet site, the recorded testnet listing keeps ?network=testnet; a mainnet listing needs no query", async () => {
+  it("on the mainnet site, the recorded mainnet listing needs no query; a testnet listing keeps ?network=testnet", async () => {
     vi.stubEnv("NEXT_PUBLIC_ARROW_NETWORK", "mainnet");
     vi.resetModules();
     try {
       const { agentCardPath } = await import("../lib/links.ts");
-      expect(agentCardPath(undefined, "mainnet")).toBe("/l/14/data?network=testnet");
+      expect(agentCardPath(undefined, "mainnet")).toBe("/l/2/data");
+      expect(agentCardPath(undefined, "testnet")).toBe("/l/2/data");
       expect(agentCardPath(3, "mainnet")).toBe("/l/3/data");
       expect(agentCardPath(14, "testnet")).toBe("/l/14/data?network=testnet");
     } finally {
@@ -40,13 +41,14 @@ describe("home agent card path (QA-13)", () => {
 });
 
 describe("footer network line (QA-14)", () => {
-  it("follows the page: /try and ?network=testnet read testnet on the mainnet site, everything else the deploy's network", async () => {
+  it("follows the page: /try and ?network=testnet read testnet on the mainnet site, the recorded run mainnet, everything else the deploy's network", async () => {
     vi.stubEnv("NEXT_PUBLIC_ARROW_NETWORK", "mainnet");
     vi.resetModules();
     try {
       const { footerNetText, viewedNetwork } = await import("../lib/footerNet.ts");
       expect(viewedNetwork("/try", null)).toBe("testnet");
-      expect(viewedNetwork("/try/recorded", "mainnet")).toBe("testnet");
+      expect(viewedNetwork("/try/recorded", "mainnet")).toBe("mainnet");
+      expect(viewedNetwork("/try/recorded", "testnet")).toBe("mainnet");
       expect(viewedNetwork("/buy/14", "testnet")).toBe("testnet");
       expect(viewedNetwork("/", null)).toBe("mainnet");
       expect(footerNetText("testnet", true)).toBe("NEAR testnet · synthetic demo data · mainnet contract deployed");

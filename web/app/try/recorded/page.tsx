@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowViews } from "@arrow/sdk/contract";
 import { evidence } from "../../../generated/data.ts";
 import { CONTRACTS } from "../../../lib/config.ts";
-import { RECORDED_RUN, shortHash } from "../../../lib/links.ts";
+import { RECORDED_RUN, shortHash, withNetwork } from "../../../lib/links.ts";
 import { recordedRun } from "../../../lib/recorded.ts";
 import { Replay } from "./Replay.tsx";
 import styles from "./recorded.module.css";
@@ -10,11 +10,11 @@ import styles from "./recorded.module.css";
 export const metadata = { title: "Recorded run" };
 
 export default async function Recorded() {
-  const views = new ArrowViews("testnet", CONTRACTS.testnet);
+  const views = new ArrowViews("mainnet", CONTRACTS.mainnet);
   const chain = await Promise.all([views.listing(RECORDED_RUN.listingId), views.eval(RECORDED_RUN.evalId), views.purchase(RECORDED_RUN.purchaseId)])
     .then(([listing, ev, purchase]) => ({ listing, eval: ev, purchase }))
     .catch(() => null);
-  const run = recordedRun(evidence.testnet, chain);
+  const run = recordedRun(evidence.mainnet, chain);
   const day = run.paidAt ? new Date(run.paidAt).toISOString().slice(0, 10) : null;
   const m = run.verdict ? /^(BUY|PASS) · fit (\d)\/5 · novelty (\d)\/5/.exec(run.verdict) : null;
   const verdict = m ? { word: m[1] as "BUY" | "PASS", fit: Number(m[2]), novelty: Number(m[3]) } : null;
@@ -25,7 +25,7 @@ export default async function Recorded() {
       <div className={styles.head}>
         <p className={styles.eyebrow}>Demo · recorded</p>
         <h1 className={styles.h1}>A run that finished.</h1>
-        <p className={styles.lede}>One real run on NEAR testnet, replayed 6× faster; every step links to its transaction.</p>
+        <p className={styles.lede}>One real run on NEAR mainnet, replayed 6× faster; every step links to its transaction.</p>
       </div>
       <Replay
         steps={run.steps}
@@ -51,7 +51,8 @@ export default async function Recorded() {
           <summary>How this verdict was recorded</summary>
           <p className={styles.note}>
             The verdict is sealed to that buyer&apos;s own key, so the chain shows it only in sealed form; the words above are what the run recorded
-            when it opened it. The fingerprints below are read from the chain now{day ? `; the run was paid on ${day}` : ""}.
+            when it opened it. This run was paid with the public demo viewing key, so anyone can open that verdict from the chain too.
+            The fingerprints below are read from the chain now{day ? `; the run was paid on ${day}` : ""}.
             {chain ? " The times next to each step are read from the chain now." : " The chain could not be reached just now, so the real times are left out."}
           </p>
         </details>
@@ -71,7 +72,7 @@ export default async function Recorded() {
 
       <div className={styles.links}>
         <Link href="/try">Run it yourself, free →</Link>
-        <Link href={`/verify/${RECORDED_RUN.evalId}`}>The full audit of this inspection, with the hardware report →</Link>
+        <Link href={withNetwork(`/verify/${RECORDED_RUN.evalId}`, "mainnet")}>The full audit of this inspection, with the hardware report →</Link>
       </div>
     </div>
   );
