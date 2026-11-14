@@ -23,6 +23,10 @@ describe("A11Y-7: every page names itself", () => {
     expect(String((await buy.generateMetadata({ params: Promise.resolve({ id: "7" }) })).title)).toContain("Listing 7");
     expect(String((await evalPage.generateMetadata({ params: Promise.resolve({ evalId: "12" }) })).title)).toContain("12");
   }, 30_000);
+  it("the listings page names itself", async () => {
+    const { metadata } = await import("../app/listings/page.tsx");
+    expect(metadata.title).toBe("Listings");
+  });
   it("the root layout adds the site name to each page title", async () => {
     const { metadata } = await import("../app/layout.tsx");
     expect(metadata.title).toMatchObject({ default: "Arrow", template: "%s · Arrow" });
@@ -30,15 +34,16 @@ describe("A11Y-7: every page names itself", () => {
 });
 
 describe("QA-16: the nav keeps the viewed network", () => {
-  it("links that read ?network= carry it when it is not the deploy default; /attack and /try do not", () => {
+  it("links that read ?network= carry it when it is not the deploy default", () => {
     // DEFAULT_NETWORK is testnet in tests, so "mainnet" is the non-default network here
     const main = Object.fromEntries(navLinks("mainnet").map((l) => [l.label, l.href]));
     expect(main.Sell).toBe("/sell?network=mainnet");
     expect(main.Payouts).toBe("/seller?network=mainnet");
     expect(main.Verify).toBe("/verify?network=mainnet");
-    expect(main.Try).toBe("/try");
+    expect(main.Listings).toBe("/listings?network=mainnet");
     const test = Object.fromEntries(navLinks("testnet").map((l) => [l.label, l.href]));
     expect(test.Sell).toBe("/sell");
+    expect(test.Listings).toBe("/listings");
   });
 });
 
@@ -122,7 +127,7 @@ describe("web halves of the contract group's items", () => {
     const { ListingCard } = await import("../components/ListingCard.tsx");
     const { listingFixture } = await import("../test/helpers.ts");
     const html = renderToStaticMarkup(h(ListingCard, { listing: toListingView(listingFixture({ title: "Sales", public_desc: "d" }), []), network: "mainnet" }));
-    expect(html).toMatch(/<h3[^>]*><bdi>Sales<\/bdi><\/h3>/);
+    expect(html).toMatch(/<h3[^>]*><a[^>]*><bdi>Sales<\/bdi><\/a><\/h3>/);
   });
   it("NUM-4 / X12-3: /sell tells the take rate with the contract's rounding and offers the encrypted file after an upload", async () => {
     const { net } = await import("../lib/format.ts");

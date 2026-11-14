@@ -60,7 +60,7 @@ export function ListingCard({ listing: l, network, team = false, compact = false
         <Badge kind={l.label} />
         <span className="mono">#{String(l.id)}</span>
       </div>
-      <h3 className={styles.title}><bdi>{l.displayTitle}</bdi></h3>
+      <h3 className={styles.title}><Link href={links.buy} className={styles.titleLink}><bdi>{l.displayTitle}</bdi></Link></h3>
       {l.stale ? <p className={styles.spent}>Sealed to an older enclave program: it can no longer be inspected or bought</p> : null}
       {l.budget.leftBits === 0 ? <p className={styles.spent}>No inspection possible: you would be buying blind</p> : null}
       <p className={styles.meta}>

@@ -20,6 +20,6 @@
 @media (max-width: 380px) { .net > summary { padding: 0 9px; } .text { max-width: 8ch; overflow: hidden; text-overflow: ellipsis; } }
 /* Locked: the full sentence, then "Live on NEAR mainnet · Locked", then "Mainnet · Locked", then "Locked" on the narrowest screens. */
 .short { display: none; }
-@media (max-width: 1023px) { .full { display: none; } .short { display: inline; } }
+@media (max-width: 1099px) { .full { display: none; } .short { display: inline; } }
 @media (max-width: 520px) { .net[data-locked] .wide { display: none; } }
-@media (max-width: 380px) { .net[data-locked] .mid { display: none; } .net[data-locked] .text { max-width: none; } }
+@media (max-width: 440px) { .net[data-locked] .mid { display: none; } .net[data-locked] .text { max-width: none; } }

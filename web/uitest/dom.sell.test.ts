@@ -95,6 +95,7 @@ describe("/sell in a DOM", () => {
     await click(button("Check listing"));
     expect(world.pays).toHaveLength(1);
     expect(host.querySelector("#listed")!.textContent).toBe("Listed as #42");
+    expect(host.querySelector('a[href="/listings#l-42"]')?.textContent).toBe("See it in the list");
     expect(announcer()).toBe("Listed as number 42.");
     expect(document.activeElement?.id).toBe("listed");
   });

@@ -42,7 +42,7 @@ export default async function BuyPage({ params, searchParams }: { params: Promis
 
   return (
     <div data-ready="true">
-      <Link href={`${withNetwork("/", net)}#listings`} className={styles.back}>← All listings</Link>
+      <Link href={withNetwork("/listings", net)} className={styles.back}>← All listings</Link>
       {net === "testnet" ? (
         <Note>
           <p><b>Real purchases run on mainnet, where the market is live and locked: its contract has no access keys, so the team cannot change it.</b> The free demo runs the same steps on testnet.</p>

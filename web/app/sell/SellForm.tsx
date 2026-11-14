@@ -11,7 +11,7 @@ import { formatBits, formatUsdc, net } from "../../lib/format.ts";
 import { parseUsdc } from "@arrow/sdk/usdc";
 import { CONTRACTS, type Network } from "../../lib/config.ts";
 import { describeError } from "../../lib/errors.ts";
-import { listingLinks } from "../../lib/links.ts";
+import { listingLinks, withNetwork } from "../../lib/links.ts";
 import { locateLatest } from "../../lib/locate.ts";
 import { checkPayment, pendingPayment, payWithIntent, PaymentPending, PaymentUnclear, type PaidTx } from "../../lib/pay.ts";
 import type { PendingPayment } from "../../lib/pending.ts";
@@ -612,7 +612,7 @@ export function SellForm({ network, programPk, bond, limits, maxEvalsCap, readOn
         <section className={`${form.panel} ${styles.success}`} aria-labelledby="listed">
           <h2 id="listed" tabIndex={-1} ref={successHeading}>Listed as #{done.listingId}</h2>
           <p>
-            <Link href={links.buy}>Open the listing</Link> · <a href={links.x402}>x402 link</a>{done.txHash ? <> · transaction <TxLink chain="near" network={network} hash={done.txHash} /></> : null}
+            <Link href={links.buy}>Open the listing</Link> · <Link href={`${withNetwork("/listings", network)}#l-${done.listingId}`}>See it in the list</Link> · <a href={links.x402}>x402 link</a>{done.txHash ? <> · transaction <TxLink chain="near" network={network} hash={done.txHash} /></> : null}
           </p>
           <p className={form.hint}>The key and your file are cleared from this page. Reloading leaves nothing behind.</p>
           {copyOfBlob ? (

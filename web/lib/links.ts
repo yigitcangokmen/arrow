@@ -71,15 +71,15 @@ export function pinnedNetwork(pathname: string): Network | null {
  */
 export const RECORDED_REFUND = { evalId: 3, listingId: 3, title: "[synthetic] e2e broken host", paid: "$0.25", back: "$0.225", kept: "$0.025" } as const;
 
-/** Every page in the navigation. The desktop bar shows Trust, Verify and Sell; the phone menu and the footer show all of them. */
+/** Every page in the navigation. Listings is the filled button; the desktop bar shows Trust, Verify and Sell; the phone menu shows the rest. */
 export const NAV_LINKS = [
   ["/", "Arrow"],
+  ["/listings", "Listings"],
   ["/trust", "Trust"],
   ["/verify", "Verify"],
   ["/sell", "Sell"],
   ["/attack", "Attack"],
   ["/seller", "Payouts"],
-  ["/try", "Try"],
 ] as const;
 
 /** The links the desktop bar shows between the name and the network badge. */
@@ -88,7 +88,7 @@ export const NAV_BAR = ["Trust", "Verify", "Sell"] as const;
 /** The trust page: who sees what, the limits and the full trust table (`#trust-table`). */
 export const TRUST_PATH = "/trust";
 
-/** The main navigation for the network being viewed: `?network=` is kept on every link that reads it. /trust, /attack and /try ignore it. */
+/** The main navigation for the network being viewed: `?network=` is kept on every link that reads it. /trust and /attack ignore it. */
 export function navLinks(net: Network): { href: string; label: string }[] {
-  return NAV_LINKS.map(([path, label]) => ({ href: path === "/attack" || path === "/try" || path === "/trust" ? path : withNetwork(path, net), label }));
+  return NAV_LINKS.map(([path, label]) => ({ href: path === "/attack" || path === "/trust" ? path : withNetwork(path, net), label }));
 }

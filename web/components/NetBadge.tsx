@@ -97,7 +97,7 @@ export function NetBadge({ net, mainnetLive, pathname, lockTx = null }: { net: N
           {state === "mainnet" ? (
             <Link href={withNetwork("/verify", "mainnet")} onClick={close}>Verify</Link>
           ) : (
-            <Link href="/try" onClick={close}>Run the demo, free</Link>
+            <Link href={withNetwork("/listings", "mainnet")} onClick={close}>See the listings</Link>
           )}
           <Link href={TRUST_PATH} onClick={close}>Who sees what →</Link>
         </p>

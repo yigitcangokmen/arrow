@@ -103,7 +103,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
             <div className={styles.heroSide}>
               <p className={styles.lede}>An AI checks a sample: <b>BUY</b> or <b>PASS</b>.</p>
               <div className={styles.ctaRow}>
-                <Link href="/try" className={styles.primary}>Run the demo, free</Link>
+                <Link href={withNetwork("/listings", net)} className={styles.primary}>See the listings</Link>
                 <Link href={RECORDED_RUN_PATH} className={styles.second}>Watch a recorded run</Link>
               </div>
             </div>
@@ -231,10 +231,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
             </h2>
             {featured.length > 0 ? (
               <p className={styles.sent}>
-                Inspected <b className="mono">{inspections}</b> {inspections === 1 ? "time" : "times"}, read from the chain.
+                Inspected <b className="mono">{inspections}</b> {inspections === 1 ? "time" : "times"}, read from the chain.{" "}
+                <Link className={styles.inline} href={withNetwork("/listings", net)}>All listings →</Link>
               </p>
             ) : (
-              <p className={styles.sent}>Contract <span className="mono">{CONTRACTS[net]}</span>.</p>
+              <p className={styles.sent}>
+                Contract <span className="mono">{CONTRACTS[net]}</span>. <Link className={styles.inline} href={withNetwork("/listings", net)}>All listings →</Link>
+              </p>
             )}
           </div>
           {forced === "loading" ? (
@@ -275,7 +278,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
               {more.length > 0 ? (
                 <details className={styles.fold} open={featured.length === 0}>
                   <summary>Older listings ({more.length})</summary>
-                  <p>Made by the team&apos;s tests and by visitors&apos; demo runs; some were sealed to an earlier program and can no longer be inspected.</p>
+                  <p>
+                    Test runs, demo relists and any listing the team did not make; some were sealed to an earlier program and can no longer be inspected.{" "}
+                    <Link href={withNetwork("/listings", net)}>All listings →</Link>
+                  </p>
                   <div className={styles.grid}>
                     {more.map((l) => (
                       <ListingCard key={String(l.id)} listing={l} network={net} />
@@ -348,7 +354,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
         <div className={styles.wrap}>
           <div className={styles.ctaPanel}>
             <h2 id="cta-title" className={styles.h2}>Now <span className={styles.dim}>try it.</span></h2>
-            <Link href="/try" className={styles.primary}>Run the demo, free</Link>
+            <Link href={withNetwork("/listings", net)} className={styles.primary}>See the listings</Link>
           </div>
         </div>
       </section>

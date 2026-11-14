@@ -30,3 +30,4 @@
   .right { gap: var(--sp-2); }
 }
 
+@media (max-width: 340px) { .try { padding: 0 10px; font-size: 14px; } }

@@ -35,7 +35,7 @@ export async function Footer() {
           </p>
         </div>
         <ul className={styles.links} aria-label="Footer">
-          <li><Link href="/try">Try it free</Link></li>
+          <li><Link href="/listings">Listings</Link></li>
           <li><Link href="/trust#trust-table">Trust table</Link></li>
           <li><Link href="/verify">Verify</Link></li>
           <li><Link href="/attack">Attack</Link></li>

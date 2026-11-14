@@ -1,0 +1,5 @@
+.grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: var(--sp-4); }
+.grid > li { display: grid; min-width: 0; scroll-margin-top: calc(64px + var(--sp-4)); }
+/* A seller arriving from /sell (#l-<id>) sees their own card outlined. */
+.grid > li:target > article { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stale { margin: 0 0 var(--sp-4); font-size: 14px; color: var(--muted); }

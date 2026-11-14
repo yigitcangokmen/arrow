@@ -87,12 +87,12 @@ function RowLine({ row, extra }: { row: Row; extra?: ReactNode }) {
   );
 }
 
-/** The next step after reading the proof: run it. */
+/** The next step after reading the proof: inspect a listing. */
 export function TryNext() {
   return (
     <div className={styles.next}>
-      <p><b>See it happen.</b> The free demo runs a listing, an inspection and a purchase with a throwaway account, in about 3 minutes.</p>
-      <Link className={styles.go} href="/try">Run the demo, free</Link>
+      <p><b>See it happen.</b> Pick a listing and inspect it before you pay.</p>
+      <Link className={styles.go} href="/listings">See the listings</Link>
     </div>
   );
 }

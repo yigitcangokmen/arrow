@@ -8,10 +8,10 @@ export default function NotFound() {
   return (
     <div data-ready="true">
       <PageHead eyebrow="404" title="Page not found.">
-        This address has no page. The demo and the listings are one click away.
+        This address has no page. The listings are one click away.
       </PageHead>
       <p className={styles.actions}>
-        <Link className={styles.primary} href="/try">Run the demo, free</Link>
+        <Link className={styles.primary} href="/listings">See the listings</Link>
         <Link className={styles.secondary} href="/">Back to the home page</Link>
       </p>
     </div>

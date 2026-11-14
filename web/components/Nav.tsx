@@ -28,8 +28,8 @@ function MenuIcon() {
 
 /**
  * Reads ?network= so the badge and the links follow the network being viewed (QA-16). Render it inside <Suspense>.
- * Desktop: brand, Trust · Verify · Sell, the network badge, Try as the filled button and the theme switch. Attack and Payouts are in
- * the phone menu and the footer. Below 860 px the links move into a <details> menu; it closes after a click, on Escape (focus back on
+ * Desktop: brand, Trust · Verify · Sell · Lock tx, the network badge, Listings as the filled button and the theme switch. Attack and
+ * Payouts are in the phone menu and the footer. Below 860 px the links move into a <details> menu; it closes after a click, on Escape (focus back on
  * the menu button) and on a tap outside. `mainnetLive` comes from a server-side view call (lib/server/mainnetLive.ts); `mainnetLockTx`
  * from the evidence file.
  */
@@ -38,8 +38,8 @@ export function Nav({ mainnetLive = false, mainnetLockTx = null }: { mainnetLive
   const menu = useRef<HTMLDetailsElement>(null);
   const links = navLinks(net);
   const brand = links.find((l) => l.label === "Arrow")!;
-  const tryLink = links.find((l) => l.label === "Try")!;
-  const middle = links.filter((l) => l !== brand && l !== tryLink);
+  const listings = links.find((l) => l.label === "Listings")!;
+  const middle = links.filter((l) => l !== brand && l !== listings);
   const pathname = usePathname();
   const current = (href: string) => {
     const path = href.split("?")[0];
@@ -84,7 +84,7 @@ export function Nav({ mainnetLive = false, mainnetLockTx = null }: { mainnetLive
         <ul className={styles.links}>{middle.filter((l) => (NAV_BAR as readonly string[]).includes(l.label)).map(item)}{lockItem}</ul>
         <div className={styles.right}>
           <NetBadge net={net} mainnetLive={mainnetLive} pathname={pathname} lockTx={mainnetLockTx} />
-          <Link href={tryLink.href} className={styles.try} aria-current={current(tryLink.href)}>{tryLink.label}</Link>
+          <Link href={listings.href} className={styles.try} aria-current={current(listings.href)}>{listings.label}</Link>
           <span className={styles.theme}><ThemeToggle /></span>
           <details className={styles.menu} ref={menu}>
             <summary><MenuIcon /><span className="sr-only">Menu</span></summary>
