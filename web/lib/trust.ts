@@ -17,8 +17,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "Whoever hosts the file sees each downloader's IP address and user agent. The exact plaintext size is public (ciphertext length minus 40 bytes), as are the column names and the row count",
     cannot: "Decrypt",
     check:
-      "blob_sha256 is on chain and the enclave checks it before reading. Not yet shown on mainnet. This site keeps sellers' ciphertext in its blob store only while the hosted demo runs; a daily job deletes a stored ciphertext that no Arrow listing points to, 24 hours after upload",
-    flag: "TODO",
+      "blob_sha256 is on chain and the enclave checks it before reading: shown on mainnet on 14 Nov (listings #1-#3; purchase #1 has listing.blob_sha256 == purchase.h == eval.h, tx Eaj1mPrtdNBWX6p49aDy9M797dsLZ4hyyi51xaKvyAR6). This site keeps sellers' ciphertext in its blob store only while the hosted demo runs; a daily job deletes a stored ciphertext that no Arrow listing points to, 24 hours after upload",
   },
   {
     part: "Program key / PROTECTED_MASTER",
@@ -206,7 +205,7 @@ export const TRUST_ROWS: readonly TrustRow[] = [
     sees: "—",
     cannot: "—",
     check:
-      "Refunded to your NEAR Intents balance. Moving it back to a Base wallet is a separate 1Click withdrawal. The Arrow contract refunded a failed eval on mainnet (arrow_refund not_ok, mainnet tx TODO_TX_M12_REFUND); refunds by mt_resolve_transfer were shown on mainnet before that with a spike contract",
+      "Refunded to your NEAR Intents balance. Moving it back to a Base wallet is a separate 1Click withdrawal. The Arrow contract refunded a failed eval on mainnet (arrow_refund not_ok, mainnet tx 7Gnw32jEcgUwmhdH2T4YtcJoUPS6hdetpTmWpoFqRcos); refunds by mt_resolve_transfer were shown on mainnet before that with a spike contract",
   },
   {
     part: "HTTP 402 wrapper",
