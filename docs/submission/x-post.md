@@ -1,13 +1,15 @@
-# X post (draft)
+# X post
 
-Standard account (no X Premium): one post with the 2:15 cut attached natively, and one reply with the links. Attach `arrow-x.mp4` (at most 2:15). The human posts it. Fill `{{YOUTUBE_URL}}` and `{{HOSTED_URL}}` from recorded values only.
+Standard account (no X Premium): one post with the 2:15 cut attached natively, and one reply with the links. The human posts it. Fill `{{YOUTUBE_URL}}` after the upload.
 
-## Post
+## Post (271 of 280 characters; a URL counts as 23)
 
 ```
-Data is hard to sell: to judge it you must see it. Then why pay?
+To judge data you must see it. Then why pay?
 
-Arrow: your AI reads sealed data in a TEE before you pay. A capped verdict comes back. Pay from Base, withdraw to Solana.
+Arrow: an AI in sealed hardware checks the data for you. You get BUY or PASS, never the rows.
+
+Live on NEAR mainnet. Locked: 0 keys, not even ours.
 
 Built at NEAR HACKATHON @NEARProtocol #NEARHackathon
 https://github.com/yigitcangokmen/arrow
@@ -16,13 +18,16 @@ https://github.com/yigitcangokmen/arrow
 ## Reply
 
 ```
-Full 3-min demo: {{YOUTUBE_URL}}
-Try it free on testnet: {{HOSTED_URL}}/try
-Every claim has a command: npm run verify
-Sellers: what data would you let a buyer's AI inspect before they pay?
+Don't trust us, verify it: npm run verify → 8/8 REQUIRED PROVEN
+
+Lock tx: https://nearblocks.io/txns/EqBJFvgJrSipYN3yHaPEm68FvKVPEJLzRb64KtnXk75X
+Live app: https://arrow-market.vercel.app
+Full demo: {{YOUTUBE_URL}}
+
+Buyers pay in USDC from Base; sellers withdraw to Solana. All through NEAR Intents.
 ```
 
 ## Notes
 
-- TODO(K4) The Solana withdrawal sentence stays only if a real withdrawal to Solana has run. If not, replace it with "Pay from Base via NEAR Intents."
-- TODO(public) The repository link works only after the repository is public (human decision).
+- The repository link works only after the repository is public (human decision).
+- Every claim above is on chain: mainnet deploy and e2e (evidence/mainnet.json), Solana outbound 2hkMCjWQ…, lock EqBJFvgJ…, verify 8/8 REQUIRED PROVEN.
