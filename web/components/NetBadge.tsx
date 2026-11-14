@@ -8,8 +8,9 @@ import styles from "./NetBadge.module.css";
 
 /**
  * The network badge: a <details> pill with a small panel, no inline handlers. TESTNET (amber dot) on testnet and always on the free try pages;
- * MAINNET (green dot, "Live on NEAR mainnet") only when the mainnet contract answered a server-side view call; "· Locked" is added when
- * the evidence file also holds the lock tx, shortened to "Mainnet · Locked" and then "Locked" on narrow screens so the nav still fits.
+ * MAINNET (green dot, "Live on NEAR mainnet") only when the mainnet contract answered a server-side view call. When the evidence file also
+ * holds the lock tx, the pill says "Locked on mainnet: 0 access keys, not even ours" on wide screens and shortens to "Live on NEAR mainnet ·
+ * Locked", "Mainnet · Locked" and then "Locked" on narrower ones so the nav still fits.
  * The dot never pulses. Closes on Escape and on a tap outside.
  */
 export function NetBadge({ net, mainnetLive, pathname, lockTx = null }: { net: Network; mainnetLive: boolean; pathname: string; lockTx?: string | null }) {
@@ -40,7 +41,7 @@ export function NetBadge({ net, mainnetLive, pathname, lockTx = null }: { net: N
   };
   const label =
     state === "mainnet"
-      ? `Live on NEAR mainnet${locked ? ", locked" : ""}. Open for details.`
+      ? `Live on NEAR mainnet${locked ? ". Locked: 0 access keys, not even ours" : ""}. Open for details.`
       : shown === "mainnet"
         ? "NEAR mainnet: the market is not deployed there yet. Open for details."
         : "NEAR testnet. Synthetic data, test money only. The market is live and locked on mainnet. Open for details.";
@@ -51,8 +52,11 @@ export function NetBadge({ net, mainnetLive, pathname, lockTx = null }: { net: N
         <span className={styles.text}>
           {locked ? (
             <>
-              <span className={styles.wide}>Live on NEAR </span>
-              <span className={styles.mid}>mainnet · </span>Locked
+              <span className={styles.full}>Locked on mainnet: 0 access keys, not even ours</span>
+              <span className={styles.short}>
+                <span className={styles.wide}>Live on NEAR </span>
+                <span className={styles.mid}>mainnet · </span>Locked
+              </span>
             </>
           ) : (
             netBadgeText(state, net, pathname)

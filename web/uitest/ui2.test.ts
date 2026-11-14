@@ -28,6 +28,7 @@ describe("NetBadge: MAINNET only when the mainnet contract answered", () => {
     const words = (html: string) => html.replace(/<[^>]+>/g, "");
     const locked = renderToStaticMarkup(h(NetBadge, { net: "mainnet", mainnetLive: true, pathname: "/", lockTx: tx }));
     expect(words(locked)).toContain("Live on NEAR mainnet · Locked");
+    expect(words(locked)).toContain("Locked on mainnet: 0 access keys, not even ours");
     expect(locked).toContain(`href="https://nearblocks.io/txns/${tx}"`);
     expect(words(locked)).toContain("the contract has no access keys, not even ours");
     const unlocked = renderToStaticMarkup(h(NetBadge, { net: "mainnet", mainnetLive: true, pathname: "/", lockTx: null }));

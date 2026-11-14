@@ -17,7 +17,7 @@ import { CONTRACTS, parseNetwork } from "../lib/config.ts";
 import { devState } from "../lib/devState.ts";
 import { formatUsdc } from "../lib/format.ts";
 import { agentCardPath, RECORDED_EVAL, RECORDED_REFUND, RECORDED_RUN, RECORDED_RUN_PATH, REPO_URL, shortHash, TRUST_PATH, txUrl, withNetwork } from "../lib/links.ts";
-import { mainnetLockTx, recordedRefundTx, recordedRun } from "../lib/recorded.ts";
+import { recordedRefundTx, recordedRun } from "../lib/recorded.ts";
 import { rpcBusy } from "../lib/rpcBusy.ts";
 import { groupHomeListings, lastGoodListings, loadListingViews } from "../lib/server/listingsPage.ts";
 import { ttlCache, type ListingView } from "../lib/server/listingsCache.ts";
@@ -89,10 +89,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
   const verifyLine = lastSummary(net);
   const inspections = featured.reduce((n, l) => n + l.budget.evalsUsed, 0);
   const refundTx = recordedRefundTx(evidence.mainnet);
-  const lockTx = mainnetLockTx(evidence.mainnet);
-  // The count comes from the last passing mainnet run of /verify in this server instance; before one has run, from the run of 14 Nov.
-  const mainnetCheck = lastSummary("mainnet");
-  const proven = mainnetCheck?.line.match(/\d+\/\d+ REQUIRED PROVEN/)?.[0];
   const agentPath = agentCardPath(wallet?.id, net);
   const run = await recordedPrints();
   const prints = run?.fingerprints ?? null;
@@ -102,18 +98,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
       {/* Hero: the machine tells the story; the buttons lead to the real run. */}
       <section className={styles.hero} aria-labelledby="hero-title">
         <div className={styles.wrap}>
-          {lockTx ? (
-            <p className={styles.locked}>
-              <b>Locked on mainnet: 0 access keys, not even ours.</b>{" "}
-              <a href={txUrl("near", "mainnet", lockTx)} target="_blank" rel="noopener noreferrer">
-                Lock tx {shortHash(lockTx)}<span className="sr-only"> (opens in a new tab)</span>
-              </a>
-              {" · "}
-              <Link href={withNetwork("/verify", "mainnet")}>
-                Verify it: {proven ? `${proven} (checked ${mainnetCheck!.at})` : "8/8 REQUIRED PROVEN on 14 Nov"}
-              </Link>
-            </p>
-          ) : null}
           <div className={styles.heroRow}>
             <h1 id="hero-title" className={styles.display}>Inspect before <span className={styles.dim}>you pay.</span></h1>
             <div className={styles.heroSide}>

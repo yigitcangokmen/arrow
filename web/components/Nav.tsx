@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { parseNetwork } from "../lib/config.ts";
-import { NAV_BAR, navLinks } from "../lib/links.ts";
+import { NAV_BAR, navLinks, shortHash, txUrl } from "../lib/links.ts";
 import { NetBadge } from "./NetBadge.tsx";
 import { ThemeToggle } from "./ThemeToggle.tsx";
 import styles from "./Nav.module.css";
@@ -69,11 +69,19 @@ export function Nav({ mainnetLive = false, mainnetLockTx = null }: { mainnetLive
   const item = ({ href, label }: { href: string; label: string }) => (
     <li key={href}><Link href={href} onClick={close} aria-current={current(href)}>{label}</Link></li>
   );
+  // The mainnet lock transaction, after Sell in the bar and in the phone menu.
+  const lockItem = mainnetLockTx ? (
+    <li>
+      <a href={txUrl("near", "mainnet", mainnetLockTx)} target="_blank" rel="noopener noreferrer" onClick={close}>
+        Lock tx <span aria-hidden="true">↗</span><span className="sr-only"> {shortHash(mainnetLockTx)} (opens in a new tab)</span>
+      </a>
+    </li>
+  ) : null;
   return (
     <header className={styles.header}>
       <nav className={styles.nav} aria-label="Main">
         <Link href={brand.href} className={styles.brand}><Mark />{brand.label}</Link>
-        <ul className={styles.links}>{middle.filter((l) => (NAV_BAR as readonly string[]).includes(l.label)).map(item)}</ul>
+        <ul className={styles.links}>{middle.filter((l) => (NAV_BAR as readonly string[]).includes(l.label)).map(item)}{lockItem}</ul>
         <div className={styles.right}>
           <NetBadge net={net} mainnetLive={mainnetLive} pathname={pathname} lockTx={mainnetLockTx} />
           <Link href={tryLink.href} className={styles.try} aria-current={current(tryLink.href)}>{tryLink.label}</Link>
@@ -81,7 +89,7 @@ export function Nav({ mainnetLive = false, mainnetLockTx = null }: { mainnetLive
           <details className={styles.menu} ref={menu}>
             <summary><MenuIcon /><span className="sr-only">Menu</span></summary>
             <div className={styles.sheet}>
-              <ul>{middle.map(item)}</ul>
+              <ul>{middle.map(item)}{lockItem}</ul>
               <ThemeToggle withLabel />
             </div>
           </details>
