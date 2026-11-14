@@ -3,7 +3,7 @@
   "contract": "arrow-market.near",
   "contract_wasm_sha256": "f59f35e7a454fe9377cc26d40c0830cb09a20797154cbeae4d35970af86e7b80",
   "program_wasm_sha256": "6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1",
-  "program_wasm_url": "https://test.fastfs.io/arrowhq.testnet/outlayer.testnet/6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1.wasm",
+  "program_wasm_url": "https://arrow-market.vercel.app/program/6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1.wasm",
   "lock": {
     "tx": null,
     "block_height": null,
@@ -485,6 +485,40 @@
       "commit": "2e9bc97b195c1a277a328c566006741232778390",
       "contract": "arrow-market.near",
       "program_wasm_sha256": "6ad7fed42691279cbcb43c3e8599fa0ef70ed7c54669e954b5acb31c03e1abc1"
+    },
+    {
+      "id": "h16-set-program",
+      "kind": "deploy",
+      "tx": "DkHQdN6rXPcem3B5QWwibgGUU6kAXMPHDVtbJMGC3xvP",
+      "chain": "near",
+      "block_height": 224537006,
+      "timestamp_utc": "2026-11-14T16:07:10.186Z",
+      "listing_id": null,
+      "eval_id": null,
+      "purchase_id": null,
+      "oneclick_deposit": null,
+      "expect": "set_program to the Arrow site URL, same hash 6ad7fed4",
+      "observed": "log arrow: program set 6ad7fed4…; program_wasm_url https://arrow-market.vercel.app/program/6ad7fed4….wasm (GET 200, sha256 6ad7fed4…)",
+      "script": "docs/internal/MAINNET-RUNBOOK.md step 20 prep",
+      "commit": "80d46c156c12d086b152dd99c4384cfc2cb0215f",
+      "contract": "arrow-market.near"
+    },
+    {
+      "id": "h16-rekey",
+      "kind": "deploy",
+      "tx": "FJNwDxzjVDxSGkqmfEEoknCeGEr5RvppnDiuHc8vfzkY",
+      "chain": "near",
+      "block_height": 224537022,
+      "timestamp_utc": "2026-11-14T16:07:19.501Z",
+      "listing_id": null,
+      "eval_id": null,
+      "purchase_id": null,
+      "oneclick_deposit": null,
+      "expect": "init_program_key after set_program; same program key",
+      "observed": "OutLayer request 3617 success on the new URL (compiled wasm reused from cache by hash), log arrow: program key set; program_pubkey unchanged 044045c8…",
+      "script": "docs/internal/MAINNET-RUNBOOK.md step 20 prep",
+      "commit": "80d46c156c12d086b152dd99c4384cfc2cb0215f",
+      "contract": "arrow-market.near"
     }
   ],
   "corrections": []
